@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import 'tailwindcss';
+@import 'swiper/css';
+
+@font-face {
+	font-family: Amoria;
+	src: url('/fonts/AMORIA.otf') format('opentype');
+}
+
+@theme {
+	--color-custom-white: #f9fafc;
+	--color-primary: #2e90c0;
+	--color-secondary: #1a3646;
+	--color-accent: #e8c5b8;
+	--color-muted: oklch(92.8% 0.006 264.531);
+	--font-amoria: 'Amoria', sans-serif;
+	--font-raleway: 'Raleway', sans-serif;
+}
+
+@layer base {
+	.padding-x-container {
+		@apply px-2 xl:px-10 2xl:px-40;
+	}
+
+	.padding-y-container {
+		@apply py-2 xl:py-10 2xl:py-40;
+	}
+}

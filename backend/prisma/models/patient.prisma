@@ -1,0 +1,22 @@
+model Patient {
+    id        Int    @id @default(autoincrement())
+    firstName String
+    lastName  String
+    email     String @unique
+    phone     String
+    dateOfBirth DateTime
+    gender    Gender
+    address   String
+    city      String
+    postalCode String
+    country   String
+    medicalHistory String? @db.Text
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHER
+}

@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int                 @id() @default(autoincrement())
+  name                 String
+  email                String              @unique
+  password             String
+  role                 String
+  admin                Boolean             @default(false)
+  services             Service[]           @relation("DoctorServices")
+  motifAssignments     MotifPractitioner[]
+  assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
+  availabilityBlocks   AvailabilityBlock[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  category String
+  services Service[]
+}
+
+model Service {
+  id           Int           @id @default(autoincrement())
+  name         String
+  slug         String?       @unique
+  price        Float
+  categoryId   Int
+  category     Category      @relation(fields: [categoryId], references: [id])
+  sessions     Session[]
+  appointments Appointment[]
+  motifs       Motif[]
+  doctorId     Int
+  doctor       User          @relation("DoctorServices", fields: [doctorId], references: [id])
+}
+
+model Session {
+  id        Int        @id @default(autoincrement())
+  session   Int
+  duration  Int
+  serviceId Int
+  service   Service    @relation(fields: [serviceId], references: [id])
+  schedules Schedule[]
+}
+
+model Patient {
+  id             Int      @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String   @unique
+  phone          String
+  dateOfBirth    DateTime
+  gender         String
+  address        String
+  city           String
+  postalCode     String
+  country        String
+  medicalHistory String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Appointment {
+  id             Int               @id @default(autoincrement())
+  name           String
+  email          String
+  phone          String
+  context        String?
+  status         String            @default("PENDING")
+  timezone       String            @default("Africa/Casablanca")
+  expiresAt      DateTime?
+  confirmedAt    DateTime?
+  cancelledAt    DateTime?
+  completedAt    DateTime?
+  serviceId      Int
+  service        Service           @relation(fields: [serviceId], references: [id])
+  motifId        Int?
+  motif          Motif?            @relation(fields: [motifId], references: [id])
+  practitionerId Int?
+  practitioner   User?             @relation("AssignedPractitionerAppointments", fields: [practitionerId], references: [id])
+  resourceId     Int?
+  resource       Resource?         @relation(fields: [resourceId], references: [id])
+  schedules      Schedule[]
+  notifications  NotificationLog[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @default(now()) @updatedAt
+}
+
+model Schedule {
+  id            Int         @id @default(autoincrement())
+  datetime      DateTime
+  sessionId     Int
+  session       Session     @relation(fields: [sessionId], references: [id])
+  appointmentId Int
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model Contact {
+  id      Int     @id @default(autoincrement())
+  name    String
+  email   String
+  phone   String
+  context String
+  read    Boolean @default(false)
+}
+
+model Motif {
+  id                         Int                 @id @default(autoincrement())
+  name                       String              @unique
+  slug                       String              @unique
+  bookingType                String
+  description                String?
+  duration                   Int
+  isActive                   Boolean             @default(true)
+  requiresPractitionerChoice Boolean             @default(false)
+  pendingTtlHours            Int                 @default(24)
+  serviceId                  Int
+  service                    Service             @relation(fields: [serviceId], references: [id])
+  practitionerAssignments    MotifPractitioner[]
+  resourceAssignments        MotifResource[]
+  appointments               Appointment[]
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+}
+
+model MotifPractitioner {
+  id             Int     @id @default(autoincrement())
+  motifId        Int
+  practitionerId Int
+  priority       Int     @default(0)
+  isPreferred    Boolean @default(false)
+  isActive       Boolean @default(true)
+  motif          Motif   @relation(fields: [motifId], references: [id])
+  practitioner   User    @relation(fields: [practitionerId], references: [id])
+
+  @@unique([motifId, practitionerId])
+}
+
+model Resource {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  slug               String              @unique
+  type               String
+  description        String?
+  isActive           Boolean             @default(true)
+  motifAssignments   MotifResource[]
+  appointments       Appointment[]
+  availabilityBlocks AvailabilityBlock[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model MotifResource {
+  id          Int      @id @default(autoincrement())
+  motifId     Int
+  resourceId  Int
+  priority    Int      @default(0)
+  isPreferred Boolean  @default(false)
+  isRequired  Boolean  @default(false)
+  motif       Motif    @relation(fields: [motifId], references: [id])
+  resource    Resource @relation(fields: [resourceId], references: [id])
+
+  @@unique([motifId, resourceId])
+}
+
+model AvailabilityBlock {
+  id             Int       @id @default(autoincrement())
+  startsAt       DateTime
+  endsAt         DateTime
+  reason         String?
+  isActive       Boolean   @default(true)
+  practitionerId Int?
+  practitioner   User?     @relation(fields: [practitionerId], references: [id])
+  resourceId     Int?
+  resource       Resource? @relation(fields: [resourceId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NotificationLog {
+  id            Int         @id @default(autoincrement())
+  appointmentId Int
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  channel       String
+  recipientType String
+  recipient     String
+  provider      String?
+  status        String      @default("PENDING")
+  message       String?
+  externalId    String?
+  error         String?
+  sentAt        DateTime?
+  createdAt     DateTime    @default(now())
+}

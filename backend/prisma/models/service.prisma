@@ -1,0 +1,26 @@
+model Category {
+    id       Int       @id @default(autoincrement())
+    category String
+    services Service[]
+}
+
+model Service {
+    id           Int           @id @default(autoincrement())
+    name         String
+    price        Float
+    categoryId   Int
+    category     Category      @relation(fields: [categoryId], references: [id])
+    sessions     Session[]
+    appointments Appointment[]
+    doctorId     Int
+    doctor       User          @relation("DoctorServices", fields: [doctorId], references: [id])
+}
+
+model Session {
+    id        Int        @id @default(autoincrement())
+    session   Int
+    duration  Int
+    serviceId Int
+    service   Service    @relation(fields: [serviceId], references: [id])
+    schedules Schedule[]
+}
