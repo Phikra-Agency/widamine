@@ -25,11 +25,11 @@ export class SessionController {
 
   @Put(":id")
   update(@Param("id") id: string, @Body() updateSessionDto: UpdateSessionDto) {
-    return this.sessionService.update(+id, updateSessionDto);
+    return this.sessionService.update(id, updateSessionDto);
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
-    return this.sessionService.remove(+id);
+    return this.sessionService.remove(id);
   }
 }

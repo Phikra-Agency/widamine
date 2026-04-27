@@ -1,19 +1,23 @@
-import { Type } from "class-transformer";
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateServiceDto {
   @IsString()
   name: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  categoryId: number;
+  @IsString()
+  categoryId: string;
 
   @IsNumber()
-  @Type(() => Number)
   price: number;
 
-  @IsNumber()
-  @Type(() => Number)
-  doctorId: number;
+  @IsString()
+  primaryDoctorId: string;
+
+  @IsOptional()
+  @IsString({ each: true })
+  allowedDoctorIds?: string[];
+
+  @IsOptional()
+  @IsString({ each: true })
+  allowedSalleIds?: string[];
 }

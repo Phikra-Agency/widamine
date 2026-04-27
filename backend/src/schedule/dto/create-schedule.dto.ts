@@ -1,16 +1,14 @@
 import { Type } from "class-transformer";
-import { IsDate, IsNumber } from "class-validator";
+import { IsDate, IsString } from "class-validator";
 
 export class CreateScheduleDto {
   @IsDate()
   @Type(() => Date)
   datetime: Date;
 
-  @IsNumber()
-  @Type(() => Number)
-  sessionId: number;
+  @IsString()
+  sessionId: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  appointmentId: number;
+  @IsString()
+  appointmentId: string;
 }

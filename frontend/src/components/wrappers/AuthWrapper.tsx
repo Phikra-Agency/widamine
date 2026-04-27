@@ -2,20 +2,31 @@ import api from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
 import axios from "axios";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function AuthWrapper() {
-  const { token, user, logout, setUser, setToken } = useAuthStore();
-  const [ready, setReady] = useState<boolean>(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    // Check auth state once on mount - don't subscribe to changes
+    const { token, user } = useAuthStore.getState();
+
+    if (!token || !user) {
+      setAuthenticated(false);
+      return;
+    }
+
+    // Set up interceptors using getState() so they always read fresh token
     const requestInterceptor = api.interceptors.request.use((config) => {
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
+      const currentToken = useAuthStore.getState().token;
+      if (currentToken) {
+        config.headers["Authorization"] = `Bearer ${currentToken}`;
       }
       return config;
     });
+
+    let isRefreshing = false;
 
     const responseInterceptor = api.interceptors.response.use(
       (response) => response,
@@ -25,20 +36,25 @@ export default function AuthWrapper() {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
+          if (isRefreshing) return Promise.reject(error);
+          isRefreshing = true;
+
           try {
             const response = await axios.post(API_BASE_URL + "/refresh", {}, { withCredentials: true });
-
             const { token: newToken, user: newUser } = response.data;
 
-            setToken(newToken);
-            setUser(newUser);
+            // Update store without triggering re-render of this component
+            useAuthStore.getState().setToken(newToken);
+            useAuthStore.getState().setUser(newUser);
 
             originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
             return api(originalRequest);
           } catch (refreshError) {
-            logout();
+            useAuthStore.getState().logout();
+            setAuthenticated(false);
             return Promise.reject(refreshError);
+          } finally {
+            isRefreshing = false;
           }
         }
 
@@ -46,17 +62,15 @@ export default function AuthWrapper() {
       }
     );
 
-    setReady(true);
+    setAuthenticated(true);
 
     return () => {
       api.interceptors.request.eject(requestInterceptor);
       api.interceptors.response.eject(responseInterceptor);
     };
-  }, [logout, setToken, setUser, token]);
+  }, []);
 
-  if (!ready) return null;
-
-  if (!token || !user) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />;
   }
 

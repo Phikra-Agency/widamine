@@ -373,9 +373,9 @@ function SlotSection({
 	setSelectedHour,
 }: {
 	title: string
-	slots: { label: string; startsAt: string; available: boolean; capacity: number }[]
+	slots: { label: string; startsAt: string; available: boolean; capacity: number; doctorId?: number; doctorName?: string }[]
 	selectedHour: string | null
-	setSelectedHour: (hour: string) => void
+	setSelectedHour: (hour: string, doctorId?: number) => void
 }) {
 	return (
 		<div>
@@ -390,17 +390,18 @@ function SlotSection({
 						<motion.button
 							key={slot.startsAt}
 							type='button'
-							onClick={() => setSelectedHour(slot.startsAt)}
+							onClick={() => setSelectedHour(slot.startsAt, slot.doctorId)}
 							data-active={isSelected}
 							disabled={!slot.available}
-							className='flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs transition-colors duration-150 hover:border-white/20 hover:bg-white/10 data-[active=true]:border-primary/50 data-[active=true]:bg-white/10 data-[active=true]:shadow-[0_8px_20px_rgba(39,168,228,0.12)] disabled:cursor-not-allowed disabled:opacity-30'
+							className='flex flex-col items-start gap-0.5 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs transition-colors duration-150 hover:border-white/20 hover:bg-white/10 data-[active=true]:border-primary/50 data-[active=true]:bg-white/10 data-[active=true]:shadow-[0_8px_20px_rgba(39,168,228,0.12)] disabled:cursor-not-allowed disabled:opacity-30'
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ delay: Math.min(index * 0.015, 0.1), duration: 0.12 }}
 							whileTap={{ scale: 0.98 }}
 						>
 							<span className='text-white/70'>{slot.label}</span>
-							{isSelected ? <CheckIcon size={12} className='text-primary' /> : null}
+							{slot.doctorName && <span className='text-[10px] text-primary/80'>{slot.doctorName}</span>}
+							{isSelected ? <CheckIcon size={12} className='text-primary mt-0.5' /> : null}
 						</motion.button>
 					)
 				})}

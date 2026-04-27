@@ -1,12 +1,9 @@
-import { Type } from "class-transformer";
-import { IsNumber } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 
 export class CreateSessionDto {
   @IsNumber()
-  @Type(() => Number)
   duration: number;
 
-  @IsNumber()
-  @Type(() => Number)
-  serviceId: number;
+  @IsString()
+  serviceId: string;
 }

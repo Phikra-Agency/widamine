@@ -11,7 +11,7 @@ interface LoginData {
 
 export default function Login() {
   const { login } = useAuthStore()
-  const [loginData, setLoginData] = useState<LoginData>({ email: 'admin@gmail.com', password: 'admin' })
+  const [loginData, setLoginData] = useState<LoginData>({ email: 'admin@widamine.com', password: 'admin123' })
   const [errors, setErrors] = useState({ email: '', password: '', form: '' })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -135,8 +135,8 @@ export default function Login() {
                 <div>
                   <p className='text-sm text-secondary'>Accès de test disponible</p>
                   <p className='mt-1 text-xs leading-6 text-secondary/56'>
-                    Email: <span className='font-medium text-secondary'>admin@gmail.com</span> · Mot de passe:{' '}
-                    <span className='font-medium text-secondary'>admin</span>
+                    Email: <span className='font-medium text-secondary'>admin@widamine.com</span> · Mot de passe:{' '}
+                    <span className='font-medium text-secondary'>admin123</span>
                   </p>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function Login() {
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       className='h-14 w-full rounded-full border border-secondary/10 bg-[#fcfaf8] pl-12 pr-4 text-secondary outline-none transition focus:border-primary/24 focus:bg-white'
-                      placeholder='admin@gmail.com'
+                      placeholder='admin@widamine.com'
                       autoComplete='email'
                     />
                   </div>

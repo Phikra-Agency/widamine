@@ -27,6 +27,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { AnimatePresence, motion } from 'framer-motion'
 import PublicNavbar from '@/components/PublicNavbar'
+import WIDAMINE_ASSETS, { WIDAMINE_CONTENT } from '@/lib/widamineSource'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -56,35 +57,39 @@ const marqueeStyle = `
 }
 `
 
-const SERVICES = [
+	const SERVICES = [
+		{
+			iconClass: 'flaticon-arm',
+			title: 'Esthétique du visage',
+			image: WIDAMINE_ASSETS.pageHeader,
+			url: '#',
+			eyebrow: 'Visage',
+			description: 'Soins orientés éclat, texture et harmonie du teint avec une lecture esthétique précise avant chaque protocole.',
+			benefit: 'Peau plus uniforme',
+			duration: '30 min',
+		},
+		{
+			iconClass: 'flaticon-eye',
+			title: "Esthétique de l'œil",
+			image: WIDAMINE_ASSETS.pageHeader,
+			url: '#',
+			eyebrow: 'Regard',
+			description: 'Approche délicate du contour de l’œil pour apporter fraîcheur, précision visuelle et équilibre du regard.',
+			benefit: 'Regard reposé',
+			duration: '25 min',
+		},
+		{
+			iconClass: 'flaticon-lips',
+			title: 'Esthétique des lèvres',
+			image: WIDAMINE_ASSETS.pageHeader,
+			url: '#',
+			eyebrow: 'Lèvres',
+			description: 'Travail sur la définition, la proportion et l’élégance du volume pour un rendu naturel et maîtrisé.',
+			benefit: 'Contour redéfini',
+			duration: '20 min',
+		},
 	{
-		title: 'Esthétique du visage',
-		image: '/hero.png',
-		url: '#',
-		eyebrow: 'Visage',
-		description: 'Soins orientés éclat, texture et harmonie du teint avec une lecture esthétique précise avant chaque protocole.',
-		benefit: 'Peau plus uniforme',
-		duration: '30 min',
-	},
-	{
-		title: "Esthétique de l'œil",
-		image: '/page-header.jpg',
-		url: '#',
-		eyebrow: 'Regard',
-		description: 'Approche délicate du contour de l’œil pour apporter fraîcheur, précision visuelle et équilibre du regard.',
-		benefit: 'Regard reposé',
-		duration: '25 min',
-	},
-	{
-		title: 'Esthétique des lèvres',
-		image: '/page-header.jpg',
-		url: '#',
-		eyebrow: 'Lèvres',
-		description: 'Travail sur la définition, la proportion et l’élégance du volume pour un rendu naturel et maîtrisé.',
-		benefit: 'Contour redéfini',
-		duration: '20 min',
-	},
-	{
+		iconClass: 'flaticon-body',
 		title: 'Esthétique du corps',
 		image: '/services/service_1.png',
 		url: '#',
@@ -94,6 +99,7 @@ const SERVICES = [
 		duration: '45 min',
 	},
 	{
+		iconClass: 'flaticon-expertise',
 		title: 'Liposuccion Vaser',
 		image: '/services/service_1.png',
 		url: '#',
@@ -102,25 +108,28 @@ const SERVICES = [
 		benefit: 'Zones ciblées',
 		duration: 'Consultation',
 	},
+		{
+			iconClass: 'flaticon-brows',
+			title: 'Esthétique des sourcils',
+			image: WIDAMINE_ASSETS.pageHeader,
+			url: '#',
+			eyebrow: 'Sourcils',
+			description: 'Correction visuelle et relecture de la ligne pour encadrer le visage avec plus de netteté.',
+			benefit: 'Ligne équilibrée',
+			duration: '20 min',
+		},
+		{
+			iconClass: 'flaticon-breast',
+			title: 'Augmentation mammaire',
+			image: '/services/service_1.png',
+			url: '#',
+			eyebrow: 'Silhouette',
+			description: 'Prise en charge orientée proportion, projection et cohérence de la silhouette globale.',
+			benefit: 'Volume harmonisé',
+			duration: 'Consultation',
+		},
 	{
-		title: 'Esthétique des sourcils',
-		image: '/page-header.jpg',
-		url: '#',
-		eyebrow: 'Sourcils',
-		description: 'Correction visuelle et relecture de la ligne pour encadrer le visage avec plus de netteté.',
-		benefit: 'Ligne équilibrée',
-		duration: '20 min',
-	},
-	{
-		title: 'Augmentation mammaire',
-		image: '/services/service_1.png',
-		url: '#',
-		eyebrow: 'Silhouette',
-		description: 'Prise en charge orientée proportion, projection et cohérence de la silhouette globale.',
-		benefit: 'Volume harmonisé',
-		duration: 'Consultation',
-	},
-	{
+		iconClass: 'flaticon-booty',
 		title: 'Brazilian Butt Lift',
 		image: '/services/service_1.png',
 		url: '#',
@@ -135,17 +144,17 @@ const MEDICAL_INSIGHTS = [
 	{
 		icon: ScanFace,
 		title: 'Notre Objectif',
-		description: 'Offrir des soins dermatologiques et esthétiques personnalisés pour améliorer la santé de la peau, rajeunir l’apparence et traiter des besoins spécifiques.',
+		description: "Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu. Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.",
 	},
 	{
 		icon: Droplets,
 		title: 'Notre Vision',
-		description: 'Être une référence en dermatologie et esthétique médicale grâce à une alliance entre innovation, qualité et résultats durables.',
+		description: 'Être le centre de référence en dermatologie et esthétique médicale, où innovation et qualité se rencontrent. Nous aspirons à créer une expérience unique, où chaque patient se sent valorisé et transformé.',
 	},
 	{
 		icon: Crosshair,
 		title: 'Notre Mission',
-		description: 'Combiner expertise médicale, technologies avancées et service personnalisé dans un cadre accueillant, sécurisé et sur mesure.',
+		description: 'Nous sommes dédiés à améliorer la vie de nos patients par des soins dermatologiques et esthétiques personnalisés. Notre mission est de combiner expertise médicale, technologies avancées et un service personnalisé pour offrir une expérience incomparable.',
 	},
 ]
 
@@ -172,22 +181,16 @@ const JOURNEY_CARDS = [
 
 const EXPERTISES = [
 	{
-		name: 'Dr. Salma A.',
-		role: 'Médecine esthétique',
+		name: 'Dr. SLAOUI WIDAD',
+		role: 'Plastic Surgery',
 		image: '/hero.png',
-		description: 'Approche douce, plan de soin structuré et attention constante au naturel du résultat.',
-	},
-	{
-		name: 'Dr. Imane B.',
-		role: 'Soins du visage',
-		image: '/page-header.jpg',
-		description: 'Traitements ciblés et lecture fine de la peau pour des résultats cohérents dans le temps.',
+		description: "Votre bien-être nous est confié. Notre équipe d'experts, pour des résultats à la hauteur de vos attentes.",
 	},
 	{
 		name: 'Équipe Widamine',
 		role: 'Accompagnement patient',
 		image: '/services/service_1.png',
-		description: 'Des professionnels dévoués présents à chaque étape pour guider, rassurer et structurer l’expérience patient.',
+		description: "Des professionnels dévoués présents à chaque étape pour guider, rassurer et structurer l'expérience patient.",
 	},
 ]
 
@@ -395,10 +398,10 @@ function LeafAccent({
 }
 
 export default function Home() {
-	return (
-		<>
-			<style>{marqueeStyle}</style>
-			<Hero />
+    return (
+        <>
+            <style>{marqueeStyle}</style>
+            <Hero />
 			<Services />
 			<ServiceUniverseSection />
 			<MedicalAestheticsSection />
@@ -439,7 +442,8 @@ function Hero() {
 
 	return (
 		<section ref={heroRef} className='relative z-[1200] min-h-[100svh] overflow-hidden isolate bg-custom-white'>
-			<div className='absolute inset-0'>
+            <div className='absolute inset-0'>
+                {/* background image removed - restored to source look (logo + overlays only) */}
 				<div className='absolute inset-0 bg-radial-[circle_at_30%_25%] from-accent/25 via-custom-white to-custom-white' />
 				<div className='absolute inset-0 bg-radial-[circle_at_75%_70%] from-primary/12 via-transparent to-transparent' />
 				<div className='absolute -top-48 -left-48 hidden h-[34rem] w-[34rem] rounded-full bg-accent/25 blur-2xl sm:block' />
@@ -507,9 +511,9 @@ function Hero() {
 						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
 						transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
 					>
-						<div className='flex h-14 w-14 items-center justify-center rounded-full border border-secondary/10 bg-custom-white/80 shadow-sm sm:h-16 sm:w-16'>
-							<img src='/logo.png' alt='Widamine' className='h-9 w-9 object-contain' />
-						</div>
+                        <div className='flex h-14 w-14 items-center justify-center rounded-full border border-secondary/10 bg-custom-white/80 shadow-sm sm:h-16 sm:w-16'>
+                            <img src={WIDAMINE_ASSETS.logos.primary} alt='Widamine' className='h-9 w-9 object-contain' />
+                        </div>
 						<h1 className='mt-3 font-amoria text-lg tracking-[0.2em] text-secondary sm:mt-4 sm:text-xl'>WIDAMINE</h1>
 						<p className='mt-1 text-[10px] uppercase tracking-[0.34em] text-secondary/60'>Sobriété Esthétique</p>
 					</motion.div>
@@ -540,7 +544,7 @@ function Hero() {
 							animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
 							transition={{ duration: 0.6, delay: 0.74, ease: [0.25, 0.46, 0.45, 0.94] }}
 						>
-							Chaque soin est bien plus qu’un simple traitement : c’est une promesse d’excellence, de transformation et de résultats remarquables dans une approche personnalisée.
+							Ici, chaque traitement est une promesse d’excellence. Grâce à une combinaison unique de technologies de pointe et de savoir-faire expert, nous vous aidons à redécouvrir votre beauté et à retrouver une peau saine et éclatante.
 						</motion.p>
 
 						<motion.div
@@ -898,7 +902,7 @@ function Services() {
 	}, [])
 
 	return (
-		<section className='bg-custom-white pt-8 pb-0 lg:pt-10'>
+		<section className='bg-custom-white pt-8 pb-16 lg:pt-10 lg:pb-24'>
 			<div className='mx-auto max-w-7xl px-4 sm:px-6'>
 				<RevealBlock className='space-y-3 text-center'>
 					<h2 className='font-amoria text-4xl text-secondary md:text-5xl'>Nos Prestations</h2>
@@ -1069,10 +1073,11 @@ function ServiceCard({
 				{isHovered && <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/7 via-transparent to-transparent' />}
 			</div>
 			<div className='flex items-end justify-between border-t border-[#eedcd3] bg-[linear-gradient(180deg,#fffdfa_0%,#fff_100%)] px-4 py-3.5 lg:px-5 lg:py-4'>
-				<p className='max-w-[10rem] text-sm leading-6 font-medium text-secondary lg:max-w-[10.5rem] lg:text-[1rem]'>{service.title}</p>
-				<span className='ml-4 shrink-0 text-primary'>
-					<ArrowUpRightIcon size={24} />
-				</span>
+    <p className='max-w-[10rem] text-sm leading-6 font-medium text-secondary lg:max-w-[10.5rem] lg:text-[1rem]'>{service.title}</p>
+                                <span className='ml-4 shrink-0 text-primary'>
+                                    {/* prefer source flaticon class if available; falls back to ArrowUpRightIcon */}
+                                    {service.iconClass ? <i className={service.iconClass} aria-hidden /> : <ArrowUpRightIcon size={24} />}
+                                </span>
 			</div>
 		</div>
 	)
@@ -1080,7 +1085,7 @@ function ServiceCard({
 
 function MedicalAestheticsSection() {
 	return (
-		<section className='bg-custom-white pt-4 pb-14 lg:pt-6 lg:pb-18'>
+		<section className='bg-custom-white pt-16 pb-32 lg:pt-20 lg:pb-52'>
 			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-10'>
 				<div className='grid gap-4 sm:grid-cols-2'>
 					<motion.div
@@ -1090,7 +1095,7 @@ function MedicalAestheticsSection() {
 						viewport={{ once: true, amount: 0.2 }}
 						transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
 					>
-						<img src='/hero.png' alt='Soin du visage Widamine' className='h-full min-h-[23rem] w-full rounded-[1.5rem] object-cover' />
+                        <img src={WIDAMINE_ASSETS.pageHeader} alt='Soin du visage Widamine' className='h-full min-h-[23rem] w-full rounded-[1.5rem] object-cover' />
 					</motion.div>
 					<motion.div
 						className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white p-3 shadow-[0_22px_45px_rgba(26,54,70,0.07)]'
@@ -1099,7 +1104,7 @@ function MedicalAestheticsSection() {
 						viewport={{ once: true, amount: 0.2 }}
 						transition={{ duration: 0.75, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
 					>
-						<img src='/page-header.jpg' alt='Esthétique médicale' className='h-40 w-full rounded-[1.5rem] object-cover' />
+                        <img src={WIDAMINE_ASSETS.pageHeader} alt='Esthétique médicale' className='h-40 w-full rounded-[1.5rem] object-cover' />
 					</motion.div>
 					<motion.div
 						className='rounded-[2rem] border border-secondary/10 bg-[#f8fbfd] p-6 shadow-[0_22px_45px_rgba(26,54,70,0.07)]'
@@ -1153,6 +1158,7 @@ function MedicalAestheticsSection() {
 function ServiceUniverseSection() {
 	const [activeProgramIndex, setActiveProgramIndex] = useState(0)
 	const activeProgram = PROGRAM_GROUPS[activeProgramIndex]
+	const intervalRef = useRef<number | null>(null)
 
 	function showPrevProgram() {
 		setActiveProgramIndex((current) => (current === 0 ? PROGRAM_GROUPS.length - 1 : current - 1))
@@ -1162,8 +1168,27 @@ function ServiceUniverseSection() {
 		setActiveProgramIndex((current) => (current === PROGRAM_GROUPS.length - 1 ? 0 : current + 1))
 	}
 
+	function startAutoSwitch() {
+		stopAutoSwitch()
+		intervalRef.current = window.setInterval(() => {
+			setActiveProgramIndex((current) => (current === PROGRAM_GROUPS.length - 1 ? 0 : current + 1))
+		}, 4000)
+	}
+
+	function stopAutoSwitch() {
+		if (intervalRef.current !== null) {
+			window.clearInterval(intervalRef.current)
+			intervalRef.current = null
+		}
+	}
+
+	useEffect(() => {
+		startAutoSwitch()
+		return () => stopAutoSwitch()
+	}, [])
+
 	return (
-		<section className='bg-custom-white pt-0 pb-12 lg:pt-1 lg:pb-14'>
+		<section className='bg-custom-white pt-16 pb-32 lg:pt-20 lg:pb-52'>
 			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
 				<div className='grid gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:items-start'>
 					<div className='space-y-6'>
@@ -1214,18 +1239,25 @@ function ServiceUniverseSection() {
 					</div>
 				</div>
 
-				<div className='mt-10 overflow-hidden rounded-[2.9rem] border border-secondary/10 bg-[linear-gradient(135deg,#fff8f3_0%,#fffdfb_58%,#f6eee7_100%)] px-7 py-8 shadow-[0_30px_70px_rgba(26,54,70,0.08)] md:px-10 md:py-10'>
-					<div className='relative grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch'>
-						<AnimatePresence mode='wait'>
-							<motion.div
-								key={activeProgram.title}
-								initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-								animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-								exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-								transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-								className='flex h-full flex-col justify-between rounded-[2.2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.45))] p-7 shadow-[0_18px_45px_rgba(26,54,70,0.05)] backdrop-blur-sm'
-							>
-								<div className='flex flex-wrap items-center gap-4'>
+                <div
+                    className='mt-20 overflow-hidden rounded-[2.9rem] border border-secondary/10 bg-[linear-gradient(135deg,#fff8f3_0%,#fffdfb_58%,#f6eee7_100%)] px-7 py-8 shadow-[0_30px_70px_rgba(26,54,70,0.08)] md:px-10 md:py-10'
+                    onMouseEnter={() => stopAutoSwitch()}
+                    onMouseLeave={() => startAutoSwitch()}
+                    onFocus={() => stopAutoSwitch()}
+                    onBlur={() => startAutoSwitch()}
+                >
+                    <div className='relative grid min-h-[28rem] gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:min-h-[32rem]'>
+                        <AnimatePresence mode='wait'>
+                            <motion.div
+                                key={activeProgram.title}
+                                initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+                                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+                                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                                // ensure the program pane fills the fixed parent height and scrolls internally when needed
+                                className='flex h-full flex-col justify-between rounded-[2.2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.45))] p-7 shadow-[0_18px_45px_rgba(26,54,70,0.05)] backdrop-blur-sm overflow-hidden'
+                            >
+                                <div className='flex flex-wrap items-center gap-4'>
 									<div className='rounded-full bg-primary/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-primary'>
 										{activeProgram.label}
 									</div>
@@ -1264,7 +1296,7 @@ function ServiceUniverseSection() {
 							</motion.div>
 						</AnimatePresence>
 
-						<div className='relative flex h-full items-center'>
+                        <div className='relative flex min-h-[28rem] items-center lg:min-h-[32rem]'>
 							<div className='pointer-events-none absolute -right-10 -top-8 h-40 w-40 rounded-full bg-primary/10 blur-3xl' />
 							<div className='pointer-events-none absolute -bottom-10 left-8 h-44 w-44 rounded-full bg-accent/18 blur-3xl' />
 
@@ -1275,8 +1307,8 @@ function ServiceUniverseSection() {
 									animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
 									exit={{ opacity: 0, x: -12, filter: 'blur(8px)' }}
 									transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-									className='relative w-full rounded-[2.25rem] border border-white/60 bg-white/84 p-7 shadow-[0_20px_50px_rgba(26,54,70,0.08)] backdrop-blur-xl'
-								>
+                                className='relative flex h-full w-full flex-col justify-between rounded-[2.25rem] border border-white/60 bg-white/84 p-7 shadow-[0_20px_50px_rgba(26,54,70,0.08)] backdrop-blur-xl lg:min-h-[32rem]'
+                                >
 									<div className='flex items-center justify-between'>
 										<div className='rounded-full border border-primary/20 bg-primary/8 px-3 py-2 text-[10px] uppercase tracking-[0.24em] text-primary/80'>
 											Sélection active
@@ -1286,13 +1318,15 @@ function ServiceUniverseSection() {
 										</div>
 									</div>
 
-									<p className='mt-8 text-[1.8rem] leading-[1.42] text-secondary'>
-										« {activeProgram.items[0]} »
-									</p>
+                                    <div className='overflow-auto'>
+                                        <p className='mt-8 text-[1.8rem] leading-[1.42] text-secondary'>
+                                            « {activeProgram.items[0]} »
+                                        </p>
 
-									<p className='mt-8 text-sm leading-7 text-secondary/62'>
-										Chaque programme est organisé comme un protocole réel : rythme, nombre de séances et combinaison d’appareils sont pensés pour garder une logique clinique et une vraie cohérence de résultats.
-									</p>
+                                        <p className='mt-8 text-sm leading-7 text-secondary/62'>
+                                            Chaque programme est organisé comme un protocole réel : rythme, nombre de séances et combinaison d’appareils sont pensés pour garder une logique clinique et une vraie cohérence de résultats.
+                                        </p>
+                                    </div>
 
 									<div className='mt-8 space-y-3 rounded-[1.5rem] border border-secondary/8 bg-[#fff9f5] p-4'>
 										{activeProgram.items.slice(1, 3).map((item) => (
@@ -1309,22 +1343,32 @@ function ServiceUniverseSection() {
 										</div>
 
 										<div className='flex items-center gap-3'>
-											<button
-												type='button'
-												onClick={showPrevProgram}
-												className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
-												aria-label='Programme précédent'
-											>
-												<ChevronLeft size={18} />
-											</button>
-											<button
-												type='button'
-												onClick={showNextProgram}
-												className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
-												aria-label='Programme suivant'
-											>
-												<ChevronRight size={18} />
-											</button>
+                                            <button
+                                                type='button'
+                                                onClick={() => {
+                                                    stopAutoSwitch()
+                                                    showPrevProgram()
+                                                }}
+                                                onBlur={() => startAutoSwitch()}
+                                                onFocus={() => stopAutoSwitch()}
+                                                className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
+                                                aria-label='Programme précédent'
+                                            >
+                                                <ChevronLeft size={18} />
+                                            </button>
+                                            <button
+                                                type='button'
+                                                onClick={() => {
+                                                    stopAutoSwitch()
+                                                    showNextProgram()
+                                                }}
+                                                onBlur={() => startAutoSwitch()}
+                                                onFocus={() => stopAutoSwitch()}
+                                                className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
+                                                aria-label='Programme suivant'
+                                            >
+                                                <ChevronRight size={18} />
+                                            </button>
 										</div>
 									</div>
 								</motion.div>
@@ -1341,7 +1385,7 @@ function BeforeAfterSection() {
 	const [split, setSplit] = useState(54)
 
 	return (
-		<section className='bg-custom-white py-20'>
+		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
 			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
 				<div className='mx-auto max-w-3xl text-center'>
 					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Avant / Après</p>
@@ -1359,9 +1403,9 @@ function BeforeAfterSection() {
 							transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
 						>
 							<div className='relative aspect-[16/10] overflow-hidden'>
-							<img src='/hero.png' alt='Après' className='absolute inset-0 h-full w-full object-cover' />
+                            <img src={WIDAMINE_ASSETS.beforeAfter[1]} alt='Après' className='absolute inset-0 h-full w-full object-cover' />
 							<div className='absolute inset-0 overflow-hidden' style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}>
-								<img src='/hero.png' alt='Avant' className='h-full w-full object-cover grayscale contrast-90 brightness-90' />
+                                <img src={WIDAMINE_ASSETS.beforeAfter[0]} alt='Avant' className='h-full w-full object-cover grayscale contrast-90 brightness-90' />
 							</div>
 							<div className='pointer-events-none absolute inset-y-0 z-10 w-px bg-white/90 shadow-[0_0_0_1px_rgba(255,255,255,0.4)]' style={{ left: `${split}%` }} />
 							<div className='pointer-events-none absolute top-6 left-6 rounded-full bg-custom-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-secondary shadow-sm'>
@@ -1418,7 +1462,7 @@ function BeforeAfterSection() {
 
 function PatientJourney() {
 	return (
-		<section className='bg-custom-white py-16 sm:py-20 lg:py-24'>
+		<section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
 			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
 				<div className='mx-auto max-w-3xl text-center'>
 					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Votre parcours</p>
@@ -1461,7 +1505,7 @@ function PatientJourney() {
 
 function ExpertsSection() {
 	return (
-		<section className='relative overflow-hidden bg-[#f8fbfd] py-16 sm:py-20 lg:py-24'>
+		<section className='relative overflow-hidden bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
 			<div className='pointer-events-none absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_top_left,rgba(232,197,184,0.28),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(46,144,192,0.18),transparent_30%)]' />
 			<RevealBlock className='relative mx-auto max-w-7xl px-4 sm:px-6'>
 				<div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
@@ -1474,18 +1518,18 @@ function ExpertsSection() {
 					</p>
 				</div>
 				<div className='mt-14 grid gap-6 lg:grid-cols-3'>
-					{EXPERTISES.map((expert) => (
-						<motion.article
-							key={expert.name}
+                    {EXPERTISES.map((expert, idx) => (
+                        <motion.article
+                            key={expert.name}
 							className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white shadow-[0_28px_55px_rgba(26,54,70,0.08)]'
 							initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
 							whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
 							viewport={{ once: true, amount: 0.18 }}
 							transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
 						>
-							<div className='h-72 overflow-hidden bg-secondary/5'>
-								<img src={expert.image} alt={expert.name} className='h-full w-full object-cover' />
-							</div>
+                            <div className='h-72 overflow-hidden bg-secondary/5'>
+                                <img src={expert.image ?? WIDAMINE_CONTENT.experts[idx % WIDAMINE_CONTENT.experts.length].image} alt={expert.name} className='h-full w-full object-cover' />
+                            </div>
 							<div className='space-y-4 p-7'>
 								<div>
 									<p className='text-sm uppercase tracking-[0.18em] text-primary'>{expert.role}</p>
@@ -1506,47 +1550,51 @@ function ExpertsSection() {
 }
 
 function TestimonialsSection() {
-	return (
-		<section className='bg-custom-white py-16 sm:py-20 lg:py-24'>
-			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='mx-auto max-w-3xl text-center'>
-					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Que disent nos clients ?</p>
-					<h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>La satisfaction et la confiance au centre de l’expérience</h2>
-					<p className='mt-5 text-base leading-8 text-secondary/68'>
-						Découvrez les retours des personnes ayant bénéficié de nos services en dermatologie et en esthétique médicale.
-					</p>
-				</div>
-				<div className='mt-14 grid gap-6 lg:grid-cols-3'>
-					{TESTIMONIALS.map((testimonial) => (
-						<motion.article
-							key={testimonial.service}
-							className='rounded-[2rem] border border-secondary/10 bg-[#fffaf7] p-7 shadow-[0_24px_50px_rgba(26,54,70,0.06)]'
-							initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-							whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-							viewport={{ once: true, amount: 0.18 }}
-							transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-						>
-							<div className='flex items-center gap-1 text-accent'>
-								{Array.from({ length: 5 }).map((_, index) => (
-									<Star key={index} size={16} className='fill-accent text-accent' />
-								))}
-							</div>
-							<p className='mt-6 text-base leading-8 text-secondary/74'>“{testimonial.quote}”</p>
-							<div className='mt-8 border-t border-secondary/8 pt-5'>
-								<p className='text-sm font-semibold text-secondary'>{testimonial.name}</p>
-								<p className='mt-1 text-xs uppercase tracking-[0.18em] text-primary'>{testimonial.service}</p>
-							</div>
-						</motion.article>
-					))}
-				</div>
-			</RevealBlock>
-		</section>
-	)
+    return (
+        <section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
+            <RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
+                <div className='mx-auto max-w-3xl text-center'>
+                    <p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Que disent nos clients ?</p>
+                    <h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>La satisfaction et la confiance au centre de l’expérience</h2>
+                    <p className='mt-5 text-base leading-8 text-secondary/68'>
+                        Découvrez les retours des personnes ayant bénéficié de nos services en dermatologie et en esthétique médicale.
+                    </p>
+                </div>
+
+                <div className='mt-14 grid gap-6 lg:grid-cols-3'>
+                    {WIDAMINE_CONTENT.testimonials.map((t, idx) => (
+                        <motion.article
+                            key={t.name}
+                            className='rounded-[2rem] border border-secondary/10 bg-[#fffaf7] p-7 shadow-[0_24px_50px_rgba(26,54,70,0.06)]'
+                            initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
+                            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                            viewport={{ once: true, amount: 0.18 }}
+                            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                            <div className='flex items-center gap-3'>
+                                <img src={WIDAMINE_ASSETS.testimonials[idx % WIDAMINE_ASSETS.testimonials.length]} alt={t.name} className='h-12 w-12 rounded-full object-cover' />
+                                <div className='flex items-center gap-1 text-accent'>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <Star key={i} size={16} className='fill-accent text-accent' />
+                                    ))}
+                                </div>
+                            </div>
+                            <p className='mt-6 text-base leading-8 text-secondary/74'>“{t.quote}”</p>
+                            <div className='mt-8 border-t border-secondary/8 pt-5'>
+                                <p className='text-sm font-semibold text-secondary'>{t.name}</p>
+                                <p className='mt-1 text-xs uppercase tracking-[0.18em] text-primary'>{t.service}</p>
+                            </div>
+                        </motion.article>
+                    ))}
+                </div>
+            </RevealBlock>
+        </section>
+    )
 }
 
 function TrustSection() {
 	return (
-		<section className='bg-custom-white py-16 sm:py-20 lg:py-24'>
+		<section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
 			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10'>
 				<div className='rounded-[2.25rem] bg-secondary px-8 py-10 text-custom-white shadow-[0_30px_60px_rgba(26,54,70,0.18)] md:px-10'>
 					<p className='text-xs uppercase tracking-[0.28em] text-custom-white/70'>Pourquoi Widamine</p>
@@ -1598,7 +1646,7 @@ function TrustSection() {
 
 function NewsSection() {
 	return (
-		<section className='bg-custom-white py-20'>
+		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
 			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
 				<div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
 					<div className='max-w-2xl'>
@@ -1619,9 +1667,9 @@ function NewsSection() {
 							viewport={{ once: true, amount: 0.18 }}
 							transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
 						>
-							<div className='h-52 overflow-hidden bg-secondary/6'>
-								<img src='/page-header.jpg' alt={post.title} className='h-full w-full object-cover' />
-							</div>
+                                <div className='h-52 overflow-hidden bg-secondary/6'>
+                                <img src={WIDAMINE_ASSETS.pageHeader} alt={post.title} className='h-full w-full object-cover' />
+                            </div>
 							<div className='space-y-4 p-6'>
 								<div className='flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.22em] text-secondary/45'>
 									<span>{post.category}</span>
@@ -1646,7 +1694,7 @@ function ConsultationBanner() {
 	const { open } = useScheduleModalStore()
 
 	return (
-		<section className='bg-custom-white pb-10'>
+		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
 				<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
 					<div className='relative overflow-hidden rounded-[1.75rem] bg-accent px-5 py-6 text-secondary shadow-[0_28px_55px_rgba(232,197,184,0.35)] sm:rounded-[2.5rem] sm:px-8 sm:py-10 md:px-12 md:py-12'>
 						<div className='pointer-events-none absolute -top-14 right-10 h-36 w-36 rounded-full bg-custom-white/20 blur-2xl' />
@@ -1681,16 +1729,16 @@ function ConsultationBanner() {
 								viewport={{ once: true, amount: 0.45 }}
 								transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
 							>
-								<img
-									src='/logo.png'
-									alt='Widamine'
-									width='64'
-									height='64'
-									loading='eager'
-									decoding='sync'
-									fetchPriority='high'
-									className='mx-auto h-16 w-16 object-contain'
-								/>
+                                <img
+                                    src={WIDAMINE_ASSETS.logos.primary}
+                                    alt='Widamine'
+                                    width='64'
+                                    height='64'
+                                    loading='eager'
+                                    decoding='sync'
+                                    fetchPriority='high'
+                                    className='mx-auto h-16 w-16 object-contain'
+                                />
 								<div className='mt-6 space-y-4 text-sm text-secondary/72'>
 									<div className='flex items-center gap-3'>
 										<CalendarDays size={18} className='text-primary' />
@@ -1719,7 +1767,7 @@ function ConsultationBanner() {
 
 function ClosingSection() {
 	return (
-		<section className='bg-custom-white py-20'>
+		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
 			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]'>
 					<div className='rounded-[2rem] border border-secondary/10 bg-[#f8fbfd] p-8'>
 						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Informations</p>

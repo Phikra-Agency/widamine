@@ -1,34 +1,21 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
-import { ArrowRight, CalendarBlank, CalendarDots as CalendarClock, Clock as Clock3, EnvelopeSimple as Mail, Phone, Sparkle as Sparkles } from '@phosphor-icons/react'
+import { ArrowRight, CalendarDots as CalendarClock, Clock, Users } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
-function getPrimarySchedule(datetime?: string) {
+function parseSchedule(datetime?: string): Date | null {
   if (!datetime) return null
-  const value = new Date(datetime)
-  return Number.isNaN(value.getTime()) ? null : value
+  const date = new Date(datetime)
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
-function formatDate(datetime?: string) {
-  const date = getPrimarySchedule(datetime)
-  if (!date) return 'Date à confirmer'
-
-  return date.toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-function formatDayLabel(date: Date) {
-  return date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '')
-}
-
-function formatMonthLabel(date: Date) {
-  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+function formatDateShort(date: Date): string {
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
 
 export default function Dashboard() {
@@ -38,280 +25,234 @@ export default function Dashboard() {
     fetchItems()
   }, [fetchItems])
 
-  const sortedItems = [...items].sort((a, b) => (b.id ?? 0) - (a.id ?? 0))
-  const today = new Date()
-  const todayKey = today.toDateString()
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
 
-  const upcoming = sortedItems.filter((item) => {
-    const schedule = getPrimarySchedule(item.schedules?.[0]?.datetime)
-    return schedule ? schedule >= new Date(today.getTime() - 60_000) : false
-  })
+  // Process appointments with parsed dates
+  const processedItems = useMemo(() => {
+    return items.map(item => ({
+      ...item,
+      scheduleDate: parseSchedule(item.schedules?.[0]?.datetime)
+    })).sort((a, b) => {
+      if (!a.scheduleDate) return 1
+      if (!b.scheduleDate) return -1
+      return a.scheduleDate.getTime() - b.scheduleDate.getTime()
+    })
+  }, [items])
 
-  const todayAppointments = sortedItems.filter((item) => {
-    const schedule = getPrimarySchedule(item.schedules?.[0]?.datetime)
-    return schedule ? schedule.toDateString() === todayKey : false
-  })
+  // Today's appointments
+  const todayAppointments = useMemo(() => {
+    return processedItems.filter(item => {
+      if (!item.scheduleDate) return false
+      return item.scheduleDate >= todayStart && item.scheduleDate <= todayEnd
+    })
+  }, [processedItems])
 
-  const withEmail = sortedItems.filter((item) => item.email?.trim()).length
-  const withPhone = sortedItems.filter((item) => item.phone?.trim()).length
-  const featured = upcoming[0] ?? sortedItems[0]
-  const weekDays = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(today)
-    date.setHours(0, 0, 0, 0)
-    date.setDate(today.getDate() + index)
+  // Current appointment (happening now or next upcoming)
+  const currentAppointment = useMemo(() => {
+    const happeningNow = todayAppointments.find(item => {
+      if (!item.scheduleDate) return false
+      const apptEnd = new Date(item.scheduleDate.getTime() + 30 * 60000) // Assume 30min duration
+      return item.scheduleDate <= now && apptEnd >= now
+    })
+    
+    if (happeningNow) return { type: 'current' as const, item: happeningNow }
+    
+    const next = todayAppointments.find(item => item.scheduleDate && item.scheduleDate > now)
+    if (next) return { type: 'next' as const, item: next }
+    
+    return null
+  }, [todayAppointments, now])
 
-    const count = upcoming.filter((item) => {
-      const schedule = getPrimarySchedule(item.schedules?.[0]?.datetime)
-      return schedule ? schedule.toDateString() === date.toDateString() : false
-    }).length
+  // Next appointment after current
+  const nextAppointment = useMemo(() => {
+    if (!currentAppointment) return null
+    const currentTime = currentAppointment.item.scheduleDate?.getTime() || 0
+    return todayAppointments.find(item => 
+      item.scheduleDate && item.scheduleDate.getTime() > currentTime
+    )
+  }, [todayAppointments, currentAppointment])
 
-    return {
-      key: date.toISOString(),
-      date,
-      count,
-      isToday: date.toDateString() === todayKey,
-    }
-  })
+  // Stats
+  const totalAppointments = items.length
+  const completedToday = todayAppointments.filter(a => a.status === 'COMPLETED').length
+  const pendingToday = todayAppointments.filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED').length
 
   return (
-    <div className='flex h-full flex-col gap-4 overflow-hidden text-slate-800 lg:gap-5'>
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className='overflow-hidden rounded-[2rem] border border-[#e7d7cf] bg-gradient-to-br from-[#0d2234] via-[#16344e] to-[#1c4965] p-5 text-white shadow-[0_30px_80px_rgba(10,31,47,0.18)] lg:p-6'
-      >
-        <div className='grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-6'>
-          <div className='space-y-4'>
-            <p className='text-xs uppercase tracking-[0.34em] text-white/55'>Administration</p>
-            <div className='space-y-2'>
-              <h1 className='max-w-3xl text-2xl leading-tight text-white lg:text-[2.5rem]'>
-                Tableau de bord des réservations et du rythme quotidien du centre.
-              </h1>
-              <p className='max-w-2xl text-sm leading-6 text-white/70'>
-                Une lecture rapide des demandes reçues, des prochains rendez-vous et du niveau d’activité pour garder le back-office dans la même ligne premium que le site public.
+    <div className='h-full overflow-auto'>
+      {/* Bento Grid Layout */}
+      <div className='grid grid-cols-12 gap-4'>
+
+        {/* Current/Next Appointment - Large Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='col-span-12 lg:col-span-5 rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-5'
+        >
+          {currentAppointment ? (
+            <>
+              <div className='flex items-center gap-2 mb-4'>
+                <div className={`h-2 w-2 rounded-full ${currentAppointment.type === 'current' ? 'bg-emerald-500 animate-pulse' : 'bg-primary'}`} />
+                <span className='text-xs uppercase tracking-wider text-primary'>
+                  {currentAppointment.type === 'current' ? 'En cours' : 'Prochain rendez-vous'}
+                </span>
+              </div>
+              <div className='space-y-1'>
+                <h3 className='text-xl font-medium text-secondary'>{currentAppointment.item.name}</h3>
+                <p className='text-sm text-secondary/60'>{currentAppointment.item.service?.name}</p>
+              </div>
+              <div className='mt-4 flex items-center gap-4 text-sm'>
+                <div className='flex items-center gap-1.5 text-secondary/70'>
+                  <Clock size={14} className='text-primary' />
+                  {currentAppointment.item.scheduleDate && formatTime(currentAppointment.item.scheduleDate)}
+                </div>
+                {currentAppointment.item.practitioner && (
+                  <div className='flex items-center gap-1.5 text-secondary/70'>
+                    <Users size={14} className='text-primary' />
+                    {currentAppointment.item.practitioner.name}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className='h-full flex flex-col justify-center items-center text-secondary/40 py-8'>
+              <CalendarClock size={32} className='text-secondary/20 mb-3' />
+              <p className='text-sm'>Aucun rendez-vous aujourd'hui</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Next Upcoming */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className='col-span-12 lg:col-span-4 rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-5'
+        >
+          <span className='text-xs uppercase tracking-wider text-secondary/50'>Suivant</span>
+          {nextAppointment ? (
+            <div className='mt-3 space-y-1'>
+              <h4 className='text-lg text-secondary'>{nextAppointment.name}</h4>
+              <p className='text-sm text-secondary/60'>{nextAppointment.service?.name}</p>
+              <p className='text-sm text-primary mt-2'>
+                {nextAppointment.scheduleDate && formatTime(nextAppointment.scheduleDate)}
               </p>
             </div>
+          ) : (
+            <p className='mt-3 text-sm text-secondary/40'>Pas d'autre rendez-vous prévu</p>
+          )}
+        </motion.div>
 
-            <div className='grid gap-3 sm:grid-cols-3'>
-              <StatCard label='Réservations totales' value={sortedItems.length} note='Demandes enregistrées' />
-              <StatCard label='Aujourd’hui' value={todayAppointments.length} note='Créneaux à suivre' />
-              <StatCard label='À venir' value={upcoming.length} note='Planning futur' />
-            </div>
-          </div>
-
-          <div className='rounded-[1.8rem] border border-white/12 bg-white/8 p-4 backdrop-blur-sm'>
-            <div className='flex items-center gap-2 text-sm text-white/72'>
-              <Sparkles size={16} className='text-[#8bd8ff]' />
-              Vue prioritaire
-            </div>
-            <div className='mt-4 space-y-3'>
-              <div className='rounded-[1.4rem] border border-white/10 bg-white/8 p-4'>
-                <p className='text-xs uppercase tracking-[0.28em] text-white/42'>Prochaine réservation</p>
-                <p className='mt-2 text-lg text-white'>{featured?.name ?? 'Aucune demande récente'}</p>
-                <p className='mt-1 text-sm text-white/62'>{featured?.service?.name ?? 'Service non défini'}</p>
-                <div className='mt-3 flex items-center gap-2 text-sm text-white/70'>
-                  <CalendarClock size={16} className='text-[#8bd8ff]' />
-                  {formatDate(featured?.schedules?.[0]?.datetime)}
-                </div>
-              </div>
-
-              <div className='grid gap-3 sm:grid-cols-2'>
-                <MiniStat icon={Mail} label='Emails fournis' value={withEmail} />
-                <MiniStat icon={Phone} label='Téléphones fournis' value={withPhone} />
-              </div>
-
-              <Link
-                to='/back-office/appointments'
-                className='inline-flex items-center gap-2 rounded-full border border-white/12 bg-white px-4 py-2.5 text-sm font-medium text-[#15344d] transition duration-300 hover:translate-x-0.5 hover:bg-[#f8f4f1]'
-              >
-                Ouvrir la liste complète
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      <div className='grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] xl:gap-5'>
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.08 }}
-          className='flex min-h-0 flex-col overflow-hidden rounded-[1.8rem] border border-[#e7d7cf] bg-white shadow-[0_24px_60px_rgba(10,31,47,0.08)]'
+          transition={{ delay: 0.1 }}
+          className='col-span-12 lg:col-span-3 grid grid-cols-2 lg:grid-cols-1 gap-3'
         >
-          <div className='flex items-center justify-between border-b border-[#efe3dc] px-5 py-4'>
-            <div>
-              <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Réservations</p>
-              <h2 className='mt-1 text-xl text-[#10293f]'>Dernières demandes reçues</h2>
-            </div>
-            <Link to='/back-office/appointments' className='text-sm text-[#2ea9df] transition hover:text-[#0d7fb3]'>
-              Voir tout
+          <div className='rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-4 flex flex-col justify-center'>
+            <span className='text-2xl font-medium text-secondary'>{todayAppointments.length}</span>
+            <span className='text-xs text-secondary/50 mt-1'>Aujourd'hui</span>
+          </div>
+          <div className='rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-4 flex flex-col justify-center'>
+            <span className='text-2xl font-medium text-emerald-500'>{completedToday}</span>
+            <span className='text-xs text-secondary/50 mt-1'>Terminés</span>
+          </div>
+          <div className='rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-4 flex flex-col justify-center'>
+            <span className='text-2xl font-medium text-amber-500'>{pendingToday}</span>
+            <span className='text-xs text-secondary/50 mt-1'>En attente</span>
+          </div>
+          <div className='rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-4 flex flex-col justify-center'>
+            <span className='text-2xl font-medium text-secondary'>{totalAppointments}</span>
+            <span className='text-xs text-secondary/50 mt-1'>Total</span>
+          </div>
+        </motion.div>
+
+        {/* Today's List */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className='col-span-12 lg:col-span-8 rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] overflow-hidden'
+        >
+          <div className='flex items-center justify-between px-5 py-4 border-b border-secondary/10'>
+            <h4 className='text-sm font-medium text-secondary'>Rendez-vous du jour</h4>
+            <Link to='/back-office/appointments' className='text-xs text-primary hover:text-primary/80 flex items-center gap-1'>
+              Voir tout <ArrowRight size={12} />
             </Link>
           </div>
-
-          <div className='min-h-0 flex-1 divide-y divide-[#f1e7e1] overflow-auto'>
-            {sortedItems.slice(0, 6).map((item, index) => (
-              <motion.div
-                key={item.id ?? `${item.email}-${index}`}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.32, delay: 0.05 * index }}
-                className='grid gap-4 px-5 py-4 md:grid-cols-[minmax(0,1.3fr)_minmax(0,0.95fr)_auto]'
-              >
-                <div className='min-w-0'>
-                  <p className='text-base text-[#17324a]'>{item.name}</p>
-                  <p className='mt-1 text-sm text-slate-500'>{item.service?.name ?? 'Service non défini'}</p>
-                  {item.context ? <p className='mt-2 line-clamp-2 text-sm leading-6 text-slate-500'>{item.context}</p> : null}
-                </div>
-                <div className='space-y-2 text-sm text-slate-500'>
-                  <div className='flex items-center gap-2'>
-                    <Mail size={15} className='text-[#2ea9df]' />
-                    <span className='truncate'>{item.email}</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <Phone size={15} className='text-[#2ea9df]' />
-                    <span>{item.phone}</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <Clock3 size={15} className='text-[#2ea9df]' />
-                    <span>{formatDate(item.schedules?.[0]?.datetime)}</span>
-                  </div>
-                </div>
-                <div className='flex items-center'>
-                  <Link
-                    to='/back-office/appointments'
-                    className='inline-flex items-center rounded-full border border-[#dce9f0] px-4 py-2 text-sm text-[#15344d] transition hover:border-[#9ed7ef] hover:text-[#0f7cac]'
-                  >
-                    Détails
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-
-            {sortedItems.length === 0 ? (
-              <div className='px-6 py-16 text-center text-slate-500'>
-                Aucune réservation pour le moment.
+          <div className='divide-y divide-secondary/5'>
+            {todayAppointments.length === 0 ? (
+              <div className='px-5 py-8 text-center text-sm text-secondary/40'>
+                Aucun rendez-vous aujourd'hui
               </div>
-            ) : null}
+            ) : (
+              todayAppointments.slice(0, 5).map((item, i) => (
+                <div key={item.id} className='flex items-center gap-4 px-5 py-3 hover:bg-secondary/5 transition-colors'>
+                  <div className='w-12 text-center'>
+                    <span className='text-sm font-medium text-secondary/70'>
+                      {item.scheduleDate && formatTime(item.scheduleDate)}
+                    </span>
+                  </div>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-sm text-secondary truncate'>{item.name}</p>
+                    <p className='text-xs text-secondary/50'>{item.service?.name}</p>
+                  </div>
+                  <StatusBadge status={item.status} />
+                </div>
+              ))
+            )}
           </div>
-        </motion.section>
+        </motion.div>
 
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.12 }}
-          className='flex min-h-0 flex-col gap-4 overflow-auto pr-1'
+          transition={{ delay: 0.2 }}
+          className='col-span-12 lg:col-span-4 rounded-2xl bg-white border border-secondary/10 shadow-[0_4px_20px_rgba(26,54,70,0.08)] p-5'
         >
-          <div className='rounded-[1.8rem] border border-[#e7d7cf] bg-white p-5 shadow-[0_20px_50px_rgba(10,31,47,0.06)]'>
-            <div className='flex items-center justify-between gap-3'>
-              <div>
-                <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Semaine</p>
-                <h3 className='mt-2 text-xl text-[#10293f]'>Calendrier rapide</h3>
-              </div>
-              <div className='flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary'>
-                <CalendarBlank size={18} />
-              </div>
-            </div>
-            <p className='mt-3 text-sm leading-6 text-slate-500'>{formatMonthLabel(today)}</p>
-            <div className='mt-4 -mx-5 px-5 overflow-x-auto pb-2'>
-              <div className='grid grid-cols-7 gap-2 min-w-[320px]'>
-                {weekDays.map((day) => (
-                  <div
-                    key={day.key}
-                    className={`rounded-[1.15rem] border px-2 py-3 text-center transition min-w-[72px] ${
-                      day.isToday ? 'border-primary/24 bg-primary/10 shadow-[0_14px_28px_rgba(46,144,192,0.10)]' : 'border-[#ecdfd7] bg-[#fcfaf8]'
-                    }`}
-                  >
-                    <p className={`text-[10px] uppercase tracking-[0.22em] ${day.isToday ? 'text-primary' : 'text-slate-400'}`}>
-                      {formatDayLabel(day.date)}
-                    </p>
-                    <p className='mt-2 text-lg text-[#10293f]'>{day.date.getDate()}</p>
-                    <p className={`mt-2 text-[11px] ${day.isToday ? 'text-primary/90' : 'text-slate-500'}`}>
-                      {day.count > 0 ? `${day.count} rdv` : 'Libre'}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <h4 className='text-sm font-medium text-secondary mb-4'>Accès rapide</h4>
+          <div className='space-y-2'>
+            <QuickAction to='/back-office/appointments' label='Rendez-vous' />
+            <QuickAction to='/back-office/calendar' label='Calendrier' />
+            <QuickAction to='/back-office/patients' label='Patients' />
           </div>
-
-          <div className='rounded-[1.8rem] border border-[#e7d7cf] bg-[#fff7f2] p-5 shadow-[0_20px_50px_rgba(10,31,47,0.06)]'>
-            <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Cadence</p>
-            <h3 className='mt-2 text-xl text-[#10293f]'>Point de contrôle rapide</h3>
-            <div className='mt-4 space-y-3'>
-              <InsightRow label='Demandes avec horaire déjà fixé' value={sortedItems.filter((item) => item.schedules?.[0]?.datetime).length} />
-              <InsightRow label='Demandes à traiter aujourd’hui' value={todayAppointments.length} />
-              <InsightRow label='Demandes futures disponibles' value={upcoming.length} />
-            </div>
-          </div>
-
-          <div className='rounded-[1.8rem] border border-[#e7d7cf] bg-white p-5 shadow-[0_20px_50px_rgba(10,31,47,0.06)]'>
-            <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Navigation</p>
-            <h3 className='mt-2 text-xl text-[#10293f]'>Accès direct</h3>
-            <div className='mt-4 space-y-3'>
-              <QuickLink to='/back-office/appointments' title='Rendez-vous' text='Ouvrir la gestion détaillée des réservations.' />
-              <QuickLink to='/back-office/calendar' title='Calendrier' text='Vérifier les séances planifiées et le rythme hebdomadaire.' />
-            </div>
-          </div>
-        </motion.section>
+        </motion.div>
       </div>
     </div>
   )
 }
 
-function StatCard({ label, value, note }: { label: string; value: number; note: string }) {
+function StatusBadge({ status }: { status?: string }) {
+  const styles = {
+    PENDING: 'bg-amber-100 text-amber-600 border border-amber-200',
+    CONFIRMED: 'bg-emerald-100 text-emerald-600 border border-emerald-200',
+    COMPLETED: 'bg-primary/10 text-primary border border-primary/20',
+    CANCELLED: 'bg-red-100 text-red-600 border border-red-200',
+  }
+  const labels = {
+    PENDING: 'En attente',
+    CONFIRMED: 'Confirmé',
+    COMPLETED: 'Terminé',
+    CANCELLED: 'Annulé',
+  }
   return (
-    <div className='rounded-[1.45rem] border border-white/12 bg-white/8 px-4 py-3.5 backdrop-blur-sm'>
-      <p className='text-xs uppercase tracking-[0.24em] text-white/42'>{label}</p>
-      <p className='mt-2 text-[1.75rem] text-white'>{value}</p>
-      <p className='mt-1.5 text-sm text-white/58'>{note}</p>
-    </div>
+    <span className={`px-2 py-1 rounded-full text-xs ${styles[status as keyof typeof styles] || 'bg-secondary/10 text-secondary/50 border border-secondary/20'}`}>
+      {labels[status as keyof typeof labels] || status}
+    </span>
   )
 }
 
-function MiniStat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Mail
-  label: string
-  value: number
-}) {
-  return (
-    <div className='rounded-[1.35rem] border border-white/10 bg-white/8 p-3.5'>
-      <div className='flex items-center gap-2 text-sm text-white/70'>
-        <Icon size={15} className='text-[#8bd8ff]' />
-        {label}
-      </div>
-      <p className='mt-2 text-xl text-white'>{value}</p>
-    </div>
-  )
-}
-
-function InsightRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className='flex items-center justify-between rounded-[1.25rem] border border-[#ecdfd7] bg-white px-4 py-3.5'>
-      <p className='max-w-[16rem] text-sm leading-6 text-slate-600'>{label}</p>
-      <p className='text-xl text-[#10293f]'>{value}</p>
-    </div>
-  )
-}
-
-function QuickLink({ to, title, text }: { to: string; title: string; text: string }) {
+function QuickAction({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className='block rounded-[1.35rem] border border-[#ecdfd7] bg-[#fcfaf8] px-4 py-3.5 transition duration-300 hover:-translate-y-0.5 hover:border-[#b7e2f4] hover:bg-white'
+      className='flex items-center justify-between px-4 py-3 rounded-xl bg-secondary/5 hover:bg-secondary/10 transition-colors text-sm text-secondary/80 hover:text-secondary'
     >
-      <div className='flex items-center justify-between gap-3'>
-        <div>
-          <p className='text-[15px] text-[#17324a]'>{title}</p>
-          <p className='mt-1 text-sm leading-5 text-slate-500'>{text}</p>
-        </div>
-        <ArrowRight size={16} className='shrink-0 text-[#2ea9df]' />
-      </div>
+      {label}
+      <ArrowRight size={14} className='text-primary' />
     </Link>
   )
 }

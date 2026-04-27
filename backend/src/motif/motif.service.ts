@@ -9,7 +9,7 @@ export class MotifService {
     name: string;
     slug: string;
     bookingType: string;
-    serviceId: number;
+    serviceId: string;
     duration?: number;
     description?: string;
   }) {
@@ -27,21 +27,21 @@ export class MotifService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return this.prisma.motif.findUnique({
       where: { id },
       include: { service: true },
     });
   }
 
-  async update(id: number, data: any) {
+  async update(id: string, data: any) {
     return this.prisma.motif.update({
       where: { id },
       data,
     });
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return this.prisma.motif.delete({ where: { id } });
   }
 }

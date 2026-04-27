@@ -12,15 +12,15 @@ export class SessionService {
       where: { serviceId: data.serviceId },
     });
     return this.prismaService.session.create({
-      data: { ...data, session: sessionCount + 1 },
+      data: { ...data, number: sessionCount + 1 },
     });
   }
 
-  update(id: number, data: UpdateSessionDto) {
+  update(id: string, data: UpdateSessionDto) {
     return this.prismaService.session.update({ where: { id }, data });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prismaService.session.delete({ where: { id } });
   }
 }

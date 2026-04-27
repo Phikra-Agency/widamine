@@ -27,7 +27,7 @@ export class ScheduleController {
   @Get(":date")
   @UseGuards(AuthGuard)
   findWeekByDate(
-    @Req() req: { user: { id: number } },
+    @Req() req: { user: { id: string } },
     @Param("date") date: string,
   ) {
     return this.scheduleService.findWeekByDate(req, new Date(date));
@@ -42,12 +42,12 @@ export class ScheduleController {
   @Put(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
   update(@Param("id") id: string, @Body() data: UpdateScheduleDto) {
-    return this.scheduleService.update(+id, data);
+    return this.scheduleService.update(id, data);
   }
 
   @Delete(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
-    return this.scheduleService.remove(+id);
+    return this.scheduleService.remove(id);
   }
 }

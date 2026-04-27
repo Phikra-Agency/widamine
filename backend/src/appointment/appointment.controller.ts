@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  ParseIntPipe,
   Query,
 } from "@nestjs/common";
 import { AppointmentService } from "./appointment.service";
@@ -25,11 +24,11 @@ export class AppointmentController {
     @Query("serviceId") serviceId: string,
     @Query("date") date: string,
   ) {
-    return this.appointmentService.getAvailability(+serviceId, date);
+    return this.appointmentService.getAvailability(serviceId, date);
   }
 
   @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
+  findOne(@Param("id") id: string) {
     return this.appointmentService.findOne(id);
   }
 
@@ -41,22 +40,22 @@ export class AppointmentController {
       email: string;
       phone: string;
       context?: string;
-      serviceId: number;
-      motifId?: number;
-      practitionerId?: number;
-      resourceId?: number;
+      serviceId: string;
+      motifId?: string;
+      practitionerId?: string;
+      resourceId?: string;
     },
   ) {
     return this.appointmentService.create(data);
   }
 
   @Put(":id")
-  update(@Param("id", ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param("id") id: string, @Body() data: any) {
     return this.appointmentService.update(id, data);
   }
 
   @Delete(":id")
-  remove(@Param("id", ParseIntPipe) id: number) {
+  remove(@Param("id") id: string) {
     return this.appointmentService.remove(id);
   }
 }

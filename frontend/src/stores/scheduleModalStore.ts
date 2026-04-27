@@ -106,7 +106,10 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   setSelectedDate: (date) => set({ selectedDate: date }),
 
   selectedHour: null,
-  setSelectedHour: (hour) => set({ selectedHour: hour }),
+  setSelectedHour: (hour, doctorId?: number) => set({ 
+    selectedHour: hour,
+    selectedPractitionerId: doctorId || null
+  }),
 
   availability: { morning: [], afternoon: [], evening: [] },
   isLoadingAvailability: false,
@@ -122,31 +125,34 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
       const day = String(selectedDate.getDate()).padStart(2, '0')
       const dateStr = `${year}-${month}-${day}`
       
-      const res = await api.get('appointments/availability', {
+const res = await api.get('appointments/availability', {
         params: {
           date: dateStr,
           serviceId: selectedMotif.id
         }
       })
       
-      const slotsArray = Array.isArray(res.data) ? res.data : []
+      // New format: [{ time, doctorId, doctorName }]
+      const slots = Array.isArray(res.data) ? res.data : []
       const morning: any[] = []
       const afternoon: any[] = []
       const evening: any[] = []
 
-      slotsArray.forEach((dateString: string) => {
-        const dateObj = new Date(dateString)
+      slots.forEach((slot: any) => {
+        const dateObj = new Date(slot.time)
         const hour = dateObj.getHours()
         const min = dateObj.getMinutes()
-        const slot = {
+        const slotData = {
           label: `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
-          startsAt: dateString,
+          startsAt: slot.time,
+          doctorId: slot.doctorId,
+          doctorName: slot.doctorName,
           available: true,
           capacity: 1
         }
-        if (hour < 12) morning.push(slot)
-        else if (hour < 17) afternoon.push(slot)
-        else evening.push(slot)
+        if (hour < 12) morning.push(slotData)
+        else if (hour < 17) afternoon.push(slotData)
+        else evening.push(slotData)
       })
 
       set({ 

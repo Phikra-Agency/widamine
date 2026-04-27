@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  ParseIntPipe,
 } from "@nestjs/common";
 import { MotifService } from "./motif.service";
 
@@ -20,7 +19,7 @@ export class MotifController {
   }
 
   @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
+  findOne(@Param("id") id: string) {
     return this.motifService.findOne(id);
   }
 
@@ -31,7 +30,7 @@ export class MotifController {
       name: string;
       slug: string;
       bookingType: string;
-      serviceId: number;
+      serviceId: string;
       duration?: number;
       description?: string;
     },
@@ -40,12 +39,12 @@ export class MotifController {
   }
 
   @Put(":id")
-  update(@Param("id", ParseIntPipe) id: number, @Body() data: any) {
+  update(@Param("id") id: string, @Body() data: any) {
     return this.motifService.update(id, data);
   }
 
   @Delete(":id")
-  remove(@Param("id", ParseIntPipe) id: number) {
+  remove(@Param("id") id: string) {
     return this.motifService.remove(id);
   }
 }

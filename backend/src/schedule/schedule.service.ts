@@ -12,17 +12,25 @@ export class ScheduleService {
     return this.prismaService.schedule.create({ data });
   }
 
-  async findWeekByDate(req: { user: { id: number } }, unsanitized_date: Date) {
+  async findWeekByDate(req: { user: { id: string } }, unsanitized_date: Date | string) {
     await this.prismaService.appointment.updateMany({
       where: { status: "PENDING", expiresAt: { lte: new Date() } },
       data: { status: "EXPIRED" },
     });
 
-    const date = new Date(unsanitized_date);
+    // Handle both Date objects and string dates (from frontend)
+    let date: Date
+    if (typeof unsanitized_date === 'string') {
+      // Parse ISO date string as local time (not UTC)
+      const [year, month, day] = unsanitized_date.split('-').map(Number)
+      date = new Date(year, month - 1, day)
+    } else {
+      date = new Date(unsanitized_date)
+    }
 
     //! round to monday to get the full week
     date.setDate(
-      unsanitized_date.getDate() - ((unsanitized_date.getDay() + 6) % 7),
+      date.getDate() - ((date.getDay() + 6) % 7),
     );
 
     const user = await this.prismaService.user.findUnique({
@@ -44,7 +52,7 @@ export class ScheduleService {
               {
                 practitionerId: null,
                 service: {
-                  doctorId: req.user.id,
+                  primaryDoctorId: req.user.id,
                 },
               },
             ],
@@ -71,7 +79,7 @@ export class ScheduleService {
         session: {
           select: {
             id: true,
-            session: true,
+            number: true,
             duration: true,
             service: {
               select: {
@@ -98,10 +106,26 @@ export class ScheduleService {
                 name: true,
               },
             },
+            motif: {
+              select: {
+                id: true,
+                name: true,
+                color: true,
+              },
+            },
           },
         },
       },
     });
+
+    // Transform schedules to rename 'number' to 'session' for frontend compatibility
+    const transformedSchedules = schedules.map(s => ({
+      ...s,
+      session: s.session ? {
+        ...s.session,
+        session: s.session.number,
+      } : undefined,
+    }));
 
     return Array.from({ length: 6 }).map((_, idx) => {
       const dayStart = new Date(date);
@@ -112,7 +136,7 @@ export class ScheduleService {
       dayEnd.setDate(dayEnd.getDate() + 1);
 
       return {
-        morning: schedules.filter((sch) => {
+        morning: transformedSchedules.filter((sch) => {
           const sch_date = new Date(sch.datetime);
           return (
             dayStart <= sch_date &&
@@ -120,7 +144,7 @@ export class ScheduleService {
             sch_date.getHours() < 12
           );
         }),
-        afternoon: schedules.filter((sch) => {
+        afternoon: transformedSchedules.filter((sch) => {
           const sch_date = new Date(sch.datetime);
           return (
             dayStart <= sch_date &&
@@ -129,7 +153,7 @@ export class ScheduleService {
             sch_date.getHours() < 16
           );
         }),
-        evening: schedules.filter((sch) => {
+        evening: transformedSchedules.filter((sch) => {
           const sch_date = new Date(sch.datetime);
           return (
             dayStart <= sch_date &&
@@ -141,11 +165,11 @@ export class ScheduleService {
     });
   }
 
-  update(id: number, data: UpdateScheduleDto) {
+  update(id: string, data: UpdateScheduleDto) {
     return this.prismaService.schedule.update({ where: { id }, data });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prismaService.schedule.delete({ where: { id } });
   }
 

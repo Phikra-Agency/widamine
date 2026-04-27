@@ -195,13 +195,33 @@ function Table() {
 }
 
 function Modal() {
-	const { operation, modalOpen, closeModal, item, setItem, saveItem, fetchDoctors, doctors } = useServicesStore()
+	const { operation, modalOpen, closeModal, item, setItem, saveItem, fetchDoctors, fetchResources, doctors, resources } = useServicesStore()
 	const { items: categories } = useCategoriesStore()
 	const isEdit = operation === 'edit'
 
 	useEffect(() => {
-		;["create", "edit"].includes(operation) && modalOpen && fetchDoctors()
+		;["create", "edit"].includes(operation) && modalOpen && (fetchDoctors(), fetchResources())
 	}, [modalOpen, operation])
+
+	// Toggle helper for multi-select arrays
+	const toggleDoctor = (doctorId: number) => {
+		const current = item.allowedDoctorIds || []
+		const updated = current.includes(doctorId)
+			? current.filter(id => id !== doctorId)
+			: [...current, doctorId]
+		setItem({ ...item, allowedDoctorIds: updated })
+	}
+
+	const toggleSalle = (salleId: number) => {
+		const current = item.allowedSalleIds || []
+		const updated = current.includes(salleId)
+			? current.filter(id => id !== salleId)
+			: [...current, salleId]
+		setItem({ ...item, allowedSalleIds: updated })
+	}
+
+	const selectedDoctors = item.allowedDoctorIds || []
+	const selectedSalles = item.allowedSalleIds || []
 
   return (
     <div className={clsx("fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4", ["create", "edit"].includes(operation) && modalOpen ? "opacity-100" : "opacity-0 pointer-events-none")}>
@@ -240,7 +260,18 @@ function Modal() {
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Médecin</label>
+						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Catégorie</label>
+						<select value={item.categoryId} onChange={(e) => setItem({ ...item, categoryId: +e.target.value })}
+							className="w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer">
+							<option value={0}>Sélectionnez une catégorie</option>
+							{categories.map((cat) => (
+								<option value={cat.id} key={cat.id}>{cat.category}</option>
+							))}
+						</select>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Médecin principal</label>
 						<select value={item.doctorId} onChange={(e) => setItem({ ...item, doctorId: +e.target.value })}
 							className="w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer">
 							<option value={0}>Sélectionnez un médecin</option>
@@ -251,14 +282,39 @@ function Modal() {
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Catégorie</label>
-						<select value={item.categoryId} onChange={(e) => setItem({ ...item, categoryId: +e.target.value })}
-							className="w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer">
-							<option value={0}>Sélectionnez une catégorie</option>
-							{categories.map((cat) => (
-								<option value={cat.id} key={cat.id}>{cat.category}</option>
+						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Médecins habilités (plusieurs)</label>
+						<div className="flex flex-wrap gap-2">
+							{doctors.map((doc) => (
+								<button
+									key={doc.id}
+									type="button"
+									onClick={() => toggleDoctor(doc.id)}
+									data-selected={selectedDoctors.includes(doc.id)}
+									className="px-3 py-2 rounded-lg text-sm border transition-all data-[selected=true]:bg-primary/20 data-[selected=true]:border-primary/50 data-[selected=true]:text-primary data-[selected=false]:border-secondary/20 data-[selected=false]:bg-white/60 data-[selected=false]:text-secondary/70 hover:border-primary/30"
+								>
+									{doc.name}
+								</button>
 							))}
-						</select>
+						</div>
+						<p className="text-xs text-secondary/50">Sélectionnez les médecins qui peuvent effectuer ce service</p>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/60">Salles autorisées (plusieurs)</label>
+						<div className="flex flex-wrap gap-2">
+							{resources.map((salle) => (
+								<button
+									key={salle.id}
+									type="button"
+									onClick={() => toggleSalle(salle.id)}
+									data-selected={selectedSalles.includes(salle.id)}
+									className="px-3 py-2 rounded-lg text-sm border transition-all data-[selected=true]:bg-secondary/20 data-[selected=true]:border-secondary/50 data-[selected=true]:text-secondary data-[selected=false]:border-secondary/20 data-[selected=false]:bg-white/60 data-[selected=false]:text-secondary/70 hover:border-secondary/30"
+								>
+									{salle.name}
+								</button>
+							))}
+						</div>
+						<p className="text-xs text-secondary/50">Sélectionnez les salles où ce service peut être prodigné</p>
 					</div>
 				</div>
 

@@ -32,12 +32,12 @@ export class CategoryController {
   @Put(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
   update(@Param("id") id: string, @Body() data: UpdateCategoryDto) {
-    return this.categoryService.update(+id, data);
+    return this.categoryService.update(id, data);
   }
 
   @Delete(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
-    return this.categoryService.remove(+id);
+    return this.categoryService.remove(id);
   }
 }

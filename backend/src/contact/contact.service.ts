@@ -7,20 +7,20 @@ export class ContactService {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: CreateContactDto) {
-    return this.prismaService.contact.create({ data });
+    return this.prismaService.contact.create({ data: data as any });
   }
 
   findAll(read: boolean) {
     return this.prismaService.contact.findMany({ where: { read } });
   }
 
-  findOne(id: number) {
-    return this.prismaService.contact.findUnique({ where: { id } });
+  findOne(id: string) {
+    return this.prismaService.contact.findUnique({ where: { id } as any });
   }
 
-  read(id: number) {
+  read(id: string) {
     return this.prismaService.contact.update({
-      where: { id },
+      where: { id } as any,
       data: { read: true },
     });
   }

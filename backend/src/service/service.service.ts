@@ -13,29 +13,29 @@ export class ServiceService {
   findAll() {
     return this.prismaService.service.findMany({
       include: {
-        doctor: { select: { name: true } },
-        category: { select: { category: true } },
+        primaryDoctor: { select: { name: true } },
+        category: { select: { name: true } },
         _count: { select: { sessions: true } },
       },
     });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prismaService.service.findUnique({
       where: { id },
       include: {
-        sessions: { orderBy: { session: "asc" } },
-        category: { select: { category: true } },
-        doctor: { select: { name: true } },
+        sessions: { orderBy: { number: "asc" } },
+        category: { select: { name: true } },
+        primaryDoctor: { select: { name: true } },
       },
     });
   }
 
-  update(id: number, data: UpdateServiceDto) {
+  update(id: string, data: UpdateServiceDto) {
     return this.prismaService.service.update({ where: { id }, data });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prismaService.service.delete({ where: { id } });
   }
 }

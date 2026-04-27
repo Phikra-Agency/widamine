@@ -52,6 +52,7 @@ interface AppointmentStoreInterface {
   savingScheduleSessionId: number | null
   setItem: (item: Appointment) => void
   toggleOpenShowModal: () => void
+  setOpenShowModal: (open: boolean) => void
   setFilters: (filters: AppointmentStoreInterface['filters']) => void
   fetchItems: () => Promise<void>
   fetchItem: (id: number) => Promise<void>
@@ -70,6 +71,9 @@ export const useAppointmentsStore = create<AppointmentStoreInterface>((set, get)
   },
   toggleOpenShowModal() {
     set({ openShowModal: !get().openShowModal })
+  },
+  setOpenShowModal(open) {
+    set({ openShowModal: open })
   },
   setFilters(filters) {
     set({ filters })

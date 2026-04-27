@@ -31,18 +31,18 @@ export class ServiceController {
 
   @Get(":id")
   findOne(@Param("id") id: string) {
-    return this.serviceService.findOne(+id);
+    return this.serviceService.findOne(id);
   }
 
   @Put(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
   update(@Param("id") id: string, @Body() data: UpdateServiceDto) {
-    return this.serviceService.update(+id, data);
+    return this.serviceService.update(id, data);
   }
 
   @Delete(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
-    return this.serviceService.remove(+id);
+    return this.serviceService.remove(id);
   }
 }

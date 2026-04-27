@@ -13,6 +13,24 @@ interface Schedule {
       name: string
     }
   }
+  appointment?: {
+    id: string
+    status: string
+    practitionerId?: string
+    practitioner?: {
+      id: string
+      name: string
+    }
+    resource?: {
+      id: string
+      name: string
+    }
+    motif?: {
+      id: string
+      name: string
+      color: string
+    }
+  }
 }
 
 interface Day {

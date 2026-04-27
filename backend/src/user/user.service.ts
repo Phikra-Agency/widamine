@@ -37,14 +37,14 @@ export class UserService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return this.prismaService.user.findUnique({
       where: { id },
       select: { id: true, name: true, email: true, role: true, admin: true },
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       const data: any = { ...updateUserDto };
       if (updateUserDto.password) {
@@ -63,7 +63,7 @@ export class UserService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     await this.prismaService.user.delete({
       where: { id },
     });

@@ -37,7 +37,7 @@ export class AuthService {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      path: "/refresh",
+      path: "/",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -89,7 +89,7 @@ export class AuthService {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      path: "/refresh",
+      path: "/",
     });
   }
 }

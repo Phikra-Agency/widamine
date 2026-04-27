@@ -1,7 +1,8 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
-import { CalendarBlank, CaretLeft, CaretRight, Clock, X } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, Clock, X } from '@phosphor-icons/react'
 import { useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
@@ -151,7 +152,6 @@ function Planner() {
                 <CaretRight size={16} />
               </button>
               <label className='inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/8 px-3.5 py-2 text-sm text-white/80'>
-                <CalendarBlank size={16} className='text-[#8bd8ff]' />
                 <input
                   type='date'
                   onChange={(e) => setFilters({ ...filters, date: e.target.value })}
@@ -223,34 +223,55 @@ function Planner() {
                         )}
                       >
                         {schedules.length === 0 ? (
-                          <div className='flex h-full items-center justify-center rounded-[0.95rem] border border-dashed border-[#ddcec5] bg-white/78 px-3 text-center text-xs uppercase tracking-[0.22em] text-slate-400'>
+                          <div className='flex h-full items-center justify-center rounded-[0.95rem] border border-dashed border-accent/40 bg-white/78 px-3 text-center text-xs uppercase tracking-[0.22em] text-secondary/36'>
                             Libre
                           </div>
                         ) : (
-                          schedules.map((schedule) => (
-                            <button
-                              key={`${schedule.session.id}-${schedule.datetime}`}
-                              type='button'
-                              onClick={() => {
-                                setItem(schedule)
-                                toggleOpenShowModal()
-                              }}
-                              className='h-full rounded-[1rem] border border-[#dce9f2] bg-[linear-gradient(180deg,#ffffff_0%,#f8fcff_100%)] px-3 py-3 text-left shadow-[0_12px_24px_rgba(10,31,47,0.06)] transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_16px_30px_rgba(10,31,47,0.08)]'
-                            >
-                              <div className='flex h-full flex-col justify-between gap-3'>
-                                <div className='flex items-center justify-between gap-2'>
-                                  <div className='rounded-full border border-primary/10 bg-primary/8 px-2.5 py-1 text-[11px] font-medium text-primary'>
-                                    {formatTimeOnly(schedule.datetime)}
+                          <>
+                            {schedules.slice(0, 2).map((schedule) => {
+                              const color = schedule.appointment?.motif?.color || '#2e90c0'
+                              return (
+                                <button
+                                  key={`${schedule.session.id}-${schedule.datetime}`}
+                                  type='button'
+                                  onClick={() => {
+                                    setItem(schedule)
+                                    toggleOpenShowModal()
+                                  }}
+                                  className='group shrink-0 rounded-[0.65rem] border border-secondary/6 bg-white text-left transition hover:border-primary/20 hover:shadow-[0_6px_16px_rgba(26,54,70,0.08)]'
+                                >
+                                  <div className='flex items-center gap-2 px-2.5 py-2'>
+                                    <div
+                                      className='flex shrink-0 items-center justify-center rounded-full px-2 py-1 text-[10px] font-semibold text-white'
+                                      style={{ backgroundColor: color }}
+                                    >
+                                      {formatTimeOnly(schedule.datetime)}
+                                    </div>
+                                    <div className='min-w-0 flex-1'>
+                                      <p className='truncate text-[11px] font-semibold leading-4 text-secondary/82'>{schedule.appointment?.motif?.name || schedule.session.service.name}</p>
+                                      <p className='mt-0.5 text-[10px] text-secondary/40'>{schedule.session.service.name} · S{schedule.session.session}</p>
+                                    </div>
+                                    <div
+                                      className='h-1.5 w-1.5 shrink-0 rounded-full'
+                                      style={{ backgroundColor: color }}
+                                    />
                                   </div>
-                                  <div className='h-2.5 w-2.5 shrink-0 rounded-full bg-primary shadow-[0_0_0_6px_rgba(88,177,224,0.12)]' />
-                                </div>
-                                <div className='min-w-0'>
-                                  <p className='line-clamp-3 text-sm leading-5 text-[#17324a]'>{schedule.session.service.name}</p>
-                                  <p className='mt-2 text-xs uppercase tracking-[0.18em] text-slate-500'>Séance {schedule.session.session}</p>
-                                </div>
-                              </div>
-                            </button>
-                          ))
+                                </button>
+                              )
+                            })}
+                            {schedules.length > 2 && (
+                              <button
+                                type='button'
+                                onClick={() => {
+                                  setItem(schedules[2])
+                                  toggleOpenShowModal()
+                                }}
+                                className='shrink-0 rounded-[0.65rem] border border-dashed border-accent/50 bg-accent/8 px-3 py-1.5 text-center text-[11px] font-medium text-secondary/50 transition hover:border-primary/30 hover:text-primary'
+                              >
+                                +{schedules.length - 2} de plus
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -264,8 +285,50 @@ function Planner() {
   )
 }
 
+function getPeriodFromHour(hour: number): 'morning' | 'afternoon' | 'evening' {
+  if (hour < 12) return 'morning'
+  if (hour < 16) return 'afternoon'
+  return 'evening'
+}
+
 function ShowModal() {
-  const { openShowModal, toggleOpenShowModal, item } = useSchedulesStore()
+  const { openShowModal, toggleOpenShowModal, item, items } = useSchedulesStore()
+  const navigate = useNavigate()
+
+  // Get all schedules from the week
+  const allWeekSchedules = items.flatMap(day => [...day.morning, ...day.afternoon, ...day.evening])
+
+  // Determine which period the clicked item belongs to
+  const itemDate = item.datetime ? new Date(item.datetime).toDateString() : ''
+  const itemHour = item.datetime ? new Date(item.datetime).getHours() : 0
+  const itemPeriod = getPeriodFromHour(itemHour)
+
+  // Filter to only schedules from the same day AND same period
+  const periodSchedules = allWeekSchedules.filter(s => {
+    if (!s.datetime) return false
+    const sDate = new Date(s.datetime).toDateString()
+    const sHour = new Date(s.datetime).getHours()
+    const sPeriod = getPeriodFromHour(sHour)
+    return sDate === itemDate && sPeriod === itemPeriod
+  }).sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
+
+  const currentIndex = periodSchedules.findIndex(s => s.datetime === item.datetime && s.session.id === item.session.id)
+  const hasNext = currentIndex < periodSchedules.length - 1
+  const hasPrev = currentIndex > 0
+
+  const navigateTo = (direction: 'next' | 'prev') => {
+    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
+    if (newIndex >= 0 && newIndex < periodSchedules.length) {
+      const { setItem } = useSchedulesStore.getState()
+      setItem(periodSchedules[newIndex])
+    }
+  }
+
+  const goToDetails = () => {
+    if (item.appointment?.id) {
+      navigate(`/back-office/appointments?id=${item.appointment.id}`)
+    }
+  }
 
   return (
     <div
@@ -274,27 +337,51 @@ function ShowModal() {
         'absolute inset-0 z-20 flex items-center justify-center bg-black/32 p-4 backdrop-blur-sm transition duration-300',
         openShowModal ? '' : 'pointer-events-none opacity-0',
       )}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={clsx(
-            'w-full max-w-xl rounded-[1.8rem] border border-[#e7d7cf] bg-white p-6 shadow-[0_24px_60px_rgba(10,31,47,0.14)] transition duration-300',
-            openShowModal ? 'opacity-100' : 'translate-y-10 opacity-0 pointer-events-none',
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={clsx(
+          'w-full max-w-xl rounded-[1.8rem] border border-[#e7d7cf] bg-white p-6 shadow-[0_24px_60px_rgba(10,31,47,0.14)] transition duration-300',
+          openShowModal ? 'opacity-100' : 'translate-y-10 opacity-0 pointer-events-none',
         )}
       >
         <div className='flex items-start justify-between gap-3'>
-          <div>
+          <div className='flex-1'>
             <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Détail séance</p>
             <h1 className='mt-2 text-2xl text-[#10293f]'>Créneau sélectionné</h1>
             <p className='mt-2 text-sm leading-6 text-slate-500'>Lecture rapide de la séance planifiée et de son horaire.</p>
           </div>
-          <button
-            onClick={toggleOpenShowModal}
-            type='button'
-            className='flex h-11 w-11 items-center justify-center rounded-full border border-secondary/10 bg-[#fcfaf8] text-secondary transition hover:border-primary/18 hover:text-primary'
-          >
-            <X size={18} />
-          </button>
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={() => navigateTo('prev')}
+              disabled={!hasPrev}
+              type='button'
+              className={clsx(
+                'flex h-11 w-11 items-center justify-center rounded-full border border-secondary/10 bg-[#fcfaf8] text-secondary transition',
+                hasPrev ? 'hover:border-primary/18 hover:text-primary' : 'opacity-30 cursor-not-allowed'
+              )}
+            >
+              <CaretLeft size={18} />
+            </button>
+            <button
+              onClick={() => navigateTo('next')}
+              disabled={!hasNext}
+              type='button'
+              className={clsx(
+                'flex h-11 w-11 items-center justify-center rounded-full border border-secondary/10 bg-[#fcfaf8] text-secondary transition',
+                hasNext ? 'hover:border-primary/18 hover:text-primary' : 'opacity-30 cursor-not-allowed'
+              )}
+            >
+              <CaretRight size={18} />
+            </button>
+            <button
+              onClick={toggleOpenShowModal}
+              type='button'
+              className='flex h-11 w-11 items-center justify-center rounded-full border border-secondary/10 bg-[#fcfaf8] text-secondary transition hover:border-primary/18 hover:text-primary'
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className='mt-6 grid gap-3 sm:grid-cols-2'>
@@ -302,6 +389,26 @@ function ShowModal() {
           <Info label='Session' value={item.session?.session ? `Séance ${item.session.session}` : '-'} />
           <Info label='Durée' value={item.session?.duration ? `${item.session.duration} min` : '-'} />
           <Info label='Date & Heure' value={formatDateTimeLabel(item.datetime)} />
+          <Info label='Praticien' value={item.appointment?.practitioner?.name || 'Non assigné'} />
+          <Info label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
+          <Info label='Statut' value={item.appointment?.status || '-'} />
+          <Info label='Motif' value={item.appointment?.motif?.name || '-'} />
+        </div>
+
+        <div className='mt-6 flex items-center justify-between gap-4'>
+          <div className='text-sm text-slate-400'>
+            {currentIndex + 1} / {periodSchedules.length}
+          </div>
+          {item.appointment?.id && (
+            <button
+              onClick={goToDetails}
+              type='button'
+              className='flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-[0_14px_28px_rgba(46,144,192,0.24)] transition hover:bg-primary/92'
+            >
+              <span>Voir détails</span>
+              <CaretRight size={16} />
+            </button>
+          )}
         </div>
       </div>
     </div>

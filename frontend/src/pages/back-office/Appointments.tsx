@@ -1,6 +1,7 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { Eye, PencilSimple as Pen, CalendarBlank, EnvelopeSimple, Phone, User, Stethoscope, Door } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import { useDebounce } from 'use-debounce'
@@ -20,6 +21,7 @@ export default function Appointments() {
           <Table />
         </div>
       </div>
+      <ShowModal />
     </motion.div>
   )
 }
@@ -52,13 +54,38 @@ function Filters() {
 }
 
 function Table() {
-  const { items, filters, fetchItems, setItem, toggleOpenShowModal } = useAppointmentsStore()
+  const { items, filters, fetchItems, setItem, toggleOpenShowModal, setOpenShowModal } = useAppointmentsStore()
   const [filtered, setFiltered] = useState(items)
   const [debouncedFilters] = useDebounce(filters, 300)
+  const [searchParams] = useSearchParams()
+  const hasOpenedFromUrl = useRef(false)
 
   useEffect(() => {
     fetchItems()
   }, [])
+
+  // Auto-open popup if id is in query params (only once)
+  useEffect(() => {
+    const id = searchParams.get('id')
+    if (id && !hasOpenedFromUrl.current) {
+      hasOpenedFromUrl.current = true
+      // Wait for items to be loaded
+      const checkAndOpen = () => {
+        const appointment = items.find(item => String(item.id) === id)
+        if (appointment) {
+          setItem(appointment)
+          setOpenShowModal(true)
+        }
+      }
+      if (items.length > 0) {
+        checkAndOpen()
+      } else {
+        // Items not loaded yet, wait for next render
+        const timer = setTimeout(checkAndOpen, 500)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [items, searchParams, setItem, setOpenShowModal])
 
   useEffect(() => {
     setFiltered(items.filter((i) => i.name.includes(debouncedFilters.term) || i.email.includes(debouncedFilters.term) || i.phone.includes(debouncedFilters.term)))
@@ -233,9 +260,20 @@ function ShowModal() {
   }, [item])
 
   return (
-    <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', openShowModal ? '' : 'opacity-0 pointer-events-none')}>
-      <div className='absolute inset-0 bg-secondary/40 backdrop-blur-sm transition-opacity duration-300' onClick={toggleOpenShowModal} />
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={openShowModal ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }} transition={{ duration: 0.32 }} className={clsx('relative w-full max-w-4xl max-h-[calc(100vh-4rem)] overflow-y-auto rounded-[2rem] border border-white/20 bg-white/95 shadow-[0_40px_100px_rgba(10,31,47,0.25)] backdrop-blur-xl transition-all duration-300', openShowModal ? 'opacity-100 scale-100' : 'opacity-0 scale-95')}>
+    <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', openShowModal ? '' : 'pointer-events-none')}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={openShowModal ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        className='absolute inset-0 bg-secondary/40 backdrop-blur-sm'
+        onClick={toggleOpenShowModal}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={openShowModal ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }}
+        transition={{ duration: 0.24 }}
+        className='relative w-full max-w-4xl max-h-[calc(100vh-4rem)] overflow-y-auto rounded-[2rem] border border-white/20 bg-white/95 shadow-[0_40px_100px_rgba(10,31,47,0.25)] backdrop-blur-xl'
+      >
         <div className='sticky top-0 z-10 border-b border-secondary/10 bg-white/80 backdrop-blur-xl px-6 py-4'>
           <h2 className='text-lg font-semibold text-secondary'>Détails du rendez-vous</h2>
           <p className='text-sm text-secondary/60 mt-0.5'>{item.name} · {item.motif?.name || item.service?.name}</p>

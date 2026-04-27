@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  ParseIntPipe,
 } from "@nestjs/common";
 import { ResourceService } from "./resource.service";
 
@@ -20,7 +19,7 @@ export class ResourceController {
   }
 
   @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
+  findOne(@Param("id") id: string) {
     return this.resourceService.findOne(id);
   }
 
@@ -39,7 +38,7 @@ export class ResourceController {
 
   @Put(":id")
   update(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("id") id: string,
     @Body()
     data: {
       name?: string;
@@ -53,7 +52,7 @@ export class ResourceController {
   }
 
   @Delete(":id")
-  remove(@Param("id", ParseIntPipe) id: number) {
+  remove(@Param("id") id: string) {
     return this.resourceService.remove(id);
   }
 }

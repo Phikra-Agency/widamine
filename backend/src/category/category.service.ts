@@ -8,7 +8,7 @@ export class CategoryService {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: CreateCategoryDto) {
-    return this.prismaService.category.create({ data });
+    return this.prismaService.category.create({ data: data as any });
   }
 
   findAll() {
@@ -17,11 +17,11 @@ export class CategoryService {
     });
   }
 
-  update(id: number, data: UpdateCategoryDto) {
-    return this.prismaService.category.update({ where: { id }, data });
+  update(id: string, data: UpdateCategoryDto) {
+    return this.prismaService.category.update({ where: { id }, data: data as any });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prismaService.category.delete({ where: { id } });
   }
 }

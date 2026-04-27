@@ -11,19 +11,19 @@ export class ResourceService {
     type: string;
     description?: string;
   }) {
-    return this.prisma.resource.create({ data });
+    return this.prisma.resource.create({ data: data as any });
   }
 
   async findAll() {
     return this.prisma.resource.findMany();
   }
 
-  async findOne(id: number) {
-    return this.prisma.resource.findUnique({ where: { id } });
+  async findOne(id: string) {
+    return this.prisma.resource.findUnique({ where: { id } as any });
   }
 
   async update(
-    id: number,
+    id: string,
     data: {
       name?: string;
       slug?: string;
@@ -32,10 +32,10 @@ export class ResourceService {
       isActive?: boolean;
     },
   ) {
-    return this.prisma.resource.update({ where: { id }, data });
+    return this.prisma.resource.update({ where: { id } as any, data: data as any });
   }
 
-  async remove(id: number) {
-    return this.prisma.resource.delete({ where: { id } });
+  async remove(id: string) {
+    return this.prisma.resource.delete({ where: { id } as any });
   }
 }

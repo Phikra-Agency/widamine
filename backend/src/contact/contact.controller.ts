@@ -32,12 +32,12 @@ export class ContactController {
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
   @Get(":id")
   findOne(@Param("id") id: string) {
-    return this.contactService.findOne(+id);
+    return this.contactService.findOne(id);
   }
 
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
   @Put(":id/read")
   read(@Param("id") id: string) {
-    return this.contactService.read(+id);
+    return this.contactService.read(id);
   }
 }

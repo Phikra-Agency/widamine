@@ -1,16 +1,20 @@
 import { useAuthStore } from '@/stores/authStore'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 export default function RoleWrapper({ roles }: { roles: string[] }) {
-  const { user } = useAuthStore()
-  const [ready, setReady] = useState(false)
   const navigate = useNavigate()
+  const checked = useRef(false)
 
   useEffect(() => {
-    !roles.includes(user?.role || '') && navigate('/login')
-    setReady(true)
+    if (checked.current) return
+    checked.current = true
+
+    const { user } = useAuthStore.getState()
+    if (!roles.includes(user?.role || '')) {
+      navigate('/login', { replace: true })
+    }
   }, [])
 
-  return ready && <Outlet />
+  return <Outlet />
 }

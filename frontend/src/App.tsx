@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthWrapper, RefreshWrapper, UnauthWrapper, RoleWrapper } from '@/components/wrappers'
-import { BackOfficeLayout, Layout } from '@/components/layouts'
+import { BackOfficeLayout, BackOfficeLayoutDark, Layout } from '@/components/layouts'
 import { Login } from '@/pages/auth'
 import { Users, Appointments, Calendar, Contacts, Categories, Services, Patients, Dashboard, Motifs, Resources } from '@/pages/back-office'
+import DashboardDark from '@/pages/back-office/DashboardDark'
 import { Home, Contact, Appointment, ServiceDetail } from '@/pages'
 import { useGSAP } from '@gsap/react'
 import { Flip } from 'gsap/all'
@@ -62,12 +63,15 @@ function App() {
 										<Route index element={<Navigate to='dashboard' />} />
 									</Route>
 								</Route>
-
 							</Route>
 
 							<Route element={<UnauthWrapper />}>
 								<Route path='login' element={<Login />} />
 							</Route>
+						</Route>
+
+						<Route path='admin1' element={<BackOfficeLayoutDark />}>
+							<Route index element={<DashboardDark />} />
 						</Route>
 					</Routes>
 				</BrowserRouter>

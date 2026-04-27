@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                   Int                 @id() @default(autoincrement())
+  id                   String              @id @default(auto()) @map("_id") @db.ObjectId
   name                 String
   email                String              @unique
   password             String
@@ -18,56 +18,71 @@ model User {
   motifAssignments     MotifPractitioner[]
   assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
   availabilityBlocks   AvailabilityBlock[]
+  resourceAssignments  ResourcePractitioner[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  category String
-  services Service[]
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String    @unique
+  services  Service[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Service {
-  id           Int           @id @default(autoincrement())
-  name         String
-  slug         String?       @unique
-  price        Float
-  categoryId   Int
-  category     Category      @relation(fields: [categoryId], references: [id])
-  sessions     Session[]
-  appointments Appointment[]
-  motifs       Motif[]
-  doctorId     Int
-  doctor       User          @relation("DoctorServices", fields: [doctorId], references: [id])
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  slug             String?       @unique
+  price            Float
+  categoryId       String        @db.ObjectId
+  category         Category      @relation(fields: [categoryId], references: [id])
+  sessions         Session[]
+  appointments     Appointment[]
+  motifs           Motif[]
+  primaryDoctorId  String        @db.ObjectId
+  primaryDoctor    User          @relation("DoctorServices", fields: [primaryDoctorId], references: [id])
+  allowedDoctorIds String[]      @db.ObjectId
+  allowedSalleIds  String[]      @db.ObjectId
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model Session {
-  id        Int        @id @default(autoincrement())
-  session   Int
-  duration  Int
-  serviceId Int
-  service   Service    @relation(fields: [serviceId], references: [id])
-  schedules Schedule[]
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  number      Int
+  duration    Int        @default(30)
+  serviceId   String     @db.ObjectId
+  service     Service    @relation(fields: [serviceId], references: [id])
+  schedules   Schedule[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Patient {
-  id             Int      @id @default(autoincrement())
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
   firstName      String
   lastName       String
-  email          String   @unique
-  phone          String
-  dateOfBirth    DateTime
-  gender         String
-  address        String
-  city           String
-  postalCode     String
-  country        String
+  email          String?
+  phone          String       @unique
+  dateOfBirth    DateTime?
+  gender         String?
+  address        String?
+  city           String?
+  postalCode     String?
+  country        String       @default("Maroc")
   medicalHistory String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  appointments   Appointment[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Appointment {
-  id             Int               @id @default(autoincrement())
+  id             String            @id @default(auto()) @map("_id") @db.ObjectId
+  patientId      String            @db.ObjectId
+  patient        Patient           @relation(fields: [patientId], references: [id])
   name           String
   email          String
   phone          String
@@ -78,49 +93,60 @@ model Appointment {
   confirmedAt    DateTime?
   cancelledAt    DateTime?
   completedAt    DateTime?
-  serviceId      Int
+  serviceId      String            @db.ObjectId
   service        Service           @relation(fields: [serviceId], references: [id])
-  motifId        Int?
+  motifId        String?           @db.ObjectId
   motif          Motif?            @relation(fields: [motifId], references: [id])
-  practitionerId Int?
+  practitionerId String?           @db.ObjectId
   practitioner   User?             @relation("AssignedPractitionerAppointments", fields: [practitionerId], references: [id])
-  resourceId     Int?
+  resourceId     String?           @db.ObjectId
   resource       Resource?         @relation(fields: [resourceId], references: [id])
   schedules      Schedule[]
   notifications  NotificationLog[]
   createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @default(now()) @updatedAt
+  updatedAt      DateTime          @updatedAt
+
+  @@index([patientId])
+  @@index([serviceId])
+  @@index([status])
 }
 
 model Schedule {
-  id            Int         @id @default(autoincrement())
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
   datetime      DateTime
-  sessionId     Int
+  sessionId     String      @db.ObjectId
   session       Session     @relation(fields: [sessionId], references: [id])
-  appointmentId Int
+  appointmentId String      @db.ObjectId
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([datetime])
+  @@index([appointmentId])
 }
 
 model Contact {
-  id      Int     @id @default(autoincrement())
-  name    String
-  email   String
-  phone   String
-  context String
-  read    Boolean @default(false)
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  phone     String
+  context   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Motif {
-  id                         Int                 @id @default(autoincrement())
+  id                         String              @id @default(auto()) @map("_id") @db.ObjectId
   name                       String              @unique
   slug                       String              @unique
   bookingType                String
   description                String?
-  duration                   Int
+  duration                   Int                 @default(30)
   isActive                   Boolean             @default(true)
   requiresPractitionerChoice Boolean             @default(false)
   pendingTtlHours            Int                 @default(24)
-  serviceId                  Int
+  color                      String              @default("#3b82f6")
+  serviceId                  String              @db.ObjectId
   service                    Service             @relation(fields: [serviceId], references: [id])
   practitionerAssignments    MotifPractitioner[]
   resourceAssignments        MotifResource[]
@@ -130,71 +156,101 @@ model Motif {
 }
 
 model MotifPractitioner {
-  id             Int     @id @default(autoincrement())
-  motifId        Int
-  practitionerId Int
-  priority       Int     @default(0)
-  isPreferred    Boolean @default(false)
-  isActive       Boolean @default(true)
-  motif          Motif   @relation(fields: [motifId], references: [id])
-  practitioner   User    @relation(fields: [practitionerId], references: [id])
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  motifId        String   @db.ObjectId
+  practitionerId String   @db.ObjectId
+  priority       Int      @default(0)
+  isPreferred    Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  motif          Motif    @relation(fields: [motifId], references: [id])
+  practitioner   User     @relation(fields: [practitionerId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@unique([motifId, practitionerId])
 }
 
 model Resource {
-  id                 Int                 @id @default(autoincrement())
-  name               String
-  slug               String              @unique
-  type               String
-  description        String?
-  isActive           Boolean             @default(true)
-  motifAssignments   MotifResource[]
-  appointments       Appointment[]
-  availabilityBlocks AvailabilityBlock[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  id                  String                 @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  slug                String                 @unique
+  type                String
+  description         String?
+  priority            Int                    @default(0)
+  isActive            Boolean                @default(true)
+  motifAssignments    MotifResource[]
+  practitionerAssignments ResourcePractitioner[]
+  appointments        Appointment[]
+  availabilityBlocks  AvailabilityBlock[]
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([priority])
+  @@index([isActive])
+}
+
+// New: Resource-Doctor many-to-many relation
+model ResourcePractitioner {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  resourceId     String   @db.ObjectId
+  practitionerId String   @db.ObjectId
+  priority       Int      @default(0)
+  isPreferred    Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  resource       Resource @relation(fields: [resourceId], references: [id])
+  practitioner   User     @relation(fields: [practitionerId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([resourceId, practitionerId])
 }
 
 model MotifResource {
-  id          Int      @id @default(autoincrement())
-  motifId     Int
-  resourceId  Int
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  motifId     String   @db.ObjectId
+  resourceId  String   @db.ObjectId
   priority    Int      @default(0)
   isPreferred Boolean  @default(false)
   isRequired  Boolean  @default(false)
   motif       Motif    @relation(fields: [motifId], references: [id])
   resource    Resource @relation(fields: [resourceId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([motifId, resourceId])
 }
 
 model AvailabilityBlock {
-  id             Int       @id @default(autoincrement())
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
   startsAt       DateTime
   endsAt         DateTime
   reason         String?
   isActive       Boolean   @default(true)
-  practitionerId Int?
+  practitionerId String?   @db.ObjectId
   practitioner   User?     @relation(fields: [practitionerId], references: [id])
-  resourceId     Int?
+  resourceId     String?   @db.ObjectId
   resource       Resource? @relation(fields: [resourceId], references: [id])
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([startsAt, endsAt])
 }
 
 model NotificationLog {
-  id            Int         @id @default(autoincrement())
-  appointmentId Int
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  appointmentId String    @db.ObjectId
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
   channel       String
   recipientType String
   recipient     String
   provider      String?
-  status        String      @default("PENDING")
+  status        String    @default("PENDING")
   message       String?
   externalId    String?
   error         String?
   sentAt        DateTime?
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime  @default(now())
+
+  @@index([appointmentId])
+  @@index([status])
 }
