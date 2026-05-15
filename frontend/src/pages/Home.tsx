@@ -217,24 +217,6 @@ const TRUST_POINTS = [
 	},
 ]
 
-const TESTIMONIALS = [
-	{
-		name: 'Patiente visage',
-		service: 'Esthétique du visage',
-		quote: "J’ai reçu un accompagnement très professionnel du début à la fin. Le résultat est naturel et je me suis sentie en confiance à chaque étape.",
-	},
-	{
-		name: 'Patiente silhouette',
-		service: 'Esthétique du corps',
-		quote: "L’équipe a été très présente pendant tout le parcours. J’ai retrouvé la silhouette que je recherchais avec une vraie qualité de suivi.",
-	},
-	{
-		name: 'Patiente regard',
-		service: "Esthétique de l'œil",
-		quote: "Tout a été expliqué clairement avant de commencer. Le rendu est doux, précis et respecte exactement ce que je voulais.",
-	},
-]
-
 const NEWS_POSTS = [
 	{
 		title: 'Fat Injection',

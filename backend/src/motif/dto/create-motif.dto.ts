@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray } from "class-validator";
 
 export class CreateMotifDto {
   @IsString()
@@ -13,9 +13,9 @@ export class CreateMotifDto {
   @IsNotEmpty()
   bookingType: string;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  serviceId: number;
+  serviceId: string;
 
   @IsOptional()
   @IsNumber()
@@ -24,6 +24,15 @@ export class CreateMotifDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  practitionerIds?: string[];
 }
 
 export class UpdateMotifDto {
@@ -40,8 +49,8 @@ export class UpdateMotifDto {
   bookingType?: string;
 
   @IsOptional()
-  @IsNumber()
-  serviceId?: number;
+  @IsString()
+  serviceId?: string;
 
   @IsOptional()
   @IsNumber()
@@ -53,4 +62,13 @@ export class UpdateMotifDto {
 
   @IsOptional()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  practitionerIds?: string[];
 }

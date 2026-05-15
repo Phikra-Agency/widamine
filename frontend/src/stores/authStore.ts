@@ -11,10 +11,11 @@ interface LoginData {
 interface User {
   id: number
   name: string
+  email?: string
   role: Role
 }
 
-export type Role = 'USER' | 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST'
+export type Role = 'USER' | 'ADMIN' | 'DOCTOR' | 'PRACTITIONER' | 'RECEPTIONIST'
 
 interface AuthStoreInterface {
   user: User | null

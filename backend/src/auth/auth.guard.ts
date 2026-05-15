@@ -5,14 +5,16 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { Observable } from "rxjs";
+import { PrismaService } from "@/prisma/prisma.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwt: JwtService) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  constructor(
+    private jwt: JwtService,
+    private prisma: PrismaService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const auth = req.headers.authorization;
 
@@ -20,12 +22,29 @@ export class AuthGuard implements CanActivate {
 
     try {
       const token = auth.split(" ")[1];
-      const decoded = this.jwt.verify<{ id: number }>(token, {
+      const payload = this.jwt.verify<{ id: string }>(token, {
         secret: process.env.JWT_SECRET,
       });
-      req.user = decoded;
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          admin: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) throw new UnauthorizedException("User not found");
+
+      req.user = user;
       return true;
     } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
       throw new UnauthorizedException("Invalid or expired token");
     }
   }

@@ -2,8 +2,11 @@ import api from '@/lib/api'
 import { create } from 'zustand'
 
 interface Motif {
-  id?: number
+  id?: string
   name: string
+  duration?: number
+  practitionerIds?: string[]
+  practitionerAssignments?: { practitionerId: string }[]
 }
 
 interface MotifStoreInterface {
@@ -23,11 +26,16 @@ interface MotifStoreInterface {
 
 export const useMotifsStore = create<MotifStoreInterface>((set, get) => ({
   items: [],
-  item: { name: '' },
+  item: { name: '', duration: 30, practitionerIds: [] },
   operation: 'create' as MotifStoreInterface['operation'],
   modalOpen: false,
-  setItem: (item) => set({ item }),
-  clearItem: () => set({ item: { name: '' } }),
+  setItem: (item: Motif) => {
+    const practitionerIds = item.practitionerAssignments 
+      ? item.practitionerAssignments.map(a => a.practitionerId) 
+      : item.practitionerIds || [];
+    set({ item: { ...item, practitionerIds } });
+  },
+  clearItem: () => set({ item: { name: '', duration: 30, practitionerIds: [] } }),
   openModal: () => set({ modalOpen: true }),
   closeModal: () => {
     set({ modalOpen: false })
@@ -39,10 +47,17 @@ export const useMotifsStore = create<MotifStoreInterface>((set, get) => ({
     set({ items: res.data })
   },
   saveItem: async () => {
-    if (get().operation === 'edit') {
-      await api.put('motifs/' + (get().item as Motif).id, get().item)
+    const { item, operation } = get();
+    // Ensure we send practitionerIds to backend
+    const payload = {
+      ...item,
+      practitionerIds: item.practitionerIds || [],
+    };
+    
+    if (operation === 'edit') {
+      await api.put('motifs/' + item.id, payload)
     } else {
-      await api.post('motifs', get().item)
+      await api.post('motifs', payload)
     }
     get().fetchItems()
     get().closeModal()

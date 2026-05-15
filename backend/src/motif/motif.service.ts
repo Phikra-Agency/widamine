@@ -12,32 +12,92 @@ export class MotifService {
     serviceId: string;
     duration?: number;
     description?: string;
+    color?: string;
+    practitionerIds?: string[];
   }) {
+    const { 
+      name, slug, bookingType, serviceId, duration, 
+      description, color, practitionerIds 
+    } = data;
+
     return this.prisma.motif.create({
       data: {
-        ...data,
-        duration: data.duration || 30,
+        name,
+        slug,
+        bookingType,
+        serviceId,
+        duration: duration || 30,
+        description,
+        color,
+        practitionerAssignments: practitionerIds
+          ? {
+              create: practitionerIds.map((pid) => ({
+                practitionerId: pid,
+              })),
+            }
+          : undefined,
       },
     });
   }
 
   async findAll() {
     return this.prisma.motif.findMany({
-      include: { service: true },
+      include: { 
+        service: true,
+        practitionerAssignments: true
+      },
     });
   }
 
   async findOne(id: string) {
     return this.prisma.motif.findUnique({
       where: { id },
-      include: { service: true },
+      include: { 
+        service: true,
+        practitionerAssignments: true
+      },
     });
   }
 
-  async update(id: string, data: any) {
+  async update(
+    id: string,
+    data: {
+      name?: string;
+      slug?: string;
+      bookingType?: string;
+      serviceId?: string;
+      duration?: number;
+      description?: string;
+      isActive?: boolean;
+      color?: string;
+      practitionerIds?: string[];
+    },
+  ) {
+    const { 
+      name, slug, bookingType, serviceId, duration, 
+      description, isActive, color, practitionerIds 
+    } = data;
+
     return this.prisma.motif.update({
       where: { id },
-      data,
+      data: {
+        name,
+        slug,
+        bookingType,
+        serviceId,
+        duration,
+        description,
+        isActive,
+        color,
+        practitionerAssignments: practitionerIds
+          ? {
+              deleteMany: {},
+              create: practitionerIds.map((pid) => ({
+                practitionerId: pid,
+              })),
+            }
+          : undefined,
+      },
     });
   }
 

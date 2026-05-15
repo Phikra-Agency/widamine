@@ -15,8 +15,14 @@ interface Schedule {
   }
   appointment?: {
     id: string
+    name?: string
     status: string
     practitionerId?: string
+    patient?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
     practitioner?: {
       id: string
       name: string
@@ -29,6 +35,7 @@ interface Schedule {
       id: string
       name: string
       color: string
+      duration?: number
     }
   }
 }

@@ -12,6 +12,8 @@ import { PatientModule } from "./patient/patient.module";
 import { SmsModule } from "./sms/sms.module";
 import { MotifModule } from "./motif/motif.module";
 import { ResourceModule } from "./resource/resource.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
+import { SettingsModule } from "./settings/settings.module";
 
 console.log("[AppModule] Loading modules...");
 
@@ -30,6 +32,8 @@ console.log("[AppModule] Loading modules...");
     SmsModule,
     MotifModule,
     ResourceModule,
+    DashboardModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

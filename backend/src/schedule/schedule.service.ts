@@ -12,11 +12,28 @@ export class ScheduleService {
     return this.prismaService.schedule.create({ data });
   }
 
-  async findWeekByDate(req: { user: { id: string } }, unsanitized_date: Date | string) {
-    await this.prismaService.appointment.updateMany({
+  async findWeekByDate(req: { user: { id: string; role: string } }, unsanitized_date: Date | string) {
+    // MongoDB requires replica set for transactions, so we use individual updates
+    const expiredAppointments = await this.prismaService.appointment.findMany({
       where: { status: "PENDING", expiresAt: { lte: new Date() } },
-      data: { status: "EXPIRED" },
+      select: { id: true },
     });
+    for (const appt of expiredAppointments) {
+      try {
+        await this.prismaService.appointment.update({
+          where: { id: appt.id },
+          data: { status: "EXPIRED" },
+        });
+      } catch (err) {
+        // On standalone MongoDB servers Prisma may require a replica set for certain operations.
+        // Failures here are non-critical for schedule listing, so log and continue.
+        try {
+          const fs = await import('fs')
+          const msg = err instanceof Error ? err.stack || err.message : JSON.stringify(err)
+          fs.appendFileSync('/tmp/widamine-schedule-error.log', `${new Date().toISOString()} - update-expired-appointment-error: ${msg}\n\n`)
+        } catch {}
+      }
+    }
 
     // Handle both Date objects and string dates (from frontend)
     let date: Date
@@ -33,16 +50,9 @@ export class ScheduleService {
       date.getDate() - ((date.getDay() + 6) % 7),
     );
 
-    const user = await this.prismaService.user.findUnique({
-      where: { id: req.user.id },
-      select: { role: true },
-    });
-
-    if (!user) throw new NotAcceptableException("User not found");
-
     const { start, end } = this.getDateRange(date, 6);
     const appointmentFilter =
-      user.role === "DOCTOR"
+      ["DOCTOR", "PRACTITIONER"].includes(req.user.role)
         ? {
             status: {
               in: ACTIVE_APPOINTMENT_STATUSES,
@@ -92,8 +102,16 @@ export class ScheduleService {
         appointment: {
           select: {
             id: true,
+            name: true,
             status: true,
             practitionerId: true,
+            patient: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
             practitioner: {
               select: {
                 id: true,
@@ -111,6 +129,7 @@ export class ScheduleService {
                 id: true,
                 name: true,
                 color: true,
+                duration: true,
               },
             },
           },
@@ -174,10 +193,17 @@ export class ScheduleService {
   }
 
   async getOpenTime(date: Date) {
-    await this.prismaService.appointment.updateMany({
+    // MongoDB requires replica set for transactions, so we use individual updates
+    const expiredAppointments = await this.prismaService.appointment.findMany({
       where: { status: "PENDING", expiresAt: { lte: new Date() } },
-      data: { status: "EXPIRED" },
+      select: { id: true },
     });
+    for (const appt of expiredAppointments) {
+      await this.prismaService.appointment.update({
+        where: { id: appt.id },
+        data: { status: "EXPIRED" },
+      });
+    }
 
     const { start, end } = this.getDateRange(date, 1);
     const records = (await this.prismaService.schedule.findMany({

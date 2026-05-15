@@ -1,5 +1,6 @@
 import api from '@/lib/api'
 import { create } from 'zustand'
+import type { Role } from '@/stores/authStore'
 
 interface User {
   id: number
@@ -7,8 +8,6 @@ interface User {
   email: string
   role: Role
 }
-
-type Role = 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST'
 
 interface UserStoreInterface {
   items: User[]
@@ -22,10 +21,15 @@ interface UserStoreInterface {
   openModal: () => void
   closeModal: () => void
   setOperation: (operation: UserStoreInterface['operation']) => void
+  openCreateModal: () => void
+  openEditModal: (user: User) => void
+  openDeleteModal: (user: User) => void
   fetchItems: () => Promise<void>
   saveItem: () => Promise<void>
   deleteItem: () => Promise<void>
 }
+
+let _closeTimer: ReturnType<typeof setTimeout> | null = null
 
 export const useUsersStore = create<UserStoreInterface>((set, get) => ({
   items: [],
@@ -43,26 +47,39 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
     set({ item: { name: '', email: '', password: '', role: 'RECEPTIONIST' } })
   },
   openModal: () => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
     set({ modalOpen: true })
   },
   closeModal: () => {
     set({ modalOpen: false })
-    setTimeout(() => {
-      get().clearItem()
-    }, 300)
   },
   setOperation: (operation) => {
     set({ operation })
+  },
+  openCreateModal: () => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({ operation: 'create', modalOpen: true, item: { name: '', email: '', password: '', role: 'RECEPTIONIST' } })
+  },
+  openEditModal: (user: User) => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({ operation: 'edit', modalOpen: true, item: { ...user, password: '' } })
+  },
+  openDeleteModal: (user: User) => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({ operation: 'delete', modalOpen: true, item: { ...user, password: '' } })
   },
   fetchItems: async () => {
     const res = await api.get('users')
     set({ items: res.data })
   },
   saveItem: async () => {
+    const item = get().item
     if (get().operation === 'edit') {
-      await api.put('users/' + (get().item as User).id, get().item)
+      const payload = { ...item }
+      if (!payload.password) delete (payload as any).password
+      await api.put('users/' + (item as User).id, payload)
     } else {
-      await api.post('users', get().item)
+      await api.post('users', item)
     }
     get().fetchItems()
     get().closeModal()

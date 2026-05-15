@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsNumber } from "class-validator";
 
 export class CreateResourceDto {
   @IsString()
@@ -16,6 +16,15 @@ export class CreateResourceDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  priority?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  motifIds?: string[];
 }
 
 export class UpdateResourceDto {
@@ -37,4 +46,13 @@ export class UpdateResourceDto {
 
   @IsOptional()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  priority?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  motifIds?: string[];
 }

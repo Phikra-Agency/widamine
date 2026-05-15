@@ -10,5 +10,6 @@ model User {
 enum Role {
     ADMIN
     DOCTOR
+    PRACTITIONER
     RECEPTIONIST
 }

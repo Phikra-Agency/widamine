@@ -13,6 +13,7 @@ interface ScheduleModalStoreInterface {
   close: () => void
   reset: () => void
   restart: () => void
+  loadMotifs: () => Promise<void>
 
   motifs: any[]
   isLoadingMotifs: boolean
@@ -58,9 +59,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
     set({ isOpen: false, date: null, mode: 'create', appointmentId: undefined })
   },
 
-  open: async () => {
-    set({ isOpen: true, step: 1, submitSuccess: false })
-    
+  loadMotifs: async () => {
     set({ isLoadingMotifs: true, motifsError: null })
     try {
       const res = await api.get('services') 
@@ -75,6 +74,10 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
     } finally {
       set({ isLoadingMotifs: false })
     }
+  },
+  open: async () => {
+    set({ isOpen: true, step: 1, submitSuccess: false })
+    await get().loadMotifs()
   },
   close: () => set({ isOpen: false }),
   reset: () => get().restart(),
@@ -115,7 +118,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   isLoadingAvailability: false,
   availabilityError: null,
   loadAvailability: async () => {
-    const { selectedDate, selectedMotif } = get()
+    const { selectedDate, selectedMotif, selectedHour } = get()
     if (!selectedDate || !selectedMotif) return
 
     set({ isLoadingAvailability: true, availabilityError: null })
@@ -125,19 +128,19 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
       const day = String(selectedDate.getDate()).padStart(2, '0')
       const dateStr = `${year}-${month}-${day}`
       
-const res = await api.get('appointments/availability', {
+      const res = await api.get('appointments/availability', {
         params: {
           date: dateStr,
           serviceId: selectedMotif.id
         }
       })
       
-      // New format: [{ time, doctorId, doctorName }]
       const slots = Array.isArray(res.data) ? res.data : []
       const morning: any[] = []
       const afternoon: any[] = []
       const evening: any[] = []
 
+      let hourStillAvailable = false
       slots.forEach((slot: any) => {
         const dateObj = new Date(slot.time)
         const hour = dateObj.getHours()
@@ -147,16 +150,19 @@ const res = await api.get('appointments/availability', {
           startsAt: slot.time,
           doctorId: slot.doctorId,
           doctorName: slot.doctorName,
+          doctorImage: slot.doctorImage,
           available: true,
           capacity: 1
         }
+        if (slot.time === selectedHour) hourStillAvailable = true
         if (hour < 12) morning.push(slotData)
         else if (hour < 17) afternoon.push(slotData)
         else evening.push(slotData)
       })
 
       set({ 
-        availability: { morning, afternoon, evening }
+        availability: { morning, afternoon, evening },
+        selectedHour: hourStillAvailable ? selectedHour : null
       })
     } catch (e: any) {
       set({ availabilityError: 'Erreur de disponibilité' })

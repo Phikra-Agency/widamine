@@ -1,343 +1,710 @@
 import { usePatientStore } from '@/stores/patientsStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, CalendarBlank } from '@phosphor-icons/react'
-import { useEffect, useState } from 'react'
+import { useAuthStore } from '@/stores/authStore'
+import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, CalendarBlank, MagnifyingGlass, CaretDown, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useDebounce } from 'use-debounce'
+import Pagination from '@/components/Pagination'
 
 const GENDER_CONFIG: Record<string, { label: string; color: string }> = {
-  MALE: { label: 'Homme', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-  FEMALE: { label: 'Femme', color: 'bg-pink-50 text-pink-700 border-pink-100' },
-  OTHER: { label: 'Autre', color: 'bg-gray-50 text-gray-700 border-gray-100' },
+  MALE: { label: 'Homme', color: 'bg-blue-50 text-blue-600' },
+  FEMALE: { label: 'Femme', color: 'bg-pink-50 text-pink-600' },
+  OTHER: { label: 'Autre', color: 'bg-gray-50 text-gray-600' },
+}
+
+function getAppointmentStats(patient: any) {
+  const now = new Date().getTime()
+  const appts = patient?.appointments || []
+  const count = appts.length
+
+  let nextDate: Date | null = null
+  let lastDate: Date | null = null
+
+  for (const appt of appts) {
+    const schedule = appt.schedules?.[0]
+    if (!schedule?.datetime) continue
+    const dt = new Date(schedule.datetime).getTime()
+    if (dt >= now && (!nextDate || dt < nextDate.getTime())) {
+      nextDate = new Date(schedule.datetime)
+    }
+    if (dt < now && (!lastDate || dt > lastDate.getTime())) {
+      lastDate = new Date(schedule.datetime)
+    }
+  }
+
+  return { count, nextDate, lastDate }
 }
 
 export default function Patients() {
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerPatient, setDrawerPatient] = useState<any>(null)
+  const items = usePatientStore(state => state.items)
+  const [searchParams] = useSearchParams()
+  const hasOpenedFromUrl = useRef(false)
+
+  const openDrawer = useCallback((patient: any) => {
+    setDrawerPatient(patient)
+    setDrawerOpen(true)
+  }, [])
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false)
+    setDrawerPatient(null)
+  }, [])
+
+  useEffect(() => {
+    const patientId = searchParams.get('patientId')
+    if (!patientId || hasOpenedFromUrl.current) return
+    if (items.length === 0) return
+    hasOpenedFromUrl.current = true
+    const patient = items.find(item => String(item.id) === patientId)
+    if (patient) openDrawer(patient)
+  }, [searchParams, items, openDrawer])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
-      className='h-full'
+      className='bo-page'
     >
-      <div className='space-y-5 relative'>
-        <Heading />
-        <Filters />
-        <div className='relative overflow-hidden rounded-[2rem] border border-secondary/10 bg-white/60 shadow-[0_20px_60px_rgba(10,31,47,0.08)] backdrop-blur-xl'>
-          <Table />
+      <div className='bo-page-inner bo-page-stack'>
+        {/* Ambient background */}
+        <div className='pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-accent/4 blur-3xl' />
+        <div className='pointer-events-none absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/3 blur-3xl' />
+
+        <div className='bo-section-stack flex-shrink-0'>
+          <Heading />
+          <Filters />
+        </div>
+        <div className='bo-surface mt-0 flex-1 min-h-0 flex flex-col'>
+          <Table openDrawer={openDrawer} />
         </div>
       </div>
       <Modal />
       <DeleteModal />
+      <PatientDrawer open={drawerOpen} patient={drawerPatient} onClose={closeDrawer} />
     </motion.div>
   )
 }
 
 function Heading() {
-  const { openModal, setOperation, clearItem } = usePatientStore()
+  const { openCreateModal } = usePatientStore()
+  const { user } = useAuthStore()
+  const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   return (
     <div className='flex items-center justify-between'>
       <div>
-        <h3 className='font-semibold text-2xl text-secondary tracking-tight'>Gestion Des Patients</h3>
-        <p className='text-sm text-secondary/60 mt-1'>Gérez les dossiers de vos patients</p>
+        <h3 className='bo-title'>Gestion Des Patients</h3>
+        <p className='bo-subtitle'>Gérez les dossiers de vos patients</p>
       </div>
-      <button
-        onClick={() => {
-          clearItem()
-          setOperation('create')
-          openModal()
-        }}
-        className='flex gap-2 items-center cursor-pointer bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/25'
-      >
-        <Plus weight='bold' /> Ajouter Un Patient
-      </button>
+      {!isPractitioner && (
+        <button
+          onClick={openCreateModal}
+          className='bo-primary-btn cursor-pointer hover:scale-[1.02]'
+        >
+          <Plus weight='bold' /> Ajouter Un Patient
+        </button>
+      )}
     </div>
   )
 }
 
 function Filters() {
-  const { filters, setFilters } = usePatientStore()
+  const { filters, setFilters, items } = usePatientStore()
+  const cities = useMemo(() => [...new Set(items.map(i => i.city).filter(Boolean))].sort(), [items])
 
   return (
-    <div className='flex gap-4'>
-      <div className='relative flex-1 max-w-md'>
+    <div className='flex flex-wrap gap-3'>
+      <div className='relative flex-1 min-w-[200px] max-w-md'>
+        <MagnifyingGlass size={15} className='absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary/30' />
         <input
           type='text'
           placeholder='Rechercher par nom ou email...'
           value={filters.term}
           onChange={(e) => setFilters({ ...filters, term: e.target.value })}
-          className='w-full bg-white/80 border border-secondary/10 rounded-xl px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 backdrop-blur-sm transition-all'
+          className='bo-input pl-10'
         />
+      </div>
+      <div className='relative min-w-[160px]'>
+        <select
+          value={filters.gender}
+          onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+          className='bo-select'
+        >
+          <option value=''>Tous les genres</option>
+          <option value='MALE'>Homme</option>
+          <option value='FEMALE'>Femme</option>
+          <option value='OTHER'>Autre</option>
+        </select>
+        <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+      </div>
+      <div className='relative min-w-[180px]'>
+        <select
+          value={filters.city}
+          onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+          className='bo-select'
+        >
+          <option value='null'>Toutes les villes</option>
+          {cities.map(city => (
+            <option key={city} value={city}>{city}</option>
+          ))}
+        </select>
+        <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
       </div>
     </div>
   )
 }
 
-function Table() {
-  const { items, filters, fetchItems, setOperation, openModal, setItem } = usePatientStore()
-  const [filtered, setFiltered] = useState(items)
+const PAGE_SIZE = 10
+
+function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
+  const { items, filters, fetchItems, openEditModal, openDeleteModal } = usePatientStore()
+  const { user } = useAuthStore()
+  const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
+  const [currentPage, setCurrentPage] = useState(1)
   const [debouncedFilters] = useDebounce(filters, 300)
 
   useEffect(() => {
     fetchItems()
   }, [])
 
-  useEffect(() => {
-    setFiltered(
-      items.filter(
-        (i) =>
-          i.firstName.toLowerCase().includes(debouncedFilters.term.toLowerCase()) ||
-          i.lastName.toLowerCase().includes(debouncedFilters.term.toLowerCase()) ||
-          i.email.toLowerCase().includes(debouncedFilters.term.toLowerCase())
-      )
-    )
+  const filtered = useMemo(() => {
+    return items.filter((i) => {
+      const term = debouncedFilters.term.toLowerCase()
+      const matchesTerm = !term ||
+        i.firstName.toLowerCase().includes(term) ||
+        i.lastName.toLowerCase().includes(term) ||
+        i.email.toLowerCase().includes(term)
+      const matchesGender = !debouncedFilters.gender || i.gender === debouncedFilters.gender
+      const matchesCity = debouncedFilters.city === 'null' || !debouncedFilters.city || i.city === debouncedFilters.city
+      return matchesTerm && matchesGender && matchesCity
+    })
   }, [items, debouncedFilters])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedFilters])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paged = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
   return (
-    <table className='w-full text-sm'>
-      <thead>
-        <tr className='border-b border-secondary/10'>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60'>Patient</th>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60'>Email</th>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60'>Téléphone</th>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60'>Naissance</th>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60'>Ville</th>
-          <th scope='col' className='px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/60 text-right'>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filtered.length === 0 && (
-          <tr>
-            <td colSpan={6} className='px-6 py-12 text-center'>
-              <div className='flex flex-col items-center gap-3 text-secondary/50'>
-                <div className='w-16 h-16 rounded-2xl bg-secondary/5 flex items-center justify-center'>
-                  <User size={32} className='text-secondary/30' />
-                </div>
-                <p className='text-sm font-medium'>Aucun patient trouvé</p>
-                <p className='text-xs'>Ajoutez un patient pour commencer</p>
-              </div>
-            </td>
-          </tr>
-        )}
-        {filtered.map((item) => {
-          const genderConf = GENDER_CONFIG[item.gender] || GENDER_CONFIG.OTHER
-          return (
-            <tr className='border-b border-secondary/5 hover:bg-white/40 transition-colors' key={item.id}>
-              <td className='px-6 py-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
-                    <User size={20} className='text-primary' />
-                  </div>
-                  <div>
-                    <span className='font-medium text-secondary block'>{item.firstName} {item.lastName}</span>
-                    <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border mt-0.5', genderConf.color)}>{genderConf.label}</span>
-                  </div>
-                </div>
-              </td>
-              <td className='px-6 py-4'>
-                <div className='flex items-center gap-1.5 text-secondary/70'>
-                  <EnvelopeSimple size={14} className='text-secondary/40' />
-                  <span>{item.email}</span>
-                </div>
-              </td>
-              <td className='px-6 py-4'>
-                <div className='flex items-center gap-1.5 text-secondary/70'>
-                  <Phone size={14} className='text-secondary/40' />
-                  <span>{item.phone}</span>
-                </div>
-              </td>
-              <td className='px-6 py-4'>
-                <div className='flex items-center gap-1.5 text-secondary/70'>
-                  <CalendarBlank size={14} className='text-secondary/40' />
-                  <span>{new Date(item.dateOfBirth).toLocaleDateString('fr-FR')}</span>
-                </div>
-              </td>
-              <td className='px-6 py-4'>
-                <div className='flex items-center gap-1.5 text-secondary/70'>
-                  <MapPin size={14} className='text-secondary/40' />
-                  <span>{item.city || '—'}</span>
-                </div>
-              </td>
-              <td className='px-6 py-4'>
-                <div className='flex items-center justify-end gap-1'>
-                  <button
-                    onClick={() => {
-                      setItem(item)
-                      setOperation('edit')
-                      openModal()
-                    }}
-                    className='p-2 rounded-lg text-secondary/60 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200'
-                  >
-                    <Pen size={18} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setItem(item)
-                      setOperation('delete')
-                      openModal()
-                    }}
-                    className='p-2 rounded-lg text-secondary/60 hover:text-red-600 hover:bg-red-50 transition-all duration-200'
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </td>
+    <div className='flex flex-col h-full'>
+      <div className='flex-1 min-h-0 overflow-auto'>
+        <table className='w-full text-sm'>
+          <thead>
+            <tr className='border-b border-black/[0.04] bg-secondary/[0.01]'>
+              <th scope='col' className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Patient</th>
+              <th scope='col' className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Réservations</th>
+              <th scope='col' className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Prochain RDV</th>
+              <th scope='col' className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Dernier RDV</th>
+              <th scope='col' className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-right'>Actions</th>
             </tr>
-          )
-        })}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className='divide-y divide-black/[0.02]'>
+            {paged.length === 0 && (
+              <tr>
+                <td colSpan={5} className='px-6 py-12 text-center'>
+                  <div className='flex flex-col items-center gap-3 text-secondary/40'>
+                    <p className='text-sm font-medium'>Aucun patient trouvé</p>
+                    <p className='text-xs'>Ajoutez un patient pour commencer</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {paged.map((item) => {
+              const genderConf = GENDER_CONFIG[item.gender] || GENDER_CONFIG.OTHER
+              const stats = getAppointmentStats(item)
+              return (
+                <tr
+                  className='group hover:bg-secondary/[0.02] transition-colors cursor-pointer'
+                  key={item.id}
+                  onClick={() => openDrawer(item)}
+                >
+                  <td className='px-6 py-4'>
+                    <div className='flex items-center gap-3'>
+                      <div className='w-8 h-8 rounded-lg bg-secondary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors'>
+                        <User size={16} className='text-secondary/40 group-hover:text-primary transition-colors' />
+                      </div>
+                      <div>
+                        <span className='font-semibold text-secondary block text-sm tracking-tight'>{item.firstName} {item.lastName}</span>
+                        <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider mt-1 border', genderConf.color, 
+                          item.gender === 'MALE' ? 'border-blue-100 bg-blue-50/50' : 
+                          item.gender === 'FEMALE' ? 'border-pink-100 bg-pink-50/50' : 
+                          'border-gray-100 bg-gray-50/50'
+                        )}>{genderConf.label}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4'>
+                    <div className='flex items-center gap-2'>
+                      <span className='inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-lg text-xs font-bold bg-secondary/5 text-secondary/60 border border-black/[0.03]'>
+                        {stats.count}
+                      </span>
+                      <span className='text-[10px] text-secondary/30 font-medium uppercase tracking-wider'>RDV</span>
+                    </div>
+                  </td>
+                  <td className='px-6 py-4'>
+                    {stats.nextDate ? (
+                      <div className='flex items-center gap-2 text-secondary/70'>
+                        <div className='w-7 h-7 rounded-full bg-primary/5 flex items-center justify-center shrink-0'>
+                          <CalendarClock size={14} className='text-primary' />
+                        </div>
+                        <div className='flex flex-col'>
+                          <span className='text-[13px] font-medium'>{stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                          <span className='text-[10px] text-secondary/40 font-medium'>{stats.nextDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className='text-secondary/20 text-xs font-medium'>—</span>
+                    )}
+                  </td>
+                  <td className='px-6 py-4'>
+                    {stats.lastDate ? (
+                      <div className='flex items-center gap-2 text-secondary/50'>
+                        <div className='w-7 h-7 rounded-full bg-secondary/5 flex items-center justify-center shrink-0'>
+                          <CalendarBlank size={14} className='text-secondary/40' />
+                        </div>
+                        <div className='flex flex-col'>
+                          <span className='text-[13px] font-medium'>{stats.lastDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                          <span className='text-[10px] text-secondary/40 font-medium text-left'>{stats.lastDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className='text-secondary/20 text-xs font-medium'>—</span>
+                    )}
+                  </td>
+                  <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}>
+                    <div className='flex items-center justify-end gap-1'>
+                      <button
+                        onClick={() => openDrawer(item)}
+                        className='px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-secondary/60 hover:bg-secondary/5 hover:text-secondary transition-all'
+                      >
+                        Détails
+                      </button>
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'
+                      >
+                        <Pen size={16} />
+                      </button>
+                      {!isPractitioner && (
+                        <button
+                          onClick={() => openDeleteModal(item)}
+                          className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div className='shrink-0 border-t border-black/[0.04] px-4 py-3 bg-white/80 backdrop-blur-sm'>
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      </div>
+    </div>
   )
 }
 
 function Modal() {
-  const { operation, modalOpen, closeModal, item, setItem, saveItem } = usePatientStore()
+  const { operation, modalOpen, closeModal, item, setItem, saveItem, clearItem, setOperation } = usePatientStore()
   const isEdit = operation === 'edit'
+  const isOpen = ['create', 'edit'].includes(operation) && modalOpen
 
   return (
-    <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
-      <div className='absolute inset-0 bg-secondary/40 backdrop-blur-sm transition-opacity duration-300' onClick={closeModal} />
-      <motion.form
-        onSubmit={(e) => {
-          e.preventDefault()
-          saveItem()
-        }}
-        initial={{ opacity: 0, y: 12 }}
-        animate={['create', 'edit'].includes(operation) && modalOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-        transition={{ duration: 0.32 }}
-        className={clsx('relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto rounded-[2rem] border border-white/20 bg-white/95 shadow-[0_40px_100px_rgba(10,31,47,0.25)] backdrop-blur-xl transition-all duration-300', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95')}
-      >
-        <div className='sticky top-0 z-10 border-b border-secondary/10 bg-white/80 backdrop-blur-xl px-6 py-4'>
+    <AnimatePresence
+      onExitComplete={() => { clearItem(); setOperation('create') }}
+    >
+      {isOpen && (
+        <div className='fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4'>
+          <motion.div
+            key='patient-backdrop'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className='absolute inset-0 bg-secondary/30 backdrop-blur-sm'
+            onClick={closeModal}
+          />
+          <motion.form
+            key='patient-form'
+            onSubmit={(e) => {
+              e.preventDefault()
+              saveItem()
+            }}
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className='relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]'
+          >
+        <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'>
           <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier le patient' : 'Nouveau patient'}</h2>
-          <p className='text-sm text-secondary/60 mt-0.5'>{isEdit ? 'Modifiez les informations du patient' : 'Ajoutez un nouveau patient'}</p>
+          <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez les informations du patient' : 'Ajoutez un nouveau patient'}</p>
         </div>
 
         <div className='p-6 space-y-6'>
           <div className='flex items-center justify-center mb-2'>
-            <div className='w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center'>
-              <User size={32} className='text-primary' />
+            <div className='w-14 h-14 rounded-2xl bg-secondary/[0.04] flex items-center justify-center'>
+              <User size={28} className='text-secondary/50' />
             </div>
           </div>
 
           <div className='grid grid-cols-2 gap-5'>
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Prénom</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Prénom</label>
               <input type='text' value={item.firstName} onChange={(e) => setItem({ ...item, firstName: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='Ahmed' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Nom</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom</label>
               <input type='text' value={item.lastName} onChange={(e) => setItem({ ...item, lastName: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='Benali' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Email</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Email</label>
               <input type='email' value={item.email} onChange={(e) => setItem({ ...item, email: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='ahmed@example.com' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Téléphone</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Téléphone</label>
               <input type='text' value={item.phone} onChange={(e) => setItem({ ...item, phone: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='+212600000000' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Date de naissance</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Date de naissance</label>
               <input type='date' value={item.dateOfBirth} onChange={(e) => setItem({ ...item, dateOfBirth: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all' />
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Genre</label>
-              <select value={item.gender} onChange={(e) => setItem({ ...item, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer'>
-                <option value='MALE'>Homme</option>
-                <option value='FEMALE'>Femme</option>
-                <option value='OTHER'>Autre</option>
-              </select>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Genre</label>
+              <div className='relative'>
+                <select value={item.gender} onChange={(e) => setItem({ ...item, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                  className='w-full rounded-lg border border-black/[0.06] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer appearance-none'>
+                  <option value='MALE'>Homme</option>
+                  <option value='FEMALE'>Femme</option>
+                  <option value='OTHER'>Autre</option>
+                </select>
+                <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+              </div>
             </div>
 
             <div className='col-span-2 space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Adresse</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Adresse</label>
               <input type='text' value={item.address} onChange={(e) => setItem({ ...item, address: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='123 Rue Mohammed V' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Ville</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Ville</label>
               <input type='text' value={item.city} onChange={(e) => setItem({ ...item, city: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='Casablanca' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Code postal</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Code postal</label>
               <input type='text' value={item.postalCode} onChange={(e) => setItem({ ...item, postalCode: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='20000' />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Pays</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Pays</label>
               <input type='text' value={item.country} onChange={(e) => setItem({ ...item, country: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='Maroc' />
             </div>
 
             <div className='col-span-2 space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wider text-secondary/60'>Antécédents médicaux</label>
+              <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Antécédents médicaux</label>
               <textarea value={item.medicalHistory || ''} onChange={(e) => setItem({ ...item, medicalHistory: e.target.value })}
-                className='w-full rounded-xl border border-secondary/10 bg-white/80 px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
                 placeholder='Notes sur les antécédents médicaux...'
                 rows={3} />
             </div>
           </div>
         </div>
 
-        <div className='sticky bottom-0 border-t border-secondary/10 bg-white/80 backdrop-blur-xl px-6 py-4 flex gap-3 justify-end'>
+        <div className='sticky bottom-0 border-t border-black/[0.04] bg-white px-6 py-4 flex gap-3 justify-end'>
           <button onClick={closeModal} type='button'
-            className='px-5 py-2.5 rounded-xl text-sm font-medium text-secondary/70 hover:text-secondary hover:bg-secondary/5 transition-all duration-200'>
+            className='px-5 py-2.5 rounded-lg text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/5 transition-all duration-200'>
             Annuler
           </button>
           <button type='submit'
-            className='px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-200 hover:scale-[1.02]'>
+            className='px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/12 transition-all duration-200'>
             {isEdit ? 'Enregistrer' : 'Créer le patient'}
           </button>
         </div>
-      </motion.form>
-    </div>
+          </motion.form>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }
 
 function DeleteModal() {
-  const { operation, modalOpen, closeModal, deleteItem } = usePatientStore()
+  const { operation, modalOpen, closeModal, deleteItem, clearItem, setOperation } = usePatientStore()
+  const isOpen = operation === 'delete' && modalOpen
+
   return (
-    <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', operation === 'delete' && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
-      <div className='absolute inset-0 bg-secondary/40 backdrop-blur-sm transition-opacity duration-300' onClick={closeModal} />
-      <div className={clsx('relative w-full max-w-md rounded-[2rem] border border-white/20 bg-white/95 shadow-[0_40px_100px_rgba(10,31,47,0.25)] backdrop-blur-xl transition-all duration-300', operation === 'delete' && modalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95')}>
-        <div className='p-6 text-center'>
-          <div className='mx-auto w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4'>
-            <Trash2 size={28} className='text-red-500' />
-          </div>
-          <h2 className='text-lg font-semibold text-secondary'>Supprimer ce patient ?</h2>
-          <p className='text-sm text-secondary/60 mt-2'>Cette action est irréversible. Le patient sera définitivement supprimé.</p>
+    <AnimatePresence
+      onExitComplete={() => { clearItem(); setOperation('create') }}
+    >
+      {isOpen && (
+        <div className='fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4'>
+          <motion.div
+            key='patient-delete-backdrop'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className='absolute inset-0 bg-secondary/30 backdrop-blur-sm'
+            onClick={closeModal}
+          />
+          <motion.div
+            key='patient-delete-dialog'
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className='relative w-full max-w-md rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]'
+          >
+            <div className='p-6 text-center'>
+              <div className='mx-auto w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4'>
+                <Trash2 size={26} className='text-red-500' />
+              </div>
+              <h2 className='text-lg font-semibold text-secondary'>Supprimer ce patient ?</h2>
+              <p className='text-sm text-secondary/50 mt-2'>Cette action est irréversible. Le patient sera définitivement supprimé.</p>
+            </div>
+            <div className='border-t border-black/[0.04] px-6 py-4 flex gap-3 justify-end'>
+              <button onClick={closeModal} className='px-5 py-2.5 rounded-lg text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/5 transition-all duration-200'>
+                Annuler
+              </button>
+              <button onClick={deleteItem} className='px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/25 transition-all duration-200'>
+                Supprimer
+              </button>
+            </div>
+          </motion.div>
         </div>
-        <div className='border-t border-secondary/10 px-6 py-4 flex gap-3 justify-end'>
-          <button onClick={closeModal} className='px-5 py-2.5 rounded-xl text-sm font-medium text-secondary/70 hover:text-secondary hover:bg-secondary/5 transition-all duration-200'>
-            Annuler
-          </button>
-          <button onClick={deleteItem} className='px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/25 transition-all duration-200 hover:scale-[1.02]'>
-            Supprimer
-          </button>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any; onClose: () => void }) {
+  const { openEditModal } = usePatientStore()
+  const { user } = useAuthStore()
+  const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
+
+  const appts = useMemo(() => {
+    if (!patient?.appointments) return { upcoming: [], past: [] }
+    const now = new Date().getTime()
+    const list = patient.appointments.map((a: any) => {
+      const dt = a.schedules?.[0]?.datetime ? new Date(a.schedules[0].datetime).getTime() : 0
+      return { ...a, _dt: dt }
+    }).sort((a: any, b: any) => b._dt - a._dt)
+    return {
+      upcoming: list.filter((a: any) => a._dt >= now),
+      past: list.filter((a: any) => a._dt < now),
+    }
+  }, [patient])
+
+  const drawerMotion = {
+    overlay: {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.18 },
+    },
+    panel: {
+      initial: { x: 24, opacity: 0 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: 24, opacity: 0 },
+      transition: { type: 'spring' as const, damping: 28, stiffness: 360 },
+    },
+  }
+
+  return (
+    <AnimatePresence>
+      {open && patient && (
+        <div className='fixed inset-0 z-50'>
+          <motion.div
+            {...drawerMotion.overlay}
+            className='absolute inset-0 bg-black/25'
+            onClick={onClose}
+          />
+
+          <motion.div
+            {...drawerMotion.panel}
+            className='absolute right-0 top-0 h-full w-full max-w-[520px] bg-white border-l border-black/[0.06] flex flex-col'
+          >
+            <div className='shrink-0 px-5 py-4 border-b border-black/[0.06] flex items-start justify-between gap-3'>
+              <div className='min-w-0'>
+                <p className='text-[11px] uppercase tracking-[0.22em] text-secondary/40'>Dossier patient</p>
+                <p className='text-base font-medium text-secondary truncate'>
+                  {patient.firstName} {patient.lastName}
+                </p>
+                <div className='flex items-center gap-2 mt-0.5'>
+                  <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium', (GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).color)}>
+                    {(GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).label}
+                  </span>
+                  {patient.dateOfBirth && (
+                    <span className='text-xs text-secondary/50'>
+                      Né(e) le {new Date(patient.dateOfBirth).toLocaleDateString('fr-FR')}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className='shrink-0 w-9 h-9 rounded-lg border border-black/[0.06] flex items-center justify-center hover:bg-secondary/[0.02] transition-colors'
+              >
+                <X size={16} className='text-secondary/60' />
+              </button>
+            </div>
+
+            <div className='flex-1 min-h-0 overflow-auto px-5 py-4 space-y-4'>
+              {/* Contact */}
+              <div className='rounded-xl border border-black/[0.06] p-4 space-y-2'>
+                <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Contact</p>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><EnvelopeSimple size={12} /> Email</span>
+                  <span className='text-xs text-secondary/70'>{patient.email || '—'}</span>
+                </div>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><Phone size={12} /> Téléphone</span>
+                  <span className='text-xs text-secondary/70'>{patient.phone || '—'}</span>
+                </div>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><MapPin size={12} /> Adresse</span>
+                  <span className='text-xs text-secondary/70'>{[patient.address, patient.city, patient.postalCode, patient.country].filter(Boolean).join(', ') || '—'}</span>
+                </div>
+              </div>
+
+              {/* Medical history */}
+              {patient.medicalHistory && (
+                <div className='rounded-xl border border-black/[0.06] p-4'>
+                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Antécédents médicaux</p>
+                  <p className='text-sm text-secondary/70 leading-relaxed'>{patient.medicalHistory}</p>
+                </div>
+              )}
+
+              {/* Upcoming appointments */}
+              {appts.upcoming.length > 0 && (
+                <div className='rounded-xl border border-black/[0.06] p-4'>
+                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Rendez-vous à venir ({appts.upcoming.length})</p>
+                  <div className='space-y-2'>
+                    {appts.upcoming.map((a: any) => (
+                      <div key={a.id} className='flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/[0.02]'>
+                        <div className='min-w-0 flex-1'>
+                          <p className='text-sm text-secondary truncate font-medium'>{a.name}</p>
+                          <div className='flex items-center gap-2 mt-0.5 text-[11px] text-secondary/40'>
+                            {a.service && <span>{a.service.name}</span>}
+                            <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium',
+                              a.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-600' :
+                              a.status === 'PENDING' ? 'bg-amber-50 text-amber-600' :
+                              a.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
+                              'bg-secondary/[0.04] text-secondary/40'
+                            )}>
+                              {a.status === 'CONFIRMED' ? 'Confirmé' : a.status === 'PENDING' ? 'En attente' : a.status === 'CANCELLED' ? 'Annulé' : a.status}
+                            </span>
+                          </div>
+                        </div>
+                        <span className='text-xs text-primary font-medium shrink-0'>
+                          {a.schedules?.[0]?.datetime
+                            ? new Date(a.schedules[0].datetime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' ' +
+                              new Date(a.schedules[0].datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                            : '—'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Past appointments */}
+              {appts.past.length > 0 && (
+                <div className='rounded-xl border border-black/[0.06] p-4'>
+                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Historique ({appts.past.length})</p>
+                  <div className='space-y-2'>
+                    {appts.past.slice(0, 8).map((a: any) => (
+                      <div key={a.id} className='flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/[0.02]'>
+                        <div className='min-w-0 flex-1'>
+                          <p className='text-sm text-secondary truncate font-medium'>{a.name}</p>
+                          <div className='flex items-center gap-2 mt-0.5 text-[11px] text-secondary/40'>
+                            {a.service && <span>{a.service.name}</span>}
+                            <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium',
+                              a.status === 'COMPLETED' ? 'bg-sky-50 text-sky-600' :
+                              a.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-600' :
+                              a.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
+                              'bg-secondary/[0.04] text-secondary/40'
+                            )}>
+                              {a.status === 'COMPLETED' ? 'Terminé' : a.status === 'CONFIRMED' ? 'Confirmé' : a.status === 'CANCELLED' ? 'Annulé' : a.status}
+                            </span>
+                          </div>
+                        </div>
+                        <span className='text-xs text-secondary/50 font-medium shrink-0'>
+                          {a.schedules?.[0]?.datetime
+                            ? new Date(a.schedules[0].datetime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                            : '—'}
+                        </span>
+                      </div>
+                    ))}
+                    {appts.past.length > 8 && (
+                      <p className='text-xs text-secondary/40 text-center pt-1'>+ {appts.past.length - 8} résultats précédents</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {appts.upcoming.length === 0 && appts.past.length === 0 && (
+                <div className='rounded-xl border border-black/[0.06] p-6 text-center'>
+                  <p className='text-sm text-secondary/40'>Aucun rendez-vous lié à ce patient</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className='pt-2 flex items-center gap-2'>
+                {!isPractitioner && (
+                  <button
+                    onClick={() => { onClose(); openEditModal(patient); }}
+                    className='flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors'
+                  >
+                    Modifier
+                  </button>
+                )}
+                <Link
+                  to='/back-office/calendar'
+                  className='flex-1 inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-lg text-sm font-medium border border-black/[0.06] text-secondary hover:bg-secondary/[0.02] transition-colors'
+                >
+                  Calendrier <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   )
 }

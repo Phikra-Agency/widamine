@@ -46,7 +46,7 @@ interface Appointment {
 interface AppointmentStoreInterface {
   items: Appointment[]
   item: Appointment
-  filters: { term: string }
+  filters: { term: string; status: string }
   openShowModal: boolean
   loadingItem: boolean
   savingScheduleSessionId: number | null
@@ -62,7 +62,7 @@ interface AppointmentStoreInterface {
 export const useAppointmentsStore = create<AppointmentStoreInterface>((set, get) => ({
   items: [],
   item: {} as Appointment,
-  filters: { term: '' },
+  filters: { term: '', status: '' },
   openShowModal: false,
   loadingItem: false,
   savingScheduleSessionId: null,

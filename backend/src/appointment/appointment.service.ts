@@ -18,6 +18,7 @@ export class AppointmentService {
     motifId?: string;
     practitionerId?: string;
     resourceId?: string;
+    datetime?: string;
   }) {
     // Find or create patient by phone
     const patient = await this.patientService.findOrCreateByPhone({
@@ -27,7 +28,26 @@ export class AppointmentService {
       phone: data.phone,
     });
 
-    return this.prisma.appointment.create({
+    // Find the first session for this service, or create a default one
+    let session = await this.prisma.session.findFirst({
+      where: { serviceId: data.serviceId },
+      orderBy: { number: 'asc' },
+    });
+
+    if (!session) {
+      const sessionCount = await this.prisma.session.count({
+        where: { serviceId: data.serviceId },
+      });
+      session = await this.prisma.session.create({
+        data: {
+          serviceId: data.serviceId,
+          number: sessionCount + 1,
+          duration: 30,
+        },
+      });
+    }
+
+    const appointment = await this.prisma.appointment.create({
       data: {
         name: data.name,
         email: data.email,
@@ -40,17 +60,46 @@ export class AppointmentService {
         resourceId: data.resourceId,
         status: "PENDING",
       },
-      include: { 
-        service: true, 
-        motif: true, 
+      include: {
+        service: true,
+        motif: true,
         practitioner: true,
         patient: true,
       },
     });
+
+    // Create schedule if datetime is provided
+    if (data.datetime) {
+      await this.prisma.schedule.create({
+        data: {
+          datetime: new Date(data.datetime),
+          sessionId: session.id,
+          appointmentId: appointment.id,
+        },
+      });
+    }
+
+    return appointment;
   }
 
   async findAll() {
     return this.prisma.appointment.findMany({
+      include: {
+        service: true,
+        motif: true,
+        practitioner: true,
+        patient: true,
+        resource: true,
+        schedules: true,
+        notifications: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findByPractitioner(practitionerId: string) {
+    return this.prisma.appointment.findMany({
+      where: { practitionerId },
       include: {
         service: true,
         motif: true,
@@ -96,6 +145,11 @@ export class AppointmentService {
       completedAt: Date;
     }>,
   ) {
+    const now = new Date();
+    if (data.status === "CONFIRMED" && !data.confirmedAt) data.confirmedAt = now;
+    if (data.status === "CANCELLED" && !data.cancelledAt) data.cancelledAt = now;
+    if (data.status === "COMPLETED" && !data.completedAt) data.completedAt = now;
+
     return this.prisma.appointment.update({
       where: { id },
       data,
@@ -181,17 +235,25 @@ export class AppointmentService {
     // Get doctors for display
     const doctors = await this.prisma.user.findMany({
       where: { id: { in: allowedDoctorIds } },
-      select: { id: true, name: true },
+      select: { id: true, name: true, image: true },
     });
-    const doctorMap = new Map(doctors.map(d => [d.id, d.name]));
+    const doctorMap = new Map(doctors.map(d => [d.id, { name: d.name, image: d.image }]));
+
+    // Generate avatar URL from initials when no image
+    const initialsAvatar = (name: string) => {
+      const initials = name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2e90c0&color=fff&size=128`;
+    };
 
     // Generate slots: for each doctor, check if they have conflicts
-    const slots: { time: string; doctorId: string; doctorName: string }[] = [];
+    const slots: { time: string; doctorId: string; doctorName: string; doctorImage: string | null }[] = [];
     const duration = service.sessions[0]?.duration || 30;
 
     for (const doctorId of allowedDoctorIds) {
-      const doctorName = doctorMap.get(doctorId) || 'Unknown';
-      
+      const doctor = doctorMap.get(doctorId) ?? { name: 'Unknown', image: null };
+      const doctorName = typeof doctor === 'string' ? doctor : doctor.name;
+      const doctorImage = typeof doctor === 'string' ? null : doctor.image;
+
       for (let hour = 9; hour < 18; hour++) {
         for (let min = 0; min < 60; min += duration) {
           const slotTime = new Date(date);
@@ -213,6 +275,7 @@ export class AppointmentService {
               time: slotTime.toISOString(),
               doctorId,
               doctorName,
+              doctorImage: doctorImage || initialsAvatar(doctorName),
             });
           }
         }

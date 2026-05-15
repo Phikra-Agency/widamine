@@ -67,16 +67,47 @@ export class PatientService {
       include: {
         appointments: {
           orderBy: { createdAt: "desc" },
-          take: 5,
-          select: {
-            id: true,
-            name: true,
-            status: true,
-            createdAt: true,
+          include: {
             service: { select: { name: true } },
+            schedules: true,
           },
         },
       },
+    });
+  }
+
+  async findByPractitioner(practitionerId: string) {
+    return this.prismaService.patient.findMany({
+      where: {
+        appointments: {
+          some: { practitionerId },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        appointments: {
+          where: { practitionerId },
+          orderBy: { createdAt: "desc" },
+          include: {
+            service: { select: { name: true } },
+            schedules: true,
+          },
+        },
+      },
+    });
+  }
+
+  async isPatientOfDoctor(patientId: string, practitionerId: string): Promise<boolean> {
+    const count = await this.prismaService.appointment.count({
+      where: { patientId, practitionerId },
+    });
+    return count > 0;
+  }
+
+  async updateMedicalHistory(id: string, medicalHistory: string | undefined) {
+    return this.prismaService.patient.update({
+      where: { id },
+      data: { medicalHistory: medicalHistory ?? null },
     });
   }
 

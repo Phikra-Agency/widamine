@@ -6,9 +6,13 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from "@nestjs/common";
 import { MotifService } from "./motif.service";
+import { AuthGuard } from "@/auth/auth.guard";
+import { RoleGuard } from "@/auth/role.guard";
 
+@UseGuards(AuthGuard)
 @Controller("motifs")
 export class MotifController {
   constructor(private readonly motifService: MotifService) {}
@@ -24,6 +28,7 @@ export class MotifController {
   }
 
   @Post()
+  @UseGuards(RoleGuard("ADMIN"))
   create(
     @Body()
     data: {
@@ -39,11 +44,13 @@ export class MotifController {
   }
 
   @Put(":id")
+  @UseGuards(RoleGuard("ADMIN"))
   update(@Param("id") id: string, @Body() data: any) {
     return this.motifService.update(id, data);
   }
 
   @Delete(":id")
+  @UseGuards(RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
     return this.motifService.remove(id);
   }

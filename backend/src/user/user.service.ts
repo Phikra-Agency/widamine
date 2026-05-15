@@ -32,7 +32,7 @@ export class UserService {
 
   async findDoctors() {
     return this.prismaService.user.findMany({
-      where: { role: "DOCTOR" },
+      where: { role: { in: ["DOCTOR", "PRACTITIONER"] } },
       select: { id: true, name: true },
     });
   }
@@ -49,8 +49,10 @@ export class UserService {
       const data: any = { ...updateUserDto };
       if (updateUserDto.password) {
         data.password = await bcrypt.hash(updateUserDto.password, 12);
+      } else {
+        delete data.password;
       }
-      await this.prismaService.user.update({
+      return await this.prismaService.user.update({
         where: { id },
         data,
         select: { id: true, name: true, email: true, role: true, admin: true },
@@ -60,6 +62,7 @@ export class UserService {
         throw new ConflictException(
           "A user with the same email is already registered",
         );
+      throw e;
     }
   }
 

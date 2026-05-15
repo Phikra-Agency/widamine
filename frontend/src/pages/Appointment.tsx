@@ -5,11 +5,12 @@ import { ShieldCheck, Clock as Clock3, Sparkle as Sparkles } from '@phosphor-ico
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 
 export default function Appointment() {
-	const { restart, motifs } = useScheduleModalStore()
+	const { restart, motifs, loadMotifs } = useScheduleModalStore()
 
 	useEffect(() => {
 		restart()
-	}, [restart])
+		void loadMotifs()
+	}, [loadMotifs, restart])
 
 	return (
 		<div className='bg-custom-white'>

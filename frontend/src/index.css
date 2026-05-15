@@ -26,3 +26,49 @@
 		@apply py-2 xl:py-10 2xl:py-40;
 	}
 }
+
+@layer components {
+	.bo-page {
+		@apply h-full overflow-hidden bg-[#fafafa];
+	}
+
+	.bo-page-scroll {
+		@apply h-full overflow-auto bg-[#fafafa];
+	}
+
+	.bo-page-inner {
+		@apply relative h-full p-4 sm:p-5 lg:p-6;
+	}
+
+	.bo-page-stack {
+		@apply relative flex h-full min-h-0 flex-col gap-4;
+	}
+
+	.bo-section-stack {
+		@apply relative space-y-4;
+	}
+
+	.bo-surface {
+		@apply relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)];
+	}
+
+	.bo-title {
+		@apply font-semibold text-2xl text-secondary tracking-tight;
+	}
+
+	.bo-subtitle {
+		@apply mt-1 text-sm text-secondary/60;
+	}
+
+	.bo-primary-btn {
+		@apply flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-white shadow-lg shadow-primary/10 transition-all duration-200 hover:bg-primary/90;
+	}
+
+	.bo-input {
+		@apply w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
+	}
+
+	.bo-select {
+		@apply w-full appearance-none rounded-lg border border-black/[0.06] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
+	}
+}

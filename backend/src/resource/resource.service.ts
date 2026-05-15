@@ -10,16 +10,43 @@ export class ResourceService {
     slug: string;
     type: string;
     description?: string;
+    priority?: number;
+    motifIds?: string[];
   }) {
-    return this.prisma.resource.create({ data: data as any });
+    const { name, slug, type, description, priority, motifIds } = data;
+    return this.prisma.resource.create({
+      data: {
+        name,
+        slug,
+        type,
+        description,
+        priority: priority || 0,
+        motifAssignments: motifIds
+          ? {
+              create: motifIds.map((motifId) => ({
+                motifId,
+              })),
+            }
+          : undefined,
+      },
+    });
   }
 
   async findAll() {
-    return this.prisma.resource.findMany();
+    return this.prisma.resource.findMany({
+      include: {
+        motifAssignments: true,
+      },
+    });
   }
 
   async findOne(id: string) {
-    return this.prisma.resource.findUnique({ where: { id } as any });
+    return this.prisma.resource.findUnique({
+      where: { id },
+      include: {
+        motifAssignments: true,
+      },
+    });
   }
 
   async update(
@@ -30,9 +57,30 @@ export class ResourceService {
       type?: string;
       description?: string;
       isActive?: boolean;
+      motifIds?: string[];
+      priority?: number;
     },
   ) {
-    return this.prisma.resource.update({ where: { id } as any, data: data as any });
+    const { name, slug, type, description, isActive, motifIds, priority } = data;
+    return this.prisma.resource.update({
+      where: { id },
+      data: {
+        name,
+        slug,
+        type,
+        description,
+        isActive,
+        priority,
+        motifAssignments: motifIds
+          ? {
+              deleteMany: {},
+              create: motifIds.map((motifId) => ({
+                motifId,
+              })),
+            }
+          : undefined,
+      },
+    });
   }
 
   async remove(id: string) {

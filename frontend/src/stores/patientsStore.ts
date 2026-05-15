@@ -3,6 +3,15 @@ import { create } from 'zustand'
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 
+interface PatientAppointment {
+  id: string
+  name: string
+  status: string
+  createdAt: string
+  service?: { name: string }
+  schedules?: { id: string; datetime: string }[]
+}
+
 interface Patient {
   id: number
   firstName: string
@@ -18,6 +27,7 @@ interface Patient {
   medicalHistory?: string
   createdAt: string
   updatedAt: string
+  appointments?: PatientAppointment[]
 }
 
 interface PatientStoreInterface {
@@ -25,17 +35,22 @@ interface PatientStoreInterface {
   item: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>
   operation: 'create' | 'edit' | 'delete'
   modalOpen: boolean
-  filters: { term: string }
+  filters: { term: string; gender: string; city: string }
   setFilters: (filters: PatientStoreInterface['filters']) => void
   setItem: (item: PatientStoreInterface['item']) => void
   clearItem: () => void
   openModal: () => void
   closeModal: () => void
   setOperation: (operation: PatientStoreInterface['operation']) => void
+  openCreateModal: () => void
+  openEditModal: (patient: Patient) => void
+  openDeleteModal: (patient: Patient) => void
   fetchItems: () => Promise<void>
   saveItem: () => Promise<void>
   deleteItem: () => Promise<void>
 }
+
+let _closeTimer: ReturnType<typeof setTimeout> | null = null
 
 export const usePatientStore = create<PatientStoreInterface>((set, get) => ({
   items: [],
@@ -54,7 +69,7 @@ export const usePatientStore = create<PatientStoreInterface>((set, get) => ({
   },
   operation: 'create' as PatientStoreInterface['operation'],
   modalOpen: false,
-  filters: { term: '' },
+  filters: { term: '', gender: '', city: 'null' },
   setFilters(filters) {
     set({ filters })
   },
@@ -79,16 +94,63 @@ export const usePatientStore = create<PatientStoreInterface>((set, get) => ({
     })
   },
   openModal: () => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
     set({ modalOpen: true })
   },
   closeModal: () => {
     set({ modalOpen: false })
-    setTimeout(() => {
-      get().clearItem()
-    }, 300)
   },
   setOperation: (operation) => {
     set({ operation })
+  },
+  openCreateModal: () => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({ operation: 'create', modalOpen: true, item: {
+      firstName: '', lastName: '', email: '', phone: '', dateOfBirth: '',
+      gender: 'MALE', address: '', city: '', postalCode: '', country: '', medicalHistory: '',
+    }})
+  },
+  openEditModal: (patient: Patient) => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({
+      operation: 'edit',
+      modalOpen: true,
+      item: {
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phone: patient.phone,
+        dateOfBirth: patient.dateOfBirth ? patient.dateOfBirth.slice(0, 10) : '',
+        gender: patient.gender,
+        address: patient.address,
+        city: patient.city,
+        postalCode: patient.postalCode,
+        country: patient.country,
+        medicalHistory: patient.medicalHistory || '',
+        id: patient.id,
+      } as any
+    })
+  },
+  openDeleteModal: (patient: Patient) => {
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null }
+    set({
+      operation: 'delete',
+      modalOpen: true,
+      item: {
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phone: patient.phone,
+        dateOfBirth: patient.dateOfBirth,
+        gender: patient.gender,
+        address: patient.address,
+        city: patient.city,
+        postalCode: patient.postalCode,
+        country: patient.country,
+        medicalHistory: patient.medicalHistory || '',
+        id: patient.id,
+      } as any
+    })
   },
   fetchItems: async () => {
     const res = await api.get('patients')

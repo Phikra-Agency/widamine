@@ -19,9 +19,11 @@ async function main() {
   await prisma.motifResource.deleteMany()
   await prisma.motif.deleteMany()
   await prisma.session.deleteMany()
+  await prisma.resourcePractitioner.deleteMany()
   await prisma.resource.deleteMany()
   await prisma.service.deleteMany()
   await prisma.category.deleteMany()
+  await prisma.contact.deleteMany()
   await prisma.user.deleteMany()
 
   // 1. USERS - Admin, Doctors, Receptionists
@@ -66,6 +68,27 @@ async function main() {
     },
   })
 
+  // Additional test accounts requested
+  const doctor4 = await prisma.user.create({
+    data: {
+      name: 'Dr. Test',
+      email: 'drtest@widamine.com',
+      password: await hashedPassword('drtest@widamine.com'),
+      role: 'DOCTOR',
+      admin: false,
+    },
+  })
+
+  const prtest = await prisma.user.create({
+    data: {
+      name: 'Pr. Test',
+      email: 'prtest@widamine.com',
+      password: await hashedPassword('prtest@widamine.com'),
+      role: 'DOCTOR',
+      admin: false,
+    },
+  })
+
   const receptionist1 = await prisma.user.create({
     data: {
       name: 'SALMA Reception',
@@ -86,7 +109,10 @@ async function main() {
     },
   })
 
-  console.log(`✅ Created ${5} users`)
+  console.log(`✅ Created ${8} users`)
+
+  // Aggregate doctors/practitioners for later linking
+  const doctors = [doctor1, doctor2, doctor3, doctor4, prtest]
 
   // 2. CATEGORIES
   console.log('Creating categories...')
@@ -430,13 +456,128 @@ async function main() {
 
   console.log(`✅ Created ${resources.length} resources`)
 
+  // 6b. RESOURCE-PRACTITIONER links
+  console.log('Linking resources to practitioners...')
+  for (const resource of resources) {
+    // All doctors can use consultation and treatment rooms
+    if (resource.type === 'CONSULTATION' || resource.type === 'TREATMENT') {
+      for (const doctor of doctors) {
+        await prisma.resourcePractitioner.create({
+          data: {
+            resourceId: resource.id,
+            practitionerId: doctor.id,
+            priority: resource.priority,
+            isActive: true,
+          },
+        })
+      }
+    }
+    // Only specific doctors for laser and surgery
+    if (resource.type === 'LASER') {
+      for (const doctor of [doctor2, doctor3, doctor4, prtest]) {
+        await prisma.resourcePractitioner.create({
+          data: {
+            resourceId: resource.id,
+            practitionerId: doctor.id,
+            priority: 1,
+            isActive: true,
+          },
+        })
+      }
+    }
+    if (resource.type === 'SURGERY' || resource.type === 'RECOVERY') {
+      for (const doctor of [doctor1, doctor2, doctor4, prtest]) {
+        await prisma.resourcePractitioner.create({
+          data: {
+            resourceId: resource.id,
+            practitionerId: doctor.id,
+            priority: 1,
+            isActive: true,
+          },
+        })
+      }
+    }
+  }
+  console.log('✅ Linked resources to practitioners')
+
+  // 6c. MOTIF-PRACTITIONER links
+  console.log('Linking motifs to practitioners...')
+  for (const motif of motifs) {
+    // Find which service this motif belongs to, then assign the allowed doctors
+    const motifService = services.find(s => s.id === motif.serviceId)
+    if (motifService) {
+      for (const doctorId of motifService.allowedDoctorIds) {
+        await prisma.motifPractitioner.create({
+          data: {
+            motifId: motif.id,
+            practitionerId: doctorId,
+            priority: doctorId === motifService.primaryDoctorId ? 1 : 0,
+            isPreferred: doctorId === motifService.primaryDoctorId,
+            isActive: true,
+          },
+        })
+      }
+    }
+  }
+  console.log('✅ Linked motifs to practitioners')
+
+  // 6d. MOTIF-RESOURCE links
+  console.log('Linking motifs to resources...')
+  for (const motif of motifs) {
+    const motifService = services.find(s => s.id === motif.serviceId)
+    if (!motifService) continue
+
+    // Assign appropriate rooms based on motif type
+    if (motif.bookingType === 'CONSULTATION' || motif.bookingType === 'FOLLOWUP') {
+      // Consultation motifs → consultation rooms
+      const consultationRooms = resources.filter(r => r.type === 'CONSULTATION')
+      for (const room of consultationRooms) {
+        await prisma.motifResource.create({
+          data: {
+            motifId: motif.id,
+            resourceId: room.id,
+            priority: room.priority,
+            isRequired: false,
+          },
+        })
+      }
+    } else if (motif.bookingType === 'TREATMENT') {
+      // Treatment motifs → treatment rooms + laser if applicable
+      const treatmentRooms = resources.filter(r => r.type === 'TREATMENT' || (r.type === 'LASER' && motif.name.toLowerCase().includes('laser')))
+      for (const room of treatmentRooms) {
+        await prisma.motifResource.create({
+          data: {
+            motifId: motif.id,
+            resourceId: room.id,
+            priority: room.priority,
+            isRequired: false,
+          },
+        })
+      }
+    } else if (motif.bookingType === 'URGENCY') {
+      // Urgency → any available room
+      const urgentRooms = resources.filter(r => r.type === 'CONSULTATION' || r.type === 'TREATMENT')
+      for (const room of urgentRooms.slice(0, 2)) {
+        await prisma.motifResource.create({
+          data: {
+            motifId: motif.id,
+            resourceId: room.id,
+            priority: room.priority,
+            isRequired: false,
+          },
+        })
+      }
+    }
+  }
+  console.log('✅ Linked motifs to resources')
+
   // 7. PATIENTS - Create many patients
   console.log('Creating patients...')
   const firstNames = ['Fatima', 'Karim', 'Sofia', 'Youssef', 'Nadia', 'Omar', 'Aicha', 'Hassan', 'Laila', 'Mehdi', 'Samira', 'Amine', 'Zineb', 'Khalid', 'Rajae', 'Hamza', 'Ikram', 'Yassin', 'Bouchra', 'Adil', 'Hanane', 'Mohamed', 'Asmae', 'Rachid', 'Kawtar', 'Imane', 'Saad', 'Dounia', 'Nabil', 'Fatiha']
   const lastNames = ['EL ALAOUI', 'BENNANI', 'CHRAIBI', 'EL FASSI', 'BENJELLOUN', 'TAZI', 'SEBTI', 'KADI', 'ALAMI', 'FILALI', 'LAHMAR', 'MAHMOUDI', 'ZEROUALI', 'DRIOUCH', 'SAADI', 'MANSOURI', 'HASSANI', 'IDRISI', 'NACIRI', 'OULAD', 'RAISSOUNI', 'SBAI', 'TALBI', 'WAHBI', 'YOUSSEFI', 'ZAHIRI', 'AMRANI', 'BOUZIDI', 'DAHBI', 'EL HACHIMI']
 
   const patients: any[] = []
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 120; i++) {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
     const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
     const phone = `06${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`
@@ -461,75 +602,130 @@ async function main() {
 
   console.log(`✅ Created ${patients.length} patients`)
 
-  // 8. APPOINTMENTS - Create appointments for today only for debugging
+  // 8. APPOINTMENTS - Create a massive number of appointments across 2 weeks
   console.log('Creating appointments (rendez-vous)...')
-  const statuses = ['PENDING', 'CONFIRMED'] as const // Only active statuses
+  const allStatuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'] as const
 
   const appointments: any[] = []
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-  // Create 8 appointments for today - ALL in morning slot (09:00-13:00)
-  for (let i = 0; i < 8; i++) {
-    const patient = patients[Math.floor(Math.random() * patients.length)]
-    const service = services[Math.floor(Math.random() * services.length)]
-    const motif = motifs[Math.floor(Math.random() * motifs.length)]
-    const doctor = [doctor1, doctor2, doctor3][Math.floor(Math.random() * 3)]
-    const resource = resources[Math.floor(Math.random() * resources.length)]
+  // Get the Monday of the current week
+  const monday = new Date(today)
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7))
 
-    const appointmentDate = new Date(today)
+  // Doctor-specific service/motif preferences
+  const doctorPrefs = [
+    { serviceIdxs: [0, 1, 5, 7, 3], motifIdxs: [0, 1, 2, 7, 3, 4, 5] },  // Dr1: botox, hyaluro, peeling, taches, mammaire
+    { serviceIdxs: [2, 6, 8, 9], motifIdxs: [4, 5, 6, 7] },                  // Dr2: lipo, laser, BBL, soin visage
+    { serviceIdxs: [4, 9, 5, 7], motifIdxs: [4, 5, 7, 3] },                  // Dr3: blepharo, soin, peeling, taches
+    { serviceIdxs: [0, 2, 5], motifIdxs: [0,4,5] },                         // Dr4: test doctor - mix
+    { serviceIdxs: [2, 6, 9], motifIdxs: [4,6,7] },                         // Prtest: practitioner test - mix
+  ]
 
-    // Morning time only: 9h to 13h (spread 8 appointments)
-    const morningSlots = [
-      { h: 9, m: 0 }, { h: 9, m: 30 },
-      { h: 10, m: 0 }, { h: 10, m: 30 },
-      { h: 11, m: 0 }, { h: 11, m: 30 },
-      { h: 12, m: 0 }, { h: 12, m: 30 }
-    ]
-    const slot = morningSlots[i % morningSlots.length]
-    appointmentDate.setHours(slot.h, slot.m, 0, 0)
+  // Time slots: morning 8:30-12:00, afternoon 14:00-17:30
+  const morningSlots = [
+    [8, 30], [9, 0], [9, 30], [10, 0], [10, 30], [11, 0], [11, 30], [12, 0],
+  ]
+  const afternoonSlots = [
+    [14, 0], [14, 30], [15, 0], [15, 30], [16, 0], [16, 30], [17, 0], [17, 30],
+  ]
 
-    const status = statuses[Math.floor(Math.random() * statuses.length)]
+  // Generate appointments for 14 days (2 weeks: current + next)
+  for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
+    const isSunday = (monday.getDay() + dayOffset) % 7 === 0
+    if (isSunday) continue // closed on Sundays
 
-    // Set dates based on status
-    let confirmedAt: Date | null = null
-    let expiresAt: Date | null = null
+    const isSaturday = (monday.getDay() + dayOffset) % 7 === 6
+    const isPast = dayOffset < (today.getTime() - monday.getTime()) / 86400000
+    const isToday = dayOffset === Math.floor((today.getTime() - monday.getTime()) / 86400000)
 
-    if (status === 'CONFIRMED') {
-      confirmedAt = new Date(appointmentDate.getTime() - 86400000)
-      expiresAt = new Date(appointmentDate.getTime() + 1800000)
-    } else {
-      expiresAt = new Date(appointmentDate.getTime() + 86400000)
+    for (let docIdx = 0; docIdx < doctors.length; docIdx++) {
+      const prefs = doctorPrefs[docIdx]
+      const slots = isSaturday ? [...morningSlots] : [...morningSlots, ...afternoonSlots]
+
+      // Each doctor gets 5-8 slots per day (some gaps)
+      const slotCount = isSaturday ? Math.floor(Math.random() * 3) + 3 : Math.floor(Math.random() * 4) + 5
+      const usedSlots = new Set<number>()
+
+      for (let s = 0; s < slotCount; s++) {
+        let slotIdx: number
+        let attempts = 0
+        do {
+          slotIdx = Math.floor(Math.random() * slots.length)
+          attempts++
+        } while (usedSlots.has(slotIdx) && attempts < 20)
+        if (usedSlots.has(slotIdx)) continue
+        usedSlots.add(slotIdx)
+
+        const [hour, min] = slots[slotIdx]
+        const serviceIdx = prefs.serviceIdxs[Math.floor(Math.random() * prefs.serviceIdxs.length)]
+        const motifIdx = prefs.motifIdxs[Math.floor(Math.random() * prefs.motifIdxs.length)]
+        const patient = patients[Math.floor(Math.random() * patients.length)]
+        const service = services[serviceIdx]
+        const motif = motifs[motifIdx]
+        const doctor = doctors[docIdx]
+        const resource = resources[Math.floor(Math.random() * resources.length)]
+
+        const appointmentDate = new Date(monday)
+        appointmentDate.setDate(monday.getDate() + dayOffset)
+        appointmentDate.setHours(hour, min, 0, 0)
+
+        // Determine status based on timing
+        let status: string
+        if (isPast) {
+          const r = Math.random()
+          status = r < 0.55 ? 'COMPLETED' : r < 0.75 ? 'CONFIRMED' : r < 0.9 ? 'CANCELLED' : 'NO_SHOW'
+        } else if (isToday) {
+          const r = Math.random()
+          status = r < 0.3 ? 'COMPLETED' : r < 0.6 ? 'CONFIRMED' : r < 0.8 ? 'PENDING' : 'CANCELLED'
+        } else {
+          const r = Math.random()
+          status = r < 0.5 ? 'CONFIRMED' : r < 0.85 ? 'PENDING' : 'CANCELLED'
+        }
+
+        let confirmedAt: Date | null = null
+        let expiresAt: Date | null = null
+
+        if (status === 'CONFIRMED' || status === 'COMPLETED') {
+          confirmedAt = new Date(appointmentDate.getTime() - 86400000)
+          expiresAt = new Date(appointmentDate.getTime() + 1800000)
+        } else {
+          expiresAt = new Date(appointmentDate.getTime() + 86400000)
+        }
+
+        const appointment = await prisma.appointment.create({
+          data: {
+            patientId: patient.id,
+            name: `${patient.firstName} ${patient.lastName}`,
+            email: patient.email || `${patient.phone}@placeholder.com`,
+            phone: patient.phone,
+            context: `${motif.name} - ${service.name}`,
+            status,
+            timezone: 'Africa/Casablanca',
+            expiresAt,
+            confirmedAt,
+            serviceId: service.id,
+            motifId: motif.id,
+            practitionerId: doctor.id,
+            resourceId: resource.id,
+          },
+        })
+
+        const session = await prisma.session.findFirst({ where: { serviceId: service.id } })
+        if (session) {
+          await prisma.schedule.create({
+            data: {
+              datetime: appointmentDate,
+              sessionId: session.id,
+              appointmentId: appointment.id,
+            },
+          })
+        }
+
+        appointments.push(appointment)
+      }
     }
-
-    const appointment = await prisma.appointment.create({
-      data: {
-        patientId: patient.id,
-        name: `${patient.firstName} ${patient.lastName}`,
-        email: patient.email || `${patient.phone}@placeholder.com`,
-        phone: patient.phone,
-        context: 'Test appointment for debugging',
-        status,
-        timezone: 'Africa/Casablanca',
-        expiresAt,
-        confirmedAt,
-        serviceId: service.id,
-        motifId: motif.id,
-        practitionerId: doctor.id,
-        resourceId: resource.id,
-      },
-    })
-
-    // Create schedule for the appointment
-    await prisma.schedule.create({
-      data: {
-        datetime: appointmentDate,
-        sessionId: (await prisma.session.findFirst({ where: { serviceId: service.id } }))?.id || '',
-        appointmentId: appointment.id,
-      },
-    })
-
-    appointments.push(appointment)
   }
 
   console.log(`✅ Created ${appointments.length} appointments (rendez-vous) with schedules`)
@@ -552,6 +748,31 @@ async function main() {
     { name: 'Claire Dubois', email: 'claire.dubois@email.com', phone: '0633344455', context: 'Vos locaux sont magnifiques! Je reviendrai avec plaisir.' },
     { name: 'Omar Benjelloun', email: 'omar.b@email.com', phone: '0644455566', context: 'Soucis avec le résultat de mon augmentation mammaire. Je voudrais revoir le Dr.' },
     { name: 'Isabelle Roux', email: 'isabelle.r@email.com', phone: '0655566677', context: 'Question sur les effets secondaires du Botox. Merci de me rassurer.' },
+    { name: 'Hassan Berrada', email: 'h.berrada@email.com', phone: '0666677788', context: 'Je voudrais prendre RDV pour une épilation laser dos complet. Quel est le tarif?' },
+    { name: 'Salma Chraibi', email: 'salma.c@email.com', phone: '0677788899', context: 'Mon traitement Botox a très bien fonctionné! Je veux refaire une séance.' },
+    { name: 'Pierre Lemaire', email: 'p.lemaire@email.com', phone: '0688899900', context: 'Je cherche un chirurgien pour rhinoplastie. Avez-vous ce service?' },
+    { name: 'Nadia El Fassi', email: 'nadia.ef@email.com', phone: '0699900011', context: 'Suite à ma liposuccion, j\'ai une douleur persistante. Urgence?' },
+    { name: 'Ahmed Tazi', email: 'ahmed.tazi@email.com', phone: '0600011122', context: 'Comment se déroule une séance de peeling? Combien de séances faut-il?' },
+    { name: 'Marie Laurent', email: 'm.laurent@email.com', phone: '0611223344', context: 'Merci pour l\'accueil chaleureux hier! Le Dr. SLAOUI est formidable.' },
+    { name: 'Rachid Alami', email: 'rachid.alami@email.com', phone: '0622334455', context: 'Je souhaite un devis pour blépharoplastie des deux paupières.' },
+    { name: 'Leila Filali', email: 'leila.f@email.com', phone: '0633445566', context: 'Peut-on combiner Botox et acide hyaluronique en une seule séance?' },
+    { name: 'David Moreau', email: 'd.moreau@email.com', phone: '0644556677', context: 'Mon épilation laser ne donne pas les résultats attendus. Déçu.' },
+    { name: 'Zineb Lahmar', email: 'zineb.l@email.com', phone: '0655667788', context: 'Je voudrais offrir un soin du visage à ma mère pour son anniversaire.' },
+    { name: 'Thomas Bernard', email: 't.bernard@email.com', phone: '0666778899', context: 'Résultat liposuccion Vaser impeccable après 3 mois. Merci Dr BENNANI!' },
+    { name: 'Aicha Mahmoudi', email: 'aicha.m@email.com', phone: '0677889900', context: 'J\'ai peur des injections. Est-ce que c\'est douloureux? Rassurez-moi.' },
+    { name: 'Julie Petit', email: 'julie.petit@email.com', phone: '0688990011', context: 'Je voudrais annuler et reporter mon rendez-vous de la semaine prochaine.' },
+    { name: 'Mehdi Zerouali', email: 'mehdi.z@email.com', phone: '0699001122', context: 'Avez-vous des promotions en cours pour les soins du visage?' },
+    { name: 'Catherine Noir', email: 'c.noir@email.com', phone: '0600112233', context: 'Mon fils de 16 ans a de l\'acné sévère. Pouvons-nous consulter?' },
+    { name: 'Youssef Driouch', email: 'youssef.d@email.com', phone: '0611223344', context: 'Je suis intéressé par le traitement des taches brunes sur les mains.' },
+    { name: 'Anne Girard', email: 'anne.g@email.com', phone: '0622334455', context: 'Bravo pour votre centre! Propreté et professionnalisme au top.' },
+    { name: 'Khalid Saadi', email: 'khalid.s@email.com', phone: '0633445566', context: 'Je voudrais connaître le prix exact du BBL tout compris.' },
+    { name: 'Sylvie Roussel', email: 's.roussel@email.com', phone: '0644556677', context: 'Mon peeling a provoqué des rougeurs qui ne partent pas. Inquiete.' },
+    { name: 'Hamza Mansour', email: 'hamza.m@email.com', phone: '0655667788', context: 'Je cherche un traitement pour les cernes sous les yeux.' },
+    { name: 'Nathalie Simon', email: 'n.simon@email.com', phone: '0666778899', context: 'Quelle est la durée de récupération après une augmentation mammaire?' },
+    { name: 'Imane Hassani', email: 'imane.h@email.com', phone: '0677889900', context: 'Je voudrais réserver pour une consultation initiale avec Dr. EL ALAOUI.' },
+    { name: 'François Mercier', email: 'f.mercier@email.com', phone: '0688990011', context: 'Est-ce que la clinique est ouverte les jours fériés?' },
+    { name: 'Bouchra Naciri', email: 'bouchra.n@email.com', phone: '0699001122', context: 'Très satisfaite de ma séance laser! Résultats visibles dès la 2ème séance.' },
+    { name: 'Lucas Garnier', email: 'l.garnier@email.com', phone: '0600112233', context: 'Je voudrais un rendez-vous urgent pour une urgence dermatologique.' },
   ]
 
   for (const msg of contactMessages) {
@@ -574,7 +795,7 @@ async function main() {
   const blockReasons = ['Congés', 'Formation médicale', 'Urgence personnelle', 'Maintenance salle', 'Réunion équipe']
 
   for (let i = 0; i < 10; i++) {
-    const doctor = [doctor1, doctor2, doctor3][Math.floor(Math.random() * 3)]
+    const doctor = doctors[Math.floor(Math.random() * doctors.length)]
     const startDate = new Date(today)
     startDate.setDate(startDate.getDate() + Math.floor(Math.random() * 30))
     startDate.setHours(9 + Math.floor(Math.random() * 8), 0, 0, 0)
@@ -598,15 +819,16 @@ async function main() {
   console.log('\n🎉 SEED COMPLETE!')
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
   console.log('📊 Summary:')
-  console.log('   • 5 Users (1 Admin, 3 Doctors, 2 Receptionists)')
+  console.log('   • 8 Users (1 Admin, 5 Doctors, 2 Receptionists)')
   console.log('   • 6 Categories')
-  console.log('   • 10 Services')
-  console.log('   • 8 Motifs')
-  console.log('   • 7 Resources (Salles)')
-  console.log('   • 50 Patients')
-  console.log('   • 80 Appointments (Rendez-vous)')
-  console.log('   • 15 Contacts')
+  console.log('   • 10 Services (with primaryDoctorId + allowedDoctorIds)')
+  console.log('   • 8 Motifs (linked to practitioners via MotifPractitioner)')
+  console.log('   • 7 Resources (linked to practitioners via ResourcePractitioner)')
+  console.log(`   • ${patients.length} Patients`)
+  console.log(`   • ${appointments.length} Appointments across 2 weeks (per-doctor, all statuses)`)
+  console.log(`   • ${contactMessages.length} Contacts`)
   console.log('   • 10 Availability Blocks')
+  console.log('   • Motif↔Resource links, Motif↔Practitioner links, Resource↔Practitioner links')
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 }
 

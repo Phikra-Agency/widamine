@@ -14,6 +14,7 @@ model User {
   password             String
   role                 String
   admin                Boolean             @default(false)
+  image                String?
   services             Service[]           @relation("DoctorServices")
   motifAssignments     MotifPractitioner[]
   assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
@@ -253,4 +254,23 @@ model NotificationLog {
 
   @@index([appointmentId])
   @@index([status])
+}
+
+model AppSettings {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  singletonKey       String   @unique @default("default")
+  smsEnabled         Boolean  @default(false)
+  emailEnabled       Boolean  @default(true)
+  inAppEnabled       Boolean  @default(true)
+  smsConfirmation    Boolean  @default(true)
+  smsReminder        Boolean  @default(true)
+  smsCancellation    Boolean  @default(false)
+  emailConfirmation  Boolean  @default(true)
+  emailReminder      Boolean  @default(true)
+  emailCancellation  Boolean  @default(true)
+  inAppConfirmation  Boolean  @default(true)
+  inAppReminder      Boolean  @default(true)
+  inAppCancellation  Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }

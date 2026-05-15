@@ -1,8 +1,24 @@
-import { IsOptional, IsString } from "class-validator";
-import { CreateUserDto } from "./create-user.dto";
+import { IsOptional, IsString, IsEmail, IsBoolean } from "class-validator";
+import { Role } from "@/enums";
 
-export class UpdateUserDto extends CreateUserDto {
+export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  declare password: string;
+  name?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  admin?: boolean;
+
+  @IsOptional()
+  @IsString()
+  role?: Role;
 }

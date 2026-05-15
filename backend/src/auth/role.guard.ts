@@ -1,30 +1,22 @@
-import { PrismaService } from "@/prisma/prisma.service";
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   mixin,
-  NotFoundException,
+  ForbiddenException,
   Type,
-  UnauthorizedException,
 } from "@nestjs/common";
 
 export const RoleGuard = (...roles: string[]): Type<CanActivate> => {
   @Injectable()
   class RoleGuardMixin implements CanActivate {
-    constructor(private prismaService: PrismaService) {}
-
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    canActivate(context: ExecutionContext): boolean {
       const req = context.switchToHttp().getRequest();
+      const user = req.user;
 
-      const user = await this.prismaService.user.findUnique({
-        where: { id: req.user.id },
-      });
-
-      if (!user) throw new NotFoundException("User Not Found");
-
+      if (!user) throw new ForbiddenException("Not authenticated");
       if (!roles.includes(user.role))
-        throw new UnauthorizedException("Insufficient permissions");
+        throw new ForbiddenException("Insufficient permissions");
 
       return true;
     }

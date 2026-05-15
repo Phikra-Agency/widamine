@@ -28,9 +28,14 @@ export class AuthService {
 
     const { password: passwd, id, ...userData } = user;
 
+    const refreshSecret =
+      process.env.JWT_REFRESH_SECRET ??
+      process.env.JWT_SECRET ??
+      "default_refresh_secret_key_12345";
+
     const refreshToken = this.jwtService.sign(
       { id: user.id },
-      { expiresIn: "30d", secret: process.env.JWT_REFRESH_SECRET },
+      { expiresIn: "30d", secret: refreshSecret },
     );
 
     res.cookie("refreshtoken", refreshToken, {
@@ -59,8 +64,13 @@ export class AuthService {
           message: "No refresh token provided",
         });
 
+      const refreshSecret =
+        process.env.JWT_REFRESH_SECRET ??
+        process.env.JWT_SECRET ??
+        "default_refresh_secret_key_12345";
+
       const payload = this.jwtService.verify(refreshtoken, {
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: refreshSecret,
       });
 
       const user = await this.prismaService.user.findUnique({

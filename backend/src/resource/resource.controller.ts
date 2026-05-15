@@ -6,9 +6,13 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from "@nestjs/common";
 import { ResourceService } from "./resource.service";
+import { AuthGuard } from "@/auth/auth.guard";
+import { RoleGuard } from "@/auth/role.guard";
 
+@UseGuards(AuthGuard)
 @Controller("resources")
 export class ResourceController {
   constructor(private readonly resourceService: ResourceService) {}
@@ -24,6 +28,7 @@ export class ResourceController {
   }
 
   @Post()
+  @UseGuards(RoleGuard("ADMIN"))
   create(
     @Body()
     data: {
@@ -37,6 +42,7 @@ export class ResourceController {
   }
 
   @Put(":id")
+  @UseGuards(RoleGuard("ADMIN"))
   update(
     @Param("id") id: string,
     @Body()
@@ -52,6 +58,7 @@ export class ResourceController {
   }
 
   @Delete(":id")
+  @UseGuards(RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
     return this.resourceService.remove(id);
   }

@@ -14,12 +14,13 @@ import { AuthGuard } from "@/auth/auth.guard";
 import { RoleGuard } from "@/auth/role.guard";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
 
+@UseGuards(AuthGuard)
 @Controller("categories")
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @UseGuards(AuthGuard, RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN"))
   create(@Body() data: CreateCategoryDto) {
     return this.categoryService.create(data);
   }
@@ -30,13 +31,13 @@ export class CategoryController {
   }
 
   @Put(":id")
-  @UseGuards(AuthGuard, RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN"))
   update(@Param("id") id: string, @Body() data: UpdateCategoryDto) {
     return this.categoryService.update(id, data);
   }
 
   @Delete(":id")
-  @UseGuards(AuthGuard, RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN"))
   remove(@Param("id") id: string) {
     return this.categoryService.remove(id);
   }

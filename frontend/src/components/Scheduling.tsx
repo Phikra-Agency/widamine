@@ -21,7 +21,7 @@ export default function Scheduling() {
 			{isOpen ? (
 				<motion.div className='fixed inset-0 z-[9999]' initial='hidden' animate='visible' exit='exit'>
 					<motion.div className='absolute inset-0 bg-black/60 backdrop-blur-md' variants={overlayVariants} onClick={handleClose} />
-					<div className='pointer-events-none absolute inset-0 m-auto flex items-center justify-center px-4'>
+					<div className='pointer-events-none absolute inset-0 flex items-end justify-center px-3 py-3 sm:items-center sm:px-4 sm:py-6'>
 						<BookingFlow onClose={handleClose} />
 					</div>
 				</motion.div>

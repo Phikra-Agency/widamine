@@ -8,5 +8,7 @@ import Patients from './Patients'
 import Dashboard from './Dashboard'
 import Motifs from './Motifs'
 import Resources from './Resources'
+import SallesMotifs from './SallesMotifs'
+import Settings from './Settings'
 
-export { Users, Calendar, Contacts, Services, Appointments, Categories, Patients, Dashboard, Motifs, Resources }
+export { Users, Calendar, Contacts, Services, Appointments, Categories, Patients, Dashboard, Motifs, Resources, SallesMotifs, Settings }

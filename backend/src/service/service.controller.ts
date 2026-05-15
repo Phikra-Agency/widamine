@@ -18,12 +18,6 @@ import { AuthGuard } from "@/auth/auth.guard";
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
-  @Post()
-  @UseGuards(AuthGuard, RoleGuard("ADMIN"))
-  create(@Body() data: CreateServiceDto) {
-    return this.serviceService.create(data);
-  }
-
   @Get()
   findAll() {
     return this.serviceService.findAll();
@@ -32,6 +26,12 @@ export class ServiceController {
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.serviceService.findOne(id);
+  }
+
+  @Post()
+  @UseGuards(AuthGuard, RoleGuard("ADMIN"))
+  create(@Body() data: CreateServiceDto) {
+    return this.serviceService.create(data);
   }
 
   @Put(":id")
