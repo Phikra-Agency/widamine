@@ -41,7 +41,7 @@ export default function Services() {
 function Heading() {
 	const { openModal, setOperation, clearItem } = useServicesStore()
 	return (
-		<div className="flex items-center justify-between">
+		<div className="flex flex-wrap items-center justify-between gap-3">
 			<div>
 				<h3 className="bo-title">Gestion Des Services</h3>
 				<p className="bo-subtitle">Gérez les services et leurs séances</p>
@@ -64,7 +64,7 @@ function Filters() {
 	const { items: categories } = useCategoriesStore()
 
 	return (
-		<div className="flex gap-4">
+		<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 			<div className="relative flex-1 max-w-md">
 				<input
 					type="text"
@@ -103,102 +103,195 @@ function Table() {
 		setFiltered(items.filter((i) => i.name.includes(debouncedFilters.term) && (i.categoryId === debouncedFilters.categoryId || debouncedFilters.categoryId === 0)))
 	}, [items, debouncedFilters])
 
-	return (
-		<table className="w-full text-sm">
-			<thead>
-				<tr className="border-b border-black/[0.06]">
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Service</th>
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Prix</th>
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Séances</th>
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Médecin</th>
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Catégorie</th>
-					<th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40 text-right">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{filtered.length === 0 && (
-					<tr>
-						<td colSpan={6} className="px-6 py-12 text-center">
-							<div className="flex flex-col items-center gap-3 text-secondary/40">
-								<div className="w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center">
-									<FirstAid size={32} className="text-secondary/30" />
-								</div>
-								<p className="text-sm font-medium">Aucun service trouvé</p>
-								<p className="text-xs">Ajoutez un service pour commencer</p>
-							</div>
-						</td>
-					</tr>
-				)}
-				{filtered.map((item) => (
-					<tr className="border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors" key={item.id}>
-						<td className="px-6 py-4">
-							<div className="flex items-center gap-3">
-								<div className="w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center">
-									<FirstAid size={20} className="text-primary" />
-								</div>
-								<span className="font-medium text-secondary">{item.name}</span>
-							</div>
-						</td>
-						<td className="px-6 py-4">
-							<div className="flex items-center gap-1.5 text-secondary/60">
-								<CurrencyDollar size={14} className="text-secondary/40" />
-								<span className="font-medium">{item.price}</span>
-								<span className="text-xs text-secondary/40">DH</span>
-							</div>
-						</td>
-						<td className="px-6 py-4">
-							<div className="flex items-center gap-1.5 text-secondary/60">
-								<Clock size={14} className="text-secondary/40" />
-								<span className="font-medium">{item._count?.sessions || 0}</span>
-							</div>
-						</td>
-						<td className="px-6 py-4 text-secondary/60">{item.doctor?.name || '—'}</td>
-						<td className="px-6 py-4">
-							{item.category?.category ? (
-								<span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border bg-violet-50 text-violet-700 border-violet-100">
-									{item.category.category}
-								</span>
-							) : '—'}
-						</td>
-						<td className="px-6 py-4">
-							<div className="flex items-center justify-end gap-1">
-								<button
-									onClick={() => {
-										setItem(item)
-										setOperation("show")
-										openModal()
-									}}
-									className="p-2 rounded-lg text-secondary/40 hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
-								>
-									<Eye size={18} />
-								</button>
-								<button
-									onClick={() => {
-										setItem(item)
-										setOperation("edit")
-										openModal()
-									}}
-									className="p-2 rounded-lg text-secondary/40 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200"
-								>
-									<Pen size={18} />
-								</button>
-								<button
-									onClick={() => {
-										setItem(item)
-										setOperation("delete")
-										openModal()
-									}}
-									className="p-2 rounded-lg text-secondary/40 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
-								>
-									<Trash2 size={18} />
-								</button>
-							</div>
-						</td>
-					</tr>
-				))}
-			</tbody>
-		</table>
-	)
+  return (
+    <>
+      {/* Desktop table */}
+      <div className="hidden lg:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-black/[0.06]">
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Service</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Prix</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Séances</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Médecin</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Catégorie</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center">
+                  <div className="flex flex-col items-center gap-3 text-secondary/40">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center">
+                      <FirstAid size={32} className="text-secondary/30" />
+                    </div>
+                    <p className="text-sm font-medium">Aucun service trouvé</p>
+                    <p className="text-xs">Ajoutez un service pour commencer</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {filtered.map((item) => (
+              <tr className="border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors" key={item.id}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center">
+                      <FirstAid size={20} className="text-primary" />
+                    </div>
+                    <span className="font-medium text-secondary">{item.name}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-secondary/60">
+                    <CurrencyDollar size={14} className="text-secondary/40" />
+                    <span className="font-medium">{item.price}</span>
+                    <span className="text-xs text-secondary/40">DH</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-secondary/60">
+                    <Clock size={14} className="text-secondary/40" />
+                    <span className="font-medium">{item._count?.sessions || 0}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-secondary/60">{item.doctor?.name || '—'}</td>
+                <td className="px-6 py-4">
+                  {item.category?.category ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border bg-violet-50 text-violet-700 border-violet-100">
+                      {item.category.category}
+                    </span>
+                  ) : '—'}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        setOperation("show")
+                        openModal()
+                      }}
+                      className="p-2 rounded-lg text-secondary/40 hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        setOperation("edit")
+                        openModal()
+                      }}
+                      className="p-2 rounded-lg text-secondary/40 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200"
+                    >
+                      <Pen size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        setOperation("delete")
+                        openModal()
+                      }}
+                      className="p-2 rounded-lg text-secondary/40 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className='lg:hidden'>
+        <div className='space-y-3 p-3'>
+          {filtered.length === 0 ? (
+            <div className='rounded-2xl border border-black/[0.06] bg-white px-4 py-10 text-center text-secondary/40'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center'>
+                  <FirstAid size={32} className='text-secondary/30' />
+                </div>
+                <p className='text-sm font-medium'>Aucun service trouvé</p>
+                <p className='text-xs'>Ajoutez un service pour commencer</p>
+              </div>
+            </div>
+          ) : (
+            filtered.map((item) => (
+              <div key={item.id} className='rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]'>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='flex items-center gap-3 min-w-0'>
+                    <div className='w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center shrink-0'>
+                      <FirstAid size={20} className='text-primary' />
+                    </div>
+                    <div className='min-w-0'>
+                      <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='mt-3 space-y-2 text-xs text-secondary/60'>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-secondary/40'>Prix</span>
+                    <span className='font-medium text-secondary/80'>{item.price} DH</span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-secondary/40'>Séances</span>
+                    <span className='font-medium text-secondary/80'>{item._count?.sessions || 0}</span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-secondary/40'>Médecin</span>
+                    <span className='font-medium text-secondary/80'>{item.doctor?.name || '—'}</span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span className='text-secondary/40'>Catégorie</span>
+                    <span>{item.category?.category ? (
+                      <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border bg-violet-50 text-violet-700 border-violet-100'>
+                        {item.category.category}
+                      </span>
+                    ) : '—'}</span>
+                  </div>
+                </div>
+
+                <div className='mt-3 flex items-center gap-2'>
+                  <button
+                    onClick={() => {
+                      setItem(item)
+                      setOperation("show")
+                      openModal()
+                    }}
+                    className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-primary hover:bg-primary/5 transition-all'
+                  >
+                    <Eye size={14} className='inline mr-1' /> Détails
+                  </button>
+                  <button
+                    onClick={() => {
+                      setItem(item)
+                      setOperation("edit")
+                      openModal()
+                    }}
+                    className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-secondary/60 hover:bg-secondary/5 hover:text-secondary transition-all'
+                  >
+                    <Pen size={14} className='inline mr-1' /> Modifier
+                  </button>
+                  <button
+                    onClick={() => {
+                      setItem(item)
+                      setOperation("delete")
+                      openModal()
+                    }}
+                    className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-red-400 hover:bg-red-50 hover:text-red-600 transition-all'
+                  >
+                    <Trash2 size={14} className='inline mr-1' /> Supprimer
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </>
+  )
 }
 
 function Modal() {

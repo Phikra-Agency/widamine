@@ -42,7 +42,7 @@ function Filters() {
   const { filters, setFilters } = useContactsStore()
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <div className="relative flex-1 max-w-md">
         <input
           type="text"
@@ -81,85 +81,159 @@ function Table() {
   }, [items, debouncedFilters])
 
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="border-b border-black/[0.06]">
-          <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Contact</th>
-          <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Email</th>
-          <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Téléphone</th>
-          <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Message</th>
-          <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40 text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filtered.length === 0 && (
-          <tr>
-            <td colSpan={5} className="px-6 py-12 text-center">
-              <div className="flex flex-col items-center gap-3 text-secondary/40">
-                <div className="w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center">
-                  <ChatCircleDots size={32} className="text-secondary/30" />
+    <>
+      {/* Desktop table */}
+      <div className="hidden lg:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-black/[0.06]">
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Contact</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Email</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Téléphone</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40">Message</th>
+              <th scope="col" className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-secondary/40 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center">
+                  <div className="flex flex-col items-center gap-3 text-secondary/40">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center">
+                      <ChatCircleDots size={32} className="text-secondary/30" />
+                    </div>
+                    <p className="text-sm font-medium">Aucun message trouvé</p>
+                    <p className="text-xs">Les messages reçus apparaîtront ici</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {filtered.map((item) => (
+              <tr className="border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors" key={item.id}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center">
+                      <User size={20} className="text-primary" />
+                    </div>
+                    <span className="font-medium text-secondary">{item.name}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-secondary/60">
+                    <EnvelopeSimple size={14} className="text-secondary/40" />
+                    <span>{item.email}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-secondary/60">
+                    <Phone size={14} className="text-secondary/40" />
+                    <span>{item.phone}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-secondary/40 text-sm line-clamp-1 max-w-[200px] block">{item.context}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        toggleOpenShowModal()
+                      }}
+                      className="p-2 rounded-lg text-secondary/40 hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
+                      title="Voir le message"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    {!filters.read && (
+                      <button
+                        onClick={() => {
+                          setItem(item)
+                          readItem()
+                        }}
+                        className="p-2 rounded-lg text-secondary/40 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
+                        title="Marquer comme lu"
+                      >
+                        <CheckCircle size={18} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className='lg:hidden'>
+        <div className='space-y-3 p-3'>
+          {filtered.length === 0 ? (
+            <div className='rounded-2xl border border-black/[0.06] bg-white px-4 py-10 text-center text-secondary/40'>
+              <div className='flex flex-col items-center gap-3'>
+                <div className='w-16 h-16 rounded-2xl bg-secondary/[0.04] flex items-center justify-center'>
+                  <ChatCircleDots size={32} className='text-secondary/30' />
                 </div>
-                <p className="text-sm font-medium">Aucun message trouvé</p>
-                <p className="text-xs">Les messages reçus apparaîtront ici</p>
+                <p className='text-sm font-medium'>Aucun message trouvé</p>
+                <p className='text-xs'>Les messages reçus apparaîtront ici</p>
               </div>
-            </td>
-          </tr>
-        )}
-        {filtered.map((item) => (
-          <tr className="border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors" key={item.id}>
-            <td className="px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center">
-                  <User size={20} className="text-primary" />
+            </div>
+          ) : (
+            filtered.map((item) => (
+              <div key={item.id} className='rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]'>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='flex items-center gap-3 min-w-0'>
+                    <div className='w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center shrink-0'>
+                      <User size={20} className='text-primary' />
+                    </div>
+                    <div className='min-w-0'>
+                      <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
+                    </div>
+                  </div>
                 </div>
-                <span className="font-medium text-secondary">{item.name}</span>
-              </div>
-            </td>
-            <td className="px-6 py-4">
-              <div className="flex items-center gap-1.5 text-secondary/60">
-                <EnvelopeSimple size={14} className="text-secondary/40" />
-                <span>{item.email}</span>
-              </div>
-            </td>
-            <td className="px-6 py-4">
-              <div className="flex items-center gap-1.5 text-secondary/60">
-                <Phone size={14} className="text-secondary/40" />
-                <span>{item.phone}</span>
-              </div>
-            </td>
-            <td className="px-6 py-4">
-              <span className="text-secondary/40 text-sm line-clamp-1 max-w-[200px] block">{item.context}</span>
-            </td>
-            <td className="px-6 py-4">
-              <div className="flex items-center justify-end gap-1">
-                <button
-                  onClick={() => {
-                    setItem(item)
-                    toggleOpenShowModal()
-                  }}
-                  className="p-2 rounded-lg text-secondary/40 hover:text-primary hover:bg-primary/[0.08] transition-all duration-200"
-                  title="Voir le message"
-                >
-                  <Eye size={18} />
-                </button>
-                {!filters.read && (
+
+                <div className='mt-3 space-y-2 text-xs text-secondary/60'>
+                  <div className='flex items-center gap-2'>
+                    <EnvelopeSimple size={14} className='text-secondary/30 shrink-0' />
+                    <span className='truncate'>{item.email}</span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Phone size={14} className='text-secondary/30 shrink-0' />
+                    <span>{item.phone}</span>
+                  </div>
+                  <div className='mt-2 rounded-lg bg-secondary/[0.03] p-2.5 text-xs text-secondary/50 leading-relaxed line-clamp-2'>
+                    {item.context}
+                  </div>
+                </div>
+
+                <div className='mt-3 flex items-center gap-2'>
                   <button
                     onClick={() => {
                       setItem(item)
-                      readItem()
+                      toggleOpenShowModal()
                     }}
-                    className="p-2 rounded-lg text-secondary/40 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
-                    title="Marquer comme lu"
+                    className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-primary hover:bg-primary/5 transition-all'
                   >
-                    <CheckCircle size={18} />
+                    <Eye size={14} className='inline mr-1' /> Voir
                   </button>
-                )}
+                  {!filters.read && (
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        readItem()
+                      }}
+                      className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-emerald-600 hover:bg-emerald-50 transition-all'
+                    >
+                      <CheckCircle size={14} className='inline mr-1' /> Lu
+                    </button>
+                  )}
+                </div>
               </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+            ))
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 

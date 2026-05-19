@@ -95,7 +95,7 @@ function Heading() {
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   return (
-    <div className='flex items-center justify-between'>
+    <div className='flex flex-wrap items-center justify-between gap-3'>
       <div>
         <h3 className='bo-title'>Gestion Des Patients</h3>
         <p className='bo-subtitle'>Gérez les dossiers de vos patients</p>
@@ -115,44 +115,57 @@ function Heading() {
 function Filters() {
   const { filters, setFilters, items } = usePatientStore()
   const cities = useMemo(() => [...new Set(items.map(i => i.city).filter(Boolean))].sort(), [items])
+  const [showExtra, setShowExtra] = useState(false)
 
   return (
-    <div className='flex flex-wrap gap-3'>
-      <div className='relative flex-1 min-w-[200px] max-w-md'>
-        <MagnifyingGlass size={15} className='absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary/30' />
-        <input
-          type='text'
-          placeholder='Rechercher par nom ou email...'
-          value={filters.term}
-          onChange={(e) => setFilters({ ...filters, term: e.target.value })}
-          className='bo-input pl-10'
-        />
-      </div>
-      <div className='relative min-w-[160px]'>
-        <select
-          value={filters.gender}
-          onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
-          className='bo-select'
+    <div className='flex flex-col gap-2'>
+      <div className='flex items-center gap-2'>
+        <div className='relative flex-1 min-w-0'>
+          <MagnifyingGlass size={15} className='absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary/30' />
+          <input
+            type='text'
+            placeholder='Rechercher par nom ou email...'
+            value={filters.term}
+            onChange={(e) => setFilters({ ...filters, term: e.target.value })}
+            className='bo-input pl-10'
+          />
+        </div>
+        <button
+          type='button'
+          onClick={() => setShowExtra(!showExtra)}
+          className='shrink-0 h-[42px] px-3 rounded-lg border border-black/[0.06] text-secondary/40 hover:text-secondary hover:bg-secondary/5 transition-all lg:hidden'
+          aria-label='Filtres supplémentaires'
         >
-          <option value=''>Tous les genres</option>
-          <option value='MALE'>Homme</option>
-          <option value='FEMALE'>Femme</option>
-          <option value='OTHER'>Autre</option>
-        </select>
-        <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+          <CaretDown size={14} className={`transition-transform ${showExtra ? 'rotate-180' : ''}`} />
+        </button>
       </div>
-      <div className='relative min-w-[180px]'>
-        <select
-          value={filters.city}
-          onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-          className='bo-select'
-        >
-          <option value='null'>Toutes les villes</option>
-          {cities.map(city => (
-            <option key={city} value={city}>{city}</option>
-          ))}
-        </select>
-        <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+      <div className={`flex-col gap-2 sm:flex-row sm:flex-wrap ${showExtra ? 'flex' : 'hidden lg:flex'}`}>
+        <div className='relative flex-1 min-w-[140px]'>
+          <select
+            value={filters.gender}
+            onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+            className='bo-select'
+          >
+            <option value=''>Tous les genres</option>
+            <option value='MALE'>Homme</option>
+            <option value='FEMALE'>Femme</option>
+            <option value='OTHER'>Autre</option>
+          </select>
+          <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+        </div>
+        <div className='relative flex-1 min-w-[140px]'>
+          <select
+            value={filters.city}
+            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+            className='bo-select'
+          >
+            <option value='null'>Toutes les villes</option>
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+          <CaretDown size={14} className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-secondary/30' />
+        </div>
       </div>
     </div>
   )
@@ -161,7 +174,7 @@ function Filters() {
 const PAGE_SIZE = 10
 
 function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
-  const { items, filters, fetchItems, openEditModal, openDeleteModal } = usePatientStore()
+  const { items, filters, fetchItems, openEditModal, openDeleteModal, openCreateModal } = usePatientStore()
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [currentPage, setCurrentPage] = useState(1)
@@ -193,7 +206,8 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
 
   return (
     <div className='flex flex-col h-full'>
-      <div className='flex-1 min-h-0 overflow-auto'>
+      {/* Desktop table */}
+      <div className='hidden flex-1 min-h-0 overflow-auto lg:block'>
         <table className='w-full text-sm'>
           <thead>
             <tr className='border-b border-black/[0.04] bg-secondary/[0.01]'>
@@ -307,6 +321,85 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
           </tbody>
         </table>
       </div>
+
+      {/* Mobile cards */}
+      <div className='flex-1 min-h-0 overflow-auto lg:hidden'>
+        {paged.length === 0 ? (
+          <div className='p-3'>
+            <div className='rounded-2xl border border-black/[0.06] bg-white px-4 py-10 text-center text-secondary/40'>
+              <p className='text-sm font-medium'>Aucun patient trouvé</p>
+              <p className='mt-1 text-xs'>Ajoutez un patient pour commencer</p>
+            </div>
+          </div>
+        ) : (
+            <div className='divide-y divide-black/[0.04] bg-white border-b border-black/[0.04]'>
+            {paged.map((item) => {
+              const stats = getAppointmentStats(item)
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => openDrawer(item)}
+                  className='flex items-center gap-3 px-3 py-3.5 active:bg-secondary/[0.02] transition-colors cursor-pointer'
+                >
+                  <div className='w-9 h-9 rounded-full bg-secondary/5 flex items-center justify-center shrink-0'>
+                    <User size={15} className='text-secondary/40' />
+                  </div>
+                  <div className='min-w-0 flex-1'>
+                    <p className='text-sm font-medium text-secondary truncate'>{item.firstName} {item.lastName}</p>
+                    <div className='flex items-center gap-2 mt-0.5'>
+                      {item.phone && (
+                        <span className='text-[11px] text-secondary/50 truncate'>{item.phone}</span>
+                      )}
+                      {stats.nextDate && (
+                        <>
+                          {item.phone && <span className='text-[9px] text-secondary/30'>·</span>}
+                          <span className='text-[11px] text-primary/70 shrink-0'>
+                            {stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-1 shrink-0' onClick={(e) => e.stopPropagation()}>
+                    {!isPractitioner && (
+                      <>
+                        <button
+                          type='button'
+                          onClick={() => openEditModal(item)}
+                          className='w-8 h-8 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all flex items-center justify-center'
+                        >
+                          <Pen size={14} />
+                        </button>
+                        <button
+                          type='button'
+                          onClick={() => openDeleteModal(item)}
+                          className='w-8 h-8 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all flex items-center justify-center'
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
+                    <div className='w-6 h-6 flex items-center justify-center text-secondary/20'>
+                      <ArrowRight size={14} />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {/* Floating action button for mobile */}
+        {!isPractitioner && (
+          <button
+            type='button'
+            onClick={openCreateModal}
+            className='fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all flex items-center justify-center lg:hidden'
+            aria-label='Ajouter un patient'
+          >
+            <Plus size={24} weight='bold' />
+          </button>
+        )}
+      </div>
       <div className='shrink-0 border-t border-black/[0.04] px-4 py-3 bg-white/80 backdrop-blur-sm'>
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
@@ -359,7 +452,7 @@ function Modal() {
             </div>
           </div>
 
-          <div className='grid grid-cols-2 gap-5'>
+          <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
             <div className='space-y-2'>
               <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Prénom</label>
               <input type='text' value={item.firstName} onChange={(e) => setItem({ ...item, firstName: e.target.value })}
@@ -407,7 +500,7 @@ function Modal() {
               </div>
             </div>
 
-            <div className='col-span-2 space-y-2'>
+            <div className='col-span-1 sm:col-span-2 space-y-2'>
               <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Adresse</label>
               <input type='text' value={item.address} onChange={(e) => setItem({ ...item, address: e.target.value })}
                 className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
@@ -435,7 +528,7 @@ function Modal() {
                 placeholder='Maroc' />
             </div>
 
-            <div className='col-span-2 space-y-2'>
+            <div className='col-span-1 sm:col-span-2 space-y-2'>
               <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Antécédents médicaux</label>
               <textarea value={item.medicalHistory || ''} onChange={(e) => setItem({ ...item, medicalHistory: e.target.value })}
                 className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
@@ -584,7 +677,7 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
               </button>
             </div>
 
-            <div className='flex-1 min-h-0 overflow-auto px-5 py-4 space-y-4'>
+            <div className='flex-1 min-h-0 overflow-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
               {/* Contact */}
               <div className='rounded-xl border border-black/[0.06] p-4 space-y-2'>
                 <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Contact</p>
@@ -598,7 +691,7 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
                 </div>
                 <div className='flex items-center justify-between'>
                   <span className='text-xs text-secondary/40 flex items-center gap-1.5'><MapPin size={12} /> Adresse</span>
-                  <span className='text-xs text-secondary/70'>{[patient.address, patient.city, patient.postalCode, patient.country].filter(Boolean).join(', ') || '—'}</span>
+                  <span className='text-xs text-secondary/70 text-right truncate max-w-[55%]'>{[patient.address, patient.city, patient.postalCode, patient.country].filter(Boolean).join(', ') || '—'}</span>
                 </div>
               </div>
 

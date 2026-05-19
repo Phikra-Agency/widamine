@@ -9,6 +9,8 @@ import {
   Stethoscope,
   DoorOpen,
   CaretDown,
+  CaretLeft,
+  CaretRight,
   ArrowUpRight,
   X,
 } from '@phosphor-icons/react'
@@ -303,7 +305,8 @@ export default function Dashboard() {
       </motion.div>
 
       <div className='flex-1 min-h-0 overflow-hidden px-4 pb-4 sm:px-6'>
-        <div className='grid h-full min-h-0 grid-cols-12 gap-3'>
+        {/* Desktop grid */}
+        <div className='hidden h-full min-h-0 grid-cols-12 gap-3 lg:grid'>
         <motion.div variants={itemVariants} className='col-span-12 2xl:col-span-7 flex min-h-0 flex-col gap-3'>
           <div className='rounded-2xl border border-black/[0.04] bg-white overflow-hidden flex min-h-0 flex-1 flex-col shadow-sm shadow-primary/8'>
             <div className='shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04]'>
@@ -425,6 +428,101 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
+
+        {/* Mobile carousel */}
+        <div className='flex h-full min-h-0 flex-col lg:hidden'>
+          <div className='flex-1 min-h-0 overflow-hidden'>
+            <MobileCarouselSection
+              sections={[
+                {
+                  id: 'running',
+                  label: 'En cours',
+                  icon: <div className='w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse' />,
+                  count: running.length,
+                  headerLink: <Link to='/back-office/calendar' className='text-[10px] text-primary hover:underline font-medium'>Calendrier</Link>,
+                  emptyText: 'Aucun rendez-vous en cours',
+                  content: running.length > 0 ? (
+                    <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
+                      {running.map(item => (
+                        <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDrawer(item.id)} />
+                      ))}
+                    </div>
+                  ) : null,
+                },
+                {
+                  id: 'upcoming',
+                  label: 'À venir',
+                  icon: <Timer size={14} className='text-primary' />,
+                  count: upcoming.length,
+                  emptyText: 'Aucun rendez-vous à venir aujourd\'hui',
+                  content: upcoming.length > 0 ? (
+                    <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
+                      {upcoming.map(item => (
+                        <ApptCard key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                      ))}
+                    </div>
+                  ) : null,
+                },
+                ...(pending.length > 0 ? [{
+                  id: 'pending',
+                  label: 'En attente',
+                  icon: <Warning size={14} className='text-amber-500' />,
+                  count: pending.length,
+                  bgColor: 'bg-amber-50/30',
+                  emptyText: '',
+                  content: (
+                    <div className='grid grid-cols-1 gap-3'>
+                      {pending.map(item => (
+                        <ApptActionCard
+                          key={item.id}
+                          item={item}
+                          confirming={confirming === item.id}
+                          onConfirm={(status) => handleConfirm(item.id, status)}
+                          onDetails={() => openDrawer(item.id)}
+                        />
+                      ))}
+                    </div>
+                  ),
+                }] : []),
+                {
+                  id: 'confirmed',
+                  label: 'Confirmés',
+                  icon: <CheckCircle size={14} className='text-emerald-500' />,
+                  count: stats.todayConfirmed,
+                  headerLink: <Link to='/back-office/calendar' className='text-[10px] text-primary hover:underline font-medium'>Voir tout</Link>,
+                  emptyText: 'Aucun rendez-vous confirmé',
+                  content: confirmed.size > 0 ? (
+                    <div className='space-y-1'>
+                      {Array.from(confirmed.entries()).map(([slot, items]) => (
+                        <div key={slot} className='flex items-start gap-3'>
+                          <div className='flex-1 space-y-1.5 pb-1.5 border-l border-primary/20 pl-4'>
+                            {items.map(item => (
+                              <ApptRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null,
+                },
+                {
+                  id: 'tomorrow',
+                  label: 'Demain',
+                  icon: <CalendarClock size={14} className='text-secondary/40' />,
+                  count: 0,
+                  emptyText: '',
+                  content: tomorrow.length > 0 ? (
+                    <div className='space-y-4'>
+                      {tomorrow.map(item => (
+                        <TomorrowRow key={item.id} item={item} />
+                      ))}
+                    </div>
+                  ) : <p className='text-sm text-secondary/30 text-center py-4'>Aucun rendez-vous demain</p>,
+                },
+              ]}
+            />
+          </div>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -591,23 +689,20 @@ function ApptCard({
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => { if (!onDetails) return; if (e.key === 'Enter' || e.key === ' ') onDetails() }}
-      className='group flex items-start gap-3 px-4 py-3 hover:bg-secondary/[0.02] transition-all duration-200 cursor-pointer border-b border-black/[0.04] last:border-b-0'
+      className='group flex items-center gap-2 px-3 py-2.5 hover:bg-secondary/[0.02] transition-all duration-200 cursor-pointer border-b border-black/[0.04] last:border-b-0 sm:px-4 sm:py-3 sm:items-start sm:gap-3'
     >
-      {/* Content */}
       <div className='flex-1 min-w-0'>
-        {/* Top row: time + name */}
         <div className='flex items-baseline gap-2'>
-          {item.scheduleDate && <span className='text-[11px] font-bold text-primary'>{formatTime(item.scheduleDate)}</span>}
+          {item.scheduleDate && <span className='text-[11px] font-bold text-primary shrink-0'>{formatTime(item.scheduleDate)}</span>}
           <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
         </div>
-
-        {/* Badge */}
-        <div className='mt-1'>
+        <div className='mt-1 flex items-center gap-2 flex-wrap'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+          <span className='flex items-center gap-1 text-[10px] text-secondary/30 sm:hidden'>
+            <ArrowRight size={10} />
+          </span>
         </div>
-
-        {/* Details row */}
-        <div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-[11px] text-secondary/40'>
+        <div className='hidden sm:flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-[11px] text-secondary/40'>
           {item.practitioner && (
             <span className='flex items-center gap-1'>
               <Stethoscope size={10} />
@@ -628,15 +723,10 @@ function ApptCard({
           )}
         </div>
       </div>
-
-      {/* Button */}
       {onDetails && (
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDetails()
-          }}
-          className='shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white border border-black/[0.08] text-secondary/50 hover:text-secondary hover:border-black/[0.14] transition-colors mt-0.5'
+          onClick={(e) => { e.stopPropagation(); onDetails() }}
+          className='hidden shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white border border-black/[0.08] text-secondary/50 hover:text-secondary hover:border-black/[0.14] transition-colors sm:block'
         >
           Voir détails
         </button>
@@ -662,7 +752,7 @@ function ApptActionCard({
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onDetails()}
-      className='group flex flex-col gap-3 px-4 py-3 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer border-b border-black/[0.03] last:border-b-0 md:grid md:grid-cols-[3.25rem_minmax(0,1fr)_12rem] md:items-start md:gap-4 lg:grid-cols-[3.25rem_minmax(0,1fr)_auto] lg:items-center'
+      className='group px-3 py-2.5 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer border-b border-black/[0.03] last:border-b-0 sm:px-4 sm:py-3 md:grid md:grid-cols-[3.25rem_minmax(0,1fr)_12rem] md:items-start md:gap-4 lg:grid-cols-[3.25rem_minmax(0,1fr)_auto] lg:items-center'
     >
       <div className='flex items-start gap-3 md:block md:min-w-[46px] md:text-right'>
         <p className='shrink-0 text-[11px] font-bold text-secondary/50'>{item.scheduleDate ? formatTime(item.scheduleDate) : '—'}</p>
@@ -688,37 +778,28 @@ function ApptActionCard({
       </div>
 
       <div
-        className='grid w-full grid-cols-1 gap-2 shrink-0 md:w-48 md:justify-self-end lg:flex lg:w-auto lg:flex-nowrap lg:items-center'
+        className='flex w-full gap-1.5 shrink-0 md:w-48 md:justify-self-end lg:flex lg:w-auto lg:flex-nowrap lg:items-center'
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDetails()
-          }}
-          className='w-full rounded-lg border border-black/[0.08] bg-white px-3 py-2 text-[10px] font-medium text-secondary/50 transition-colors hover:text-secondary hover:border-black/[0.14] lg:w-auto lg:px-3 lg:py-1.5'
+          onClick={(e) => { e.stopPropagation(); onDetails() }}
+          className='flex-1 rounded-lg border border-black/[0.08] bg-white px-2 py-1.5 text-[9px] font-medium text-secondary/50 transition-colors hover:text-secondary hover:border-black/[0.14] sm:px-3 sm:py-2 sm:text-[10px] lg:w-auto lg:px-3 lg:py-1.5'
         >
-          Voir détails
+          Détails
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onConfirm('CONFIRMED')
-          }}
+          onClick={(e) => { e.stopPropagation(); onConfirm('CONFIRMED') }}
           disabled={confirming}
-          className='w-full rounded-lg bg-emerald-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 lg:w-auto lg:px-4 lg:py-1.5'
+          className='flex-1 rounded-lg bg-emerald-50 px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-[10px] lg:w-auto lg:px-4 lg:py-1.5'
         >
-          Confirmer
+          Oui
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onConfirm('CANCELLED')
-          }}
+          onClick={(e) => { e.stopPropagation(); onConfirm('CANCELLED') }}
           disabled={confirming}
-          className='w-full rounded-lg bg-rose-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50 lg:w-auto lg:px-3 lg:py-1.5'
+          className='flex-1 rounded-lg bg-rose-50 px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50 sm:px-3 sm:py-2 sm:text-[10px] lg:w-auto lg:px-3 lg:py-1.5'
         >
-          Refuser
+          Non
         </button>
       </div>
     </div>
@@ -782,6 +863,86 @@ function MotifPill({ name, color }: { name: string; color: string }) {
       <div className='w-1.5 h-1.5 rounded-full mr-1.5' style={{ backgroundColor: color }} />
       {name}
     </span>
+  )
+}
+
+function MobileCarouselSection({ sections }: {
+  sections: Array<{
+    id: string
+    label: string
+    icon: React.ReactNode
+    count: number
+    headerLink?: React.ReactNode
+    bgColor?: string
+    emptyText: string
+    content: React.ReactNode | null
+  }>
+}) {
+  const [idx, setIdx] = useState(0)
+  const section = sections[idx]
+  if (!section) return null
+
+  return (
+    <div className='flex h-full flex-col'>
+      {/* Nav header */}
+      <div className='flex items-center justify-between gap-2 px-4 py-2 border-b border-black/[0.04] bg-white shrink-0'>
+        <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-1.5'>
+            {sections.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => setIdx(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === idx ? 'w-6 bg-primary' : 'w-1.5 bg-secondary/15'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className='flex items-center gap-2'>
+          <span className='text-[11px] text-secondary/40 font-medium'>
+            {section.label} · {section.count}
+          </span>
+          <div className='flex gap-1'>
+            <button
+              onClick={() => setIdx(i => Math.max(0, i - 1))}
+              disabled={idx === 0}
+              className='w-7 h-7 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/40 hover:text-secondary hover:bg-secondary/5 disabled:opacity-20 disabled:cursor-not-allowed transition-all'
+            >
+              <CaretLeft size={14} />
+            </button>
+            <button
+              onClick={() => setIdx(i => Math.min(sections.length - 1, i + 1))}
+              disabled={idx === sections.length - 1}
+              className='w-7 h-7 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/40 hover:text-secondary hover:bg-secondary/5 disabled:opacity-20 disabled:cursor-not-allowed transition-all'
+            >
+              <CaretRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className='flex-1 min-h-0 overflow-auto p-4'>
+        <div className='rounded-2xl border border-black/[0.04] bg-white overflow-hidden flex min-h-0 flex-col shadow-sm'>
+          <div className={`shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04] ${section.bgColor || ''}`}>
+            <div className='flex items-center gap-2'>
+              {section.icon}
+              <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>{section.label}</h4>
+              <span className='text-[10px] text-secondary/40'>({section.count})</span>
+            </div>
+            {section.headerLink}
+          </div>
+          <div className='flex-1 min-h-0 overflow-auto p-4'>
+            {section.content || (
+              <div className='flex flex-col items-center justify-center py-8 text-center'>
+                <p className='text-sm text-secondary/30 font-medium'>{section.emptyText}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

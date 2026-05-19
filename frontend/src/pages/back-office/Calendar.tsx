@@ -1,6 +1,6 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
-import { CaretLeft, CaretRight, Clock } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, Clock, CalendarBlank } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import api from '@/lib/api'
 import { motion } from 'framer-motion'
@@ -38,9 +38,9 @@ function useOpenedKeys() {
 
 const DAY_LABELS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 const PERIOD_LABELS = [
-  { key: 'morning', label: 'Matinée', hours: '09:00 - 13:00', accent: 'bg-[#eef8fd]' },
-  { key: 'afternoon', label: 'Après-midi', hours: '14:00 - 16:00', accent: 'bg-[#fff5ee]' },
-  { key: 'evening', label: 'Soirée', hours: '16:00 - 18:00', accent: 'bg-[#f5f3fb]' },
+  { key: 'morning', label: 'Matinée', hours: '09:00 - 13:00', color: '#2e90c0' },
+  { key: 'afternoon', label: 'Après-midi', hours: '14:00 - 16:00', color: '#e8944a' },
+  { key: 'evening', label: 'Soirée', hours: '16:00 - 18:00', color: '#8b6ec4' },
 ] as const
 
 function getWeekDates(date: string) {
@@ -103,7 +103,7 @@ export default function Calendar() {
       transition={{ duration: 0.45 }}
       className='bo-page'
     >
-      <div className='bo-page-inner flex h-full flex-col gap-4 overflow-hidden text-secondary'>
+      <div className='bo-page-inner flex h-full flex-col text-secondary p-0 lg:p-6'>
         <Planner />
       </div>
     </motion.div>
@@ -158,6 +158,10 @@ function Planner() {
     () => items.reduce((sum, day) => sum + day.morning.length + day.afternoon.length + day.evening.length, 0),
     [items],
   )
+  const [mobileDayIdx, setMobileDayIdx] = useState(0)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [pickerOffset, setPickerOffset] = useState(0)
+  const pickerRef = useRef<HTMLDivElement>(null)
   const { markOpened, isOpened } = useOpenedKeys()
 
   useEffect(() => {
@@ -174,34 +178,31 @@ function Planner() {
     }
   }, [fetchItems, fetchedDate, filters.date, setFetchedDate])
 
+  useEffect(() => {
+    if (!showDatePicker) return
+    setPickerOffset(0)
+    const handleClick = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowDatePicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showDatePicker])
+
+  const pickerDate = parseLocalDate(filters.date)
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 18, scale: 0.992 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className='bo-surface flex h-full min-h-0 flex-1 flex-col'
+      className='bo-surface flex h-full min-h-0 flex-1 flex-col rounded-none lg:rounded-2xl border-0 lg:border'
     >
-      <div className='shrink-0 border-b border-[#26445a]/22 bg-[linear-gradient(135deg,#0d2234_0%,#16344e_58%,#1b4964_100%)] px-5 py-2.5 text-white'>
-        <div className='flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between'>
-          <div className='space-y-2'>
-            <p className='text-[11px] uppercase tracking-[0.32em] text-white/48'>Légende des motifs</p>
-            <MotifLegend />
-          </div>
-
-          <div className='flex flex-col gap-1.5 xl:min-w-[27rem] xl:items-end'>
-            <div className='flex flex-col gap-3 rounded-[1.1rem] border border-white/10 bg-white/7 px-3 py-2 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between xl:min-w-[27rem]'>
-              <div>
-                <p className='text-[10px] uppercase tracking-[0.26em] text-white/42'>Semaine active</p>
-                <p className='mt-1 text-[13px] text-white'>{formatWeekLabel(filters.date)}</p>
-              </div>
-
-              <div className='grid grid-cols-2 gap-2'>
-                <MiniMetric label='Créneaux' value={total} />
-                <MiniMetric label='Jours' value={6} />
-              </div>
-            </div>
-
-            <div className='inline-flex flex-wrap items-center justify-end gap-1.5'>
+      <div className='shrink-0 border-b border-[#26445a]/22 bg-[linear-gradient(135deg,#0d2234_0%,#16344e_58%,#1b4964_100%)] text-white'>
+        <div className='lg:hidden'>
+          <div className='flex items-center justify-between px-5 pt-2.5 pb-1 mt-[30px]'>
+            <div className='flex items-center gap-1.5'>
               <button
                 type='button'
                 onClick={() => {
@@ -209,10 +210,16 @@ function Planner() {
                   nextDate.setDate(nextDate.getDate() - 7)
                   setFilters({ ...filters, date: formatLocalDate(nextDate) })
                 }}
-                className='flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white transition hover:bg-white/12'
+                className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/60 backdrop-blur-sm transition hover:bg-white/[0.14] hover:text-white active:scale-90'
               >
-                <CaretLeft size={16} />
+                <CaretLeft size={8} />
               </button>
+              <span className='text-[12px] font-semibold text-white/70 tracking-tight'>
+                {weekDates[0].toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                }).replace('.', '')}
+              </span>
               <button
                 type='button'
                 onClick={() => {
@@ -220,24 +227,271 @@ function Planner() {
                   nextDate.setDate(nextDate.getDate() + 7)
                   setFilters({ ...filters, date: formatLocalDate(nextDate) })
                 }}
-                className='flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white transition hover:bg-white/12'
+                className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/60 backdrop-blur-sm transition hover:bg-white/[0.14] hover:text-white active:scale-90'
               >
-                <CaretRight size={16} />
+                <CaretRight size={8} />
               </button>
-              <label className='inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/8 px-3.5 py-2 text-sm text-white/80'>
-                <input
-                  type='date'
-                  onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                  value={filters.date}
-                  className='bg-transparent text-sm text-white outline-none'
-                />
-              </label>
+            </div>
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={() => {
+                  const today = new Date()
+                  const dayOfWeek = today.getDay()
+                  setMobileDayIdx(dayOfWeek === 0 ? 0 : dayOfWeek - 1)
+                  setFilters({ ...filters, date: formatLocalDate(new Date()) })
+                }}
+                className='text-[10px] font-semibold text-white/50 transition hover:text-white/80'
+              >
+                Auj
+              </button>
+              <div className='relative' ref={pickerRef}>
+                  <button
+                    type='button'
+                    onClick={() => setShowDatePicker(prev => !prev)}
+                    className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/50 backdrop-blur-sm transition hover:bg-white/[0.14] hover:text-white'
+                  >
+                    <CalendarBlank size={11} />
+                  </button>
+
+                  {showDatePicker && (() => {
+                    const viewDate = new Date(pickerDate.getFullYear(), pickerDate.getMonth() + pickerOffset, 1)
+                    const year = viewDate.getFullYear()
+                    const month = viewDate.getMonth()
+                    const daysInMonth = new Date(year, month + 1, 0).getDate()
+                    const firstDay = new Date(year, month, 1).getDay()
+                    const firstDayIdx = firstDay === 0 ? 6 : firstDay - 1
+                    const today = new Date()
+                    const blanks = Array.from({ length: firstDayIdx })
+                    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+                    const isToday = (d: number) =>
+                      year === today.getFullYear() && month === today.getMonth() && d === today.getDate()
+                    const isSelected = (d: number) =>
+                      year === pickerDate.getFullYear() && month === pickerDate.getMonth() && d === pickerDate.getDate()
+
+                    return (
+                      <div className='absolute right-0 top-full mt-2 z-50 w-[260px] rounded-xl border border-white/10 bg-[#0d2234] p-3 shadow-2xl backdrop-blur-xl'>
+                        <div className='mb-3 flex items-center justify-between'>
+                          <button
+                            type='button'
+                            onClick={(e) => { e.stopPropagation(); setPickerOffset(prev => prev - 1) }}
+                            className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/60 transition hover:bg-white/[0.14] hover:text-white'
+                          >
+                            <CaretLeft size={8} />
+                          </button>
+                          <span className='text-[11px] font-semibold text-white/80'>
+                            {viewDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                          </span>
+                          <button
+                            type='button'
+                            onClick={(e) => { e.stopPropagation(); setPickerOffset(prev => prev + 1) }}
+                            className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/60 transition hover:bg-white/[0.14] hover:text-white'
+                          >
+                            <CaretRight size={8} />
+                          </button>
+                        </div>
+
+                        <div className='mb-1 grid grid-cols-7'>
+                          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d) => (
+                            <div key={d} className='py-1 text-center text-[9px] font-semibold uppercase text-white/35'>
+                              {d}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className='grid grid-cols-7'>
+                          {blanks.map((_, i) => (
+                            <div key={`b${i}`} />
+                          ))}
+                          {days.map((d) => (
+                            <button
+                              key={d}
+                              type='button'
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const date = new Date(year, month, d)
+                                const dayOfWeek = date.getDay()
+                                setMobileDayIdx(dayOfWeek === 0 ? 0 : dayOfWeek - 1)
+                                setFilters({ ...filters, date: formatLocalDate(date) })
+                                setShowDatePicker(false)
+                              }}
+                              className={`rounded-full py-1 text-center text-[11px] font-semibold transition ${
+                                isSelected(d)
+                                  ? 'bg-primary text-white shadow-[0_2px_6px_rgba(46,144,192,0.3)]'
+                                  : isToday(d)
+                                    ? 'text-white/80 ring-1 ring-inset ring-white/20'
+                                    : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                              }`}
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+            </div>
+          </div>
+
+          <div className='flex gap-1 overflow-x-auto px-5 pb-2.5'>
+            {weekDates.map((date, idx) => {
+              const isToday = formatLocalDate(date) === formatLocalDate(new Date())
+              const isActive = idx === mobileDayIdx
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setMobileDayIdx(idx)}
+                  className='flex shrink-0 flex-col items-center gap-0.5 py-1 transition-all duration-200 min-w-[38px]'
+                >
+                  <span className={`text-[9px] font-semibold uppercase tracking-[0.1em] ${
+                    isActive ? 'text-white/80' : 'text-white/35'
+                  }`}>
+                    {DAY_LABELS[idx].slice(0, 3)}
+                  </span>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary text-white shadow-[0_2px_8px_rgba(46,144,192,0.35)]'
+                      : isToday
+                        ? 'text-white/70 ring-1 ring-inset ring-white/20'
+                        : 'text-white/45 hover:text-white/70'
+                  }`}>
+                    {date.toLocaleDateString('fr-FR', { day: '2-digit' })}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className='hidden lg:block px-6 py-3.5'>
+          <div className='flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between'>
+            <div className='space-y-2'>
+              <p className='text-[11px] uppercase tracking-[0.32em] text-white/48'>Légende des motifs</p>
+              <MotifLegend />
+            </div>
+
+            <div className='flex flex-col gap-1.5 xl:min-w-[27rem] xl:items-end'>
+              <div className='flex flex-col gap-3 rounded-[1.1rem] border border-white/10 bg-white/7 px-3 py-2 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between xl:min-w-[27rem]'>
+                <div>
+                  <p className='text-[10px] uppercase tracking-[0.26em] text-white/42'>Semaine active</p>
+                  <p className='mt-1 text-[13px] text-white'>{formatWeekLabel(filters.date)}</p>
+                </div>
+
+                <div className='grid grid-cols-2 gap-2'>
+                  <MiniMetric label='Créneaux' value={total} />
+                  <MiniMetric label='Jours' value={6} />
+                </div>
+              </div>
+
+              <div className='inline-flex flex-wrap items-center justify-end gap-1.5'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    const nextDate = parseLocalDate(filters.date)
+                    nextDate.setDate(nextDate.getDate() - 7)
+                    setFilters({ ...filters, date: formatLocalDate(nextDate) })
+                  }}
+                  className='flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white transition hover:bg-white/12'
+                >
+                  <CaretLeft size={16} />
+                </button>
+                <button
+                  type='button'
+                  onClick={() => {
+                    const nextDate = parseLocalDate(filters.date)
+                    nextDate.setDate(nextDate.getDate() + 7)
+                    setFilters({ ...filters, date: formatLocalDate(nextDate) })
+                  }}
+                  className='flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white transition hover:bg-white/12'
+                >
+                  <CaretRight size={16} />
+                </button>
+                <label className='inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/8 px-3.5 py-2 text-sm text-white/80'>
+                  <input
+                    type='date'
+                    onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                    value={filters.date}
+                    className='bg-transparent text-sm text-white outline-none'
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className='min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-2'>
+      <div className='lg:hidden flex-1 overflow-y-auto'>
+        {items[mobileDayIdx] ? (
+          <div className='divide-y divide-black/[0.04]'>
+            {PERIOD_LABELS.map((period) => {
+              const schedules = items[mobileDayIdx]?.[period.key] || []
+              return (
+                <div key={period.key} className='px-5 py-3'>
+                  <div className='mb-3 flex items-center gap-2'>
+                    <div className='h-2 w-2 rounded-full' style={{ backgroundColor: period.color }} />
+                    <span className='text-[11px] font-semibold text-secondary'>{period.label}</span>
+                    <span className='text-[10px] text-secondary/40'>{period.hours}</span>
+                    {schedules.length > 0 && (
+                      <span className='ml-auto text-[10px] font-medium text-secondary/40'>
+                        {schedules.length} créneau{schedules.length > 1 ? 'x' : ''}
+                      </span>
+                    )}
+                  </div>
+                  {schedules.length === 0 ? (
+                    <p className='py-6 text-center text-[11px] uppercase tracking-[0.12em] text-secondary/30'>
+                      Libre
+                    </p>
+                  ) : (
+                    <div className='space-y-1.5'>
+                      {schedules.map((schedule) => {
+                        const color = schedule.appointment?.motif?.color || period.color
+                        const key = `${schedule.datetime}-${schedule.session.id}`
+                        return (
+                          <button
+                            key={key}
+                            type='button'
+                            onClick={() => {
+                              setItem(schedule)
+                              toggleOpenShowModal()
+                              markOpened(key)
+                            }}
+                            className='flex w-full items-center gap-3 rounded-lg border border-black/[0.04] bg-white px-3 py-2.5 text-left transition hover:border-primary/20'
+                          >
+                            <div
+                              className='shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold text-white'
+                              style={{ backgroundColor: color }}
+                            >
+                              {formatTimeOnly(schedule.datetime)}
+                            </div>
+                            <div className='min-w-0 flex-1'>
+                              <p className='truncate text-[12px] font-medium text-secondary'>
+                                {schedule.appointment?.motif?.name || schedule.session.service.name}
+                              </p>
+                              <p className='text-[10px] text-secondary/40'>
+                                {schedule.session.service.name} · S{schedule.session.session}
+                              </p>
+                            </div>
+                            {!isOpened(key) && (
+                              <div className='h-2 w-2 shrink-0 rounded-full' style={{ backgroundColor: color }} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className='flex h-full items-center justify-center text-[12px] uppercase tracking-[0.16em] text-secondary/30'>
+            Aucun rendez-vous
+          </div>
+        )}
+      </div>
+
+      <div className='hidden lg:block min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-2'>
           <div className='grid h-full min-w-[980px] grid-cols-[7rem_repeat(6,minmax(0,1fr))] grid-rows-[4.9rem_repeat(3,minmax(0,1fr))] overflow-hidden rounded-xl border border-black/[0.04] bg-secondary/[0.01]'>
             <div className='sticky left-0 z-20 border-b border-r border-black/[0.04] bg-white px-3.5 py-3'>
               <p className='text-[10px] uppercase tracking-[0.2em] text-secondary/40'>Périodes</p>

@@ -71,7 +71,7 @@ export default function BackOfficeLayout() {
       <div className='flex flex-1 min-h-0 w-full'>
         <Sidebar isPreview={isPreview} sidebarOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <section className='flex-1 min-w-0 overflow-hidden'>
-          <div className={isDashboard ? 'h-full overflow-hidden' : 'h-full px-3 py-3 sm:px-4 sm:py-4 overflow-auto'}>
+          <div className={isDashboard ? 'h-full overflow-hidden' : 'h-full overflow-auto'}>
             <Outlet />
           </div>
         </section>

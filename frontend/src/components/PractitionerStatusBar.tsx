@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { SignOut as LogOut, ArrowRight } from '@phosphor-icons/react'
+import { SignOut as LogOut, ArrowRight, CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/api'
 
@@ -105,22 +105,32 @@ export default function PractitionerStatusBar() {
   if (!isPractitioner) return null
 
   return (
-    <div className='shrink-0 border-t border-secondary/10 bg-secondary/[0.03] px-3 py-3 sm:px-4'>
-      <div className='grid gap-2 md:grid-cols-[minmax(160px,auto)_minmax(0,1fr)_minmax(0,1fr)_minmax(160px,auto)_auto] md:items-stretch'>
-        <div className='group relative flex min-w-0 items-center gap-3 rounded-2xl border border-secondary/8 bg-white/70 px-4 py-3 md:rounded-none md:border-0 md:border-r md:bg-transparent md:px-5 md:py-0'>
+    <div className='shrink-0 border-t border-secondary/10 bg-secondary/[0.03] px-3 py-2 sm:px-4 sm:py-3'>
+      <div className='flex flex-col md:grid md:grid-cols-[minmax(160px,auto)_minmax(0,1fr)_minmax(0,1fr)_minmax(160px,auto)_auto] md:items-stretch'>
+        {/* Mobile: compact carousel-like bar */}
+        <MobileBottomBar
+          user={user}
+          todayTotal={todayTotal}
+          current={current}
+          next={next}
+          logout={logout}
+          openScheduleModal={openScheduleModal}
+        />
+
+        {/* Desktop layout */}
+        <div className='hidden group relative min-w-0 items-center gap-3 md:flex md:border-r md:border-secondary/8 md:px-5 md:py-0'>
           <div className='w-8 h-8 rounded-full bg-primary/12 flex items-center justify-center shrink-0'>
             <span className='text-xs font-semibold text-primary'>{user?.name?.charAt(0) || '?'}</span>
           </div>
           <div className='min-w-0'>
             <p className='text-sm font-semibold text-secondary truncate'>{user?.name}</p>
             <button
-              onClick={() => logout().then(() => window.location.href = '/')}
+              onClick={() => logout().then(() => window.location.href = '/login')}
               className='flex items-center gap-1 text-[11px] text-secondary/40 hover:text-red-500 transition-colors'
             >
               <LogOut size={11} /> Déconnexion
             </button>
           </div>
-          {/* Tooltip */}
           <div className='pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 translate-y-0 opacity-0 group-hover:-top-9 group-hover:opacity-100 transition-all duration-200 z-50'>
             <div className='rounded-lg bg-secondary px-3 py-1.5 text-white text-[11px] leading-snug whitespace-nowrap shadow-md'>
               {user?.role === 'DOCTOR' ? 'Médecin' : user?.role === 'PRACTITIONER' ? 'Praticien' : user?.role} · {user?.name}
@@ -132,7 +142,7 @@ export default function PractitionerStatusBar() {
         <button
           type='button'
           onClick={() => current && openScheduleModal(current)}
-          className='group relative flex min-w-0 items-center gap-3 rounded-2xl border border-secondary/8 bg-white/70 px-4 py-3 md:rounded-none md:border-0 md:border-r md:bg-transparent md:px-5 md:py-0 text-left w-full'
+          className='hidden group relative min-w-0 items-center gap-3 md:flex md:border-r md:border-secondary/8 md:px-5 md:py-0 text-left w-full'
         >
           <div className='h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0' />
           <div className='min-w-0'>
@@ -148,7 +158,6 @@ export default function PractitionerStatusBar() {
               <p className='text-xs text-secondary/35 mt-0.5'>Aucun rendez-vous</p>
             )}
           </div>
-          {/* Tooltip */}
           {current && (
             <div className='pointer-events-none absolute -top-2 left-5 opacity-0 group-hover:-top-[52px] group-hover:opacity-100 transition-all duration-200 z-50'>
               <div className='rounded-lg px-3 py-2 text-white text-[11px] leading-snug whitespace-nowrap shadow-md' style={{ backgroundColor: current.motif?.color || '#3b82f6' }}>
@@ -163,7 +172,7 @@ export default function PractitionerStatusBar() {
         <button
           type='button'
           onClick={() => next && openScheduleModal(next)}
-          className='group relative flex min-w-0 items-center gap-3 rounded-2xl border border-secondary/8 bg-white/70 px-4 py-3 md:rounded-none md:border-0 md:border-r md:bg-transparent md:px-5 md:py-0 text-left w-full'
+          className='hidden group relative min-w-0 items-center gap-3 md:flex md:border-r md:border-secondary/8 md:px-5 md:py-0 text-left w-full'
         >
           <div className='h-2 w-2 rounded-full bg-primary shrink-0' />
           <div className='min-w-0'>
@@ -179,7 +188,6 @@ export default function PractitionerStatusBar() {
               <p className='text-xs text-secondary/35 mt-0.5'>Aucun rendez-vous</p>
             )}
           </div>
-          {/* Tooltip */}
           {next && (
             <div className='pointer-events-none absolute -top-2 left-5 opacity-0 group-hover:-top-[52px] group-hover:opacity-100 transition-all duration-200 z-50'>
               <div className='rounded-lg px-3 py-2 text-white text-[11px] leading-snug whitespace-nowrap shadow-md' style={{ backgroundColor: next.motif?.color || '#3b82f6' }}>
@@ -191,7 +199,7 @@ export default function PractitionerStatusBar() {
           )}
         </button>
 
-        <div className='group relative flex min-w-0 items-center gap-3 rounded-2xl border border-secondary/8 bg-white/70 px-4 py-3 md:rounded-none md:border-0 md:bg-transparent md:px-5 md:py-0'>
+        <div className='hidden group relative min-w-0 items-center gap-3 md:flex md:px-5 md:py-0'>
           <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 shrink-0'>
             <span className='text-base font-bold text-primary'>{todayTotal}</span>
           </div>
@@ -199,7 +207,6 @@ export default function PractitionerStatusBar() {
             <p className='text-[10px] uppercase tracking-[0.18em] text-secondary/40 font-semibold'>Aujourd'hui</p>
             <p className='text-xs text-secondary/60 mt-0.5'>Rendez-vous</p>
           </div>
-          {/* Tooltip */}
           <div className='pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:-top-9 group-hover:opacity-100 transition-all duration-200 z-50'>
             <div className='rounded-lg bg-secondary px-3 py-1.5 text-white text-[11px] leading-snug whitespace-nowrap shadow-md'>
               {todayTotal} rendez-vous aujourd'hui
@@ -208,13 +215,132 @@ export default function PractitionerStatusBar() {
           </div>
         </div>
 
-        <div className='flex items-center justify-end px-1 md:px-4'>
+        <div className='hidden items-center justify-end px-4 md:flex'>
           <Link
-            to='/back-office/appointments'
+            to='/back-office/patients'
             className='flex w-full items-center justify-center gap-1.5 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-xs font-semibold text-primary/80 transition-colors hover:text-primary md:w-auto md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0'
           >
             Voir tous <ArrowRight size={12} />
           </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileBottomBar({
+  user, todayTotal, current, next, logout, openScheduleModal,
+}: {
+  user: any; todayTotal: number; current: any; next: any;
+  logout: () => Promise<void>; openScheduleModal: (appt: any) => void;
+}) {
+  const [tab, setTab] = useState(0)
+  const tabs = [
+    {
+      id: 'now',
+      label: 'Maintenant',
+      color: 'emerald',
+      data: current,
+      empty: 'Aucun rendez-vous',
+    },
+    {
+      id: 'next',
+      label: 'Suivant',
+      color: 'primary',
+      data: next,
+      empty: 'Aucun rendez-vous',
+    },
+    {
+      id: 'today',
+      label: 'Aujourd\'hui',
+      color: 'secondary',
+      data: { count: todayTotal },
+      isCount: true,
+    },
+  ]
+  const active = tabs[tab]
+
+  return (
+    <div className='md:hidden'>
+      {/* Mini top bar: user + pills */}
+      <div className='flex items-center gap-2 px-1 pb-2'>
+        <div className='flex items-center gap-2 min-w-0 flex-1'>
+          <div className='w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center shrink-0'>
+            <span className='text-[9px] font-semibold text-primary'>{user?.name?.charAt(0) || '?'}</span>
+          </div>
+          <span className='text-[11px] font-semibold text-secondary truncate'>{user?.name}</span>
+        </div>
+        <div className='flex items-center gap-1'>
+          <span className='text-[10px] text-secondary/40 mr-1'>{todayTotal} aujourd'hui</span>
+          <button
+            onClick={() => logout().then(() => window.location.href = '/login')}
+            className='shrink-0 p-1 rounded-lg text-secondary/30 hover:text-red-500 transition-colors'
+          >
+            <LogOut size={12} />
+          </button>
+          <Link
+            to='/back-office/patients'
+            className='shrink-0 flex items-center gap-0.5 rounded-lg bg-primary/5 px-2 py-1 text-[9px] font-semibold text-primary/80'
+          >
+            Voir <ArrowRight size={8} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Tab dots + prev/next */}
+      <div className='flex items-center gap-2'>
+        <button
+          onClick={() => setTab(t => Math.max(0, t - 1))}
+          disabled={tab === 0}
+          className='shrink-0 w-6 h-6 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/30 hover:text-secondary disabled:opacity-20 disabled:cursor-not-allowed transition-all'
+        >
+          <CaretLeft size={12} />
+        </button>
+
+        <div className='flex items-center gap-1'>
+          {tabs.map((t, i) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(i)}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i === tab ? 'w-5 bg-primary' : 'w-1 bg-secondary/15'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={() => setTab(t => Math.min(tabs.length - 1, t + 1))}
+          disabled={tab === tabs.length - 1}
+          className='shrink-0 w-6 h-6 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/30 hover:text-secondary disabled:opacity-20 disabled:cursor-not-allowed transition-all'
+        >
+          <CaretRight size={12} />
+        </button>
+
+        {/* Active content */}
+        <div className='flex-1 min-w-0'>
+          {active.isCount ? (
+            <div className='flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1.5'>
+              <span className='text-sm font-bold text-primary'>{todayTotal}</span>
+              <span className='text-[9px] text-primary/60 uppercase tracking-wider'>RDV aujourd'hui</span>
+            </div>
+          ) : (
+            <button
+              type='button'
+              onClick={() => active.data && openScheduleModal(active.data)}
+              className='w-full rounded-lg border border-secondary/8 bg-white/70 px-2 py-1.5 text-left'
+            >
+              <div className='flex items-center gap-1.5'>
+                <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${active.id === 'now' ? 'bg-emerald-500 animate-pulse' : 'bg-primary'}`} />
+                <span className='text-[8px] uppercase tracking-[0.16em] text-secondary/40 font-semibold'>{active.label}</span>
+              </div>
+              {active.data ? (
+                <p className='text-[11px] font-medium text-secondary truncate mt-0.5'>{active.data.patient?.firstName || active.data.name || 'Patient'}</p>
+              ) : (
+                <p className='text-[10px] text-secondary/35 mt-0.5'>{active.empty}</p>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

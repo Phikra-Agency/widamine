@@ -52,7 +52,8 @@ function Table() {
   const { items, fetchItems, setOperation, openModal, setItem } = useMotifsStore()
   useEffect(() => { fetchItems() }, [])
   return (
-    <table className='w-full text-sm'>
+    <div className='overflow-x-auto'>
+      <table className='w-full text-sm'>
       <thead>
         <tr className='border-b border-black/[0.04]'>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</th>
@@ -78,6 +79,7 @@ function Table() {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }
 
