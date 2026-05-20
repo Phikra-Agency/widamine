@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { SignOut as LogOut, ArrowRight, CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { SignOut as LogOut, ArrowRight, CaretDown, CaretUp } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import api from '@/lib/api'
 
 interface AppointmentItem {
@@ -234,115 +235,128 @@ function MobileBottomBar({
   user: any; todayTotal: number; current: any; next: any;
   logout: () => Promise<void>; openScheduleModal: (appt: any) => void;
 }) {
+  const [open, setOpen] = useState(false)
   const [tab, setTab] = useState(0)
   const tabs = [
     {
       id: 'now',
       label: 'Maintenant',
-      color: 'emerald',
       data: current,
       empty: 'Aucun rendez-vous',
     },
     {
       id: 'next',
       label: 'Suivant',
-      color: 'primary',
       data: next,
       empty: 'Aucun rendez-vous',
-    },
-    {
-      id: 'today',
-      label: 'Aujourd\'hui',
-      color: 'secondary',
-      data: { count: todayTotal },
-      isCount: true,
     },
   ]
   const active = tabs[tab]
 
   return (
     <div className='md:hidden'>
-      {/* Mini top bar: user + pills */}
-      <div className='flex items-center gap-2 px-1 pb-2'>
-        <div className='flex items-center gap-2 min-w-0 flex-1'>
-          <div className='w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center shrink-0'>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div className='w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0'>
             <span className='text-[9px] font-semibold text-primary'>{user?.name?.charAt(0) || '?'}</span>
           </div>
-          <span className='text-[11px] font-semibold text-secondary truncate'>{user?.name}</span>
-        </div>
-        <div className='flex items-center gap-1'>
-          <span className='text-[10px] text-secondary/40 mr-1'>{todayTotal} aujourd'hui</span>
-          <button
-            onClick={() => logout().then(() => window.location.href = '/login')}
-            className='shrink-0 p-1 rounded-lg text-secondary/30 hover:text-red-500 transition-colors'
-          >
-            <LogOut size={12} />
-          </button>
-          <Link
-            to='/back-office/patients'
-            className='shrink-0 flex items-center gap-0.5 rounded-lg bg-primary/5 px-2 py-1 text-[9px] font-semibold text-primary/80'
-          >
-            Voir <ArrowRight size={8} />
-          </Link>
-        </div>
-      </div>
-
-      {/* Tab dots + prev/next */}
-      <div className='flex items-center gap-2'>
-        <button
-          onClick={() => setTab(t => Math.max(0, t - 1))}
-          disabled={tab === 0}
-          className='shrink-0 w-6 h-6 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/30 hover:text-secondary disabled:opacity-20 disabled:cursor-not-allowed transition-all'
-        >
-          <CaretLeft size={12} />
-        </button>
-
-        <div className='flex items-center gap-1'>
-          {tabs.map((t, i) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(i)}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                i === tab ? 'w-5 bg-primary' : 'w-1 bg-secondary/15'
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          onClick={() => setTab(t => Math.min(tabs.length - 1, t + 1))}
-          disabled={tab === tabs.length - 1}
-          className='shrink-0 w-6 h-6 rounded-lg border border-black/[0.06] flex items-center justify-center text-secondary/30 hover:text-secondary disabled:opacity-20 disabled:cursor-not-allowed transition-all'
-        >
-          <CaretRight size={12} />
-        </button>
-
-        {/* Active content */}
-        <div className='flex-1 min-w-0'>
-          {active.isCount ? (
-            <div className='flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1.5'>
-              <span className='text-sm font-bold text-primary'>{todayTotal}</span>
-              <span className='text-[9px] text-primary/60 uppercase tracking-wider'>RDV aujourd'hui</span>
-            </div>
-          ) : (
-            <button
-              type='button'
-              onClick={() => active.data && openScheduleModal(active.data)}
-              className='w-full rounded-lg border border-secondary/8 bg-white/70 px-2 py-1.5 text-left'
-            >
-              <div className='flex items-center gap-1.5'>
-                <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${active.id === 'now' ? 'bg-emerald-500 animate-pulse' : 'bg-primary'}`} />
-                <span className='text-[8px] uppercase tracking-[0.16em] text-secondary/40 font-semibold'>{active.label}</span>
-              </div>
-              {active.data ? (
-                <p className='text-[11px] font-medium text-secondary truncate mt-0.5'>{active.data.patient?.firstName || active.data.name || 'Patient'}</p>
-              ) : (
-                <p className='text-[10px] text-secondary/35 mt-0.5'>{active.empty}</p>
-              )}
-            </button>
+          <span className='text-[11px] font-semibold text-secondary truncate max-w-[100px]'>{user?.name}</span>
+          {open && (
+            <span className='text-[10px] text-secondary/40 font-medium'>{todayTotal} aujourd'hui</span>
           )}
         </div>
+        <div className='flex items-center gap-1'>
+          {open && (
+            <div className='flex items-center gap-1.5 mr-1'>
+              <Link
+                to='/back-office/patients'
+                className='flex items-center gap-0.5 rounded-lg bg-primary/8 px-2 py-1 text-[9px] font-semibold text-primary/70'
+              >
+                Patients <ArrowRight size={8} />
+              </Link>
+              <button
+                onClick={() => logout().then(() => window.location.href = '/login')}
+                className='shrink-0 p-1 rounded-lg text-secondary/25 hover:text-red-500 transition-colors'
+              >
+                <LogOut size={11} />
+              </button>
+            </div>
+          )}
+          <button
+            type='button'
+            onClick={() => setOpen(prev => !prev)}
+            className='flex h-6 w-6 items-center justify-center rounded-lg text-secondary/40 hover:text-secondary hover:bg-black/[0.04] transition-all'
+          >
+            <CaretDown size={12} className={`transition-transform duration-200 ${open ? '' : '-rotate-180'}`} />
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key='mobile-bar-content'
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className='overflow-hidden'
+          >
+            <div className='pt-2 space-y-1.5'>
+          <div className='flex gap-2'>
+            {tabs.map((t, i) => {
+              const isNow = t.id === 'now'
+              const isActive = i === tab
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(i)}
+                  className={`flex-1 flex items-center gap-2 rounded-xl border px-2.5 py-2 transition-all duration-200 min-w-0 ${
+                    isActive
+                      ? 'border-primary/25 bg-white shadow-sm'
+                      : 'border-black/[0.04] bg-white/50 text-secondary/40'
+                  }`}
+                >
+                  <div className={`h-2 w-2 shrink-0 rounded-full ${isNow ? 'bg-emerald-500' : 'bg-primary'} ${isNow && isActive ? 'animate-pulse' : ''}`} />
+                  <span className='text-[9px] uppercase tracking-[0.12em] font-semibold truncate'>{t.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div>
+            {active.data ? (
+              <button
+                type='button'
+                onClick={() => openScheduleModal(active.data)}
+                className='w-full rounded-lg border border-black/[0.04] bg-white/70 px-3 py-2 text-left transition hover:border-primary/20'
+              >
+                <div className='flex items-center gap-2'>
+                  <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${active.id === 'now' ? 'bg-emerald-500 animate-pulse' : 'bg-primary'}`} />
+                  <span className='text-[10px] uppercase tracking-[0.12em] text-secondary/40 font-semibold'>{active.label}</span>
+                  <span className='text-[10px] text-secondary/30'>·</span>
+                  <span className='text-[10px] text-secondary/50'>{active.data.resource?.name || 'Salle 1'}</span>
+                  {active.data.motif?.name && (
+                    <>
+                      <span className='text-[10px] text-secondary/30'>·</span>
+                      <MotifPill name={active.data.motif.name} color={active.data.motif.color} />
+                    </>
+                  )}
+                </div>
+                <p className='text-[12px] font-semibold text-secondary mt-1'>
+                  {active.data.patient?.firstName || active.data.name || 'Patient'}
+                </p>
+              </button>
+            ) : (
+              <div className='rounded-lg border border-dashed border-black/[0.06] bg-white/40 px-3 py-2.5 text-center'>
+                <p className='text-[10px] text-secondary/30'>{active.empty}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+      )}
+    </AnimatePresence>
     </div>
   )
 }
