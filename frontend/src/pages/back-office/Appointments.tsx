@@ -14,7 +14,7 @@ export default function Appointments() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className='bo-page'
     >
       <div className='bo-page-inner bo-page-stack p-3 sm:p-4 lg:p-6'>

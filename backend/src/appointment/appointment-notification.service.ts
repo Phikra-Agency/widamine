@@ -165,7 +165,9 @@ export class AppointmentNotificationService {
     const doctor = await this.prisma.user.findUnique({
       where: { id: appointment.practitionerId },
     });
-    if (!doctor?.email) return;
+    if (!doctor) return;
+    const doctorEmail = doctor.notificationEmail ?? doctor.email;
+    if (!doctorEmail) return;
 
     const date = appointment.schedules[0]
       ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
@@ -178,7 +180,7 @@ export class AppointmentNotificationService {
       : "à planifier";
 
     await this.mailService.sendMail(
-      doctor.email,
+      doctorEmail,
       `Nouvelle réservation — ${appointment.service?.name || "Widamine"}`,
       `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -210,7 +212,9 @@ export class AppointmentNotificationService {
     const doctor = await this.prisma.user.findUnique({
       where: { id: appointment.practitionerId },
     });
-    if (!doctor?.email) return;
+    if (!doctor) return;
+    const doctorEmail = doctor.notificationEmail ?? doctor.email;
+    if (!doctorEmail) return;
 
     const date = appointment.schedules[0]
       ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
@@ -223,7 +227,7 @@ export class AppointmentNotificationService {
       : "";
 
     await this.mailService.sendMail(
-      doctor.email,
+      doctorEmail,
       `Rendez-vous annulé — ${appointment.service?.name || "Widamine"}`,
       `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

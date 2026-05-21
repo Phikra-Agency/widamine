@@ -11,7 +11,7 @@
     "start": "node ./node_modules/@nestjs/cli/bin/nest.js start",
     "start:dev": "node ./node_modules/@nestjs/cli/bin/nest.js start --watch",
     "start:debug": "node ./node_modules/@nestjs/cli/bin/nest.js start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "reset": "prisma migrate reset",

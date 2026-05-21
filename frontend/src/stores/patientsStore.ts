@@ -157,10 +157,16 @@ export const usePatientStore = create<PatientStoreInterface>((set, get) => ({
     set({ items: res.data })
   },
   saveItem: async () => {
+    const raw = get().item as any
+    const payload = { ...raw }
+    if (!payload.dateOfBirth) delete payload.dateOfBirth
+    if (!payload.gender) delete payload.gender
+    if (!payload.email) delete payload.email
+    delete payload.id
     if (get().operation === 'edit') {
-      await api.put('patients/' + (get().item as any).id, get().item)
+      await api.put('patients/' + (get().item as any).id, payload)
     } else {
-      await api.post('patients', get().item)
+      await api.post('patients', payload)
     }
     get().fetchItems()
     get().closeModal()

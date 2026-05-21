@@ -64,35 +64,11 @@ function formatWeekLabel(date: string) {
   })}`
 }
 
-function formatDateTimeLabel(value?: string) {
-  if (!value) return 'Date non définie'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date non définie'
-
-  return date.toLocaleString('fr-FR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 function formatTimeOnly(value?: string) {
   if (!value) return '--:--'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '--:--'
-
-  return date.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-function formatReservationOrder(value: number) {
-  if (value <= 0) return '-'
-  if (value === 1) return '1ère'
-  return `${value}e`
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
 export default function Calendar() {
@@ -100,7 +76,7 @@ export default function Calendar() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className='bo-page'
     >
       <div className='bo-page-inner flex h-full flex-col text-secondary p-0 lg:p-6'>
@@ -639,12 +615,6 @@ function Planner() {
   )
 }
 
-function getPeriodFromHour(hour: number): 'morning' | 'afternoon' | 'evening' {
-  if (hour < 12) return 'morning'
-  if (hour < 16) return 'afternoon'
-  return 'evening'
-}
-
 function MiniMetric({ label, value }: { label: string; value: number }) {
   return (
     <div className='rounded-[0.95rem] border border-white/10 bg-white/8 px-3 py-2.5'>
@@ -654,11 +624,4 @@ function MiniMetric({ label, value }: { label: string; value: number }) {
   )
 }
 
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div className='rounded-lg border border-black/[0.04] bg-secondary/[0.01] p-4'>
-      <div className='mb-1 text-[10px] uppercase tracking-[0.16em] text-secondary/40'>{label}</div>
-      <div className='text-sm leading-6 text-secondary'>{value}</div>
-    </div>
-  )
-}
+

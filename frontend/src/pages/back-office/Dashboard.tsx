@@ -1,5 +1,6 @@
 import api from '@/lib/api'
 import { useAuthStore } from '@/stores/authStore'
+import { useStatsStore } from '@/stores/statsStore'
 import {
   ArrowRight,
   CalendarDots as CalendarClock,
@@ -37,17 +38,19 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.03,
+      staggerChildren: 0.035,
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.22, ease: [0.21, 1, 0.36, 1] as const },
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
   },
 }
 
@@ -161,6 +164,7 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 
 export default function Dashboard() {
   const { user } = useAuthStore()
+  const { setStats: setSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
   const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS)
   const [confirming, setConfirming] = useState<string | null>(null)
@@ -176,8 +180,11 @@ export default function Dashboard() {
   const [practitioners, setPractitioners] = useState<OptionItem[]>([])
 
   const fetchStats = useCallback(() => {
-    api.get('dashboard/stats').then((res) => setStats(res.data))
-  }, [])
+    api.get('dashboard/stats').then((res) => {
+      setStats(res.data)
+      setSharedStats(res.data)
+    })
+  }, [setSharedStats])
 
   useEffect(() => {
     fetchStats()
@@ -752,7 +759,7 @@ function ApptActionCard({
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onDetails()}
-      className='group px-3 py-2.5 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer border-b border-black/[0.03] last:border-b-0 sm:px-4 sm:py-3 md:grid md:grid-cols-[3.25rem_minmax(0,1fr)_12rem] md:items-start md:gap-4 lg:grid-cols-[3.25rem_minmax(0,1fr)_auto] lg:items-center'
+      className='group flex flex-col gap-3 px-4 py-3 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer border-b border-black/[0.03] last:border-b-0 md:grid md:grid-cols-[3.25rem_minmax(0,1fr)_12rem] md:items-start md:gap-4 lg:grid-cols-[3.25rem_minmax(0,1fr)_auto] lg:items-center'
     >
       <div className='flex items-start gap-3 md:block md:min-w-[46px] md:text-right'>
         <p className='shrink-0 text-[11px] font-bold text-secondary/50'>{item.scheduleDate ? formatTime(item.scheduleDate) : '—'}</p>
@@ -778,28 +785,37 @@ function ApptActionCard({
       </div>
 
       <div
-        className='flex w-full gap-1.5 shrink-0 md:w-48 md:justify-self-end lg:flex lg:w-auto lg:flex-nowrap lg:items-center'
+        className='grid w-full grid-cols-1 gap-2 shrink-0 md:w-48 md:justify-self-end lg:flex lg:w-auto lg:flex-nowrap lg:items-center'
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          onClick={(e) => { e.stopPropagation(); onDetails() }}
-          className='flex-1 rounded-lg border border-black/[0.08] bg-white px-2 py-1.5 text-[9px] font-medium text-secondary/50 transition-colors hover:text-secondary hover:border-black/[0.14] sm:px-3 sm:py-2 sm:text-[10px] lg:w-auto lg:px-3 lg:py-1.5'
+          onClick={(e) => {
+            e.stopPropagation()
+            onDetails()
+          }}
+          className='w-full rounded-lg border border-black/[0.08] bg-white px-3 py-2 text-[10px] font-medium text-secondary/50 transition-colors hover:text-secondary hover:border-black/[0.14] lg:w-auto lg:px-3 lg:py-1.5'
         >
-          Détails
+          Voir détails
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); onConfirm('CONFIRMED') }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onConfirm('CONFIRMED')
+          }}
           disabled={confirming}
-          className='flex-1 rounded-lg bg-emerald-50 px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-[10px] lg:w-auto lg:px-4 lg:py-1.5'
+          className='w-full rounded-lg bg-emerald-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 lg:w-auto lg:px-4 lg:py-1.5'
         >
-          Oui
+          Confirmer
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); onConfirm('CANCELLED') }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onConfirm('CANCELLED')
+          }}
           disabled={confirming}
-          className='flex-1 rounded-lg bg-rose-50 px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50 sm:px-3 sm:py-2 sm:text-[10px] lg:w-auto lg:px-3 lg:py-1.5'
+          className='w-full rounded-lg bg-rose-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50 lg:w-auto lg:px-3 lg:py-1.5'
         >
-          Non
+          Refuser
         </button>
       </div>
     </div>

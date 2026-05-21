@@ -77,9 +77,6 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   },
   closeModal: () => {
     set({ modalOpen: false })
-    setTimeout(() => {
-      get().clearItem()
-    }, 300)
   },
   setOperation: (operation) => {
     set({ operation })

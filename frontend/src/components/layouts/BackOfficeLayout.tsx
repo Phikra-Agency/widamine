@@ -159,8 +159,7 @@ function Sidebar({
           </div>
         </nav>
 
-        {user?.role !== 'DOCTOR' && user?.role !== 'PRACTITIONER' && (
-          <div className='border-t border-secondary/10 p-4 bg-secondary/5'>
+        <div className={`border-t border-secondary/10 p-4 bg-secondary/5 ${user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER' ? 'xl:hidden' : ''}`}>
             <button
               onClick={() => navigate('/')}
               className='mb-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-secondary/60 transition-colors hover:text-secondary hover:bg-secondary/5'
@@ -201,7 +200,6 @@ function Sidebar({
               </Link>
             )}
           </div>
-        )}
       </aside>
     </>
   )

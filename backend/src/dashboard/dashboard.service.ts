@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/prisma/prisma.service";
 
 const apptInclude = {
-  patient: { select: { firstName: true, lastName: true, phone: true } },
+  patient: { select: { id: true, firstName: true, lastName: true, phone: true } },
   service: { select: { name: true } },
   practitioner: { select: { name: true } },
   motif: { select: { name: true, color: true } },

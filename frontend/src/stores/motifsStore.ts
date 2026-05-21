@@ -30,16 +30,17 @@ export const useMotifsStore = create<MotifStoreInterface>((set, get) => ({
   operation: 'create' as MotifStoreInterface['operation'],
   modalOpen: false,
   setItem: (item: Motif) => {
-    const practitionerIds = item.practitionerAssignments 
-      ? item.practitionerAssignments.map(a => a.practitionerId) 
-      : item.practitionerIds || [];
-    set({ item: { ...item, practitionerIds } });
+    const practitionerIds = item.practitionerIds 
+      ?? (item.practitionerAssignments 
+        ? item.practitionerAssignments.map(a => a.practitionerId) 
+        : []);
+    const { practitionerAssignments, ...clean } = item;
+    set({ item: { ...clean, practitionerIds } });
   },
   clearItem: () => set({ item: { name: '', duration: 30, practitionerIds: [] } }),
   openModal: () => set({ modalOpen: true }),
   closeModal: () => {
     set({ modalOpen: false })
-    setTimeout(() => get().clearItem(), 300)
   },
   setOperation: (operation) => set({ operation }),
   fetchItems: async () => {

@@ -1,7 +1,8 @@
 import api from '@/lib/api'
+import axios from 'axios'
 import { Bell, EnvelopeSimple, Phone } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type NotificationType = 'confirmation' | 'reminder' | 'cancellation'
 type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'inAppEnabled'
@@ -23,9 +24,9 @@ interface NotificationSettings {
 }
 
 const reveal = {
-  initial: { opacity: 0, y: 10 },
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const },
+  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
@@ -44,6 +45,9 @@ export default function Settings() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savingRef = useRef(false)
+
   useEffect(() => {
     setLoading(true)
     api
@@ -57,26 +61,42 @@ export default function Settings() {
       .finally(() => setLoading(false))
   }, [])
 
-  const persistSettings = async (next: NotificationSettings, previous: NotificationSettings) => {
+  const persistSettings = async (next: NotificationSettings) => {
+    if (savingRef.current) return
+    savingRef.current = true
     setSaving(true)
-    setSuccess('')
-    setError('')
+
     try {
       const res = await api.put<NotificationSettings>('settings/notifications', next)
       setSettings(res.data)
+      setError('')
       setSuccess('Enregistré automatiquement.')
-    } catch {
-      setSettings(previous)
-      setError("Échec d'enregistrement de la configuration.")
+    } catch (err) {
+      setSuccess('')
+      const detail =
+        axios.isAxiosError(err) && err.response?.data?.message
+          ? Array.isArray(err.response.data.message)
+            ? err.response.data.message.join(', ')
+            : err.response.data.message
+          : "Échec d'enregistrement de la configuration."
+      setError(detail)
     } finally {
+      savingRef.current = false
       setSaving(false)
     }
+  }
+
+  const scheduleSave = (next: NotificationSettings) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    setSuccess('')
+    setError('')
+    debounceRef.current = setTimeout(() => persistSettings(next), 500)
   }
 
   const toggleChannel = (key: EnabledKey) => {
     setSettings((prev) => {
       const next = { ...prev, [key]: !prev[key] }
-      void persistSettings(next, prev)
+      scheduleSave(next)
       return next
     })
   }
@@ -90,16 +110,16 @@ export default function Settings() {
           [type]: !prev[channel][type],
         },
       }
-      void persistSettings(next, prev)
+      scheduleSave(next)
       return next
     })
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className='bo-page'
     >
       <div className='bo-page-inner bo-page-stack'>

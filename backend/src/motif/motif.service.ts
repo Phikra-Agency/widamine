@@ -7,9 +7,9 @@ export class MotifService {
 
   async create(data: {
     name: string;
-    slug: string;
-    bookingType: string;
-    serviceId: string;
+    slug?: string;
+    bookingType?: string;
+    serviceId?: string;
     duration?: number;
     description?: string;
     color?: string;
@@ -20,23 +20,29 @@ export class MotifService {
       description, color, practitionerIds 
     } = data;
 
-    return this.prisma.motif.create({
+    const motif = await this.prisma.motif.create({
       data: {
         name,
-        slug,
-        bookingType,
-        serviceId,
+        slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        bookingType: bookingType || 'STANDARD',
+        serviceId: serviceId || '000000000000000000000000',
         duration: duration || 30,
         description,
         color,
-        practitionerAssignments: practitionerIds
-          ? {
-              create: practitionerIds.map((pid) => ({
-                practitionerId: pid,
-              })),
-            }
-          : undefined,
       },
+    });
+
+    if (practitionerIds?.length) {
+      for (const pid of practitionerIds) {
+        await this.prisma.motifPractitioner.create({
+          data: { motifId: motif.id, practitionerId: pid },
+        });
+      }
+    }
+
+    return this.prisma.motif.findUnique({
+      where: { id: motif.id },
+      include: { service: true, practitionerAssignments: true },
     });
   }
 
@@ -78,7 +84,7 @@ export class MotifService {
       description, isActive, color, practitionerIds 
     } = data;
 
-    return this.prisma.motif.update({
+    await this.prisma.motif.update({
       where: { id },
       data: {
         name,
@@ -89,19 +95,26 @@ export class MotifService {
         description,
         isActive,
         color,
-        practitionerAssignments: practitionerIds
-          ? {
-              deleteMany: {},
-              create: practitionerIds.map((pid) => ({
-                practitionerId: pid,
-              })),
-            }
-          : undefined,
       },
+    });
+
+    if (practitionerIds !== undefined) {
+      await this.prisma.motifPractitioner.deleteMany({ where: { motifId: id } });
+      for (const pid of practitionerIds) {
+        await this.prisma.motifPractitioner.create({
+          data: { motifId: id, practitionerId: pid },
+        });
+      }
+    }
+
+    return this.prisma.motif.findUnique({
+      where: { id },
+      include: { service: true, practitionerAssignments: true },
     });
   }
 
   async remove(id: string) {
+    await this.prisma.motifPractitioner.deleteMany({ where: { motifId: id } });
     return this.prisma.motif.delete({ where: { id } });
   }
 }

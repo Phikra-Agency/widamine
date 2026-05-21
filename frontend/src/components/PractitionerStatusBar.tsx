@@ -1,36 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { useStatsStore } from '@/stores/statsStore'
+import type { AppointmentItem } from '@/stores/statsStore'
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { SignOut as LogOut, ArrowRight, CaretDown, CaretUp } from '@phosphor-icons/react'
+import { SignOut as LogOut, ArrowRight, CaretDown } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '@/lib/api'
-
-interface AppointmentItem {
-  id: string
-  name: string
-  status: string
-  patient?: { firstName: string; lastName: string; phone: string }
-  service?: { name: string }
-  practitioner?: { id?: string; name: string }
-  resource?: { name: string }
-  motif?: { name: string; color: string }
-  schedules?: { datetime: string }[]
-}
-
-interface DashboardStats {
-  todayTotal: number
-  todayConfirmed: number
-  todayPending: number
-  todayCompleted: number
-  todayCancelled: number
-  totalPatients: number
-  currentlyRunning: AppointmentItem[]
-  nextHour: AppointmentItem[]
-  confirmedToday: AppointmentItem[]
-  pendingConfirmations: AppointmentItem[]
-  tomorrowPreview: AppointmentItem[]
-}
 
 function parseSchedule(datetime?: string): Date | null {
   if (!datetime) return null
@@ -50,14 +26,15 @@ function enrichAppts(items: AppointmentItem[]) {
 
 export default function PractitionerStatusBar() {
   const { user, logout } = useAuthStore()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const { stats, setStats } = useStatsStore()
 
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
 
   useEffect(() => {
     if (!isPractitioner) return
+    if (stats) return
     api.get('dashboard/stats').then(res => setStats(res.data)).catch(() => {})
-  }, [isPractitioner])
+  }, [isPractitioner, stats, setStats])
 
   const { current, next, todayTotal } = useMemo(() => {
     const running = enrichAppts(stats?.currentlyRunning || [])
@@ -93,6 +70,7 @@ export default function PractitionerStatusBar() {
       appointment: {
         id: appt.id,
         status: appt.status,
+        patient: appt.patient,
         practitionerId: appt.practitioner?.id,
         practitioner: appt.practitioner,
         resource: appt.resource,

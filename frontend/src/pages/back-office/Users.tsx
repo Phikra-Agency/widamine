@@ -18,14 +18,14 @@ export default function Users() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
-      className='bo-page-scroll'
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className='bo-page'
     >
       <div className='bo-page-inner'>
         <div className='pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-accent/8 blur-3xl' />
         <div className='pointer-events-none absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/5 blur-3xl' />
 
-        <div className='bo-section-stack'>
+        <div className='bo-section-stack h-full min-h-0 overflow-y-auto'>
           <Heading />
           <Filters />
           <div className='bo-surface'>
@@ -40,10 +40,16 @@ export default function Users() {
 }
 
 function Heading() {
+  const { openCreateModal } = useUsersStore()
   return (
-    <div>
-      <h3 className='bo-title'>Gestion Des Utilisateurs</h3>
-      <p className='bo-subtitle'>Gérez les comptes utilisateurs et leurs rôles</p>
+    <div className='flex flex-wrap items-center justify-between gap-3'>
+      <div>
+        <h3 className='bo-title'>Gestion Des Utilisateurs</h3>
+        <p className='bo-subtitle'>Gérez les comptes utilisateurs et leurs rôles</p>
+      </div>
+      <button onClick={openCreateModal} className='bo-primary-btn hidden lg:inline-flex cursor-pointer'>
+        <Plus weight='bold' /> Ajouter Un Utilisateur
+      </button>
     </div>
   )
 }
@@ -234,7 +240,7 @@ function Table() {
         <button
           type='button'
           onClick={openCreateModal}
-          className='fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-xl hover:shadow-primary/40 active:scale-95'
+          className='bo-fab'
           aria-label='Ajouter un utilisateur'
         >
           <Plus size={22} weight='bold' />
@@ -245,16 +251,14 @@ function Table() {
 }
 
 function Modal() {
-  const { operation, modalOpen, closeModal, item, setItem, saveItem, clearItem, setOperation } = useUsersStore()
+  const { operation, modalOpen, closeModal, item, setItem, saveItem } = useUsersStore()
   const isEdit = operation === 'edit'
   const roleConfig = ROLE_CONFIG[item.role] || ROLE_CONFIG.RECEPTIONIST
   const RoleIcon = roleConfig.icon
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
 
   return (
-    <AnimatePresence
-      onExitComplete={() => { clearItem(); setOperation('create') }}
-    >
+    <AnimatePresence>
       {isOpen && (
         <div className='fixed inset-0 z-50 flex items-start justify-center px-3 py-6 sm:px-4 sm:py-8'>
           <motion.div
@@ -357,13 +361,11 @@ function Modal() {
 }
 
 function DeleteModal() {
-  const { operation, modalOpen, closeModal, deleteItem, clearItem, setOperation } = useUsersStore()
+  const { operation, modalOpen, closeModal, deleteItem } = useUsersStore()
   const isOpen = operation === 'delete' && modalOpen
 
   return (
-    <AnimatePresence
-      onExitComplete={() => { clearItem(); setOperation('create') }}
-    >
+    <AnimatePresence>
       {isOpen && (
         <div className='fixed inset-0 z-50 flex items-start justify-center px-3 py-6 sm:px-4 sm:py-8'>
           <motion.div

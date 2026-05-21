@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { CaretLeft, CaretRight, X } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
+import { motion } from 'framer-motion'
 
 function formatDateTimeLabel(value?: string) {
   if (!value) return 'Date non définie'
@@ -15,13 +16,6 @@ function formatDateTimeLabel(value?: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function formatTimeOnly(value?: string) {
-  if (!value) return '--:--'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '--:--'
-  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatReservationOrder(value: number) {
@@ -96,18 +90,24 @@ export default function ScheduleShowModal() {
   }
 
   return (
-    <div
+    <motion.div
       onClick={toggleOpenShowModal}
+      initial={{ opacity: 0 }}
+      animate={openShowModal ? { opacity: 1 } : { opacity: 0 }}
+      transition={{ duration: 0.2 }}
       className={clsx(
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm transition duration-300',
-        openShowModal ? '' : 'pointer-events-none opacity-0',
+        'fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm',
+        openShowModal ? '' : 'pointer-events-none',
       )}
     >
-      <div
+      <motion.div
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={openShowModal ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className={clsx(
-          'bo-surface w-full max-w-xl p-4 sm:p-6 max-h-[85vh] overflow-y-auto transition duration-300',
-          openShowModal ? 'opacity-100' : 'translate-y-10 opacity-0 pointer-events-none',
+          'bo-surface w-full max-w-xl p-4 sm:p-6 max-h-[85vh] overflow-y-auto',
+          openShowModal ? '' : 'pointer-events-none',
         )}
       >
         <div className='flex items-start justify-between gap-3'>
@@ -189,7 +189,7 @@ export default function ScheduleShowModal() {
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

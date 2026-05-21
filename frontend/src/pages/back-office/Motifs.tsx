@@ -9,15 +9,15 @@ export default function Motifs() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
-      className='bo-page-scroll'
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className='bo-page'
     >
       <div className='bo-page-inner'>
         {/* Ambient background */}
         <div className='pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-accent/8 blur-3xl' />
         <div className='pointer-events-none absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/5 blur-3xl' />
 
-        <div className='bo-section-stack'>
+        <div className='bo-section-stack h-full min-h-0 overflow-y-auto'>
           <Heading />
           <div className='bo-surface'>
             <Table />
@@ -89,7 +89,7 @@ function Modal() {
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
-      <motion.form onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); saveItem() }} initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={['create', 'edit'].includes(operation) && modalOpen ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className={clsx('relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
+      <motion.form onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); saveItem() }} initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={['create', 'edit'].includes(operation) && modalOpen ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className={clsx('relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
         <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'>
           <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} motif</h2>
           <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez le motif de consultation' : 'Ajoutez un nouveau motif'}</p>
@@ -122,7 +122,7 @@ function DeleteModal() {
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', operation === 'delete' && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
-      <div onClick={(e) => e.stopPropagation()} className={clsx('relative w-full max-w-md rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]', operation === 'delete' && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
+      <div onClick={(e) => e.stopPropagation()} className={clsx('relative w-full max-w-md rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated', operation === 'delete' && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
         <div className='p-6 text-center'>
           <div className='mx-auto w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4'>
             <Trash2 size={26} className='text-red-500' />

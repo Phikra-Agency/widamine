@@ -7,28 +7,34 @@ export class ResourceService {
 
   async create(data: {
     name: string;
-    slug: string;
-    type: string;
+    slug?: string;
+    type?: string;
     description?: string;
     priority?: number;
     motifIds?: string[];
   }) {
     const { name, slug, type, description, priority, motifIds } = data;
-    return this.prisma.resource.create({
+    const resource = await this.prisma.resource.create({
       data: {
         name,
-        slug,
-        type,
+        slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        type: type || 'SALLE',
         description,
         priority: priority || 0,
-        motifAssignments: motifIds
-          ? {
-              create: motifIds.map((motifId) => ({
-                motifId,
-              })),
-            }
-          : undefined,
       },
+    });
+
+    if (motifIds?.length) {
+      for (const motifId of motifIds) {
+        await this.prisma.motifResource.create({
+          data: { resourceId: resource.id, motifId },
+        });
+      }
+    }
+
+    return this.prisma.resource.findUnique({
+      where: { id: resource.id },
+      include: { motifAssignments: true },
     });
   }
 
@@ -62,7 +68,8 @@ export class ResourceService {
     },
   ) {
     const { name, slug, type, description, isActive, motifIds, priority } = data;
-    return this.prisma.resource.update({
+
+    await this.prisma.resource.update({
       where: { id },
       data: {
         name,
@@ -71,19 +78,27 @@ export class ResourceService {
         description,
         isActive,
         priority,
-        motifAssignments: motifIds
-          ? {
-              deleteMany: {},
-              create: motifIds.map((motifId) => ({
-                motifId,
-              })),
-            }
-          : undefined,
       },
+    });
+
+    if (motifIds !== undefined) {
+      await this.prisma.motifResource.deleteMany({ where: { resourceId: id } });
+      for (const motifId of motifIds) {
+        await this.prisma.motifResource.create({
+          data: { resourceId: id, motifId },
+        });
+      }
+    }
+
+    return this.prisma.resource.findUnique({
+      where: { id },
+      include: { motifAssignments: true },
     });
   }
 
   async remove(id: string) {
-    return this.prisma.resource.delete({ where: { id } as any });
+    await this.prisma.motifResource.deleteMany({ where: { resourceId: id } });
+    await this.prisma.resourcePractitioner.deleteMany({ where: { resourceId: id } });
+    return this.prisma.resource.delete({ where: { id } });
   }
 }

@@ -67,7 +67,7 @@ export default function Patients() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className='bo-page'
     >
       <div className='bo-page-inner bo-page-stack'>
@@ -393,7 +393,7 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
           <button
             type='button'
             onClick={openCreateModal}
-            className='fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all flex items-center justify-center lg:hidden'
+            className='bo-fab lg:hidden'
             aria-label='Ajouter un patient'
           >
             <Plus size={24} weight='bold' />
@@ -408,14 +408,12 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
 }
 
 function Modal() {
-  const { operation, modalOpen, closeModal, item, setItem, saveItem, clearItem, setOperation } = usePatientStore()
+  const { operation, modalOpen, closeModal, item, setItem, saveItem } = usePatientStore()
   const isEdit = operation === 'edit'
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
 
   return (
-    <AnimatePresence
-      onExitComplete={() => { clearItem(); setOperation('create') }}
-    >
+    <AnimatePresence>
       {isOpen && (
         <div className='fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4'>
           <motion.div
@@ -490,8 +488,9 @@ function Modal() {
             <div className='space-y-2'>
               <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Genre</label>
               <div className='relative'>
-                <select value={item.gender} onChange={(e) => setItem({ ...item, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                <select value={item.gender || ''} onChange={(e) => setItem({ ...item, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
                   className='w-full rounded-lg border border-black/[0.06] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer appearance-none'>
+                  <option value='' disabled>Sélectionner</option>
                   <option value='MALE'>Homme</option>
                   <option value='FEMALE'>Femme</option>
                   <option value='OTHER'>Autre</option>
@@ -556,13 +555,11 @@ function Modal() {
 }
 
 function DeleteModal() {
-  const { operation, modalOpen, closeModal, deleteItem, clearItem, setOperation } = usePatientStore()
+  const { operation, modalOpen, closeModal, deleteItem } = usePatientStore()
   const isOpen = operation === 'delete' && modalOpen
 
   return (
-    <AnimatePresence
-      onExitComplete={() => { clearItem(); setOperation('create') }}
-    >
+    <AnimatePresence>
       {isOpen && (
         <div className='fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4'>
           <motion.div

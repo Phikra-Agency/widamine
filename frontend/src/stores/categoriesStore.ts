@@ -38,9 +38,6 @@ export const useCategoriesStore = create<CategoryStoreInterface>((set, get) => (
   },
   closeModal: () => {
     set({ modalOpen: false })
-    setTimeout(()=>{
-      get().clearItem()
-    },300)
   },
   setOperation: (operation) => {
     set({ operation })

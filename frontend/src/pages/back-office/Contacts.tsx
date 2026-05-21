@@ -10,7 +10,7 @@ export default function Contacts() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className='bo-page'
     >
       <div className="bo-page-inner bo-section-stack">
@@ -181,52 +181,54 @@ function Table() {
           ) : (
             filtered.map((item) => (
               <div key={item.id} className='rounded-2xl border border-black/[0.06] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]'>
-                <div className='flex items-start justify-between gap-3'>
-                  <div className='flex items-center gap-3 min-w-0'>
-                    <div className='w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center shrink-0'>
-                      <User size={20} className='text-primary' />
+                <div className='flex flex-col gap-3'>
+                  <div className='flex items-start justify-between gap-3'>
+                    <div className='flex items-center gap-3 min-w-0'>
+                      <div className='w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center shrink-0'>
+                        <User size={20} className='text-primary' />
+                      </div>
+                      <div className='min-w-0'>
+                        <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
+                      </div>
                     </div>
-                    <div className='min-w-0'>
-                      <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
+                  </div>
+
+                  <div className='space-y-2 text-xs text-secondary/60'>
+                    <div className='flex items-center gap-2'>
+                      <EnvelopeSimple size={14} className='text-secondary/30 shrink-0' />
+                      <span className='truncate'>{item.email}</span>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <Phone size={14} className='text-secondary/30 shrink-0' />
+                      <span>{item.phone}</span>
+                    </div>
+                    <div className='rounded-lg bg-secondary/[0.03] p-2.5 text-xs text-secondary/50 leading-relaxed line-clamp-2'>
+                      {item.context}
                     </div>
                   </div>
-                </div>
 
-                <div className='mt-3 space-y-2 text-xs text-secondary/60'>
                   <div className='flex items-center gap-2'>
-                    <EnvelopeSimple size={14} className='text-secondary/30 shrink-0' />
-                    <span className='truncate'>{item.email}</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <Phone size={14} className='text-secondary/30 shrink-0' />
-                    <span>{item.phone}</span>
-                  </div>
-                  <div className='mt-2 rounded-lg bg-secondary/[0.03] p-2.5 text-xs text-secondary/50 leading-relaxed line-clamp-2'>
-                    {item.context}
-                  </div>
-                </div>
-
-                <div className='mt-3 flex items-center gap-2'>
-                  <button
-                    onClick={() => {
-                      setItem(item)
-                      toggleOpenShowModal()
-                    }}
-                    className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-primary hover:bg-primary/5 transition-all'
-                  >
-                    <Eye size={14} className='inline mr-1' /> Voir
-                  </button>
-                  {!filters.read && (
                     <button
                       onClick={() => {
                         setItem(item)
-                        readItem()
+                        toggleOpenShowModal()
                       }}
-                      className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-emerald-600 hover:bg-emerald-50 transition-all'
+                      className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-primary hover:bg-primary/5 transition-all'
                     >
-                      <CheckCircle size={14} className='inline mr-1' /> Lu
+                      <Eye size={14} className='inline mr-1' /> Voir
                     </button>
-                  )}
+                    {!filters.read && (
+                      <button
+                        onClick={() => {
+                          setItem(item)
+                          readItem()
+                        }}
+                        className='flex-1 px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-emerald-600 hover:bg-emerald-50 transition-all'
+                      >
+                        <CheckCircle size={14} className='inline mr-1' /> Lu
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
@@ -241,8 +243,13 @@ function ShowModal() {
   const { openShowModal, toggleOpenShowModal, item } = useContactsStore()
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', openShowModal ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
-      <div className="absolute inset-0 bg-black/[0.4] backdrop-blur-sm transition-opacity duration-300" onClick={toggleOpenShowModal} />
-      <div onClick={(e) => e.stopPropagation()} className={clsx('relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.08] bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition-all duration-300', openShowModal ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none')}>
+      <div className="absolute inset-0 bo-glass transition-opacity duration-300" onClick={toggleOpenShowModal} />
+      <motion.div
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={openShowModal ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className={clsx('relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated', openShowModal ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
         <div className="sticky top-0 z-10 border-b border-black/[0.06] bg-white px-6 py-4">
           <h2 className="text-lg font-semibold text-secondary">Message reçu</h2>
           <p className="text-sm text-secondary/40 mt-0.5">De la part de {item.name}</p>
@@ -289,12 +296,12 @@ function ShowModal() {
           <button
             onClick={toggleOpenShowModal}
             type="button"
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/[0.04] transition-all duration-200"
+            className="px-5 py-2.5 rounded-lg text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/[0.04] transition-all duration-200"
           >
             Fermer
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

@@ -17,23 +17,41 @@ type Tab = 'salles' | 'motifs'
 
 export default function SallesMotifs() {
   const [tab, setTab] = useState<Tab>('salles')
+  const { openCreateModal: openCreateSalle } = useResourcesStore()
+  const { setOperation: setMotifOp, openModal: openMotifModal, clearItem: clearMotifItem } = useMotifsStore()
+
+  const handleCreate = () => {
+    if (tab === 'salles') {
+      openCreateSalle()
+    } else {
+      clearMotifItem()
+      setMotifOp('create')
+      openMotifModal()
+    }
+  }
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className='bo-page-scroll'>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className='bo-page'>
       <div className='bo-page-inner'>
         <div className='pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-accent/8 blur-3xl' />
         <div className='pointer-events-none absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/5 blur-3xl' />
-        <div className='bo-section-stack'>
+        <div className='bo-section-stack h-full min-h-0 overflow-y-auto'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div>
               <h3 className='bo-title'>Salles & Motifs</h3>
               <p className='bo-subtitle'>Gérez les salles, motifs et leurs associations</p>
             </div>
-            <div className='inline-flex items-center gap-1 rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-1 w-full sm:w-auto'>
-              <button onClick={() => setTab('salles')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'salles' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
-                <Door size={14} /> Salles
-              </button>
-              <button onClick={() => setTab('motifs')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'motifs' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
-                <Stethoscope size={14} /> Motifs
+            <div className='flex items-center gap-3'>
+              <div className='inline-flex items-center gap-1 rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-1 w-full sm:w-auto'>
+                <button onClick={() => setTab('salles')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'salles' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
+                  <Door size={14} /> Salles
+                </button>
+                <button onClick={() => setTab('motifs')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'motifs' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
+                  <Stethoscope size={14} /> Motifs
+                </button>
+              </div>
+              <button onClick={handleCreate} className='bo-primary-btn hidden lg:inline-flex cursor-pointer'>
+                <Plus weight='bold' /> Ajouter
               </button>
             </div>
           </div>
@@ -145,9 +163,11 @@ function SallesTable() {
           })
         )}
       </div>
-      <button type='button' onClick={openCreateModal} className='fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all flex items-center justify-center' aria-label='Ajouter une salle'>
-        <Plus size={24} weight='bold' />
-      </button>
+      <div className='lg:hidden'>
+        <button type='button' onClick={openCreateModal} className='bo-fab' aria-label='Ajouter une salle'>
+          <Plus size={24} weight='bold' />
+        </button>
+      </div>
     </>
   )
 }
@@ -232,9 +252,11 @@ function MotifsTable() {
           ))
         )}
       </div>
-      <button type='button' onClick={() => { clearItem(); setOperation('create'); openModal() }} className='fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all flex items-center justify-center' aria-label='Ajouter un motif'>
-        <Plus size={24} weight='bold' />
-      </button>
+      <div className='lg:hidden'>
+        <button type='button' onClick={() => { clearItem(); setOperation('create'); openModal() }} className='bo-fab' aria-label='Ajouter un motif'>
+          <Plus size={24} weight='bold' />
+        </button>
+      </div>
     </>
   )
 }
@@ -252,7 +274,7 @@ function SalleModal() {
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', visible ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
-      <motion.form onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); saveItem() }} initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={visible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className='relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.15)]'>
+      <motion.form onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); saveItem() }} initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={visible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className='relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated'>
         <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'><h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouvelle'} salle</h2><p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez les informations' : 'Ajoutez une nouvelle salle'}</p></div>
         <div className='p-6 space-y-5'>
           <div className='space-y-2'><label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom</label><input type='text' value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all' placeholder='Salle A' /></div>
@@ -309,7 +331,7 @@ function MotifModal() {
         initial={{ opacity: 0, y: 16, scale: 0.98 }} 
         animate={visible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} 
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} 
-        className='relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.15)]'
+        className='relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated'
       >
         <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'>
           <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} motif</h2>

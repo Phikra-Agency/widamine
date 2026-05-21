@@ -1,263 +1,146 @@
-# Widamine Project
+# Widamine — Documentation
 
-Medical/aesthetic clinic management system with public booking site and admin dashboard.
+Medical/aesthetic clinic management system with public booking site and admin back-office.
 
-## Project Overview
+## Documentation Index
 
-- **Frontend**: React + Vite + Tailwind CSS + Framer Motion
-- **Backend**: NestJS + Prisma + SQLite
-- **Database**: SQLite
+| File | Description |
+|------|-------------|
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Overall system architecture, tech stack, design decisions |
+| **[FRONTEND.md](FRONTEND.md)** | Frontend pages, components, stores, routing, theming |
+| **[BACKEND.md](BACKEND.md)** | Backend modules, controllers, services, API endpoints |
+| **[DATABASE.md](DATABASE.md)** | Prisma schema, all models, fields, relationships |
+| **[AUTH.md](AUTH.md)** | Authentication flow, JWT, role-based access control |
+| **[API.md](API.md)** | Complete API reference with endpoints, params, responses |
+| **[BOOKING.md](BOOKING.md)** | Booking flow: components, store, availability algorithm |
+| **[SETUP.md](SETUP.md)** | Local development setup, environment variables, troubleshooting |
+| **[COMPONENTS.md](COMPONENTS.md)** | Frontend component reference (legacy) |
+| **[SCHEMA.md](SCHEMA.md)** | Database schema documentation (legacy, SQLite-based) |
+| **[RBAC_DESIGN.md](RBAC_DESIGN.md)** | RBAC design document with proposed changes |
 
-## Quick Start
+## Quick Links
 
-### 1. Install Dependencies
+- **Frontend**: `cd frontend && npm run dev` → http://localhost:5173
+- **Backend**: `cd backend && npm run start:dev` → http://localhost:3000
+- **MongoDB**: Requires replica set (`mongod --replSet rs0`)
 
-```bash
-# Frontend
-cd /home/alan/widamine/frontend
-npm install
+## Tech Stack
 
-# Backend
-cd /home/alan/widamine/backend
-npm install
-```
-
-### 2. Start Development Servers
-
-**Terminal 1 (Backend):**
-```bash
-cd /home/alan/widamine/backend
-npm run start:dev
-# Runs on http://localhost:3000
-```
-
-**Terminal 2 (Frontend):**
-```bash
-cd /home/alan/widamine/frontend
-npm run dev
-# Runs on http://localhost:5173
-```
-
-### 3. Access
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3000
-
----
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, Vite 8, Tailwind CSS v4, Framer Motion 12, Zustand 5 |
+| Backend | NestJS, Prisma ORM, JWT |
+| Database | MongoDB |
+| Email | Brevo API |
+| Icons | Phosphor Icons |
+| UI Library | Mantine v9 |
 
 ## Project Structure
 
 ```
-/home/alan/widamine/
-├── frontend/          # React frontend
+widamine/
+├── frontend/          # React SPA
 │   ├── src/
 │   │   ├── components/   # UI components
+│   │   │   ├── layouts/  # Layout shells
+│   │   │   └── wrappers/ # Route guards
 │   │   ├── pages/        # Page components
-│   │   │   ├── back-office/  # Admin dashboard
-│   │   │   └── *.tsx         # Public site
-│   │   ├── stores/       # Zustand state
-│   │   ├── lib/         # Utilities
-│   │   └── App.tsx      # Router
+│   │   │   ├── back-office/  # Admin pages (11 pages)
+│   │   │   └── auth/     # Login
+│   │   ├── stores/       # Zustand stores (11 stores)
+│   │   ├── lib/          # API client, utilities, content
+│   │   └── App.tsx       # Router
 │   └── package.json
 │
-├── backend/          # NestJS backend
+├── backend/           # NestJS API
 │   ├── src/
-│   │   ├── prisma/    # Database schema
 │   │   ├── auth/      # Authentication
-│   │   ├── users/     # User management
-│   │   ├── services/  # Services CRUD
-│   │   ├── appointments/  # Bookings
-│   │   └── *.ts       # Other modules
+│   │   ├── user/      # User management
+│   │   ├── patient/   # Patient records
+│   │   ├── appointment/  # Bookings + availability
+│   │   ├── schedule/  # Weekly schedules
+│   │   ├── service/   # Services CRUD
+│   │   ├── category/  # Categories
+│   │   ├── motif/     # Consultation types
+│   │   ├── resource/  # Rooms/salles
+│   │   ├── session/   # Time slots
+│   │   ├── contact/   # Contact forms
+│   │   ├── dashboard/ # Stats
+│   │   ├── settings/  # Notification settings
+│   │   ├── mail/      # Email (Brevo)
+│   │   ├── sms/       # SMS (stub)
+│   │   └── prisma/    # DB client
 │   ├── prisma/
-│   │   └── schema.prisma
+│   │   └── schema.prisma  # 15 models
 │   └── package.json
 │
-└── docs/            # Documentation
-    ├── SCHEMA.md      # Database schema
-    └── COMPONENTS.md  # Frontend components
+└── docs/              # Documentation (you are here)
+    ├── ARCHITECTURE.md
+    ├── FRONTEND.md
+    ├── BACKEND.md
+    ├── DATABASE.md
+    ├── AUTH.md
+    ├── API.md
+    ├── BOOKING.md
+    ├── SETUP.md
+    ├── COMPONENTS.md
+    ├── SCHEMA.md
+    └── RBAC_DESIGN.md
 ```
-
----
 
 ## Features
 
 ### Public Site
-- Landing page with services showcase
+- Landing page with hero, services, testimonials, gallery
+- Multi-step booking flow with real-time availability
 - Service detail pages
-- Multi-step booking flow
 - Contact form
-- Doctor/salle availability checking
+- Responsive design
 
-### Admin Dashboard
-- **Dashboard**: Overview stats, upcoming appointments
-- **Appointments**: Manage all bookings
-- **Calendar**: Weekly schedule view
-- **Services**: CRUD with multi-doctor/multi-salle support
-- **Categories**: Service categorization
-- **Motifs**: Consultation types
-- **Resources**: Room/salle management
-- **Users**: Admin, Doctor, Receptionist accounts
-- **Patients**: Patient records
-- **Contacts**: Form submissions
+### Back-Office
+- Dashboard with stats and overview
+- Weekly calendar view
+- Appointment management (CRUD, status updates)
+- Patient records with history
+- User management with role-based access
+- Service, category, motif, resource CRUD
+- Contact form submissions
+- Notification settings
+- Practitioner status bar
 
 ### Booking System
 - Multiple doctors per service
-- Multiple rooms/salles per service
+- Multiple rooms per service
 - Real-time availability checking
-- Prevents double-booking (doctor + salle)
-- Shows doctor name on time slots
+- Double-booking prevention (doctor + room)
+- Auto-generated time slots
+- Confirmation/cancellation emails
+- Find-or-create patient by phone
 
----
+## Roles
 
-## Tech Stack
+| Role | Access |
+|------|--------|
+| ADMIN | Full system access |
+| DOCTOR / PRACTITIONER | Own appointments and patients |
+| RECEPTIONIST | Appointments, patients, contacts |
 
-### Frontend
-- React 18
-- Vite
-- Tailwind CSS
-- Framer Motion (animations)
-- Mantine (date picker)
-- Zustand (state management)
-- React Router
-- Axios
-
-### Backend
-- NestJS
-- Prisma ORM
-- SQLite
-- JWT Authentication
-- Class Validator
-
----
-
-## Deployment
-
-### Development
-
-Both servers run locally:
-- Frontend: Vite dev server
-- Backend: NestJS with watch mode
-
-### Production Build
-
-**Frontend:**
-```bash
-cd /home/alan/widamine/frontend
-npm run build
-# Output: dist/
-```
-
-**Backend:**
-```bash
-cd /home/alan/widamine/backend
-npm run build
-# Output: dist/
-```
-
----
-
-## Database
-
-### Migrations
+## Quick Start
 
 ```bash
-cd /home/alan/widamine/backend
-npx prisma db push      # Apply schema
-npx prisma generate    # Generate client
+# 1. Start MongoDB (replica set)
+mongod --replSet rs0
+
+# 2. Backend
+cd backend
+npm install
+npx prisma generate && npx prisma db push
+npm run start:dev
+
+# 3. Frontend
+cd frontend
+npm install
+npm run dev
 ```
 
-### Seed Data
-
-The database starts empty. Add:
-- Categories
-- Doctors (Users with role: DOCTOR)
-- Services (linked to doctors)
-- Rooms (Resources)
-- Sessions (time slots for services)
-
----
-
-## Authentication
-
-### Login
-- Public site: `/login`
-- Default admin: Create via backend or direct database insert
-
-### JWT
-- Tokens stored in localStorage
-- Auto-refresh on expiry
-- Role-based access control
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/login` | Login |
-| GET | `/services` | List services |
-| GET | `/appointments/availability` | Available slots |
-| GET | `/users/doctors` | List doctors |
-| GET | `/resources` | List rooms |
-
----
-
-## Scripts
-
-### Frontend
-```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run preview # Preview build
-```
-
-### Backend
-```bash
-npm run start:dev    # Development with watch
-npm run build       # Production build
-npm run start       # Production run
-```
-
----
-
-## Troubleshooting
-
-### Port Already in Use
-```bash
-# Kill process on port
-fuser -k 3000/tcp   # Backend
-fuser -k 5173/tcp   # Frontend
-```
-
-### Database Errors
-```bash
-# Reset database
-cd /home/alan/widamine/backend
-rm prisma/dev.db
-npx prisma db push
-```
-
----
-
-## Files Created in This Project
-
-### Documentation (`docs/`)
-- `SCHEMA.md` - Database schema
-- `COMPONENTS.md` - Frontend components guide
-
-### Backend Fixes
-- Added `allowedDoctorIds`, `allowedSalleIds` to Service model
-- Updated `getAvailability` to check doctor + salle conflicts
-- Fixed appointment availability logic
-
-### Frontend Fixes
-- Added animations to all admin pages
-- Fixed booking flow auto-load availability
-- Removed preloader
-- Added doctor/salle multi-select to Services page
-- Time slots now show doctor name
-
-### Bug Fixes
-- Modal closing tag mismatches
-- Services page structure issues
-- Availability not loading on date selection
+See **[SETUP.md](SETUP.md)** for detailed instructions.

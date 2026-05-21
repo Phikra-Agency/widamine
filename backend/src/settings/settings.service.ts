@@ -8,38 +8,27 @@ export class SettingsService {
 
   private readonly key = "default";
 
-  private defaultData() {
+  private readonly COLLECTION = "AppSettings";
+
+  private flatDoc(dto: UpdateNotificationSettingsDto) {
     return {
       singletonKey: this.key,
-      smsEnabled: false,
-      emailEnabled: true,
-      inAppEnabled: true,
-      smsConfirmation: true,
-      smsReminder: true,
-      smsCancellation: false,
-      emailConfirmation: true,
-      emailReminder: true,
-      emailCancellation: true,
-      inAppConfirmation: true,
-      inAppReminder: true,
-      inAppCancellation: false,
+      smsEnabled: dto.smsEnabled,
+      emailEnabled: dto.emailEnabled,
+      inAppEnabled: dto.inAppEnabled,
+      smsConfirmation: dto.smsTypes.confirmation,
+      smsReminder: dto.smsTypes.reminder,
+      smsCancellation: dto.smsTypes.cancellation,
+      emailConfirmation: dto.emailTypes.confirmation,
+      emailReminder: dto.emailTypes.reminder,
+      emailCancellation: dto.emailTypes.cancellation,
+      inAppConfirmation: dto.inAppTypes.confirmation,
+      inAppReminder: dto.inAppTypes.reminder,
+      inAppCancellation: dto.inAppTypes.cancellation,
     };
   }
 
-  private toResponse(settings: {
-    smsEnabled: boolean;
-    emailEnabled: boolean;
-    inAppEnabled: boolean;
-    smsConfirmation: boolean;
-    smsReminder: boolean;
-    smsCancellation: boolean;
-    emailConfirmation: boolean;
-    emailReminder: boolean;
-    emailCancellation: boolean;
-    inAppConfirmation: boolean;
-    inAppReminder: boolean;
-    inAppCancellation: boolean;
-  }) {
+  private toResponse(settings: Record<string, unknown>) {
     return {
       smsEnabled: settings.smsEnabled,
       emailEnabled: settings.emailEnabled,
@@ -63,49 +52,54 @@ export class SettingsService {
   }
 
   async getNotificationSettings() {
-    const settings = await this.prisma.appSettings.upsert({
-      where: { singletonKey: this.key },
-      update: {},
-      create: this.defaultData(),
+    const result = await this.prisma.$runCommandRaw({
+      find: this.COLLECTION,
+      filter: { singletonKey: this.key },
+      limit: 1,
     });
 
-    return this.toResponse(settings);
+    const batch = (result as any).cursor?.firstBatch ?? [];
+    let settings = batch[0] as Record<string, unknown> | undefined;
+
+    if (!settings) {
+      const defaultData = this.flatDoc({
+        smsEnabled: false,
+        emailEnabled: true,
+        inAppEnabled: true,
+        smsTypes: { confirmation: true, reminder: true, cancellation: false },
+        emailTypes: { confirmation: true, reminder: true, cancellation: true },
+        inAppTypes: { confirmation: true, reminder: true, cancellation: false },
+      });
+
+      await this.prisma.$runCommandRaw({
+        insert: this.COLLECTION,
+        documents: [defaultData],
+      });
+
+      const result2 = await this.prisma.$runCommandRaw({
+        find: this.COLLECTION,
+        filter: { singletonKey: this.key },
+        limit: 1,
+      });
+
+      settings = ((result2 as any).cursor?.firstBatch ?? [])[0] as Record<string, unknown> | undefined;
+    }
+
+    return this.toResponse(settings!);
   }
 
   async updateNotificationSettings(dto: UpdateNotificationSettingsDto) {
-    const settings = await this.prisma.appSettings.upsert({
-      where: { singletonKey: this.key },
-      update: {
-        smsEnabled: dto.smsEnabled,
-        emailEnabled: dto.emailEnabled,
-        inAppEnabled: dto.inAppEnabled,
-        smsConfirmation: dto.smsTypes.confirmation,
-        smsReminder: dto.smsTypes.reminder,
-        smsCancellation: dto.smsTypes.cancellation,
-        emailConfirmation: dto.emailTypes.confirmation,
-        emailReminder: dto.emailTypes.reminder,
-        emailCancellation: dto.emailTypes.cancellation,
-        inAppConfirmation: dto.inAppTypes.confirmation,
-        inAppReminder: dto.inAppTypes.reminder,
-        inAppCancellation: dto.inAppTypes.cancellation,
-      },
-      create: {
-        ...this.defaultData(),
-        smsEnabled: dto.smsEnabled,
-        emailEnabled: dto.emailEnabled,
-        inAppEnabled: dto.inAppEnabled,
-        smsConfirmation: dto.smsTypes.confirmation,
-        smsReminder: dto.smsTypes.reminder,
-        smsCancellation: dto.smsTypes.cancellation,
-        emailConfirmation: dto.emailTypes.confirmation,
-        emailReminder: dto.emailTypes.reminder,
-        emailCancellation: dto.emailTypes.cancellation,
-        inAppConfirmation: dto.inAppTypes.confirmation,
-        inAppReminder: dto.inAppTypes.reminder,
-        inAppCancellation: dto.inAppTypes.cancellation,
-      },
+    const data = this.flatDoc(dto);
+
+    const result = await this.prisma.$runCommandRaw({
+      findAndModify: this.COLLECTION,
+      query: { singletonKey: this.key },
+      update: { $set: data },
+      upsert: true,
+      new: true,
     });
 
-    return this.toResponse(settings);
+    const updated = (result as any).value as Record<string, unknown>;
+    return this.toResponse(updated);
   }
 }
