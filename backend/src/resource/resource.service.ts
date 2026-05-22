@@ -34,14 +34,14 @@ export class ResourceService {
 
     return this.prisma.resource.findUnique({
       where: { id: resource.id },
-      include: { motifAssignments: true },
+      include: { motifAssignments: { include: { motif: true } } },
     });
   }
 
   async findAll() {
     return this.prisma.resource.findMany({
       include: {
-        motifAssignments: true,
+        motifAssignments: { include: { motif: true } },
       },
     });
   }
@@ -50,7 +50,7 @@ export class ResourceService {
     return this.prisma.resource.findUnique({
       where: { id },
       include: {
-        motifAssignments: true,
+        motifAssignments: { include: { motif: true } },
       },
     });
   }
@@ -92,7 +92,7 @@ export class ResourceService {
 
     return this.prisma.resource.findUnique({
       where: { id },
-      include: { motifAssignments: true },
+      include: { motifAssignments: { include: { motif: true } } },
     });
   }
 

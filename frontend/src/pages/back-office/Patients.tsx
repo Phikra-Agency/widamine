@@ -103,7 +103,7 @@ function Heading() {
       {!isPractitioner && (
         <button
           onClick={openCreateModal}
-          className='bo-primary-btn cursor-pointer hover:scale-[1.02]'
+          className='bo-primary-btn hidden lg:inline-flex cursor-pointer hover:scale-[1.02]'
         >
           <Plus weight='bold' /> Ajouter Un Patient
         </button>
@@ -127,7 +127,7 @@ function Filters() {
             placeholder='Rechercher par nom ou email...'
             value={filters.term}
             onChange={(e) => setFilters({ ...filters, term: e.target.value })}
-            className='bo-input pl-10'
+            className='w-full rounded-xl border border-black/[0.06] bg-white pl-10 pr-4 py-2.5 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] placeholder:text-secondary/35 transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'
           />
         </div>
         <button
@@ -144,7 +144,7 @@ function Filters() {
           <select
             value={filters.gender}
             onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
-            className='bo-select'
+            className='w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'
           >
             <option value=''>Tous les genres</option>
             <option value='MALE'>Homme</option>
@@ -157,7 +157,7 @@ function Filters() {
           <select
             value={filters.city}
             onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-            className='bo-select'
+            className='w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'
           >
             <option value='null'>Toutes les villes</option>
             {cities.map(city => (
@@ -339,7 +339,7 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
                 <div
                   key={item.id}
                   onClick={() => openDrawer(item)}
-                  className='flex items-center gap-3 px-3 py-3.5 active:bg-secondary/[0.02] transition-colors cursor-pointer'
+                  className='flex items-center gap-2 px-3 py-3.5 active:bg-secondary/[0.02] transition-colors cursor-pointer'
                 >
                   <div className='w-9 h-9 rounded-full bg-secondary/5 flex items-center justify-center shrink-0'>
                     <User size={15} className='text-secondary/40' />
@@ -360,27 +360,27 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
                       )}
                     </div>
                   </div>
-                  <div className='flex items-center gap-1 shrink-0' onClick={(e) => e.stopPropagation()}>
+                  <div className='flex items-center shrink-0' onClick={(e) => e.stopPropagation()}>
                     {!isPractitioner && (
                       <>
                         <button
                           type='button'
                           onClick={() => openEditModal(item)}
-                          className='w-8 h-8 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all flex items-center justify-center'
+                          className='w-7 h-7 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all flex items-center justify-center'
                         >
-                          <Pen size={14} />
+                          <Pen size={12} />
                         </button>
                         <button
                           type='button'
                           onClick={() => openDeleteModal(item)}
-                          className='w-8 h-8 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all flex items-center justify-center'
+                          className='w-7 h-7 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all flex items-center justify-center'
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </>
                     )}
-                    <div className='w-6 h-6 flex items-center justify-center text-secondary/20'>
-                      <ArrowRight size={14} />
+                    <div className='w-5 h-5 flex items-center justify-center text-secondary/20 ml-1'>
+                      <ArrowRight size={12} />
                     </div>
                   </div>
                 </div>
@@ -388,18 +388,18 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
             })}
           </div>
         )}
-        {/* Floating action button for mobile */}
-        {!isPractitioner && (
-          <button
-            type='button'
-            onClick={openCreateModal}
-            className='bo-fab lg:hidden'
-            aria-label='Ajouter un patient'
-          >
-            <Plus size={24} weight='bold' />
-          </button>
-        )}
       </div>
+      {/* Floating action button for mobile */}
+      {!isPractitioner && (
+        <button
+          type='button'
+          onClick={openCreateModal}
+          className='bo-fab lg:hidden'
+          aria-label='Ajouter un patient'
+        >
+          <Plus size={24} weight='bold' />
+        </button>
+      )}
       <div className='shrink-0 border-t border-black/[0.04] px-4 py-3 bg-white/80 backdrop-blur-sm'>
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
@@ -489,7 +489,7 @@ function Modal() {
               <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Genre</label>
               <div className='relative'>
                 <select value={item.gender || ''} onChange={(e) => setItem({ ...item, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
-                  className='w-full rounded-lg border border-black/[0.06] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer appearance-none'>
+                  className='w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'>
                   <option value='' disabled>Sélectionner</option>
                   <option value='MALE'>Homme</option>
                   <option value='FEMALE'>Femme</option>

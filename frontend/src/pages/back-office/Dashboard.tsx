@@ -6,9 +6,8 @@ import {
   CalendarDots as CalendarClock,
   Timer,
   CheckCircle,
+  Check,
   Warning,
-  Stethoscope,
-  DoorOpen,
   CaretDown,
   CaretLeft,
   CaretRight,
@@ -164,9 +163,9 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 
 export default function Dashboard() {
   const { user } = useAuthStore()
-  const { setStats: setSharedStats } = useStatsStore()
+  const { stats: sharedStats, fetchStats: fetchSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
-  const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS)
+  const [stats, setStats] = useState<DashboardStats>(sharedStats || EMPTY_STATS)
   const [confirming, setConfirming] = useState<string | null>(null)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -179,16 +178,25 @@ export default function Dashboard() {
   const [resources, setResources] = useState<OptionItem[]>([])
   const [practitioners, setPractitioners] = useState<OptionItem[]>([])
 
-  const fetchStats = useCallback(() => {
-    api.get('dashboard/stats').then((res) => {
-      setStats(res.data)
-      setSharedStats(res.data)
+  const fetchStats = useCallback((options?: { force?: boolean }) => {
+    return fetchSharedStats(options).then(() => {
+      const next = useStatsStore.getState().stats
+      if (next) setStats(next)
     })
-  }, [setSharedStats])
+  }, [fetchSharedStats])
 
   useEffect(() => {
-    fetchStats()
+    if (sharedStats) {
+      setStats(sharedStats)
+    }
+    void fetchStats()
   }, [fetchStats])
+
+  useEffect(() => {
+    if (sharedStats) {
+      setStats(sharedStats)
+    }
+  }, [sharedStats])
 
   const now = new Date()
 
@@ -202,7 +210,7 @@ export default function Dashboard() {
     setConfirming(id)
     try {
       await api.put(`appointments/${id}`, { status })
-      fetchStats()
+      await fetchStats({ force: true })
       if (selectedId === id) {
         api.get(`appointments/${id}`).then((res) => setDetails(res.data))
       }
@@ -282,13 +290,17 @@ export default function Dashboard() {
     setDetailsSaving(true)
     try {
       await api.put(`appointments/${selectedId}`, patch)
-      fetchStats()
+      await fetchStats({ force: true })
       const refreshed = await api.get(`appointments/${selectedId}`)
       setDetails(refreshed.data)
     } finally {
       setDetailsSaving(false)
     }
   }
+
+  const sectionShellClass = 'rounded-2xl border border-black/[0.06] bg-white overflow-hidden flex min-h-0 flex-col shadow-sm'
+  const sectionHeaderClass = 'shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04]'
+  const sectionBodyClass = 'flex-1 min-h-0 overflow-auto px-4 py-3'
 
   return (
     <motion.div
@@ -315,22 +327,21 @@ export default function Dashboard() {
         {/* Desktop grid */}
         <div className='hidden h-full min-h-0 grid-cols-12 gap-3 lg:grid'>
         <motion.div variants={itemVariants} className='col-span-12 2xl:col-span-7 flex min-h-0 flex-col gap-3'>
-          <div className='rounded-2xl border border-black/[0.04] bg-white overflow-hidden flex min-h-0 flex-1 flex-col shadow-sm shadow-primary/8'>
-            <div className='shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04]'>
+          <div className={`${sectionShellClass} min-h-[19rem]`}>
+            <div className={sectionHeaderClass}>
               <div className='flex items-center gap-2'>
                 <div className='w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse' />
                 <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>En cours</h4>
                 <span className='text-[10px] text-secondary/40'>({running.length})</span>
               </div>
-              <Link to='/back-office/calendar' className='text-[10px] text-primary hover:underline font-medium'>Calendrier</Link>
             </div>
-            <div className='flex-1 min-h-0 overflow-auto p-4'>
+            <div className={sectionBodyClass}>
               {running.length === 0 ? (
                 <div className='h-full flex flex-col items-center justify-center py-8 text-center'>
                   <p className='text-sm text-secondary/30 font-medium'>Aucun rendez-vous en cours</p>
                 </div>
               ) : (
-                <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
+                <div className='space-y-2'>
                   {running.map(item => (
                     <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDrawer(item.id)} />
                   ))}
@@ -339,19 +350,21 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className='rounded-2xl border border-black/[0.06] bg-white overflow-hidden flex min-h-0 flex-1 flex-col shadow-sm'>
-            <div className='shrink-0 flex items-center gap-2 px-5 py-3 border-b border-black/[0.04]'>
-              <Timer size={14} className='text-primary' />
-              <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>À venir</h4>
-              <span className='text-[10px] text-secondary/40'>({upcoming.length})</span>
+          <div className={sectionShellClass}>
+            <div className={sectionHeaderClass}>
+              <div className='flex items-center gap-2'>
+                <Timer size={14} className='text-primary' />
+                <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>À venir</h4>
+                <span className='text-[10px] text-secondary/40'>({upcoming.length})</span>
+              </div>
             </div>
-            <div className='flex-1 min-h-0 overflow-auto p-4'>
+            <div className={sectionBodyClass}>
               {upcoming.length === 0 ? (
                 <div className='h-full flex flex-col items-center justify-center py-8 text-center'>
                   <p className='text-sm text-secondary/30 font-medium'>Aucun rendez-vous à venir aujourd'hui</p>
                 </div>
               ) : (
-                <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
+                <div className='space-y-2'>
                   {upcoming.map(item => (
                     <ApptCard key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
                   ))}
@@ -363,14 +376,16 @@ export default function Dashboard() {
 
         <motion.div variants={itemVariants} className='col-span-12 2xl:col-span-5 flex min-h-0 flex-col gap-3'>
           {pending.length > 0 && (
-            <div className='rounded-2xl border border-amber-200/60 bg-white overflow-hidden flex min-h-0 flex-1 flex-col shadow-sm'>
-              <div className='shrink-0 flex items-center gap-2 px-5 py-3 border-b border-black/[0.04] bg-amber-50/30'>
-                <Warning size={14} className='text-amber-500' />
-                <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>En attente</h4>
-                <span className='text-[10px] text-secondary/40'>({pending.length})</span>
+            <div className={`${sectionShellClass} flex-[1.05]`}>
+              <div className={`${sectionHeaderClass} bg-amber-50/20`}>
+                <div className='flex items-center gap-2'>
+                  <Warning size={14} className='text-amber-500' />
+                  <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>En attente</h4>
+                  <span className='text-[10px] text-secondary/40'>({pending.length})</span>
+                </div>
               </div>
-              <div className='flex-1 min-h-0 overflow-auto p-4'>
-                <div className='grid grid-cols-1 gap-3'>
+              <div className={sectionBodyClass}>
+                <div className='grid grid-cols-1 gap-2'>
                   {pending.map(item => (
                     <ApptActionCard
                       key={item.id}
@@ -385,25 +400,24 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className='flex-1 flex min-h-0 flex-col rounded-2xl border border-black/[0.06] bg-white overflow-hidden shadow-sm'>
-            <div className='shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04]'>
+          <div className={`${sectionShellClass} flex-1`}>
+            <div className={sectionHeaderClass}>
               <div className='flex items-center gap-2'>
                 <CheckCircle size={14} className='text-emerald-500' />
                 <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>Confirmés</h4>
                 <span className='text-[10px] text-secondary/40'>({stats.todayConfirmed})</span>
               </div>
-              <Link to='/back-office/calendar' className='text-[10px] text-primary hover:underline font-medium'>Voir tout</Link>
             </div>
-            <div className='flex-1 min-h-0 overflow-auto p-4'>
+            <div className={sectionBodyClass}>
               {confirmed.size === 0 ? (
                 <div className='h-full flex flex-col items-center justify-center py-4 text-center'>
                   <p className='text-sm text-secondary/30 font-medium'>Aucun rendez-vous confirmé</p>
                 </div>
               ) : (
-                <div className='space-y-1'>
+                <div className='space-y-2'>
                   {Array.from(confirmed.entries()).map(([slot, items]) => (
-                    <div key={slot} className='flex items-start gap-3'>
-                      <div className='flex-1 space-y-1.5 pb-1.5 border-l border-primary/20 pl-4'>
+                    <div key={slot} className='rounded-xl border border-black/[0.04] bg-white px-2 py-1.5'>
+                      <div className='flex-1 space-y-1'>
                         {items.map(item => (
                           <ApptRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
                         ))}
@@ -415,20 +429,21 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className='flex-1 flex min-h-0 flex-col rounded-2xl border border-black/[0.06] bg-white overflow-hidden shadow-sm'>
-            <div className='shrink-0 flex items-center justify-between px-5 py-3 border-b border-black/[0.04]'>
+          <div className='rounded-2xl border border-black/[0.06] bg-white overflow-hidden shadow-sm'>
+            <div className={sectionHeaderClass}>
               <div className='flex items-center gap-2'>
                 <CalendarClock size={14} className='text-secondary/40' />
                 <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>Demain</h4>
+                <span className='text-[10px] text-secondary/40'>({tomorrow.length})</span>
               </div>
               <Link to='/back-office/calendar' className='text-secondary/20 hover:text-primary transition-colors'>
                 <ArrowUpRight size={14} />
               </Link>
             </div>
-            <div className='flex-1 min-h-0 overflow-auto p-4'>
+            <div className='overflow-auto px-4 py-3'>
               <div className='space-y-4'>
                 {tomorrow.map(item => (
-                  <TomorrowRow key={item.id} item={item} />
+                  <TomorrowRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
                 ))}
               </div>
             </div>
@@ -499,10 +514,10 @@ export default function Dashboard() {
                   headerLink: <Link to='/back-office/calendar' className='text-[10px] text-primary hover:underline font-medium'>Voir tout</Link>,
                   emptyText: 'Aucun rendez-vous confirmé',
                   content: confirmed.size > 0 ? (
-                    <div className='space-y-1'>
+                    <div className='space-y-2'>
                       {Array.from(confirmed.entries()).map(([slot, items]) => (
-                        <div key={slot} className='flex items-start gap-3'>
-                          <div className='flex-1 space-y-1.5 pb-1.5 border-l border-primary/20 pl-4'>
+                        <div key={slot} className='rounded-xl border border-black/[0.04] bg-white px-2 py-1.5'>
+                          <div className='flex-1 space-y-1'>
                             {items.map(item => (
                               <ApptRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
                             ))}
@@ -521,7 +536,7 @@ export default function Dashboard() {
                   content: tomorrow.length > 0 ? (
                     <div className='space-y-4'>
                       {tomorrow.map(item => (
-                        <TomorrowRow key={item.id} item={item} />
+                        <TomorrowRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
                       ))}
                     </div>
                   ) : <p className='text-sm text-secondary/30 text-center py-4'>Aucun rendez-vous demain</p>,
@@ -696,48 +711,34 @@ function ApptCard({
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => { if (!onDetails) return; if (e.key === 'Enter' || e.key === ' ') onDetails() }}
-      className='group flex items-center gap-2 px-3 py-2.5 hover:bg-secondary/[0.02] transition-all duration-200 cursor-pointer border-b border-black/[0.04] last:border-b-0 sm:px-4 sm:py-3 sm:items-start sm:gap-3'
+      className='group flex flex-col gap-2 rounded-xl border border-black/[0.04] bg-white px-3.5 py-3 hover:bg-secondary/[0.02] transition-all duration-200 cursor-pointer md:grid md:grid-cols-[3.1rem_minmax(0,1fr)] md:items-center md:gap-3'
     >
-      <div className='flex-1 min-w-0'>
-        <div className='flex items-baseline gap-2'>
-          {item.scheduleDate && <span className='text-[11px] font-bold text-primary shrink-0'>{formatTime(item.scheduleDate)}</span>}
-          <p className='text-sm font-semibold text-secondary truncate'>{item.name}</p>
+      <div className='flex items-start gap-3 md:block md:min-w-[46px] md:text-right'>
+        {item.scheduleDate && <span className='shrink-0 text-[11px] font-bold text-secondary/50'>{formatTime(item.scheduleDate)}</span>}
+      </div>
+      <div className='min-w-0 flex-1'>
+        <div className='min-w-0'>
+          <p className='text-sm font-semibold text-secondary truncate leading-tight'>{item.name}</p>
         </div>
         <div className='mt-1 flex items-center gap-2 flex-wrap'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
-          <span className='flex items-center gap-1 text-[10px] text-secondary/30 sm:hidden'>
-            <ArrowRight size={10} />
-          </span>
-        </div>
-        <div className='hidden sm:flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1.5 text-[11px] text-secondary/40'>
           {item.practitioner && (
-            <span className='flex items-center gap-1'>
-              <Stethoscope size={10} />
+            <span className='text-[10px] text-secondary/40'>
               {item.practitioner.name}
             </span>
           )}
           {item.resource && (
-            <span className='flex items-center gap-1'>
-              <DoorOpen size={10} />
+            <span className='text-[10px] text-secondary/40'>
               {item.resource.name}
             </span>
           )}
           {elapsed !== null && (
-            <span className='flex items-center gap-1 text-emerald-600 font-medium'>
-              <Timer size={10} />
+            <span className='text-[10px] text-emerald-600 font-medium'>
               {elapsed} min
             </span>
           )}
         </div>
       </div>
-      {onDetails && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onDetails() }}
-          className='hidden shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white border border-black/[0.08] text-secondary/50 hover:text-secondary hover:border-black/[0.14] transition-colors sm:block'
-        >
-          Voir détails
-        </button>
-      )}
     </div>
   )
 }
@@ -759,7 +760,7 @@ function ApptActionCard({
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onDetails()}
-      className='group flex flex-col gap-3 px-4 py-3 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer border-b border-black/[0.03] last:border-b-0 md:grid md:grid-cols-[3.25rem_minmax(0,1fr)_12rem] md:items-start md:gap-4 lg:grid-cols-[3.25rem_minmax(0,1fr)_auto] lg:items-center'
+      className='group flex flex-col gap-2 rounded-xl border border-black/[0.04] bg-white px-3.5 py-3 hover:bg-amber-50/20 transition-all duration-200 cursor-pointer md:grid md:grid-cols-[3.1rem_minmax(0,1fr)_auto] md:items-center md:gap-3'
     >
       <div className='flex items-start gap-3 md:block md:min-w-[46px] md:text-right'>
         <p className='shrink-0 text-[11px] font-bold text-secondary/50'>{item.scheduleDate ? formatTime(item.scheduleDate) : '—'}</p>
@@ -776,7 +777,7 @@ function ApptActionCard({
 
       <div className='hidden min-w-0 md:block'>
         <p className='text-sm font-semibold text-secondary truncate leading-tight'>{item.name}</p>
-        <div className='flex items-center gap-2 mt-1 flex-wrap'>
+        <div className='mt-1 flex items-center gap-2 flex-wrap'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
           {item.practitioner && (
             <span className='text-[10px] text-secondary/40'>{item.practitioner.name}</span>
@@ -785,27 +786,19 @@ function ApptActionCard({
       </div>
 
       <div
-        className='grid w-full grid-cols-1 gap-2 shrink-0 md:w-48 md:justify-self-end lg:flex lg:w-auto lg:flex-nowrap lg:items-center'
+        className='flex w-full shrink-0 items-center justify-end gap-2 md:w-auto md:justify-self-end'
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDetails()
-          }}
-          className='w-full rounded-lg border border-black/[0.08] bg-white px-3 py-2 text-[10px] font-medium text-secondary/50 transition-colors hover:text-secondary hover:border-black/[0.14] lg:w-auto lg:px-3 lg:py-1.5'
-        >
-          Voir détails
-        </button>
         <button
           onClick={(e) => {
             e.stopPropagation()
             onConfirm('CONFIRMED')
           }}
           disabled={confirming}
-          className='w-full rounded-lg bg-emerald-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50 lg:w-auto lg:px-4 lg:py-1.5'
+          className='flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100 disabled:opacity-50'
+          aria-label='Confirmer'
         >
-          Confirmer
+          <Check size={16} weight='bold' />
         </button>
         <button
           onClick={(e) => {
@@ -813,9 +806,10 @@ function ApptActionCard({
             onConfirm('CANCELLED')
           }}
           disabled={confirming}
-          className='w-full rounded-lg bg-rose-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50 lg:w-auto lg:px-3 lg:py-1.5'
+          className='flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500 transition-colors hover:bg-rose-100 disabled:opacity-50'
+          aria-label='Refuser'
         >
-          Refuser
+          <X size={16} weight='bold' />
         </button>
       </div>
     </div>
@@ -829,7 +823,7 @@ function ApptRow({ item, onDetails }: { item: ReturnType<typeof enrichAppts>[0];
       tabIndex={0}
       onClick={onDetails}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onDetails()}
-      className='group flex items-start gap-3 p-2 rounded-xl hover:bg-secondary/[0.02] transition-all cursor-pointer'
+      className='group flex items-start gap-3 rounded-xl px-2 py-2 hover:bg-secondary/[0.02] transition-all cursor-pointer'
     >
       {/* Time */}
       <div className='min-w-[42px] text-right shrink-0 pt-0.5'>
@@ -852,9 +846,15 @@ function ApptRow({ item, onDetails }: { item: ReturnType<typeof enrichAppts>[0];
   )
 }
 
-function TomorrowRow({ item }: { item: ReturnType<typeof enrichAppts>[0] }) {
+function TomorrowRow({ item, onDetails }: { item: ReturnType<typeof enrichAppts>[0]; onDetails?: () => void }) {
   return (
-    <div className='flex items-start gap-3 sm:items-center'>
+    <div
+      role='button'
+      tabIndex={0}
+      onClick={onDetails}
+      onKeyDown={(e) => { if (!onDetails) return; if (e.key === 'Enter' || e.key === ' ') onDetails() }}
+      className='group flex items-start gap-3 rounded-lg px-2 py-1.5 transition-all hover:bg-secondary/[0.02] cursor-pointer sm:items-center'
+    >
       <div className='min-w-[42px] text-right pt-0.5 sm:pt-0'>
         <p className='text-[10px] font-bold text-primary'>{item.scheduleDate ? formatTime(item.scheduleDate) : '—'}</p>
       </div>
@@ -867,16 +867,16 @@ function TomorrowRow({ item }: { item: ReturnType<typeof enrichAppts>[0] }) {
 }
 
 function MotifPill({ name, color }: { name: string; color: string }) {
+  const safeColor = normalizeMotifColor(color) || '#2E90C0'
   return (
     <span
-      className='inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold leading-none border shadow-sm tracking-tight'
+      className='inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight'
       style={{
-        backgroundColor: `${color}18`,
-        color: color,
-        borderColor: `${color}35`,
+        backgroundColor: `${safeColor}14`,
+        color: safeColor,
       }}
     >
-      <div className='w-1.5 h-1.5 rounded-full mr-1.5' style={{ backgroundColor: color }} />
+      <div className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: safeColor }} />
       {name}
     </span>
   )
@@ -998,4 +998,11 @@ function StatusBadge({ status }: { status?: string }) {
       {labels[status || ''] || status}
     </span>
   )
+}
+
+function normalizeMotifColor(value?: string) {
+  if (!value) return null
+  const trimmed = value.trim()
+  const prefixed = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+  return /^#[0-9A-Fa-f]{6}$/.test(prefixed) ? prefixed.toUpperCase() : null
 }

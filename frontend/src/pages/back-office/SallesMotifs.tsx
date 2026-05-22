@@ -7,10 +7,10 @@ import clsx from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const PRIO: Record<number, { label: string; color: string }> = {
-  1: { label: 'Basse', color: 'bg-gray-50 text-gray-600 border-gray-100' },
-  2: { label: 'Normale', color: 'bg-blue-50 text-blue-600 border-blue-100' },
-  3: { label: 'Haute', color: 'bg-amber-50 text-amber-600 border-amber-100' },
-  4: { label: 'Urgente', color: 'bg-red-50 text-red-600 border-red-100' },
+  1: { label: 'Basse', color: 'bg-gray-50/60 text-gray-500 border-gray-100' },
+  2: { label: 'Normale', color: 'bg-blue-50/60 text-blue-500 border-blue-100' },
+  3: { label: 'Haute', color: 'bg-amber-50/60 text-amber-500 border-amber-100' },
+  4: { label: 'Urgente', color: 'bg-red-50/60 text-red-500 border-red-100' },
 }
 
 type Tab = 'salles' | 'motifs'
@@ -94,7 +94,7 @@ function SallesTable() {
             <tr className='group hover:bg-secondary/[0.02] transition-colors' key={item.id}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Door size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
               <td className='px-6 py-4'><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${p.color}`}><Star size={11} weight={item.priority >= 3 ? 'fill' : 'regular'} />{p.label}</span></td>
-              <td className='px-6 py-4'><div className='flex flex-wrap gap-1.5'>{(item.motifs || []).length === 0 ? <span className='text-xs text-secondary/30'>Aucun motif</span> : (item.motifs || []).map((m: any) => <span key={m.id} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border bg-secondary/[0.03] text-secondary/50 border-black/[0.04]'><LinkIcon size={9} />{m.name}</span>)}</div></td>
+              <td className='px-6 py-4'><div className='flex flex-wrap gap-1.5'>{(item.motifAssignments || []).length === 0 ? <span className='text-xs text-secondary/30'>Aucun motif</span> : (item.motifAssignments || []).map((assignment: any) => <span key={assignment.id || assignment.motifId} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border bg-secondary/[0.03] text-secondary/50 border-black/[0.04]'><LinkIcon size={9} />{assignment.motif?.name || assignment.motifId}</span>)}</div></td>
               <td className='px-6 py-4'><div className='flex items-center justify-end gap-1'><button onClick={() => openEditModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => openDeleteModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
             </tr>
           )})}
@@ -182,15 +182,22 @@ function MotifsTable() {
         <thead>
           <tr className='border-b border-black/[0.04] bg-secondary/[0.01]'>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Motif</th>
+            <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Couleur</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Durée</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-right'>Actions</th>
           </tr>
         </thead>
         <tbody className='divide-y divide-black/[0.02]'>
-          {items.length === 0 && <tr><td colSpan={3} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Stethoscope size={24} /><p className='text-sm font-medium'>Aucun motif trouvé</p></div></td></tr>}
+          {items.length === 0 && <tr><td colSpan={4} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Stethoscope size={24} /><p className='text-sm font-medium'>Aucun motif trouvé</p></div></td></tr>}
           {items.map((item) => (
             <tr className='group hover:bg-secondary/[0.02] transition-colors' key={item.id}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Stethoscope size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
+              <td className='px-6 py-4'>
+                <div className='flex items-center gap-2'>
+                  <span className='h-4 w-4 rounded-full border border-black/[0.06]' style={{ backgroundColor: item.color || '#2E90C0' }} />
+                  <span className='text-xs font-medium text-secondary/55'>{item.color || '#2E90C0'}</span>
+                </div>
+              </td>
               <td className='px-6 py-4'><span className='inline-flex items-center rounded-md border border-black/[0.06] bg-secondary/[0.01] px-2.5 py-1 text-xs font-semibold text-secondary/70'>{item.duration || 30} min</span></td>
               <td className='px-6 py-4'><div className='flex items-center justify-end gap-1'><button onClick={() => { setItem(item); setOperation('edit'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => { setItem(item); setOperation('delete'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
             </tr>
@@ -228,6 +235,10 @@ function MotifsTable() {
                   <span className='inline-flex shrink-0 items-center self-start mt-0.5 rounded-md border border-black/[0.06] bg-secondary/[0.03] px-1.5 py-0.5 text-[10px] font-medium text-secondary/50'>
                     {item.duration || 30} min
                   </span>
+                </div>
+                <div className='mt-1 flex items-center gap-2'>
+                  <span className='h-3.5 w-3.5 rounded-full border border-black/[0.06]' style={{ backgroundColor: item.color || '#2E90C0' }} />
+                  <span className='text-[11px] text-secondary/45'>{item.color || '#2E90C0'}</span>
                 </div>
               </div>
               <div className='flex shrink-0 items-center gap-0.5'>
@@ -322,6 +333,10 @@ function MotifModal() {
     setItem({ ...item, practitionerIds: next })
   }
 
+  const randomizeColor = () => {
+    setItem({ ...item, color: getRandomMotifColor() })
+  }
+
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', visible ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
@@ -369,6 +384,40 @@ function MotifModal() {
             />
           </div>
 
+          <div className='space-y-2'>
+            <div className='flex items-center justify-between gap-3'>
+              <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du motif</label>
+              <button
+                type='button'
+                onClick={randomizeColor}
+                className='rounded-lg border border-black/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary/55 transition hover:bg-secondary/[0.03] hover:text-secondary'
+              >
+                Aléatoire
+              </button>
+            </div>
+            <div className='flex items-center gap-3 rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-3'>
+              <input
+                type='color'
+                value={normalizeMotifColor(item.color) || '#2E90C0'}
+                onChange={(e) => setItem({ ...item, color: e.target.value.toUpperCase() })}
+                className='h-11 w-11 cursor-pointer rounded-lg border border-black/[0.06] bg-transparent p-1'
+              />
+              <div className='min-w-0 flex-1 space-y-2'>
+                <input
+                  type='text'
+                  value={item.color || ''}
+                  onChange={(e) => setItem({ ...item, color: e.target.value.toUpperCase() })}
+                  className='w-full rounded-lg border border-black/[0.06] bg-white px-3 py-2 text-sm text-secondary placeholder:text-secondary/35 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+                  placeholder='#2E90C0'
+                />
+                <div className='flex items-center gap-2'>
+                  <span className='h-2.5 w-2.5 rounded-full' style={{ backgroundColor: normalizeMotifColor(item.color) || '#2E90C0' }} />
+                  <span className='text-xs text-secondary/45'>Prévisualisation du tag et du calendrier</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Doctor Selection */}
           <div className='space-y-2'>
             <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Praticiens assignés</label>
@@ -409,6 +458,18 @@ function MotifModal() {
       </motion.form>
     </div>
   )
+}
+
+function normalizeMotifColor(value?: string) {
+  if (!value) return null
+  const trimmed = value.trim()
+  const prefixed = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+  return /^#[0-9A-Fa-f]{6}$/.test(prefixed) ? prefixed.toUpperCase() : null
+}
+
+function getRandomMotifColor() {
+  const palette = ['#2E90C0', '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444', '#10B981', '#EC4899', '#0EA5E9']
+  return palette[Math.floor(Math.random() * palette.length)]
 }
 
 function MotifDeleteModal() {

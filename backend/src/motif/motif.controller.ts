@@ -38,6 +38,8 @@ export class MotifController {
       serviceId: string;
       duration?: number;
       description?: string;
+      color?: string;
+      practitionerIds?: string[];
     },
   ) {
     return this.motifService.create(data);

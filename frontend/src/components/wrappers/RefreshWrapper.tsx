@@ -11,6 +11,16 @@ export default function RefreshWrapper() {
     if (hasRefreshed.current) return
     hasRefreshed.current = true
 
+    const { token, user } = useAuthStore.getState()
+
+    if (token && user) {
+      setReady(true)
+      void refresh().catch(() => {
+        // Background refresh can fail; auth wrapper/interceptors will handle invalidation if needed
+      })
+      return
+    }
+
     ;(async () => {
       try {
         await refresh()

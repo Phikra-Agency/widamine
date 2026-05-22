@@ -56,7 +56,7 @@ function Filters() {
         <select
           value={filters.read ? '1' : '0'}
           onChange={(e) => setFilters({ ...filters, read: e.target.value === '1' })}
-          className="bo-select"
+          className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option value="0">Non lus</option>
           <option value="1">Lus</option>

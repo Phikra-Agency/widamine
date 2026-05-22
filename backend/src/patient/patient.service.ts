@@ -146,6 +146,9 @@ export class PatientService {
   }
 
   async remove(id: string) {
+    await this.prismaService.schedule.deleteMany({ where: { appointment: { patientId: id } } });
+    await this.prismaService.notificationLog.deleteMany({ where: { appointment: { patientId: id } } });
+    await this.prismaService.appointment.deleteMany({ where: { patientId: id } });
     return this.prismaService.patient.delete({
       where: { id },
     });

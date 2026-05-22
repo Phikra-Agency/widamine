@@ -422,15 +422,14 @@ function Planner() {
                     <div className='space-y-1.5'>
                       {schedules.map((schedule) => {
                         const color = schedule.appointment?.motif?.color || period.color
-                        const key = `${schedule.datetime}-${schedule.session.id}`
                         return (
                           <button
-                            key={key}
+                            key={schedule.id}
                             type='button'
                             onClick={() => {
                               setItem(schedule)
                               toggleOpenShowModal()
-                              markOpened(key)
+                              markOpened(schedule.id)
                             }}
                             className='flex w-full items-center gap-3 rounded-lg border border-black/[0.04] bg-white px-3 py-2.5 text-left transition hover:border-primary/20'
                           >
@@ -448,7 +447,7 @@ function Planner() {
                                 {schedule.session.service.name} · S{schedule.session.session}
                               </p>
                             </div>
-                            {!isOpened(key) && (
+                            {!isOpened(schedule.id) && (
                               <div className='h-2 w-2 shrink-0 rounded-full' style={{ backgroundColor: color }} />
                             )}
                           </button>
@@ -503,8 +502,8 @@ function Planner() {
               <div key={period.key} className='contents'>
                 <div className='sticky left-0 z-10 flex h-full flex-col justify-between border-r border-t border-black/[0.04] bg-white px-3.5 py-3.5'>
                   <p className='text-sm text-secondary'>{period.label}</p>
-                  <div className='inline-flex items-center gap-2 rounded-full border border-black/[0.04] bg-secondary/[0.02] px-3 py-1.5 text-xs text-secondary/50'>
-                    <Clock size={14} className='text-primary' />
+                  <div className='inline-flex h-[28px] w-fit items-center whitespace-nowrap gap-1 rounded-full border border-black/[0.04] bg-secondary/[0.02] px-2 py-0 text-[10px] leading-none text-secondary/50'>
+                    <Clock size={11} className='text-primary' />
                     {period.hours}
                   </div>
                 </div>
@@ -532,7 +531,7 @@ function Planner() {
                           <>
                                 {schedules.slice(0, 2).map((schedule) => {
                                   const color = schedule.appointment?.motif?.color || '#2e90c0'
-                                  const key = `${schedule.datetime}-${schedule.session.id}`
+                                  const key = schedule.id
                                   return (
                                     <div key={key} className='relative group/sched'>
                                       <button
@@ -623,5 +622,3 @@ function MiniMetric({ label, value }: { label: string; value: number }) {
     </div>
   )
 }
-
-

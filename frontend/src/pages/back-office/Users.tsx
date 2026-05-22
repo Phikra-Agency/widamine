@@ -7,10 +7,10 @@ import { useDebounce } from 'use-debounce'
 import type { Role } from '@/stores/authStore'
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  ADMIN: { label: 'Administrateur', color: 'bg-violet-50 text-violet-600', icon: Crown },
-  DOCTOR: { label: 'Médecin', color: 'bg-emerald-50 text-emerald-600', icon: Stethoscope },
-  RECEPTIONIST: { label: 'Réceptionniste', color: 'bg-blue-50 text-blue-600', icon: UserCircle },
-  PRACTITIONER: { label: 'Praticien', color: 'bg-sky-50 text-sky-600', icon: Stethoscope },
+  ADMIN: { label: 'Administrateur', color: 'bg-violet-50/55 text-violet-500', icon: Crown },
+  DOCTOR: { label: 'Médecin', color: 'bg-emerald-50/55 text-emerald-500', icon: Stethoscope },
+  RECEPTIONIST: { label: 'Réceptionniste', color: 'bg-blue-50/55 text-blue-500', icon: UserCircle },
+  PRACTITIONER: { label: 'Praticien', color: 'bg-sky-50/55 text-sky-500', icon: Stethoscope },
 }
 
 export default function Users() {
@@ -65,7 +65,7 @@ function Filters() {
           placeholder='Rechercher un utilisateur...'
           value={filters.term}
           onChange={(e) => setFilters({ ...filters, term: e.target.value })}
-          className='bo-input'
+          className='w-full rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] placeholder:text-secondary/35 transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'
         />
         {filters.term && (
           <button
@@ -81,7 +81,7 @@ function Filters() {
         <select
           onChange={(e) => setFilters({ ...filters, role: e.target.value as Role & 'null' })}
           value={filters.role}
-          className='bo-select'
+          className='w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20'
         >
           <option value='null'>Tous les rôles</option>
           <option value='RECEPTIONIST'>Réceptionniste</option>

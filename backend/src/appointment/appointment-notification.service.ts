@@ -151,6 +151,50 @@ export class AppointmentNotificationService {
     );
   }
 
+  async notifyDoctorConfirmation(appointmentId: string) {
+    if (!(await this.canSendAnyEmail())) return;
+
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { service: true, practitioner: true, schedules: true, patient: true },
+    });
+    if (!appointment?.practitionerId) return;
+
+    const doctor = await this.prisma.user.findUnique({
+      where: { id: appointment.practitionerId },
+    });
+    if (!doctor) return;
+    const doctorEmail = doctor.notificationEmail ?? doctor.email;
+    if (!doctorEmail) return;
+
+    const date = appointment.schedules[0]
+      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "à planifier";
+
+    await this.mailService.sendMail(
+      doctorEmail,
+      `Rendez-vous confirmé — ${appointment.service?.name || "Widamine"}`,
+      `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #10b981;">Rendez-vous confirmé</h2>
+          <p>Bonjour <strong>${doctor.name}</strong>,</p>
+          <p>Le rendez-vous suivant a été confirmé.</p>
+          <table style="border-collapse: collapse; width: 100%; margin: 16px 0;">
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Patient</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${appointment.patient ? `${appointment.patient.firstName} ${appointment.patient.lastName}` : appointment.name}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Service</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${appointment.service?.name || "-"}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Date</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${date}</td></tr>
+          </table>
+        </div>
+      `,
+    );
+  }
+
   // ── Doctor notifications ──────────────────────────────────────
 
   async notifyDoctorNewAppointment(appointmentId: string) {

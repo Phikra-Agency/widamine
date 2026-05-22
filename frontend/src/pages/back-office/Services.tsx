@@ -77,7 +77,7 @@ function Filters() {
 			<div className="relative min-w-[180px]">
 				<select
 					onChange={(e) => setFilters({ ...filters, categoryId: +e.target.value })}
-					className="bo-select"
+					className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
 				>
 					<option value="0">Toutes les catégories</option>
 					{categories.map((cat) => (
@@ -364,7 +364,7 @@ function Modal() {
 						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Catégorie</label>
 						<div className="relative">
 							<select value={item.categoryId} onChange={(e) => setItem({ ...item, categoryId: +e.target.value })}
-								className="w-full rounded-xl border border-black/[0.08] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer appearance-none">
+								className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20">
 								<option value={0}>Sélectionnez une catégorie</option>
 								{categories.map((cat) => (
 									<option value={cat.id} key={cat.id}>{cat.category}</option>
@@ -378,7 +378,7 @@ function Modal() {
 						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Médecin principal</label>
 						<div className="relative">
 							<select value={item.doctorId} onChange={(e) => setItem({ ...item, doctorId: +e.target.value })}
-								className="w-full rounded-xl border border-black/[0.08] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all cursor-pointer appearance-none">
+								className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20">
 								<option value={0}>Sélectionnez un médecin</option>
 								{doctors.map((doc) => (
 									<option value={doc.id} key={doc.id}>{doc.name}</option>

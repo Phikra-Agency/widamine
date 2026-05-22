@@ -1,12 +1,12 @@
 import api from '@/lib/api'
 import axios from 'axios'
-import { Bell, EnvelopeSimple, Phone } from '@phosphor-icons/react'
+import { EnvelopeSimple, Phone } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 type NotificationType = 'confirmation' | 'reminder' | 'cancellation'
-type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'inAppEnabled'
-type TypesKey = 'smsTypes' | 'emailTypes' | 'inAppTypes'
+type EnabledKey = 'smsEnabled' | 'emailEnabled'
+type TypesKey = 'smsTypes' | 'emailTypes'
 
 interface ChannelTypes {
   confirmation: boolean
@@ -93,9 +93,9 @@ export default function Settings() {
     debounceRef.current = setTimeout(() => persistSettings(next), 500)
   }
 
-  const toggleChannel = (key: EnabledKey) => {
+  const setChannelEnabled = (key: EnabledKey, checked: boolean) => {
     setSettings((prev) => {
-      const next = { ...prev, [key]: !prev[key] }
+      const next = { ...prev, [key]: checked, inAppEnabled: false, inAppTypes: { confirmation: false, reminder: false, cancellation: false } }
       scheduleSave(next)
       return next
     })
@@ -105,6 +105,8 @@ export default function Settings() {
     setSettings((prev) => {
       const next = {
         ...prev,
+        inAppEnabled: false,
+        inAppTypes: { confirmation: false, reminder: false, cancellation: false },
         [channel]: {
           ...prev[channel],
           [type]: !prev[channel][type],
@@ -141,9 +143,8 @@ export default function Settings() {
                   <div className='mb-4 flex items-end justify-between border-b border-black/[0.04] pb-4'>
                     <div>
                       <p className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Canaux de notification</p>
-                      <p className='mt-1 text-sm text-secondary/70'>Configurez les canaux et les types envoyés</p>
+                      <p className='mt-1 text-sm text-secondary/70'>Confirmation: patient + docteur. Rappel: patient uniquement.</p>
                     </div>
-                    <span className='rounded-md border border-black/[0.06] bg-secondary/[0.02] px-2 py-1 text-[11px] font-medium text-secondary/60'>3 canaux</span>
                   </div>
 
                   <div className='space-y-3'>
@@ -151,7 +152,7 @@ export default function Settings() {
                       name='SMS'
                       enabled={settings.smsEnabled}
                       disabled={saving}
-                      onToggle={() => toggleChannel('smsEnabled')}
+                      onToggleEnabled={(checked) => setChannelEnabled('smsEnabled', checked)}
                       types={settings.smsTypes}
                       onToggleType={(type) => toggleType('smsTypes', type)}
                     />
@@ -159,17 +160,9 @@ export default function Settings() {
                       name='Email'
                       enabled={settings.emailEnabled}
                       disabled={saving}
-                      onToggle={() => toggleChannel('emailEnabled')}
+                      onToggleEnabled={(checked) => setChannelEnabled('emailEnabled', checked)}
                       types={settings.emailTypes}
                       onToggleType={(type) => toggleType('emailTypes', type)}
-                    />
-                    <ChannelRow
-                      name='In-app'
-                      enabled={settings.inAppEnabled}
-                      disabled={saving}
-                      onToggle={() => toggleChannel('inAppEnabled')}
-                      types={settings.inAppTypes}
-                      onToggleType={(type) => toggleType('inAppTypes', type)}
                     />
                   </div>
 
@@ -194,44 +187,42 @@ function ChannelRow({
   name,
   enabled,
   disabled,
-  onToggle,
+  onToggleEnabled,
   types,
   onToggleType,
 }: {
   name: string
   enabled: boolean
   disabled?: boolean
-  onToggle: () => void
+  onToggleEnabled: (checked: boolean) => void
   types: ChannelTypes
   onToggleType: (type: NotificationType) => void
 }) {
   const channelMeta = {
     SMS: { icon: Phone, subtitle: 'Canal SMS' },
     Email: { icon: EnvelopeSimple, subtitle: 'Canal email' },
-    'In-app': { icon: Bell, subtitle: 'Canal interne' },
   } as const
 
-  const meta = channelMeta[name as keyof typeof channelMeta] || channelMeta['In-app']
+  const meta = channelMeta[name as keyof typeof channelMeta] || channelMeta.Email
   const ChannelIcon = meta.icon
 
   return (
     <div className='rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-4'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-3'>
-          <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-black/[0.05]'>
-            <ChannelIcon size={16} className='text-secondary/60' />
-          </div>
-          <div>
-            <p className='text-sm font-medium text-secondary'>{name}</p>
-            <p className='text-xs text-secondary/40'>{meta.subtitle} · activer/désactiver les envois</p>
-          </div>
+      <div className='flex items-start gap-3'>
+        <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-black/[0.05]'>
+          <ChannelIcon size={16} className='text-secondary/60' />
         </div>
-        <button disabled={disabled} onClick={onToggle} className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${enabled ? 'bg-primary' : 'bg-secondary/20'}`}>
-          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-5' : ''}`} />
-        </button>
+        <div className='min-w-0 flex-1'>
+          <p className='text-sm font-medium text-secondary'>{name}</p>
+          <p className='text-xs text-secondary/40'>{meta.subtitle}</p>
+        </div>
       </div>
 
       <div className='mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3'>
+        <label className='inline-flex items-center gap-2 rounded-md border border-black/[0.04] bg-secondary/[0.02] px-3 py-2 text-xs'>
+          <input disabled={disabled} type='checkbox' checked={enabled} onChange={(e) => onToggleEnabled(e.target.checked)} className='h-4 w-4 disabled:cursor-not-allowed' />
+          <span>Activer le canal</span>
+        </label>
         {(['confirmation', 'reminder', 'cancellation'] as NotificationType[]).map((type) => (
           <label
             key={type}

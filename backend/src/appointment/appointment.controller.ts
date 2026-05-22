@@ -96,6 +96,9 @@ export class AppointmentController {
       this.notificationService.sendConfirmation(id).catch((err) =>
         console.error("Failed to send confirmation email:", err.message),
       );
+      this.notificationService.notifyDoctorConfirmation(id).catch((err) =>
+        console.error("Failed to notify doctor of confirmation:", err.message),
+      );
     } else if (data.status === "CANCELLED") {
       // Notify both patient and doctor about cancellation
       this.notificationService.sendCancellation(id).catch((err) =>

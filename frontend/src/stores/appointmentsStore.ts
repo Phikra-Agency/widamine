@@ -1,5 +1,6 @@
 import api from '@/lib/api'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 interface Appointment {
   id?: number
@@ -47,6 +48,7 @@ interface AppointmentStoreInterface {
   items: Appointment[]
   item: Appointment
   filters: { term: string; status: string }
+  lastFetchedAt: number | null
   openShowModal: boolean
   loadingItem: boolean
   savingScheduleSessionId: number | null
@@ -59,55 +61,75 @@ interface AppointmentStoreInterface {
   saveScheduleDate: (payload: { sessionId: number; datetime: string }) => Promise<void>
 }
 
-export const useAppointmentsStore = create<AppointmentStoreInterface>((set, get) => ({
-  items: [],
-  item: {} as Appointment,
-  filters: { term: '', status: '' },
-  openShowModal: false,
-  loadingItem: false,
-  savingScheduleSessionId: null,
-  setItem: (item) => {
-    set({ item })
-  },
-  toggleOpenShowModal() {
-    set({ openShowModal: !get().openShowModal })
-  },
-  setOpenShowModal(open) {
-    set({ openShowModal: open })
-  },
-  setFilters(filters) {
-    set({ filters })
-  },
-  fetchItems: async () => {
-    const res = await api.get('appointments')
-    set({ items: res.data })
-  },
-  fetchItem: async (id: number) => {
-    set({ loadingItem: true })
-    try {
-      const res = await api.get(`appointments/${id}`)
-      set({ item: res.data })
-    } finally {
-      set({ loadingItem: false })
+const APPOINTMENTS_STALE_MS = 60 * 1000
+
+export const useAppointmentsStore = create<AppointmentStoreInterface>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      item: {} as Appointment,
+      filters: { term: '', status: '' },
+      lastFetchedAt: null,
+      openShowModal: false,
+      loadingItem: false,
+      savingScheduleSessionId: null,
+      setItem: (item) => {
+        set({ item })
+      },
+      toggleOpenShowModal() {
+        set({ openShowModal: !get().openShowModal })
+      },
+      setOpenShowModal(open) {
+        set({ openShowModal: open })
+      },
+      setFilters(filters) {
+        set({ filters })
+      },
+      fetchItems: async () => {
+        const { items, lastFetchedAt } = get()
+        const isFresh = items.length > 0 && lastFetchedAt && Date.now() - lastFetchedAt < APPOINTMENTS_STALE_MS
+        if (isFresh) return
+
+        const res = await api.get('appointments')
+        set({ items: res.data, lastFetchedAt: Date.now() })
+      },
+      fetchItem: async (id: number) => {
+        set({ loadingItem: true })
+        try {
+          const res = await api.get(`appointments/${id}`)
+          set({ item: res.data })
+        } finally {
+          set({ loadingItem: false })
+        }
+      },
+      saveScheduleDate: async ({ sessionId, datetime }) => {
+        const appointment = get().item
+        if (!appointment.id) return
+
+        set({ savingScheduleSessionId: sessionId })
+        try {
+          const existingSchedule = appointment.schedules?.find((schedule) => schedule.sessionId === sessionId)
+
+          if (existingSchedule) {
+            await api.put(`schedule/${existingSchedule.id}`, { datetime })
+          } else {
+            await api.post('schedule', { datetime, sessionId, appointmentId: appointment.id })
+          }
+
+          set({ lastFetchedAt: null })
+          await get().fetchItem(appointment.id)
+        } finally {
+          set({ savingScheduleSessionId: null })
+        }
+      },
+    }),
+    {
+      name: 'appointments-storage',
+      partialize: (state) => ({
+        items: state.items,
+        filters: state.filters,
+        lastFetchedAt: state.lastFetchedAt,
+      }),
     }
-  },
-  saveScheduleDate: async ({ sessionId, datetime }) => {
-    const appointment = get().item
-    if (!appointment.id) return
-
-    set({ savingScheduleSessionId: sessionId })
-    try {
-      const existingSchedule = appointment.schedules?.find((schedule) => schedule.sessionId === sessionId)
-
-      if (existingSchedule) {
-        await api.put(`schedule/${existingSchedule.id}`, { datetime })
-      } else {
-        await api.post('schedule', { datetime, sessionId, appointmentId: appointment.id })
-      }
-
-      await get().fetchItem(appointment.id)
-    } finally {
-      set({ savingScheduleSessionId: null })
-    }
-  },
-}))
+  )
+)

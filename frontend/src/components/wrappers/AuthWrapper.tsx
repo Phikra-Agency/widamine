@@ -6,14 +6,14 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function AuthWrapper() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [state, setState] = useState<"checking" | "authenticated" | "unauthenticated">("checking");
 
   useEffect(() => {
     // Check auth state once on mount - don't subscribe to changes
     const { token, user } = useAuthStore.getState();
 
     if (!token || !user) {
-      setAuthenticated(false);
+      setState("unauthenticated");
       return;
     }
 
@@ -46,12 +46,13 @@ export default function AuthWrapper() {
             // Update store without triggering re-render of this component
             useAuthStore.getState().setToken(newToken);
             useAuthStore.getState().setUser(newUser);
+            setState("authenticated");
 
             originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
             return api(originalRequest);
           } catch (refreshError) {
             useAuthStore.getState().logout();
-            setAuthenticated(false);
+            setState("unauthenticated");
             return Promise.reject(refreshError);
           } finally {
             isRefreshing = false;
@@ -62,7 +63,7 @@ export default function AuthWrapper() {
       }
     );
 
-    setAuthenticated(true);
+    setState("authenticated");
 
     return () => {
       api.interceptors.request.eject(requestInterceptor);
@@ -70,7 +71,11 @@ export default function AuthWrapper() {
     };
   }, []);
 
-  if (!authenticated) {
+  if (state === "checking") {
+    return null;
+  }
+
+  if (state !== "authenticated") {
     return <Navigate to="/login" replace />;
   }
 

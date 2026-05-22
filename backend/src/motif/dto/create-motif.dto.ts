@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, Matches } from "class-validator";
 
 export class CreateMotifDto {
   @IsString()
@@ -27,6 +27,7 @@ export class CreateMotifDto {
 
   @IsOptional()
   @IsString()
+  @Matches(/^#[0-9A-Fa-f]{6}$/)
   color?: string;
 
   @IsOptional()
@@ -65,6 +66,7 @@ export class UpdateMotifDto {
 
   @IsOptional()
   @IsString()
+  @Matches(/^#[0-9A-Fa-f]{6}$/)
   color?: string;
 
   @IsOptional()

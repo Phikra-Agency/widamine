@@ -1,6 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
+const DEFAULT_MOTIF_COLORS = [
+  "#2E90C0",
+  "#14B8A6",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EF4444",
+  "#10B981",
+  "#EC4899",
+  "#0EA5E9",
+];
+
 @Injectable()
 export class MotifService {
   constructor(private prisma: PrismaService) {}
@@ -28,7 +39,7 @@ export class MotifService {
         serviceId: serviceId || '000000000000000000000000',
         duration: duration || 30,
         description,
-        color,
+        color: normalizeMotifColor(color) ?? getRandomMotifColor(),
       },
     });
 
@@ -83,6 +94,7 @@ export class MotifService {
       name, slug, bookingType, serviceId, duration, 
       description, isActive, color, practitionerIds 
     } = data;
+    const normalizedColor = color === undefined ? undefined : normalizeMotifColor(color) ?? undefined;
 
     await this.prisma.motif.update({
       where: { id },
@@ -94,7 +106,7 @@ export class MotifService {
         duration,
         description,
         isActive,
-        color,
+        color: normalizedColor,
       },
     });
 
@@ -117,4 +129,15 @@ export class MotifService {
     await this.prisma.motifPractitioner.deleteMany({ where: { motifId: id } });
     return this.prisma.motif.delete({ where: { id } });
   }
+}
+
+function normalizeMotifColor(value?: string) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  const prefixed = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  return /^#[0-9A-Fa-f]{6}$/.test(prefixed) ? prefixed.toUpperCase() : null;
+}
+
+function getRandomMotifColor() {
+  return DEFAULT_MOTIF_COLORS[Math.floor(Math.random() * DEFAULT_MOTIF_COLORS.length)];
 }

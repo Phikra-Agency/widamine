@@ -1,5 +1,4 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { useAuthStore } from '@/stores/authStore'
 import { CaretLeft, CaretRight, X } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
@@ -80,9 +79,7 @@ export default function ScheduleShowModal() {
   const goToDetails = () => {
     toggleOpenShowModal()
     if (!item.appointment?.id) return
-    const { user } = useAuthStore.getState()
-    const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
-    if (isPractitioner && item.appointment?.patient?.id) {
+    if (item.appointment?.patient?.id) {
       navigate(`/back-office/patients?patientId=${item.appointment.patient.id}`)
     } else {
       navigate(`/back-office/appointments?id=${item.appointment.id}`)

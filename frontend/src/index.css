@@ -86,7 +86,7 @@
 	}
 
 	.bo-select {
-		@apply w-full appearance-none rounded-lg border border-black/[0.06] bg-white pl-4 pr-10 py-2.5 text-sm text-secondary transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
+		@apply w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
 	}
 }
 
