@@ -2,13 +2,13 @@ import api from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function AuthWrapper() {
   const [state, setState] = useState<"checking" | "authenticated" | "unauthenticated">("checking");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Check auth state once on mount - don't subscribe to changes
     const { token, user } = useAuthStore.getState();
 

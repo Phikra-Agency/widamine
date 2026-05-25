@@ -11,7 +11,6 @@ import {
   CaretDown,
   CaretLeft,
   CaretRight,
-  ArrowUpRight,
   X,
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -436,9 +435,6 @@ export default function Dashboard() {
                 <h4 className='text-xs font-semibold text-secondary uppercase tracking-wider'>Demain</h4>
                 <span className='text-[10px] text-secondary/40'>({tomorrow.length})</span>
               </div>
-              <Link to='/back-office/calendar' className='text-secondary/20 hover:text-primary transition-colors'>
-                <ArrowUpRight size={14} />
-              </Link>
             </div>
             <div className='overflow-auto px-4 py-3'>
               <div className='space-y-4'>
