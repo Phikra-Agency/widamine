@@ -14,7 +14,7 @@ import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 
 gsap.registerPlugin(useGSAP)
-
+	
 const Dashboard = lazy(() => import('@/pages/back-office/Dashboard'))
 const Users = lazy(() => import('@/pages/back-office/Users'))
 const Patients = lazy(() => import('@/pages/back-office/Patients'))

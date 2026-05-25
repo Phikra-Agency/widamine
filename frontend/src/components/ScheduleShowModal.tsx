@@ -1,4 +1,5 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
+import { saveCalendarReturnContext } from '@/lib/scheduleNavigation'
 import { CaretLeft, CaretRight, X } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
@@ -42,11 +43,14 @@ export default function ScheduleShowModal() {
   const { openShowModal, toggleOpenShowModal, item, items } = useSchedulesStore()
   const navigate = useNavigate()
 
+  if (!openShowModal || !item?.datetime) return null
+
   const allWeekSchedules = items.flatMap(day => [...day.morning, ...day.afternoon, ...day.evening])
 
-  const itemDate = item.datetime ? new Date(item.datetime).toDateString() : ''
-  const itemHour = item.datetime ? new Date(item.datetime).getHours() : 0
+  const itemDate = new Date(item.datetime).toDateString()
+  const itemHour = new Date(item.datetime).getHours()
   const itemPeriod = getPeriodFromHour(itemHour)
+  const itemSessionId = item.session?.id ?? 0
 
   const periodSchedules = allWeekSchedules.filter(s => {
     if (!s.datetime) return false
@@ -60,8 +64,12 @@ export default function ScheduleShowModal() {
     .filter((s) => s.datetime && new Date(s.datetime).toDateString() === itemDate)
     .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
 
-  const currentIndex = periodSchedules.findIndex(s => s.datetime === item.datetime && s.session.id === item.session.id)
-  const dayIndex = daySchedules.findIndex(s => s.datetime === item.datetime && s.session.id === item.session.id)
+  const currentIndex = periodSchedules.findIndex(
+    s => s.datetime === item.datetime && (s.session?.id ?? 0) === itemSessionId,
+  )
+  const dayIndex = daySchedules.findIndex(
+    s => s.datetime === item.datetime && (s.session?.id ?? 0) === itemSessionId,
+  )
   const hasNext = currentIndex < periodSchedules.length - 1
   const hasPrev = currentIndex > 0
   const patientName = item.appointment?.patient
@@ -77,6 +85,9 @@ export default function ScheduleShowModal() {
   }
 
   const goToDetails = () => {
+    if (item.datetime && item.appointment?.id) {
+      saveCalendarReturnContext(item)
+    }
     toggleOpenShowModal()
     if (!item.appointment?.id) return
     if (item.appointment?.patient?.id) {

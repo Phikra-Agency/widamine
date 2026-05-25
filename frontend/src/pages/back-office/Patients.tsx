@@ -1,10 +1,20 @@
 import { usePatientStore } from '@/stores/patientsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useSchedulesStore } from '@/stores/schedulesStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, CalendarBlank, MagnifyingGlass, CaretDown, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  buildCalendarReturnUrl,
+  buildCalendarUrlFromAppointment,
+  clearCalendarReturnContext,
+  normalizeAppointmentId,
+  readCalendarReturnContext,
+  stashAppointmentForCalendarOpen,
+} from '@/lib/scheduleNavigation'
 import { useDebounce } from 'use-debounce'
 import Pagination from '@/components/Pagination'
 
@@ -602,10 +612,115 @@ function DeleteModal() {
   )
 }
 
+function UpcomingAppointmentRow({
+  appt,
+  onOpenCalendar,
+}: {
+  appt: any
+  onOpenCalendar: (appt: any) => void
+}) {
+  const hasSlot = appt._dt > 0
+  const appointmentId = normalizeAppointmentId(appt)
+
+  if (!hasSlot) {
+    return (
+      <div className='flex w-full items-center gap-3 rounded-lg bg-secondary/[0.02] px-3 py-2'>
+        <div className='min-w-0 flex-1'>
+          <p className='text-sm font-medium text-secondary truncate'>{appt.name}</p>
+          <div className='mt-0.5 flex items-center gap-2 text-[11px] text-secondary/40'>
+            {appt.service && <span>{appt.service.name}</span>}
+            <StatusBadge status={appt.status} />
+          </div>
+        </div>
+        <span className='shrink-0 text-xs font-medium text-secondary/40'>—</span>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type='button'
+      disabled={!appointmentId}
+      onClick={() => appointmentId && onOpenCalendar({ ...appt, id: appointmentId })}
+      className={clsx(
+        'relative z-20 flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-200',
+        appointmentId
+          ? 'cursor-pointer border-transparent bg-secondary/[0.02] hover:border-primary/20 hover:bg-primary/[0.06] hover:shadow-[0_2px_12px_rgba(46,144,192,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]'
+          : 'cursor-not-allowed border-black/[0.04] bg-secondary/[0.02] opacity-60',
+      )}
+    >
+      <div className='min-w-0 flex-1'>
+        <p className='text-sm font-medium text-secondary truncate'>{appt.name}</p>
+        <div className='mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-secondary/40'>
+          {appt.service && <span>{appt.service.name}</span>}
+          <StatusBadge status={appt.status} />
+          {appointmentId && (
+            <span className='font-medium text-primary/70'>Voir au calendrier →</span>
+          )}
+        </div>
+      </div>
+      <div className='flex shrink-0 items-center gap-1.5'>
+        <span className='text-xs font-semibold text-primary'>
+          {new Date(appt._dt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}{' '}
+          {new Date(appt._dt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+        </span>
+        <CalendarClock size={15} className='shrink-0 text-primary/40' />
+      </div>
+    </button>
+  )
+}
+
+function StatusBadge({ status }: { status?: string }) {
+  return (
+    <span
+      className={clsx(
+        'inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium',
+        status === 'CONFIRMED'
+          ? 'bg-emerald-50 text-emerald-600'
+          : status === 'PENDING'
+            ? 'bg-amber-50 text-amber-600'
+            : status === 'CANCELLED'
+              ? 'bg-rose-50 text-rose-600'
+              : 'bg-secondary/[0.04] text-secondary/40',
+      )}
+    >
+      {status === 'CONFIRMED'
+        ? 'Confirmé'
+        : status === 'PENDING'
+          ? 'En attente'
+          : status === 'CANCELLED'
+            ? 'Annulé'
+            : status || '—'}
+    </span>
+  )
+}
+
 function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any; onClose: () => void }) {
   const { openEditModal } = usePatientStore()
   const { user } = useAuthStore()
+  const navigate = useNavigate()
+  const openAppointmentFromPatientDrawer = useSchedulesStore(state => state.openAppointmentFromPatientDrawer)
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
+  const calendarReturn = useMemo(() => (open ? readCalendarReturnContext() : null), [open])
+  const calendarTo = calendarReturn ? buildCalendarReturnUrl(calendarReturn) : '/back-office/calendar'
+
+  const openOnCalendar = useCallback(
+    (appt: any) => {
+      const appointmentId = normalizeAppointmentId(appt)
+      if (!appointmentId || !appt._dt) return
+
+      const payload = { ...appt, id: appointmentId }
+      clearCalendarReturnContext()
+      stashAppointmentForCalendarOpen(payload)
+
+      const opened = openAppointmentFromPatientDrawer(payload)
+      if (!opened) return
+
+      onClose()
+      navigate('/back-office/calendar')
+    },
+    [navigate, onClose, openAppointmentFromPatientDrawer],
+  )
 
   const appts = useMemo(() => {
     if (!patient?.appointments) return { upcoming: [], past: [] }
@@ -635,19 +750,23 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
     },
   }
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <AnimatePresence>
       {open && patient && (
-        <div className='fixed inset-0 z-50'>
-          <motion.div
+        <div className='fixed inset-0 z-[120] flex'>
+          <motion.button
+            type='button'
+            aria-label='Fermer le dossier patient'
             {...drawerMotion.overlay}
-            className='absolute inset-0 bg-black/25'
+            className='min-w-0 flex-1 border-0 bg-black/25 p-0'
             onClick={onClose}
           />
 
-          <motion.div
+          <motion.aside
             {...drawerMotion.panel}
-            className='absolute right-0 top-0 h-full w-full max-w-[520px] bg-white border-l border-black/[0.06] flex flex-col'
+            className='relative z-[121] flex h-full w-full max-w-[520px] shrink-0 flex-col border-l border-black/[0.06] bg-white shadow-[-8px_0_32px_rgba(26,54,70,0.08)]'
           >
             <div className='shrink-0 px-5 py-4 border-b border-black/[0.06] flex items-start justify-between gap-3'>
               <div className='min-w-0'>
@@ -706,28 +825,11 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
                   <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Rendez-vous à venir ({appts.upcoming.length})</p>
                   <div className='space-y-2'>
                     {appts.upcoming.map((a: any) => (
-                      <div key={a.id} className='flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/[0.02]'>
-                        <div className='min-w-0 flex-1'>
-                          <p className='text-sm text-secondary truncate font-medium'>{a.name}</p>
-                          <div className='flex items-center gap-2 mt-0.5 text-[11px] text-secondary/40'>
-                            {a.service && <span>{a.service.name}</span>}
-                            <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium',
-                              a.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-600' :
-                              a.status === 'PENDING' ? 'bg-amber-50 text-amber-600' :
-                              a.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
-                              'bg-secondary/[0.04] text-secondary/40'
-                            )}>
-                              {a.status === 'CONFIRMED' ? 'Confirmé' : a.status === 'PENDING' ? 'En attente' : a.status === 'CANCELLED' ? 'Annulé' : a.status}
-                            </span>
-                          </div>
-                        </div>
-                        <span className='text-xs text-primary font-medium shrink-0'>
-                          {a.schedules?.[0]?.datetime
-                            ? new Date(a.schedules[0].datetime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' ' +
-                              new Date(a.schedules[0].datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-                            : '—'}
-                        </span>
-                      </div>
+                      <UpcomingAppointmentRow
+                        key={normalizeAppointmentId(a) ?? `upcoming-${a._dt}-${a.name}`}
+                        appt={a}
+                        onOpenCalendar={openOnCalendar}
+                      />
                     ))}
                   </div>
                 </div>
@@ -739,27 +841,11 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
                   <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Historique ({appts.past.length})</p>
                   <div className='space-y-2'>
                     {appts.past.slice(0, 8).map((a: any) => (
-                      <div key={a.id} className='flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/[0.02]'>
-                        <div className='min-w-0 flex-1'>
-                          <p className='text-sm text-secondary truncate font-medium'>{a.name}</p>
-                          <div className='flex items-center gap-2 mt-0.5 text-[11px] text-secondary/40'>
-                            {a.service && <span>{a.service.name}</span>}
-                            <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium',
-                              a.status === 'COMPLETED' ? 'bg-sky-50 text-sky-600' :
-                              a.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-600' :
-                              a.status === 'CANCELLED' ? 'bg-rose-50 text-rose-600' :
-                              'bg-secondary/[0.04] text-secondary/40'
-                            )}>
-                              {a.status === 'COMPLETED' ? 'Terminé' : a.status === 'CONFIRMED' ? 'Confirmé' : a.status === 'CANCELLED' ? 'Annulé' : a.status}
-                            </span>
-                          </div>
-                        </div>
-                        <span className='text-xs text-secondary/50 font-medium shrink-0'>
-                          {a.schedules?.[0]?.datetime
-                            ? new Date(a.schedules[0].datetime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-                            : '—'}
-                        </span>
-                      </div>
+                      <UpcomingAppointmentRow
+                        key={normalizeAppointmentId(a) ?? `past-${a._dt}-${a.name}`}
+                        appt={a}
+                        onOpenCalendar={openOnCalendar}
+                      />
                     ))}
                     {appts.past.length > 8 && (
                       <p className='text-xs text-secondary/40 text-center pt-1'>+ {appts.past.length - 8} résultats précédents</p>
@@ -785,16 +871,22 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
                   </button>
                 )}
                 <Link
-                  to='/back-office/calendar'
-                  className='flex-1 inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-lg text-sm font-medium border border-black/[0.06] text-secondary hover:bg-secondary/[0.02] transition-colors'
+                  to={calendarTo}
+                  className={clsx(
+                    'flex-1 inline-flex items-center justify-center gap-1 px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors',
+                    calendarReturn
+                      ? 'border-primary/20 bg-primary/[0.04] text-primary hover:bg-primary/[0.08]'
+                      : 'border-black/[0.06] text-secondary hover:bg-secondary/[0.02]',
+                  )}
                 >
-                  Calendrier <ArrowRight size={12} />
+                  {calendarReturn ? 'Retour au créneau' : 'Calendrier'} <ArrowRight size={12} />
                 </Link>
               </div>
             </div>
-          </motion.div>
+          </motion.aside>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

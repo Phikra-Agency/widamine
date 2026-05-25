@@ -15,7 +15,8 @@ import {
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { canOpenOnCalendar, openCalendarForAppointment } from '@/lib/scheduleNavigation'
 
 function parseSchedule(datetime?: string): Date | null {
   if (!datetime) return null
@@ -161,6 +162,7 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { stats: sharedStats, fetchStats: fetchSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
@@ -228,6 +230,17 @@ export default function Dashboard() {
     setSelectedId(null)
     setDetails(null)
   }, [])
+
+  const openDetails = useCallback(
+    (item: ApptItem) => {
+      if (canOpenOnCalendar(item)) {
+        openCalendarForAppointment(navigate, item)
+        return
+      }
+      openDrawer(item.id)
+    },
+    [navigate, openDrawer],
+  )
 
   const drawerMotion = {
     overlay: {
@@ -342,7 +355,7 @@ export default function Dashboard() {
               ) : (
                 <div className='space-y-2'>
                   {running.map(item => (
-                    <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDrawer(item.id)} />
+                    <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDetails(item)} />
                   ))}
                 </div>
               )}
@@ -365,7 +378,7 @@ export default function Dashboard() {
               ) : (
                 <div className='space-y-2'>
                   {upcoming.map(item => (
-                    <ApptCard key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                    <ApptCard key={item.id} item={item} onDetails={() => openDetails(item)} />
                   ))}
                 </div>
               )}
@@ -391,7 +404,7 @@ export default function Dashboard() {
                       item={item}
                       confirming={confirming === item.id}
                       onConfirm={(status) => handleConfirm(item.id, status)}
-                      onDetails={() => openDrawer(item.id)}
+                      onDetails={() => openDetails(item)}
                     />
                   ))}
                 </div>
@@ -418,7 +431,7 @@ export default function Dashboard() {
                     <div key={slot} className='rounded-xl border border-black/[0.04] bg-white px-2 py-1.5'>
                       <div className='flex-1 space-y-1'>
                         {items.map(item => (
-                          <ApptRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                          <ApptRow key={item.id} item={item} onDetails={() => openDetails(item)} />
                         ))}
                       </div>
                     </div>
@@ -439,7 +452,7 @@ export default function Dashboard() {
             <div className='overflow-auto px-4 py-3'>
               <div className='space-y-4'>
                 {tomorrow.map(item => (
-                  <TomorrowRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                  <TomorrowRow key={item.id} item={item} onDetails={() => openDetails(item)} />
                 ))}
               </div>
             </div>
@@ -462,7 +475,7 @@ export default function Dashboard() {
                   content: running.length > 0 ? (
                     <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
                       {running.map(item => (
-                        <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDrawer(item.id)} />
+                        <ApptCard key={item.id} item={item} showElapsed now={now} onDetails={() => openDetails(item)} />
                       ))}
                     </div>
                   ) : null,
@@ -476,7 +489,7 @@ export default function Dashboard() {
                   content: upcoming.length > 0 ? (
                     <div className='rounded-xl border border-black/[0.04] bg-white overflow-hidden'>
                       {upcoming.map(item => (
-                        <ApptCard key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                        <ApptCard key={item.id} item={item} onDetails={() => openDetails(item)} />
                       ))}
                     </div>
                   ) : null,
@@ -496,7 +509,7 @@ export default function Dashboard() {
                           item={item}
                           confirming={confirming === item.id}
                           onConfirm={(status) => handleConfirm(item.id, status)}
-                          onDetails={() => openDrawer(item.id)}
+                          onDetails={() => openDetails(item)}
                         />
                       ))}
                     </div>
@@ -515,7 +528,7 @@ export default function Dashboard() {
                         <div key={slot} className='rounded-xl border border-black/[0.04] bg-white px-2 py-1.5'>
                           <div className='flex-1 space-y-1'>
                             {items.map(item => (
-                              <ApptRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                              <ApptRow key={item.id} item={item} onDetails={() => openDetails(item)} />
                             ))}
                           </div>
                         </div>
@@ -532,7 +545,7 @@ export default function Dashboard() {
                   content: tomorrow.length > 0 ? (
                     <div className='space-y-4'>
                       {tomorrow.map(item => (
-                        <TomorrowRow key={item.id} item={item} onDetails={() => openDrawer(item.id)} />
+                        <TomorrowRow key={item.id} item={item} onDetails={() => openDetails(item)} />
                       ))}
                     </div>
                   ) : <p className='text-sm text-secondary/30 text-center py-4'>Aucun rendez-vous demain</p>,

@@ -3,6 +3,7 @@ import { CreateScheduleDto } from "./dto/create-schedule.dto";
 import { UpdateScheduleDto } from "./dto/update-schedule.dto";
 import { PrismaService } from "@/prisma/prisma.service";
 
+// Used for availability (openTime). Calendar week view returns all statuses.
 const ACTIVE_APPOINTMENT_STATUSES: string[] = ["PENDING", "CONFIRMED"];
 
 @Injectable()
@@ -54,9 +55,6 @@ export class ScheduleService {
     const appointmentFilter =
       ["DOCTOR", "PRACTITIONER"].includes(req.user.role)
         ? {
-            status: {
-              in: ACTIVE_APPOINTMENT_STATUSES,
-            },
             OR: [
               { practitionerId: req.user.id },
               {
@@ -67,11 +65,7 @@ export class ScheduleService {
               },
             ],
           }
-        : {
-            status: {
-              in: ACTIVE_APPOINTMENT_STATUSES,
-            },
-          };
+        : {};
 
     const schedules = await this.prismaService.schedule.findMany({
       where: {

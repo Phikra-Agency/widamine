@@ -2,9 +2,20 @@ import { useSchedulesStore } from '@/stores/schedulesStore'
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
 import { CaretLeft, CaretRight, Clock, CalendarBlank } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import api from '@/lib/api'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import {
+  appointmentToScheduleLike,
+  clearStashedAppointment,
+  getMobileDayIndexForDate,
+  getWeekMondayForPending,
+  parsePendingCalendarOpen,
+  readStashedAppointment,
+  resolveScheduleForOpen,
+  type PendingCalendarOpen,
+} from '@/lib/scheduleNavigation'
 
 const OPENED_STORAGE_KEY = 'calendar-opened-keys'
 
@@ -127,8 +138,25 @@ function MotifLegend() {
 }
 
 function Planner() {
-  const { items, filters, fetchItems, setFetchedDate, fetchedDate, setItem, toggleOpenShowModal, setFilters } =
-    useSchedulesStore()
+  const {
+    items,
+    filters,
+    fetchItems,
+    setFetchedDate,
+    fetchedDate,
+    setItem,
+    openShowSchedule,
+    toggleOpenShowModal,
+    setFilters,
+    pendingCalendarOpen,
+    clearPendingCalendarOpen,
+    openShowModal,
+  } = useSchedulesStore()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [pendingOpen, setPendingOpen] = useState<PendingCalendarOpen | null>(null)
+  const processedOpenRef = useRef<string | null>(null)
+  const effectivePending = pendingOpen ?? pendingCalendarOpen
   const weekDates = useMemo(() => getWeekDates(filters.date), [filters.date])
   const total = useMemo(
     () => items.reduce((sum, day) => sum + day.morning.length + day.afternoon.length + day.evening.length, 0),
@@ -142,9 +170,22 @@ function Planner() {
 
   useEffect(() => {
     const date = getMondayOfWeek(filters.date)
-    fetchItems(date)
-    setFetchedDate(date)
+    const force = Boolean(pendingCalendarOpen || openShowModal)
+    void fetchItems(date, { force }).then(() => setFetchedDate(date))
   }, [])
+
+  useEffect(() => {
+    if (!location.pathname.includes('/calendar')) return
+    const pending = pendingCalendarOpen ?? parsePendingCalendarOpen(searchParams)
+    const date = pending?.date ?? filters.date
+    const monday = getMondayOfWeek(date)
+    if (pending) {
+      setMobileDayIdx(getMobileDayIndexForDate(pending.date, monday))
+    }
+    if (openShowModal || pending) {
+      void fetchItems(monday, { force: true })
+    }
+  }, [location.pathname, pendingCalendarOpen, openShowModal, filters.date, fetchItems, searchParams])
 
   useEffect(() => {
     const date = getMondayOfWeek(filters.date)
@@ -153,6 +194,81 @@ function Planner() {
       setFetchedDate(date)
     }
   }, [fetchItems, fetchedDate, filters.date, setFetchedDate])
+
+  useEffect(() => {
+    const fromUrl = parsePendingCalendarOpen(searchParams)
+    if (fromUrl) {
+      setPendingOpen(fromUrl)
+      if (filters.date !== fromUrl.date) {
+        setFilters({ ...filters, date: fromUrl.date })
+      }
+      return
+    }
+    if (pendingCalendarOpen) {
+      setPendingOpen(pendingCalendarOpen)
+    } else {
+      setPendingOpen(null)
+    }
+  }, [searchParams, pendingCalendarOpen, filters.date, setFilters])
+
+  useEffect(() => {
+    if (!effectivePending) {
+      processedOpenRef.current = null
+      return
+    }
+    processedOpenRef.current = null
+
+    const stashed = readStashedAppointment()
+    if (stashed?.id === effectivePending.appointmentId) {
+      const preview = appointmentToScheduleLike(stashed)
+      if (preview) openShowSchedule(preview as Parameters<typeof openShowSchedule>[0])
+    }
+  }, [effectivePending?.appointmentId, effectivePending?.date, openShowSchedule])
+
+  useEffect(() => {
+    if (!effectivePending) return
+
+    const targetMonday = getWeekMondayForPending(effectivePending)
+    if (fetchedDate !== targetMonday) {
+      void fetchItems(targetMonday, { force: true })
+      return
+    }
+
+    const token = `${effectivePending.appointmentId}|${effectivePending.date}`
+    if (processedOpenRef.current === token) return
+
+    void (async () => {
+      const schedule = await resolveScheduleForOpen(
+        items,
+        effectivePending.appointmentId,
+        effectivePending.scheduleKey,
+      )
+      if (!schedule) return
+
+      openShowSchedule(schedule as Parameters<typeof openShowSchedule>[0])
+      setMobileDayIdx(getMobileDayIndexForDate(effectivePending.date, targetMonday))
+      processedOpenRef.current = token
+      setPendingOpen(null)
+      clearPendingCalendarOpen()
+
+      const next = new URLSearchParams(searchParams)
+      next.delete('openAppointment')
+      next.delete('openSchedule')
+      next.delete('date')
+      setSearchParams(next, { replace: true })
+
+      clearStashedAppointment()
+    })()
+  }, [
+    effectivePending,
+    items,
+    fetchedDate,
+    fetchItems,
+    openShowSchedule,
+    searchParams,
+    setSearchParams,
+    clearPendingCalendarOpen,
+  ])
 
   useEffect(() => {
     if (!showDatePicker) return
