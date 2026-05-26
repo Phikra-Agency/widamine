@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/authStore'
 
 const LINKS: { to: string; label: string; icon: React.ElementType; roles: string[] }[] = [
   { to: 'dashboard', label: 'Dashboard', icon: LayoutGrid, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
-  { to: 'appointments', label: 'Rendez-vous', icon: ClipboardCheck, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
+  // { to: 'appointments', label: 'Rendez-vous', icon: ClipboardCheck, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
   { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
   { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR'] },
   { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN'] },

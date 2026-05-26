@@ -15,8 +15,8 @@ import {
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { canOpenOnCalendar, openCalendarForAppointment } from '@/lib/scheduleNavigation'
+import { Link } from 'react-router-dom'
+
 
 function parseSchedule(datetime?: string): Date | null {
   if (!datetime) return null
@@ -162,7 +162,6 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { stats: sharedStats, fetchStats: fetchSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
@@ -233,13 +232,9 @@ export default function Dashboard() {
 
   const openDetails = useCallback(
     (item: ApptItem) => {
-      if (canOpenOnCalendar(item)) {
-        openCalendarForAppointment(navigate, item)
-        return
-      }
       openDrawer(item.id)
     },
-    [navigate, openDrawer],
+    [openDrawer],
   )
 
   const drawerMotion = {

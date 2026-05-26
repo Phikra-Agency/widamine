@@ -1,4 +1,4 @@
-import { useAppointmentsStore } from '@/stores/appointmentsStore'
+// import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { ArrowRight, CalendarBlank, CalendarDots as CalendarClock, Clock as Clock3, EnvelopeSimple as Mail, Phone, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
@@ -122,10 +122,10 @@ export default function Dashboard() {
               </div>
 
               <Link
-                to='/back-office/appointments'
+                to='/back-office/calendar'
                 className='inline-flex items-center gap-2 rounded-full border border-white/12 bg-white px-4 py-2.5 text-sm font-medium text-[#15344d] transition duration-300 hover:translate-x-0.5 hover:bg-[#f8f4f1]'
               >
-                Ouvrir la liste complète
+                Ouvrir le calendrier
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -145,7 +145,7 @@ export default function Dashboard() {
               <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Réservations</p>
               <h2 className='mt-1 text-xl text-[#10293f]'>Dernières demandes reçues</h2>
             </div>
-            <Link to='/back-office/appointments' className='text-sm text-[#2ea9df] transition hover:text-[#0d7fb3]'>
+            <Link to='/back-office/calendar' className='text-sm text-[#2ea9df] transition hover:text-[#0d7fb3]'>
               Voir tout
             </Link>
           </div>
@@ -180,10 +180,10 @@ export default function Dashboard() {
                 </div>
                 <div className='flex items-center'>
                   <Link
-                    to='/back-office/appointments'
+                    to='/back-office/calendar'
                     className='inline-flex items-center rounded-full border border-[#dce9f0] px-4 py-2 text-sm text-[#15344d] transition hover:border-[#9ed7ef] hover:text-[#0f7cac]'
                   >
-                    Détails
+                    Calendrier
                   </Link>
                 </div>
               </motion.div>
@@ -250,7 +250,6 @@ export default function Dashboard() {
             <p className='text-xs uppercase tracking-[0.28em] text-[#90a0ae]'>Navigation</p>
             <h3 className='mt-2 text-xl text-[#10293f]'>Accès direct</h3>
             <div className='mt-4 space-y-3'>
-              <QuickLink to='/back-office/appointments' title='Rendez-vous' text='Ouvrir la gestion détaillée des réservations.' />
               <QuickLink to='/back-office/calendar' title='Calendrier' text='Vérifier les séances planifiées et le rythme hebdomadaire.' />
             </div>
           </div>

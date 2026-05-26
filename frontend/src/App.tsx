@@ -78,7 +78,7 @@ function App() {
 
 									<Route element={<RoleWrapper roles={['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER']} />}>
 										<Route path='patients' element={<Suspense fallback={null}><Patients /></Suspense>} />
-										<Route path='appointments' element={<Suspense fallback={null}><Appointments /></Suspense>} />
+										{/* <Route path='appointments' element={<Suspense fallback={null}><Appointments /></Suspense>} /> */}
 										<Route path='calendar' element={<Suspense fallback={null}><Calendar /></Suspense>} />
 									</Route>
 

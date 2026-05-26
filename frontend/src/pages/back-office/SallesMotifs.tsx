@@ -3,6 +3,7 @@ import { useMotifsStore } from '@/stores/motifsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, Star, Link as LinkIcon, Door, Stethoscope, UserCircle } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -16,7 +17,15 @@ const PRIO: Record<number, { label: string; color: string }> = {
 type Tab = 'salles' | 'motifs'
 
 export default function SallesMotifs() {
-  const [tab, setTab] = useState<Tab>('salles')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const [tab, setTab] = useState<Tab>((tabParam === 'motifs' ? 'motifs' : 'salles'))
+
+  const handleSetTab = (next: Tab) => {
+    setTab(next)
+    setSearchParams(next === 'motifs' ? { tab: 'motifs' } : {}, { replace: true })
+  }
+
   const { openCreateModal: openCreateSalle } = useResourcesStore()
   const { setOperation: setMotifOp, openModal: openMotifModal, clearItem: clearMotifItem } = useMotifsStore()
 
@@ -43,10 +52,10 @@ export default function SallesMotifs() {
             </div>
             <div className='flex items-center gap-3'>
               <div className='inline-flex items-center gap-1 rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-1 w-full sm:w-auto'>
-                <button onClick={() => setTab('salles')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'salles' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
+                <button onClick={() => handleSetTab('salles')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'salles' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
                   <Door size={14} /> Salles
                 </button>
-                <button onClick={() => setTab('motifs')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'motifs' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
+                <button onClick={() => handleSetTab('motifs')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'motifs' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
                   <Stethoscope size={14} /> Motifs
                 </button>
               </div>
@@ -91,11 +100,11 @@ function SallesTable() {
         <tbody className='divide-y divide-black/[0.02]'>
           {items.length === 0 && <tr><td colSpan={4} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Door size={24} /><p className='text-sm font-medium'>Aucune salle trouvée</p></div></td></tr>}
           {items.map((item) => { const p = PRIO[item.priority] || PRIO[1]; return (
-            <tr className='group hover:bg-secondary/[0.02] transition-colors' key={item.id}>
+            <tr className='group hover:bg-secondary/[0.02] transition-colors cursor-pointer' key={item.id} onClick={() => openEditModal(item)}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Door size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
               <td className='px-6 py-4'><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${p.color}`}><Star size={11} weight={item.priority >= 3 ? 'fill' : 'regular'} />{p.label}</span></td>
               <td className='px-6 py-4'><div className='flex flex-wrap gap-1.5'>{(item.motifAssignments || []).length === 0 ? <span className='text-xs text-secondary/30'>Aucun motif</span> : (item.motifAssignments || []).map((assignment: any) => <span key={assignment.id || assignment.motifId} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border bg-secondary/[0.03] text-secondary/50 border-black/[0.04]'><LinkIcon size={9} />{assignment.motif?.name || assignment.motifId}</span>)}</div></td>
-              <td className='px-6 py-4'><div className='flex items-center justify-end gap-1'><button onClick={() => openEditModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => openDeleteModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
+              <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}><div className='flex items-center justify-end gap-1'><button onClick={() => openEditModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => openDeleteModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
             </tr>
           )})}
         </tbody>
@@ -122,7 +131,8 @@ function SallesTable() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.035, ease: [0.22, 1, 0.36, 1] }}
-                className='flex items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+                onClick={() => openEditModal(item)}
+                className='flex cursor-pointer items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
               >
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/[0.04]'>
                   <Door size={16} className='text-secondary/40' />
@@ -140,7 +150,7 @@ function SallesTable() {
                     </p>
                   )}
                 </div>
-                <div className='flex shrink-0 items-center gap-0.5'>
+                <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
                   <button
                     type='button'
                     onClick={() => openEditModal(item)}
@@ -190,7 +200,7 @@ function MotifsTable() {
         <tbody className='divide-y divide-black/[0.02]'>
           {items.length === 0 && <tr><td colSpan={4} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Stethoscope size={24} /><p className='text-sm font-medium'>Aucun motif trouvé</p></div></td></tr>}
           {items.map((item) => (
-            <tr className='group hover:bg-secondary/[0.02] transition-colors' key={item.id}>
+            <tr className='group hover:bg-secondary/[0.02] transition-colors cursor-pointer' key={item.id} onClick={() => { setItem(item); setOperation('edit'); openModal() }}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Stethoscope size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
               <td className='px-6 py-4'>
                 <div className='flex items-center gap-2'>
@@ -199,7 +209,7 @@ function MotifsTable() {
                 </div>
               </td>
               <td className='px-6 py-4'><span className='inline-flex items-center rounded-md border border-black/[0.06] bg-secondary/[0.01] px-2.5 py-1 text-xs font-semibold text-secondary/70'>{item.duration || 30} min</span></td>
-              <td className='px-6 py-4'><div className='flex items-center justify-end gap-1'><button onClick={() => { setItem(item); setOperation('edit'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => { setItem(item); setOperation('delete'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
+              <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}><div className='flex items-center justify-end gap-1'><button onClick={() => { setItem(item); setOperation('edit'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => { setItem(item); setOperation('delete'); openModal() }} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
             </tr>
           ))}
         </tbody>
@@ -224,7 +234,8 @@ function MotifsTable() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: idx * 0.035, ease: [0.22, 1, 0.36, 1] }}
-              className='flex items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+              onClick={() => { setItem(item); setOperation('edit'); openModal() }}
+              className='flex cursor-pointer items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
             >
               <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/[0.04]'>
                 <Stethoscope size={16} className='text-secondary/40' />
@@ -241,7 +252,7 @@ function MotifsTable() {
                   <span className='text-[11px] text-secondary/45'>{item.color || '#2E90C0'}</span>
                 </div>
               </div>
-              <div className='flex shrink-0 items-center gap-0.5'>
+              <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
                 <button
                   type='button'
                   onClick={() => { setItem(item); setOperation('edit'); openModal() }}

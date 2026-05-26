@@ -92,8 +92,6 @@ export default function ScheduleShowModal() {
     if (!item.appointment?.id) return
     if (item.appointment?.patient?.id) {
       navigate(`/back-office/patients?patientId=${item.appointment.patient.id}`)
-    } else {
-      navigate(`/back-office/appointments?id=${item.appointment.id}`)
     }
   }
 

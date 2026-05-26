@@ -304,12 +304,6 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
                   <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}>
                     <div className='flex items-center justify-end gap-1'>
                       <button
-                        onClick={() => openDrawer(item)}
-                        className='px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border border-black/[0.06] text-secondary/60 hover:bg-secondary/5 hover:text-secondary transition-all'
-                      >
-                        Détails
-                      </button>
-                      <button
                         onClick={() => openEditModal(item)}
                         className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'
                       >
@@ -621,8 +615,9 @@ function UpcomingAppointmentRow({
 }) {
   const hasSlot = appt._dt > 0
   const appointmentId = normalizeAppointmentId(appt)
+  const isClickable = hasSlot && appointmentId && appt.status === 'CONFIRMED'
 
-  if (!hasSlot) {
+  if (!isClickable) {
     return (
       <div className='flex w-full items-center gap-3 rounded-lg bg-secondary/[0.02] px-3 py-2'>
         <div className='min-w-0 flex-1'>
@@ -640,23 +635,15 @@ function UpcomingAppointmentRow({
   return (
     <button
       type='button'
-      disabled={!appointmentId}
-      onClick={() => appointmentId && onOpenCalendar({ ...appt, id: appointmentId })}
-      className={clsx(
-        'relative z-20 flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-200',
-        appointmentId
-          ? 'cursor-pointer border-transparent bg-secondary/[0.02] hover:border-primary/20 hover:bg-primary/[0.06] hover:shadow-[0_2px_12px_rgba(46,144,192,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]'
-          : 'cursor-not-allowed border-black/[0.04] bg-secondary/[0.02] opacity-60',
-      )}
+      onClick={() => onOpenCalendar({ ...appt, id: appointmentId })}
+      className='relative z-20 flex w-full cursor-pointer items-center gap-3 rounded-lg border border-transparent bg-secondary/[0.02] px-3 py-2.5 text-left transition-all duration-200 hover:border-primary/20 hover:bg-primary/[0.06] hover:shadow-[0_2px_12px_rgba(46,144,192,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.99]'
     >
       <div className='min-w-0 flex-1'>
         <p className='text-sm font-medium text-secondary truncate'>{appt.name}</p>
         <div className='mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-secondary/40'>
           {appt.service && <span>{appt.service.name}</span>}
           <StatusBadge status={appt.status} />
-          {appointmentId && (
-            <span className='font-medium text-primary/70'>Voir au calendrier →</span>
-          )}
+          <span className='font-medium text-primary/70'>Voir au calendrier →</span>
         </div>
       </div>
       <div className='flex shrink-0 items-center gap-1.5'>

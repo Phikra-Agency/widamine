@@ -139,7 +139,7 @@ function Table() {
               const roleConfig = ROLE_CONFIG[item.role] || ROLE_CONFIG.RECEPTIONIST
               const RoleIcon = roleConfig.icon
               return (
-                <tr className='border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors' key={item.id}>
+                <tr className='border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors cursor-pointer' key={item.id} onClick={() => openEditModal(item)}>
                   <td className='px-6 py-4'>
                     <div className='flex items-center gap-3'>
                       <div className='w-10 h-10 rounded-xl bg-secondary/[0.04] flex items-center justify-center'>
@@ -155,7 +155,7 @@ function Table() {
                       {roleConfig.label}
                     </span>
                   </td>
-                  <td className='px-6 py-4'>
+                  <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}>
                     <div className='flex items-center justify-end gap-1'>
                       <button
                         onClick={() => openEditModal(item)}
@@ -200,7 +200,8 @@ function Table() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.035, ease: [0.22, 1, 0.36, 1] }}
-                className='flex items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]'
+                onClick={() => openEditModal(item)}
+                className='flex items-center gap-3 rounded-xl border border-black/[0.04] bg-white px-4 py-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] cursor-pointer'
               >
                 <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/[0.04]'>
                   <User size={16} className='text-secondary/40' />
@@ -215,7 +216,7 @@ function Table() {
                   </div>
                   <p className='mt-0.5 truncate text-[11px] text-secondary/50'>{item.email}</p>
                 </div>
-                <div className='flex shrink-0 items-center gap-0.5'>
+                <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
                   <button
                     type='button'
                     onClick={() => openEditModal(item)}
