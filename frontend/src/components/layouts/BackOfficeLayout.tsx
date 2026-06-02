@@ -49,7 +49,7 @@ export default function BackOfficeLayout() {
   return (
     <main className='h-dvh overflow-hidden bg-custom-white text-secondary flex flex-col'>
       <div className='flex items-center justify-between border-b border-secondary/10 bg-white px-4 py-3 xl:hidden'>
-        <div className='flex items-center gap-3'>
+        <Link to='/back-office/dashboard' className='flex items-center gap-3'>
           <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10'>
             <img src='/logo.png' alt='Widamine' className='h-6 w-6 object-contain' />
           </div>
@@ -57,7 +57,7 @@ export default function BackOfficeLayout() {
             <p className='text-xs font-medium text-secondary font-amoria tracking-wider'>Widamine</p>
             <p className='text-[10px] text-secondary/60'>Back office</p>
           </div>
-        </div>
+        </Link>
         <button
           type='button'
           onClick={() => setSidebarOpen((open) => !open)}
@@ -121,7 +121,7 @@ function Sidebar({
         }`}
       >
         <div className='flex items-center justify-between gap-3 px-5 py-6 border-b border-secondary/10'>
-          <div className='flex items-center gap-3'>
+          <Link to='/back-office/dashboard' className='flex items-center gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10'>
               <img src='/logo.png' alt='Widamine' className='h-6 w-6 object-contain' />
             </div>
@@ -129,7 +129,7 @@ function Sidebar({
               <p className='text-xs font-medium text-secondary font-amoria tracking-wider'>Widamine</p>
               <p className='text-[10px] text-secondary/60'>Admin</p>
             </div>
-          </div>
+          </Link>
           <button
             type='button'
             onClick={onClose}
