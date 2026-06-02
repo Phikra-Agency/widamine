@@ -92,7 +92,7 @@ function SidebarDark({ sidebarOpen, onClose }: { sidebarOpen: boolean; onClose: 
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
       <div className='flex items-center gap-4 border-b border-white/10 pb-5'>
-        <div className='flex min-w-0 items-center gap-4'>
+        <Link to='/admin1' className='flex min-w-0 items-center gap-4'>
           <div className='flex h-14 w-14 items-center justify-center rounded-[1.4rem] bg-white/92 shadow-[0_16px_26px_rgba(0,0,0,0.14)]'>
             <img src='/logo.png' alt='Widamine' className='h-9 w-9 object-contain' />
           </div>
@@ -101,7 +101,7 @@ function SidebarDark({ sidebarOpen, onClose }: { sidebarOpen: boolean; onClose: 
             <p className='mt-1 font-amoria text-2xl tracking-[0.08em] text-white'>Admin</p>
             <p className='mt-1 text-sm text-white/52'>Pilotage des demandes et du centre</p>
           </div>
-        </div>
+        </Link>
         <button
           type='button'
           onClick={onClose}

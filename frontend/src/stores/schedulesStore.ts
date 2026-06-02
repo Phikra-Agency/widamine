@@ -168,10 +168,7 @@ export const useSchedulesStore = create<ScheduleStoreInterface>()(
     {
       name: 'schedules-storage',
       partialize: (state) => ({
-        items: state.items,
         filters: state.filters,
-        fetchedDate: state.fetchedDate,
-        lastFetchedAt: state.lastFetchedAt,
       }),
     }
   )

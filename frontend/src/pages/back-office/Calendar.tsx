@@ -1,6 +1,6 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
-import { CaretLeft, CaretRight, Clock, CalendarBlank } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, CaretDown, Clock, CalendarBlank, Funnel } from '@phosphor-icons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import api from '@/lib/api'
@@ -103,6 +103,71 @@ interface MotifItem {
   color: string
 }
 
+function DropdownSelect({
+  value,
+  onChange,
+  placeholder,
+  options,
+  open,
+  onOpen,
+  id,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  options: { value: string; label: string }[]
+  open: string | null
+  onOpen: (v: string) => void
+  id: string
+}) {
+  const label = value ? options.find(o => o.value === value)?.label ?? placeholder : placeholder
+  return (
+    <div className='relative'>
+      <button
+        type='button'
+        onClick={() => onOpen(id)}
+        className='flex w-full items-center justify-between gap-1.5 rounded-lg border border-white/10 bg-white/8 px-2.5 py-2 text-[12px] font-medium text-white/80 outline-none transition focus:border-primary/40 focus:ring-1 focus:ring-primary/30'
+      >
+        <span className={value ? 'text-white/90' : 'text-white/40'}>{label}</span>
+        <CaretDown
+          size={10}
+          className={`shrink-0 text-white/40 transition-transform ${open === id ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open === id && (
+        <motion.div
+          initial={{ opacity: 0, y: -2, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.1 }}
+          className='absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#0d2234_0%,#16344e_58%,#1b4964_100%)] backdrop-blur-xl shadow-xl'
+        >
+          <button
+            type='button'
+            onClick={() => { onChange(''); onOpen('') }}
+            className={`flex w-full items-center px-3 py-2 text-left text-[12px] transition hover:bg-white/8 ${
+              !value ? 'text-white' : 'text-white/50'
+            }`}
+          >
+            {placeholder}
+          </button>
+          {options.map(opt => (
+            <button
+              key={opt.value}
+              type='button'
+              onClick={() => { onChange(opt.value); onOpen('') }}
+              className={`flex w-full items-center px-3 py-2 text-left text-[12px] transition hover:bg-white/8 ${
+                value === opt.value ? 'text-white' : 'text-white/70'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
 function MotifLegend() {
   const [motifs, setMotifs] = useState<MotifItem[]>([])
 
@@ -158,14 +223,50 @@ function Planner() {
   const processedOpenRef = useRef<string | null>(null)
   const effectivePending = pendingOpen ?? pendingCalendarOpen
   const weekDates = useMemo(() => getWeekDates(filters.date), [filters.date])
-  const total = useMemo(
-    () => items.reduce((sum, day) => sum + day.morning.length + day.afternoon.length + day.evening.length, 0),
-    [items],
-  )
   const [mobileDayIdx, setMobileDayIdx] = useState(0)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [pickerOffset, setPickerOffset] = useState(0)
   const pickerRef = useRef<HTMLDivElement>(null)
+  const [filterPractitionerId, setFilterPractitionerId] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterMotifId, setFilterMotifId] = useState('')
+  const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([])
+  const [motifOptions, setMotifOptions] = useState<MotifItem[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  useEffect(() => {
+    api.get('users/doctors').then(res => setDoctors(res.data || [])).catch(() => {})
+    api.get('motifs').then(res => setMotifOptions(res.data || [])).catch(() => {})
+  }, [])
+
+  const filteredItems = useMemo(() => {
+    const hasFilter = filterPractitionerId || filterStatus || filterMotifId
+    return items.map(day => {
+      const filterPeriod = (schedules: typeof day.morning) =>
+        schedules.filter(s => {
+          const a = s.appointment
+          if (!a) return false
+          if (!hasFilter && (a.status === 'CANCELLED' || a.status === 'COMPLETED')) return false
+          if (filterPractitionerId && a.practitionerId !== filterPractitionerId) return false
+          if (filterStatus && a.status !== filterStatus) return false
+          if (filterMotifId && a.motif?.id !== filterMotifId) return false
+          return true
+        })
+      return {
+        morning: filterPeriod(day.morning),
+        afternoon: filterPeriod(day.afternoon),
+        evening: filterPeriod(day.evening),
+      }
+    })
+  }, [items, filterPractitionerId, filterStatus, filterMotifId])
+
+  const displayItems = filteredItems
+  const displayTotal = useMemo(
+    () => displayItems.reduce((sum, day) => sum + day.morning.length + day.afternoon.length + day.evening.length, 0),
+    [displayItems],
+  )
+
   const { markOpened, isOpened } = useOpenedKeys()
 
   useEffect(() => {
@@ -324,7 +425,82 @@ function Planner() {
                 <CaretRight size={8} />
               </button>
             </div>
-            <div className='flex items-center gap-2'>
+              <div className='flex items-center gap-2'>
+              <div className='relative'>
+                <button
+                  type='button'
+                  onClick={() => setShowFilters(prev => !prev)}
+                  className='flex h-6 w-6 items-center justify-center rounded-full bg-white/8 text-white/50 backdrop-blur-sm transition hover:bg-white/[0.14] hover:text-white'
+                >
+                  <Funnel size={11} />
+                  {(filterPractitionerId || filterStatus || filterMotifId) && (
+                    <span className='absolute -right-0.5 -top-0.5 grid h-[18px] w-[18px] place-items-center rounded-full bg-primary text-[10px] font-bold leading-none text-white'>
+                      {[filterPractitionerId, filterStatus, filterMotifId].filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+
+                {showFilters && (
+                  <>
+                    <div className='fixed inset-0 z-40' onClick={() => { setShowFilters(false); setOpenDropdown(null) }} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.15 }}
+                      className='absolute right-0 top-full z-50 mt-2 flex w-[280px] flex-col gap-2 rounded-xl border border-white/10 bg-[linear-gradient(135deg,#0d2234_0%,#16344e_58%,#1b4964_100%)] px-3 py-2.5 backdrop-blur-xl shadow-xl'
+                    >
+                      <div className='flex items-center justify-between gap-2'>
+                        <span className='text-[10px] uppercase tracking-[0.2em] text-white/40'>Filtrer par</span>
+                        {(filterPractitionerId || filterStatus || filterMotifId) && (
+                          <button
+                            type='button'
+                            onClick={() => { setFilterPractitionerId(''); setFilterStatus(''); setFilterMotifId('') }}
+                            className='text-[10px] font-medium text-white/40 underline transition hover:text-white/70'
+                          >
+                            Réinitialiser
+                          </button>
+                        )}
+                      </div>
+
+                      <DropdownSelect
+                        value={filterPractitionerId}
+                        onChange={setFilterPractitionerId}
+                        placeholder='Tous les praticiens'
+                        options={doctors.map(d => ({ value: d.id, label: d.name }))}
+                        open={openDropdown}
+                        onOpen={(v) => setOpenDropdown(openDropdown === 'practitioner' ? null : 'practitioner')}
+                        id='practitioner'
+                      />
+
+                      <DropdownSelect
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                        placeholder='Tous les statuts'
+                        options={[
+                          { value: 'PENDING', label: 'En attente' },
+                          { value: 'CONFIRMED', label: 'Confirmé' },
+                          { value: 'COMPLETED', label: 'Terminé' },
+                          { value: 'CANCELLED', label: 'Annulé' },
+                        ]}
+                        open={openDropdown}
+                        onOpen={(v) => setOpenDropdown(openDropdown === 'status' ? null : 'status')}
+                        id='status'
+                      />
+
+                      <DropdownSelect
+                        value={filterMotifId}
+                        onChange={setFilterMotifId}
+                        placeholder='Tous les motifs'
+                        options={motifOptions.map(m => ({ value: m.id, label: m.name }))}
+                        open={openDropdown}
+                        onOpen={(v) => setOpenDropdown(openDropdown === 'motif' ? null : 'motif')}
+                        id='motif'
+                      />
+                    </motion.div>
+                  </>
+                )}
+              </div>
+
               <button
                 type='button'
                 onClick={() => {
@@ -471,12 +647,87 @@ function Planner() {
                 </div>
 
                 <div className='grid grid-cols-2 gap-2'>
-                  <MiniMetric label='Créneaux' value={total} />
+                  <MiniMetric label='Créneaux' value={displayTotal} />
                   <MiniMetric label='Jours' value={6} />
                 </div>
               </div>
 
               <div className='inline-flex flex-wrap items-center justify-end gap-1.5'>
+                <div className='relative'>
+                  <button
+                    type='button'
+                    onClick={() => setShowFilters(prev => !prev)}
+                    className='inline-flex h-9 items-center gap-1.5 rounded-full border border-white/12 bg-white/8 px-3 text-[11px] font-medium text-white/70 backdrop-blur-sm transition hover:bg-white/14 hover:text-white'
+                  >
+                    <Funnel size={12} />
+                    {(filterPractitionerId || filterStatus || filterMotifId) && (
+                      <span className='grid h-[18px] w-[18px] place-items-center rounded-full bg-primary text-[10px] font-bold leading-none text-white'>
+                        {[filterPractitionerId, filterStatus, filterMotifId].filter(Boolean).length}
+                      </span>
+                    )}
+                  </button>
+
+                  {showFilters && (
+                    <>
+                      <div className='fixed inset-0 z-40' onClick={() => { setShowFilters(false); setOpenDropdown(null) }} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.15 }}
+                        className='absolute right-0 top-full z-50 mt-2 flex flex-col gap-2 rounded-xl border border-white/10 bg-[linear-gradient(135deg,#0d2234_0%,#16344e_58%,#1b4964_100%)] px-3 py-2.5 backdrop-blur-xl shadow-xl min-w-[360px]'
+                      >
+                        <div className='flex items-center justify-between gap-2'>
+                          <span className='text-[10px] uppercase tracking-[0.2em] text-white/40'>Filtrer par</span>
+                          {(filterPractitionerId || filterStatus || filterMotifId) && (
+                            <button
+                              type='button'
+                              onClick={() => { setFilterPractitionerId(''); setFilterStatus(''); setFilterMotifId('') }}
+                              className='text-[10px] font-medium text-white/40 underline transition hover:text-white/70'
+                            >
+                              Réinitialiser
+                            </button>
+                          )}
+                        </div>
+
+                        <DropdownSelect
+                          value={filterPractitionerId}
+                          onChange={setFilterPractitionerId}
+                          placeholder='Tous les praticiens'
+                          options={doctors.map(d => ({ value: d.id, label: d.name }))}
+                          open={openDropdown}
+                          onOpen={(v) => setOpenDropdown(openDropdown === 'practitioner' ? null : 'practitioner')}
+                          id='practitioner'
+                        />
+
+                        <DropdownSelect
+                          value={filterStatus}
+                          onChange={setFilterStatus}
+                          placeholder='Tous les statuts'
+                          options={[
+                            { value: 'PENDING', label: 'En attente' },
+                            { value: 'CONFIRMED', label: 'Confirmé' },
+                            { value: 'COMPLETED', label: 'Terminé' },
+                            { value: 'CANCELLED', label: 'Annulé' },
+                          ]}
+                          open={openDropdown}
+                          onOpen={(v) => setOpenDropdown(openDropdown === 'status' ? null : 'status')}
+                          id='status'
+                        />
+
+                        <DropdownSelect
+                          value={filterMotifId}
+                          onChange={setFilterMotifId}
+                          placeholder='Tous les motifs'
+                          options={motifOptions.map(m => ({ value: m.id, label: m.name }))}
+                          open={openDropdown}
+                          onOpen={(v) => setOpenDropdown(openDropdown === 'motif' ? null : 'motif')}
+                          id='motif'
+                        />
+                      </motion.div>
+                    </>
+                  )}
+                </div>
+
                 <button
                   type='button'
                   onClick={() => {
@@ -495,6 +746,7 @@ function Planner() {
                     nextDate.setDate(nextDate.getDate() + 7)
                     setFilters({ ...filters, date: formatLocalDate(nextDate) })
                   }}
+
                   className='flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white transition hover:bg-white/12'
                 >
                   <CaretRight size={16} />
@@ -514,10 +766,10 @@ function Planner() {
       </div>
 
       <div className='lg:hidden flex-1 overflow-y-auto'>
-        {items[mobileDayIdx] ? (
+        {displayItems[mobileDayIdx] ? (
           <div className='divide-y divide-black/[0.04]'>
             {PERIOD_LABELS.map((period) => {
-              const schedules = items[mobileDayIdx]?.[period.key] || []
+              const schedules = displayItems[mobileDayIdx]?.[period.key] || []
               return (
                 <div key={period.key} className='px-5 py-3'>
                   <div className='mb-3 flex items-center gap-2'>
@@ -625,7 +877,7 @@ function Planner() {
                 </div>
 
                 {DAY_LABELS.map((dayLabel, dayIdx) => {
-                  const day = items[dayIdx]
+                  const day = displayItems[dayIdx]
                   const schedules = day?.[period.key] || []
 
                   return (
