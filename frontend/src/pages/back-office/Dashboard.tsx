@@ -190,6 +190,11 @@ export default function Dashboard() {
       setStats(sharedStats)
     }
     void fetchStats()
+
+    const interval = setInterval(() => { void fetchStats({ force: true }); }, 30_000)
+    const onVisible = () => { if (document.visibilityState === 'visible') void fetchStats({ force: true }) }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVisible) }
   }, [fetchStats])
 
   useEffect(() => {
@@ -663,7 +668,7 @@ export default function Dashboard() {
                                 disabled={detailsSaving}
                                 onChange={(value) => saveDetails({ motifId: value || undefined })}
                               >
-                                <option value=''>—</option>
+                                <option value=''>{details.service?.name || '—'}</option>
                                 {motifs.map((m) => (
                                   <option key={m.id} value={m.id}>
                                     {m.name}
@@ -726,6 +731,9 @@ function ApptCard({
         </div>
         <div className='mt-1 flex items-center gap-2 flex-wrap'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+          {!item.motif && item.service && (
+            <span className='rounded-full bg-secondary/8 px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight text-secondary/60'>{item.service.name}</span>
+          )}
           {item.practitioner && (
             <span className='text-[10px] text-secondary/40'>
               {item.practitioner.name}
@@ -772,6 +780,11 @@ function ApptActionCard({
           <p className='text-sm font-semibold text-secondary truncate leading-tight'>{item.name}</p>
           <div className='mt-1 flex items-center gap-2 flex-wrap'>
             {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+            {!item.motif && item.service && (
+              <span className='rounded-full bg-secondary/8 px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight text-secondary/60'>
+                {item.service.name}
+              </span>
+            )}
             {item.practitioner && (
               <span className='text-[10px] text-secondary/40'>{item.practitioner.name}</span>
             )}
@@ -783,6 +796,11 @@ function ApptActionCard({
         <p className='text-sm font-semibold text-secondary truncate leading-tight'>{item.name}</p>
         <div className='mt-1 flex items-center gap-2 flex-wrap'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+          {!item.motif && item.service && (
+            <span className='rounded-full bg-secondary/8 px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight text-secondary/60'>
+              {item.service.name}
+            </span>
+          )}
           {item.practitioner && (
             <span className='text-[10px] text-secondary/40'>{item.practitioner.name}</span>
           )}
@@ -839,6 +857,9 @@ function ApptRow({ item, onDetails }: { item: ReturnType<typeof enrichAppts>[0];
         <p className='text-sm font-medium text-secondary truncate group-hover:text-primary transition-colors'>{item.name}</p>
         <div className='flex items-center gap-2 mt-0.5'>
           {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+          {!item.motif && item.service && (
+            <span className='rounded-full bg-secondary/8 px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight text-secondary/60'>{item.service.name}</span>
+          )}
         </div>
       </div>
 
@@ -865,6 +886,9 @@ function TomorrowRow({ item, onDetails }: { item: ReturnType<typeof enrichAppts>
       <div className='flex min-w-0 flex-1 flex-wrap items-center gap-2'>
         <p className='text-xs font-medium text-secondary/80 truncate'>{item.name}</p>
         {item.motif && <MotifPill name={item.motif.name} color={item.motif.color} />}
+        {!item.motif && item.service && (
+          <span className='rounded-full bg-secondary/8 px-2.5 py-1 text-[10px] font-semibold leading-none tracking-tight text-secondary/60'>{item.service.name}</span>
+        )}
       </div>
     </div>
   )

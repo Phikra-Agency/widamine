@@ -145,6 +145,18 @@ export class PatientService {
     });
   }
 
+  async deleteIfNoAppointments(patientId: string) {
+    const remaining = await this.prismaService.appointment.count({
+      where: {
+        patientId,
+        status: { notIn: ['CANCELLED', 'COMPLETED'] },
+      },
+    })
+    if (remaining === 0) {
+      await this.remove(patientId)
+    }
+  }
+
   async remove(id: string) {
     await this.prismaService.schedule.deleteMany({ where: { appointment: { patientId: id } } });
     await this.prismaService.notificationLog.deleteMany({ where: { appointment: { patientId: id } } });

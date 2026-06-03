@@ -55,7 +55,7 @@ export const useStatsStore = create<StatsStore>()(
     }),
     {
       name: 'stats-storage',
-      partialize: (state) => ({ stats: state.stats, lastFetchedAt: state.lastFetchedAt }),
+      partialize: (state) => ({}),
     }
   )
 )

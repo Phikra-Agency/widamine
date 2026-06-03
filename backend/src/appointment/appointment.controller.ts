@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { AppointmentService } from "./appointment.service";
 import { AppointmentNotificationService } from "./appointment-notification.service";
+import { PatientService } from "@/patient/patient.service";
 import { AuthGuard } from "@/auth/auth.guard";
 import { RoleGuard } from "@/auth/role.guard";
 
@@ -21,6 +22,7 @@ export class AppointmentController {
   constructor(
     private readonly appointmentService: AppointmentService,
     private readonly notificationService: AppointmentNotificationService,
+    private readonly patientService: PatientService,
   ) {}
 
   @Get("availability")
@@ -47,6 +49,11 @@ export class AppointmentController {
     },
   ) {
     const result = await this.appointmentService.create(data);
+
+    // Send acknowledgment email to the patient
+    this.notificationService.sendNewBookingAcknowledgment(result.id).catch((err) =>
+      console.error("Failed to send booking acknowledgment:", err.message),
+    );
 
     // Notify the assigned doctor about the new reservation
     if (result.practitionerId) {
@@ -106,6 +113,11 @@ export class AppointmentController {
       );
       this.notificationService.notifyDoctorCancellation(id).catch((err) =>
         console.error("Failed to notify doctor of cancellation:", err.message),
+      );
+
+      // Clean up patient if this was their only appointment
+      this.patientService.deleteIfNoAppointments(result.patientId).catch((err) =>
+        console.error("Failed to clean up patient:", err.message),
       );
     }
 

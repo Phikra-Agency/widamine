@@ -22,9 +22,9 @@ const panelVariants = {
 }
 
 const stepVariants = {
-  initial: { opacity: 0, x: 8 },
-  animate: { opacity: 1, x: 0, transition: { duration: 0.18, ease: 'easeOut' as const } },
-  exit: { opacity: 0, x: -6, transition: { duration: 0.12 } },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.15, ease: 'easeOut' as const } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.1 } },
 }
 
 function getPanelWidth(step: number) {
@@ -109,6 +109,15 @@ function ReservationSteps({
   } = useScheduleModalStore()
 
   const [viewingDoctorsFor, setViewingDoctorsFor] = useState<string | null>(null)
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({})
+
+  const validate = () => {
+    const errs: { email?: string; phone?: string } = {}
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) errs.email = 'Email invalide'
+    if (!/^[\d\s\+\-\.]{6,20}$/.test(userData.phone)) errs.phone = 'Numéro invalide'
+    setErrors(errs)
+    return Object.keys(errs).length === 0
+  }
 
   useEffect(() => {
     if (step <= 0) {
@@ -124,6 +133,7 @@ function ReservationSteps({
   }, [loadAvailability, selectedDate, selectedMotif, selectedPractitionerId, step])
 
   const handleSubmit = async () => {
+    if (!validate()) return
     await submit()
   }
 
@@ -136,13 +146,15 @@ function ReservationSteps({
     }
   }
 
+  const inputBase = 'w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+
   return (
     <motion.div
       variants={panelVariants}
       initial='hidden'
       animate='visible'
       exit='exit'
-      className={`overflow-hidden rounded-[1.45rem] border border-white/18 bg-[linear-gradient(180deg,rgba(52,52,52,0.98),rgba(33,33,33,0.98))] p-4 text-white shadow-[0_28px_70px_rgba(0,0,0,0.38)] sm:rounded-[1.65rem] sm:p-6 ${
+      className={`overflow-hidden rounded-[1.45rem] border border-white/18 bg-[linear-gradient(180deg,rgba(52,52,52,0.98),rgba(33,33,33,0.98))] p-4 text-white sm:rounded-[1.65rem] sm:p-6 ${
         embedded
           ? 'relative flex w-full max-w-full flex-col min-h-[24rem] sm:max-w-[720px] sm:min-h-[30rem]'
           : 'pointer-events-auto relative flex max-h-[calc(100dvh-1.5rem)] w-full flex-col sm:max-h-[min(90dvh,52rem)]'
@@ -150,11 +162,10 @@ function ReservationSteps({
       style={embedded ? undefined : { width: `min(calc(100vw - 1.5rem), ${getPanelWidth(step)}px)` }}
     >
       <div className='pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent' />
-      <div className='pointer-events-none absolute -left-10 top-0 h-28 w-28 rounded-full bg-primary/12 blur-3xl' />
       <div className='mb-5 flex items-center justify-between sm:mb-6'>
         <h2 className='text-lg font-normal'>{getStepTitle(step)}</h2>
         {embedded ? null : (
-          <button onClick={handleDismiss} className='text-white/50 transition-all duration-300 ease-out hover:text-white'>
+          <button onClick={handleDismiss} className='text-white/50 hover:text-white'>
             <X size={20} />
           </button>
         )}
@@ -163,63 +174,42 @@ function ReservationSteps({
       <AnimatePresence initial={false} mode='wait'>
         <motion.div
           key={`panel-step-${step}`}
-          initial={{ opacity: 0, y: 10, scale: 0.99 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -6, scale: 0.995 }}
-          transition={{
-            duration: 0.15,
-            ease: 'easeOut',
-          }}
+          variants={stepVariants}
+          initial='initial'
+          animate='animate'
+          exit='exit'
           className={`relative w-full flex-1 overflow-y-auto pr-1 ${embedded ? 'min-h-[18rem] sm:min-h-[24rem]' : 'min-h-[18rem]'}`}
         >
           {step === 1 ? (
-            <motion.div
-              key='step-1'
-              variants={stepVariants}
-              initial='initial'
-              animate='animate'
-              exit='exit'
-              className='min-h-[190px] sm:min-h-[220px]'
-            >
+            <div className='min-h-[190px] sm:min-h-[220px]'>
               {motifsError ? <InlineMessage tone='error'>{motifsError}</InlineMessage> : null}
               {isLoadingMotifs ? <InlineMessage>Chargement des motifs...</InlineMessage> : null}
               <div className='mb-5 grid grid-cols-1 gap-2.5 sm:mb-6 sm:grid-cols-2 sm:gap-3'>
-                {motifs.map((motif, index) => (
-                  <motion.button
+                {motifs.map((motif) => (
+                  <button
                     key={motif.id}
                     data-active={selectedMotif?.id === motif.id}
                     onClick={() => {
                       setSelectedMotif(motif)
                       setStep(2)
                     }}
-                    className='group flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-left transition-all duration-300 ease-out hover:border-white/20 hover:bg-white/10 data-[active=true]:border-primary/50 data-[active=true]:bg-primary/10 data-[active=true]:shadow-[0_0_20px_rgba(39,168,228,0.15)]'
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: Math.min(index * 0.02, 0.15), duration: 0.15 }}
-                    whileTap={{ scale: 0.98 }}
+                    className='group flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-left hover:border-white/20 hover:bg-white/10 data-[active=true]:border-primary/50 data-[active=true]:bg-primary/10 data-[active=true]:shadow-[0_0_20px_rgba(39,168,228,0.15)]'
                   >
-                    <div className='flex h-6 w-6 items-center justify-center rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors'>
+                    <div className='flex h-6 w-6 items-center justify-center rounded-lg bg-white/5 group-hover:bg-white/10'>
                       <MicroscopeIcon size={14} className='text-white/60' />
                     </div>
                     <span className='min-w-0 text-[13px] font-medium text-white/80 sm:text-sm'>{motif.name}</span>
                     {selectedMotif?.id === motif.id ? <CheckIcon size={14} className='ml-1 text-primary' /> : null}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
               {selectedMotif?.description ? <p className='text-sm leading-6 text-white/55'>{selectedMotif.description}</p> : null}
-            </motion.div>
+            </div>
           ) : null}
 
           {step === 2 ? (
-            <motion.div
-              key='step-2'
-              variants={stepVariants}
-              initial='initial'
-              animate='animate'
-              exit='exit'
-              className='flex flex-col gap-4 sm:gap-6 lg:flex-row'
-            >
+            <div className='flex flex-col gap-4 sm:gap-6 lg:flex-row'>
               <div className='flex shrink-0 justify-center lg:block'>
                 <DatePicker
                   value={formatDateInputValue(selectedDate)}
@@ -285,18 +275,11 @@ function ReservationSteps({
                   </>
                 )}
               </div>
-            </motion.div>
+            </div>
           ) : null}
 
           {step === 3 ? (
-            <motion.div
-              key='step-3'
-              variants={stepVariants}
-              initial='initial'
-              animate='animate'
-              exit='exit'
-              className='min-h-[280px] sm:min-h-[320px]'
-            >
+            <div className='min-h-[280px] sm:min-h-[320px]'>
               {submitError ? (
                 <div className='mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300'>
                   {submitError}
@@ -307,42 +290,48 @@ function ReservationSteps({
                 <div className='relative'>
                   <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
                   <input
+                    required
                     type='text'
                     placeholder='Prénom'
                     value={userData.prenom}
                     onChange={(e) => setUserData({ ...userData, prenom: e.target.value })}
-                    className='w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 transition-all duration-500 ease-in-out hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                    className={inputBase}
                   />
                 </div>
                 <div className='relative'>
                   <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
                   <input
+                    required
                     type='text'
                     placeholder='Nom'
                     value={userData.nom}
                     onChange={(e) => setUserData({ ...userData, nom: e.target.value })}
-                    className='w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 transition-all duration-500 ease-in-out hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                    className={inputBase}
                   />
                 </div>
                 <div className='relative sm:col-span-2'>
                   <Mail size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
                   <input
+                    required
                     type='email'
                     placeholder='Adresse Email'
                     value={userData.email}
-                    onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                    className='w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 transition-all duration-500 ease-in-out hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                    onChange={(e) => { setUserData({ ...userData, email: e.target.value }); setErrors({ ...errors, email: undefined }) }}
+                    className={inputBase}
                   />
+                  {errors.email && <p className='mt-1 px-3 text-[11px] text-red-400'>{errors.email}</p>}
                 </div>
                 <div className='relative sm:col-span-2'>
                   <Phone size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
                   <input
+                    required
                     type='tel'
                     placeholder='Numéro De Téléphone'
                     value={userData.phone}
-                    onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-                    className='w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 transition-all duration-500 ease-in-out hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                    onChange={(e) => { setUserData({ ...userData, phone: e.target.value }); setErrors({ ...errors, phone: undefined }) }}
+                    className={inputBase}
                   />
+                  {errors.phone && <p className='mt-1 px-3 text-[11px] text-red-400'>{errors.phone}</p>}
                 </div>
               </div>
 
@@ -352,10 +341,10 @@ function ReservationSteps({
                   rows={4}
                   value={userData.note}
                   onChange={(e) => setUserData({ ...userData, note: e.target.value })}
-                  className='w-full resize-none rounded-xl border border-white/20 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/40 transition-all duration-500 ease-in-out hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                  className='w-full resize-none rounded-xl border border-white/20 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/40 hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
                 />
               </div>
-            </motion.div>
+            </div>
           ) : null}
         </motion.div>
       </AnimatePresence>
@@ -364,7 +353,7 @@ function ReservationSteps({
         {step === 1 ? (
           <button
             onClick={handleDismiss}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 transition-all duration-300 ease-out hover:border-white/20 hover:bg-white/10 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10 sm:w-auto'
           >
             <X size={16} />
             Annuler
@@ -372,18 +361,17 @@ function ReservationSteps({
         ) : (
           <button
             onClick={() => setStep(step - 1)}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 transition-all duration-300 ease-out hover:border-white/20 hover:bg-white/10 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10 sm:w-auto'
           >
             <ArrowLeftIcon size={16} />
             Retour
           </button>
         )}
         {step === 3 ? (
-          <motion.button
-            whileTap={{ scale: 0.985 }}
+          <button
             onClick={handleSubmit}
             disabled={isSubmitting || !userData.prenom || !userData.nom || !userData.email || !userData.phone}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium transition-all duration-300 ease-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
           >
             {isSubmitting ? (
               <>
@@ -400,17 +388,16 @@ function ReservationSteps({
             ) : (
               'Confirmer Votre 1ère Séance'
             )}
-          </motion.button>
+          </button>
         ) : (
-          <motion.button
-            whileTap={{ scale: 0.985 }}
+          <button
             onClick={() => setStep(step + 1)}
             disabled={step === 1 ? !selectedMotif : !selectedDate || !selectedHour}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary/80 px-5 py-2 text-sm transition-all duration-300 ease-out hover:bg-primary hover:shadow-lg hover:shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary/80 px-5 py-2 text-sm hover:bg-primary disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
           >
             {step === 1 ? 'Date Et Heure' : 'Informations De Contact'}
             <ArrowRightIcon size={16} />
-          </motion.button>
+          </button>
         )}
       </div>
     </motion.div>
@@ -446,19 +433,15 @@ function TimeSection({
         <div className='h-px flex-1 bg-white/20' />
       </div>
       <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
-        {uniqueTimes.map((slot, index) => (
-          <motion.button
+        {uniqueTimes.map((slot) => (
+          <button
             key={slot.label}
             type='button'
             onClick={() => onSelectTime(slot.label)}
-            className='flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/70 transition-all duration-200 hover:border-primary/40 hover:bg-primary/10 hover:text-white hover:shadow-[0_0_16px_rgba(39,168,228,0.12)]'
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: Math.min(index * 0.03, 0.15), duration: 0.2 }}
-            whileTap={{ scale: 0.97 }}
+            className='flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/70 hover:border-primary/40 hover:bg-primary/10 hover:text-white'
           >
             {slot.label}
-          </motion.button>
+          </button>
         ))}
       </div>
     </div>
@@ -493,7 +476,7 @@ function DoctorSelection({
         <button
           type='button'
           onClick={onBack}
-          className='flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 transition-all duration-300 ease-out hover:border-white/20 hover:bg-white/10'
+          className='flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10'
         >
           <ArrowLeftIcon size={16} />
           Retour
@@ -503,7 +486,7 @@ function DoctorSelection({
       </div>
 
       <div className='grid grid-cols-1 gap-2'>
-        {doctorsForTime.map((slot: any, index: number) => {
+        {doctorsForTime.map((slot: any) => {
           const isSelected = selectedHour === slot.startsAt && (selectedPractitionerId ?? null) === (slot.doctorId ?? null)
           const rawName = (slot.doctorName ?? '').trim()
           const nameWithoutPrefix = rawName.replace(/^dr\.?\s+/i, '').trim()
@@ -511,7 +494,7 @@ function DoctorSelection({
           const img = slot.doctorImage
 
           return (
-            <motion.button
+            <button
               key={`${slot.startsAt}-${slot.doctorId ?? 'none'}`}
               type='button'
               onClick={() => {
@@ -520,15 +503,11 @@ function DoctorSelection({
                 onContinue()
               }}
               className={clsx(
-                'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200',
+                'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left',
                 isSelected
-                  ? 'border-primary/60 bg-primary/15 shadow-[0_0_20px_rgba(39,168,228,0.16)]'
+                  ? 'border-primary/60 bg-primary/15'
                   : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
               )}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index * 0.03, 0.18), duration: 0.18 }}
-              whileTap={{ scale: 0.985 }}
             >
               <div className='h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-white/5'>
                 {img ? <img src={img} alt={fullName} className='h-full w-full object-cover' /> : null}
@@ -536,7 +515,7 @@ function DoctorSelection({
               <div className='min-w-0 flex-1'>
                 <div
                   className={clsx(
-                    'text-sm font-semibold leading-snug text-white/85 whitespace-normal break-words',
+                    'text-sm font-semibold leading-snug whitespace-normal break-words',
                     isSelected ? 'text-white' : 'text-white/85'
                   )}
                 >
@@ -545,7 +524,7 @@ function DoctorSelection({
                 <div className={clsx('mt-0.5 text-[11px]', isSelected ? 'text-primary/90' : 'text-white/45')}>Disponible à {viewingDoctorsFor}</div>
               </div>
               <div className={clsx('text-xs font-semibold', isSelected ? 'text-primary' : 'text-white/35')}>{isSelected ? 'Choisi' : 'Choisir'}</div>
-            </motion.button>
+            </button>
           )
         })}
       </div>
@@ -560,47 +539,27 @@ variants={panelVariants}
 initial='hidden'
 animate='visible'
 exit='exit'
-className={`border border-white/20 bg-[#2a2a2a]/98 rounded-2xl p-6 text-center text-white shadow-2xl sm:p-8 ${embedded ? 'relative w-full max-w-[520px]' : 'pointer-events-auto w-full max-w-[min(calc(100vw-1.5rem),400px)]'}`}
+className={`border border-white/20 bg-[#2a2a2a]/98 rounded-2xl p-6 text-center text-white sm:p-8 ${embedded ? 'relative w-full max-w-[520px]' : 'pointer-events-auto w-full max-w-[min(calc(100vw-1.5rem),400px)]'}`}
 >
 <div className='relative mb-6'>
-<div className='absolute inset-0 animate-pulse rounded-full bg-primary/20 blur-2xl' />
-<motion.div
-initial={{ scale: 0.85, opacity: 0 }}
-animate={{ scale: 1, opacity: 1 }}
-transition={{ delay: 0.08, type: 'spring', stiffness: 180, damping: 16 }}
-className='relative mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20'
->
+<div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20'>
 <CheckIcon size={40} className='text-primary' />
-</motion.div>
+</div>
 </div>
 
-<motion.h3
-initial={{ opacity: 0, y: 10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ delay: 0.16 }}
-className='mb-2 text-xl'
->
+<h3 className='mb-2 text-xl'>
 Réservation Confirmée!
-</motion.h3>
-<motion.p
-initial={{ opacity: 0, y: 10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ delay: 0.22 }}
-className='mb-6 text-sm leading-relaxed text-white/60'
->
+</h3>
+<p className='mb-6 text-sm leading-relaxed text-white/60'>
 Votre rendez-vous a été enregistré avec succès. Notre équipe vous contactera prochainement pour confirmer.
-</motion.p>
+</p>
 
-<motion.button
-initial={{ opacity: 0, y: 10 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ delay: 0.28 }}
-whileTap={{ scale: 0.985 }}
+<button
 onClick={onClose}
-className='w-full rounded-full bg-primary py-3 text-sm font-medium transition-all duration-500 ease-in-out hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20'
+className='w-full rounded-full bg-primary py-3 text-sm font-medium hover:bg-primary/90'
 >
 Parfait
-</motion.button>
+</button>
 </motion.div>
 )
 }

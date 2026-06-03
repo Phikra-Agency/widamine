@@ -9,6 +9,44 @@ export class AppointmentService {
     private patientService: PatientService,
   ) {}
 
+  private async findAvailableResource(serviceId: string, datetime: string): Promise<string | undefined> {
+    const service = await this.prisma.service.findUnique({
+      where: { id: serviceId },
+      select: { allowedSalleIds: true },
+    })
+    if (!service?.allowedSalleIds?.length) return undefined
+
+    const slotStart = new Date(datetime)
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
+
+    const bookedResources = await this.prisma.appointment.findMany({
+      where: {
+        resourceId: { in: service.allowedSalleIds },
+        status: { notIn: ['CANCELLED', 'COMPLETED'] },
+        schedules: {
+          some: {
+            datetime: { gte: slotStart, lt: slotEnd },
+          },
+        },
+      },
+      select: { resourceId: true },
+    })
+
+    const bookedIds = new Set(bookedResources.map(r => r.resourceId).filter(Boolean))
+    const availableIds = service.allowedSalleIds.filter(id => !bookedIds.has(id))
+    if (!availableIds.length) return undefined
+
+    if (availableIds.length === 1) return availableIds[0]
+
+    const resources = await this.prisma.resource.findMany({
+      where: { id: { in: availableIds } },
+      select: { id: true, priority: true },
+      orderBy: { priority: 'desc' },
+    })
+
+    return resources[0]?.id
+  }
+
   async create(data: {
     name: string;
     email: string;
@@ -45,6 +83,11 @@ export class AppointmentService {
           duration: 30,
         },
       });
+    }
+
+    // Auto-assign resource if not provided and datetime is given
+    if (!data.resourceId && data.datetime) {
+      data.resourceId = await this.findAvailableResource(data.serviceId, data.datetime)
     }
 
     const appointment = await this.prisma.appointment.create({

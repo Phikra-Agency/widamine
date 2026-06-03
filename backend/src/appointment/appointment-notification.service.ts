@@ -195,6 +195,75 @@ export class AppointmentNotificationService {
     );
   }
 
+  async sendNewBookingAcknowledgment(appointmentId: string) {
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { service: true },
+    });
+    if (!appointment || !appointment.email) return;
+
+    const serviceName = appointment.service?.name || "Consultation";
+
+    await this.mailService.sendMail(
+      appointment.email,
+      `Réservation reçue — Widamine`,
+      `
+        <div style="font-family: 'Raleway', Arial, Helvetica, sans-serif; max-width: 560px; margin: 0 auto; background: #f9fafc;">
+          <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+            <tr><td style="height:4px;background:#2e90c0;font-size:0;line-height:0;">&nbsp;</td></tr>
+          </table>
+
+          <div style="padding:36px 32px 8px;text-align:center;">
+            <p style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#1a3646;letter-spacing:3px;margin:0;text-transform:uppercase;">Widamine</p>
+            <p style="font-size:10px;color:#2e90c0;letter-spacing:3px;margin:4px 0 0;text-transform:uppercase;font-weight:600;">Sobriété Esthétique</p>
+          </div>
+
+          <div style="margin:24px 32px;background:#fffaf7;border-radius:28px;border:1px solid rgba(26,54,70,0.10);padding:40px 32px;box-shadow:0 18px 40px rgba(26,54,70,0.06);">
+            <div style="text-align:center;margin-bottom:28px;">
+              <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e8c5b8,#f0d5cb);margin:0 auto 16px;">
+                <table cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+                  <tr><td style="text-align:center;vertical-align:middle;color:#1a3646;font-size:22px;">&#10003;</td></tr>
+                </table>
+              </div>
+              <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#1a3646;margin:0;letter-spacing:0.5px;">Réservation reçue</h1>
+            </div>
+
+            <p style="font-size:15px;color:#1a3646;line-height:1.7;margin:0 0 20px;">
+              Bonjour <strong style="color:#2e90c0;">${appointment.name}</strong>,
+            </p>
+            <p style="font-size:15px;color:rgba(26,54,70,0.72);line-height:1.8;margin:0 0 20px;">
+              Nous avons bien reçu votre demande de rendez-vous au <strong style="color:#1a3646;">Cabinet Widamine</strong>.
+            </p>
+
+            <div style="background:linear-gradient(180deg,#fbf4ef,#fffaf7);border-radius:20px;padding:20px 24px;margin:0 0 20px;border:1px solid rgba(232,197,184,0.35);">
+              <p style="font-size:10px;color:#2e90c0;letter-spacing:3px;margin:0 0 4px;text-transform:uppercase;font-weight:600;">Service demandé</p>
+              <p style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:400;color:#1a3646;margin:0;">${serviceName}</p>
+            </div>
+
+            <div style="background:#f9fafc;border-radius:16px;padding:20px 24px;margin:0 0 24px;border-left:3px solid #e8c5b8;">
+              <p style="font-size:14px;color:rgba(26,54,70,0.68);line-height:1.8;margin:0;">
+                Notre équipe vous recontactera <strong style="color:#1a3646;">dès que possible</strong> pour confirmer votre rendez-vous et vous proposer les horaires disponibles.
+              </p>
+            </div>
+
+            <p style="font-size:14px;color:rgba(26,54,70,0.68);line-height:1.8;margin:0 0 4px;">
+              Pour toute question, n'hésitez pas à nous contacter.
+            </p>
+            <p style="font-size:15px;color:rgba(26,54,70,0.72);line-height:1.8;margin:0;">
+              Cordialement,<br>
+              <strong style="color:#2e90c0;">L'équipe Widamine</strong>
+            </p>
+          </div>
+
+          <div style="background:#1a3646;border-radius:28px 28px 28px 28px;margin:0 32px 32px;padding:24px 32px;text-align:center;">
+            <p style="font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0;text-transform:uppercase;">1<sup>er</sup> centre médical de Dermato-Esthétique</p>
+            <p style="font-size:10px;color:rgba(255,255,255,0.3);margin:6px 0 0;letter-spacing:1px;">Fès, Maroc</p>
+          </div>
+        </div>
+      `,
+    );
+  }
+
   // ── Doctor notifications ──────────────────────────────────────
 
   async notifyDoctorNewAppointment(appointmentId: string) {
