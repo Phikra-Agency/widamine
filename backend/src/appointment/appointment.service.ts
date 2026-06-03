@@ -10,14 +10,21 @@ export class AppointmentService {
   ) {}
 
   private async findAvailableResource(serviceId: string, datetime: string): Promise<string | undefined> {
-    const service = await this.prisma.service.findUnique({
-      where: { id: serviceId },
-      select: { allowedSalleIds: true },
-    })
+    const [service, firstSession] = await Promise.all([
+      this.prisma.service.findUnique({
+        where: { id: serviceId },
+        select: { allowedSalleIds: true },
+      }),
+      this.prisma.session.findFirst({
+        where: { serviceId },
+        orderBy: { number: 'asc' },
+      }),
+    ])
     if (!service?.allowedSalleIds?.length) return undefined
 
+    const duration = firstSession?.duration || 30
     const slotStart = new Date(datetime)
-    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
+    const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000)
 
     const bookedResources = await this.prisma.appointment.findMany({
       where: {
@@ -41,7 +48,7 @@ export class AppointmentService {
     const resources = await this.prisma.resource.findMany({
       where: { id: { in: availableIds } },
       select: { id: true, priority: true },
-      orderBy: { priority: 'desc' },
+      orderBy: { priority: 'asc' },
     })
 
     return resources[0]?.id
@@ -303,17 +310,18 @@ export class AppointmentService {
           slotTime.setHours(hour, min, 0, 0);
           const timeKey = slotTime.getTime();
 
-          // Check if this doctor OR any salle is booked at this time
+          // Check if this doctor is booked at this time
           const doctorConflict = conflicts.has(`${doctorId}_${timeKey}`);
-          let salleConflict = false;
+          // Check if at least one salle is free at this time
+          let hasFreeSalle = allowedSalleIds.length === 0;
           for (const salleId of allowedSalleIds) {
-            if (conflicts.has(`${salleId}_${timeKey}`)) {
-              salleConflict = true;
+            if (!conflicts.has(`${salleId}_${timeKey}`)) {
+              hasFreeSalle = true;
               break;
             }
           }
 
-          if (!doctorConflict && !salleConflict) {
+          if (!doctorConflict && hasFreeSalle) {
             slots.push({
               time: slotTime.toISOString(),
               doctorId,
