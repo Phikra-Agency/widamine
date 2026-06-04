@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Put,
+  Req,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -20,13 +21,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseGuards(RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  @UseGuards(RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
   findAll() {
     return this.userService.findAll();
   }
@@ -37,15 +38,15 @@ export class UserController {
   }
 
   @Get(":id")
-  @UseGuards(RoleGuard("ADMIN"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
   findOne(@Param("id") id: string) {
     return this.userService.findOne(id);
   }
 
   @Put(":id")
-  @UseGuards(RoleGuard("ADMIN"))
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
+  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto, @Req() req: any) {
+    return this.userService.update(id, updateUserDto, req.user);
   }
 
   @Delete(":id")

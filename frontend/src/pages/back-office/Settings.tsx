@@ -95,7 +95,7 @@ export default function Settings() {
 
   const setChannelEnabled = (key: EnabledKey, checked: boolean) => {
     setSettings((prev) => {
-      const next = { ...prev, [key]: checked, inAppEnabled: false, inAppTypes: { confirmation: false, reminder: false, cancellation: false } }
+      const next = { ...prev, [key]: checked }
       scheduleSave(next)
       return next
     })
@@ -105,8 +105,6 @@ export default function Settings() {
     setSettings((prev) => {
       const next = {
         ...prev,
-        inAppEnabled: false,
-        inAppTypes: { confirmation: false, reminder: false, cancellation: false },
         [channel]: {
           ...prev[channel],
           [type]: !prev[channel][type],

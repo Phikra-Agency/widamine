@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import toast from 'react-hot-toast'
 import { EnvelopeSimple as Mail, MapPin, Phone, Clock as Clock3 } from '@phosphor-icons/react'
 import Header from '@/components/Header'
@@ -87,7 +87,7 @@ function ContactForm() {
 	const [loading, setLoading] = useState(false)
 	const [contactData, setContactData] = useState({ name: '', email: '', phone: '', context: '' })
 
-	async function submit(e: SubmitEvent<HTMLFormElement>) {
+	async function submit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		try {
 			if (loading) return

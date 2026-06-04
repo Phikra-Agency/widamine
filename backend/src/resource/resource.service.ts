@@ -99,6 +99,7 @@ export class ResourceService {
   async remove(id: string) {
     await this.prisma.motifResource.deleteMany({ where: { resourceId: id } });
     await this.prisma.resourcePractitioner.deleteMany({ where: { resourceId: id } });
+    await this.prisma.availabilityBlock.deleteMany({ where: { resourceId: id } });
     return this.prisma.resource.delete({ where: { id } });
   }
 }

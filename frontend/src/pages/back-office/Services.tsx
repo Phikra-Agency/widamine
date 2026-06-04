@@ -8,9 +8,17 @@ import { useCategoriesStore } from "@/stores/categoriesStore"
 
 export default function Services() {
 	const { fetchItems } = useCategoriesStore()
+	const { closeModal: closeServicesModal, setOperation: setServicesOperation } = useServicesStore()
 
 	useEffect(() => {
 		fetchItems()
+	}, [])
+
+	useEffect(() => {
+		return () => {
+			closeServicesModal()
+			setServicesOperation('create')
+		}
 	}, [])
 
 	return (

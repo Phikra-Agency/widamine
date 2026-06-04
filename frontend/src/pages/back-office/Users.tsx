@@ -1,4 +1,5 @@
 import { useUsersStore } from '@/stores/usersStore'
+import { useAuthStore } from '@/stores/authStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, User, Crown, Stethoscope, UserCircle, CaretDown } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
@@ -97,6 +98,8 @@ function Filters() {
 
 function Table() {
   const { items, filters, fetchItems, openEditModal, openDeleteModal, openCreateModal } = useUsersStore()
+  const { user: currentUser } = useAuthStore()
+  const isReceptionist = currentUser?.role === 'RECEPTIONIST'
   const [filtered, setFiltered] = useState(items)
   const [debouncedFilters] = useDebounce(filters, 300)
 
@@ -163,12 +166,14 @@ function Table() {
                       >
                         <Pen size={16} />
                       </button>
-                      <button
-                        onClick={() => openDeleteModal(item)}
-                        className='p-2 rounded-lg text-secondary/40 hover:text-red-600 hover:bg-red-50 transition-all duration-200'
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {!isReceptionist && (
+                        <button
+                          onClick={() => openDeleteModal(item)}
+                          className='p-2 rounded-lg text-secondary/40 hover:text-red-600 hover:bg-red-50 transition-all duration-200'
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -225,14 +230,16 @@ function Table() {
                   >
                     <Pen size={14} />
                   </button>
-                  <button
-                    type='button'
-                    onClick={() => openDeleteModal(item)}
-                    className='flex h-9 w-9 items-center justify-center rounded-lg text-secondary/30 transition-all hover:bg-red-50 hover:text-red-600'
-                    aria-label='Supprimer'
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {!isReceptionist && (
+                    <button
+                      type='button'
+                      onClick={() => openDeleteModal(item)}
+                      className='flex h-9 w-9 items-center justify-center rounded-lg text-secondary/30 transition-all hover:bg-red-50 hover:text-red-600'
+                      aria-label='Supprimer'
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )
@@ -253,7 +260,9 @@ function Table() {
 
 function Modal() {
   const { operation, modalOpen, closeModal, item, setItem, saveItem } = useUsersStore()
+  const { user: currentUser } = useAuthStore()
   const isEdit = operation === 'edit'
+  const isReceptionist = currentUser?.role === 'RECEPTIONIST'
   const roleConfig = ROLE_CONFIG[item.role] || ROLE_CONFIG.RECEPTIONIST
   const RoleIcon = roleConfig.icon
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
@@ -315,24 +324,33 @@ function Modal() {
             <div className='grid grid-cols-2 gap-2 sm:gap-3'>
               {Object.entries(ROLE_CONFIG).map(([role, config]) => {
                 const RIcon = config.icon
+                const isActive = item.role === role
                 return (
                   <button
                     key={role}
                     type='button'
-                    onClick={() => setItem({ ...item, role: role as typeof item.role })}
+                    onClick={() => {
+                      if (!isReceptionist) {
+                        setItem({ ...item, role: role as typeof item.role })
+                      }
+                    }}
                     className={clsx(
                       'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all duration-200',
-                      item.role === role
+                      isActive
                         ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-black/[0.06] bg-white text-secondary/50 hover:border-black/[0.1]'
+                        : 'border-black/[0.06] bg-white text-secondary/50 hover:border-black/[0.1]',
+                      isReceptionist && 'opacity-60 cursor-not-allowed'
                     )}
                   >
-                    <RIcon size={20} weight={item.role === role ? 'fill' : 'regular'} />
+                    <RIcon size={20} weight={isActive ? 'fill' : 'regular'} />
                     <span className='text-center text-xs font-medium leading-tight'>{config.label}</span>
                   </button>
                 )
               })}
             </div>
+            {isReceptionist && (
+              <p className='text-[11px] text-amber-600 mt-1'>Seul un administrateur peut modifier les rôles.</p>
+            )}
           </div>
 
           <div className='space-y-2'>

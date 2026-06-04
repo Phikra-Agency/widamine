@@ -3,6 +3,21 @@ import { CreatePatientDto } from "./dto/create-patient.dto";
 import { UpdatePatientDto } from "./dto/update-patient.dto";
 import { PrismaService } from "@/prisma/prisma.service";
 
+const CITY_NORMALIZE: Record<string, string> = {
+  casablanca: "Casablanca",
+  rabat: "Rabat",
+  marrakech: "Marrakech",
+  fes: "Fès",
+  "fès": "Fès",
+  tanger: "Tanger",
+};
+
+function normalizeCity(city: string | undefined | null): string | undefined | null {
+  if (!city) return city;
+  const key = city.trim().toLowerCase();
+  return CITY_NORMALIZE[key] ?? city.trim();
+}
+
 @Injectable()
 export class PatientService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -28,7 +43,7 @@ export class PatientService {
       if (data.dateOfBirth) updateData.dateOfBirth = data.dateOfBirth;
       if (data.gender) updateData.gender = data.gender;
       if (data.address) updateData.address = data.address;
-      if (data.city) updateData.city = data.city;
+      if (data.city) updateData.city = normalizeCity(data.city);
       if (data.postalCode) updateData.postalCode = data.postalCode;
       if (data.country) updateData.country = data.country;
       if (data.medicalHistory) updateData.medicalHistory = data.medicalHistory;
@@ -49,7 +64,7 @@ export class PatientService {
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         gender: data.gender,
         address: data.address,
-        city: data.city,
+        city: normalizeCity(data.city),
         postalCode: data.postalCode,
         country: data.country || "Maroc",
         medicalHistory: data.medicalHistory,
@@ -138,6 +153,7 @@ export class PatientService {
     if (updatePatientDto.dateOfBirth) {
       data.dateOfBirth = new Date(updatePatientDto.dateOfBirth);
     }
+    if (data.city) data.city = normalizeCity(data.city);
 
     return this.prismaService.patient.update({
       where: { id },

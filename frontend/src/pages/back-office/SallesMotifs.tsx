@@ -26,8 +26,17 @@ export default function SallesMotifs() {
     setSearchParams(next === 'motifs' ? { tab: 'motifs' } : {}, { replace: true })
   }
 
-  const { openCreateModal: openCreateSalle } = useResourcesStore()
-  const { setOperation: setMotifOp, openModal: openMotifModal, clearItem: clearMotifItem } = useMotifsStore()
+  const { openCreateModal: openCreateSalle, closeModal: closeResModal, setOperation: setResOp } = useResourcesStore()
+  const { setOperation: setMotifOp, openModal: openMotifModal, clearItem: clearMotifItem, closeModal: closeMotModal } = useMotifsStore()
+
+  useEffect(() => {
+    return () => {
+      closeResModal()
+      setResOp('create')
+      closeMotModal()
+      setMotifOp('create')
+    }
+  }, [])
 
   const handleCreate = () => {
     if (tab === 'salles') {

@@ -13,7 +13,7 @@ export class ScheduleService {
     return this.prismaService.schedule.create({ data });
   }
 
-  async findWeekByDate(req: { user: { id: string; role: string } }, unsanitized_date: Date | string) {
+  async findWeekByDate(user: { id: string; role: string }, unsanitized_date: Date | string) {
     // MongoDB requires replica set for transactions, so we use individual updates
     const expiredAppointments = await this.prismaService.appointment.findMany({
       where: { status: "PENDING", expiresAt: { lte: new Date() } },
@@ -53,14 +53,14 @@ export class ScheduleService {
 
     const { start, end } = this.getDateRange(date, 6);
     const appointmentFilter =
-      ["DOCTOR", "PRACTITIONER"].includes(req.user.role)
+      ["DOCTOR", "PRACTITIONER"].includes(user.role)
         ? {
             OR: [
-              { practitionerId: req.user.id },
+              { practitionerId: user.id },
               {
                 practitionerId: null,
                 service: {
-                  primaryDoctorId: req.user.id,
+                  primaryDoctorId: user.id,
                 },
               },
             ],

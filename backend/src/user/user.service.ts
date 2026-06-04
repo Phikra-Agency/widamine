@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  BadRequestException,
+} from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { PrismaService } from "@/prisma/prisma.service";
@@ -10,7 +15,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      await this.prismaService.user.create({
+      return await this.prismaService.user.create({
         data: {
           ...createUserDto,
           password: await bcrypt.hash(createUserDto.password, 12),
@@ -44,7 +49,38 @@ export class UserService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto, currentUser?: any) {
+    const targetUser = await this.prismaService.user.findUnique({
+      where: { id },
+      select: { id: true, role: true },
+    });
+    if (!targetUser) throw new BadRequestException("User not found");
+
+    // Receptionist cannot change any user's role
+    if (currentUser?.role === "RECEPTIONIST") {
+      if (updateUserDto.role !== undefined) {
+        throw new ForbiddenException(
+          "Receptionists cannot change user roles",
+        );
+      }
+    }
+
+    // Prevent removing the last admin's admin role
+    if (
+      targetUser.role === "ADMIN" &&
+      updateUserDto.role &&
+      updateUserDto.role !== "ADMIN"
+    ) {
+      const adminCount = await this.prismaService.user.count({
+        where: { role: "ADMIN" },
+      });
+      if (adminCount <= 1) {
+        throw new BadRequestException(
+          "Cannot change the role of the last administrator",
+        );
+      }
+    }
+
     try {
       const data: any = { ...updateUserDto };
       if (updateUserDto.password) {
@@ -67,6 +103,23 @@ export class UserService {
   }
 
   async remove(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      select: { id: true, role: true },
+    });
+    if (!user) throw new BadRequestException("User not found");
+
+    if (user.role === "ADMIN") {
+      const adminCount = await this.prismaService.user.count({
+        where: { role: "ADMIN" },
+      });
+      if (adminCount <= 1) {
+        throw new BadRequestException(
+          "Cannot delete the last administrator",
+        );
+      }
+    }
+
     await this.prismaService.user.delete({
       where: { id },
     });

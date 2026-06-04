@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import {
   IsBoolean,
-  IsDefined,
+  IsOptional,
   ValidateNested,
 } from "class-validator";
 
@@ -17,27 +17,30 @@ export class NotificationTypesDto {
 }
 
 export class UpdateNotificationSettingsDto {
+  @IsOptional()
   @IsBoolean()
-  smsEnabled: boolean;
+  smsEnabled?: boolean;
 
+  @IsOptional()
   @IsBoolean()
-  emailEnabled: boolean;
+  emailEnabled?: boolean;
 
+  @IsOptional()
   @IsBoolean()
-  inAppEnabled: boolean;
+  inAppEnabled?: boolean;
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => NotificationTypesDto)
-  smsTypes: NotificationTypesDto;
+  smsTypes?: NotificationTypesDto;
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => NotificationTypesDto)
-  emailTypes: NotificationTypesDto;
+  emailTypes?: NotificationTypesDto;
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => NotificationTypesDto)
-  inAppTypes: NotificationTypesDto;
+  inAppTypes?: NotificationTypesDto;
 }

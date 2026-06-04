@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { PrismaService } from "@/prisma/prisma.service";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
@@ -8,7 +8,7 @@ export class CategoryService {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(data: CreateCategoryDto) {
-    return this.prismaService.category.create({ data: data as any });
+    return this.prismaService.category.create({ data });
   }
 
   findAll() {
@@ -18,10 +18,14 @@ export class CategoryService {
   }
 
   update(id: string, data: UpdateCategoryDto) {
-    return this.prismaService.category.update({ where: { id }, data: data as any });
+    return this.prismaService.category.update({ where: { id }, data });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    const svcs = await this.prismaService.service.findMany({ where: { categoryId: id }, select: { id: true } });
+    if (svcs.length) {
+      throw new BadRequestException("Cannot delete category with existing services. Delete or reassign services first.");
+    }
     return this.prismaService.category.delete({ where: { id } });
   }
 }

@@ -20,7 +20,8 @@ export class SessionService {
     return this.prismaService.session.update({ where: { id }, data });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    await this.prismaService.schedule.deleteMany({ where: { sessionId: id } });
     return this.prismaService.session.delete({ where: { id } });
   }
 }

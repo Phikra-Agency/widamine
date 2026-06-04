@@ -13,6 +13,15 @@ const PRIORITY_CONFIG: Record<number, { label: string; color: string }> = {
 }
 
 export default function Resources() {
+  const { closeModal: closeResModal, setOperation: setResOp } = useResourcesStore()
+
+  useEffect(() => {
+    return () => {
+      closeResModal()
+      setResOp('create')
+    }
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

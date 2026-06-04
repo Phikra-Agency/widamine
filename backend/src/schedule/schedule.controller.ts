@@ -32,7 +32,7 @@ export class ScheduleController {
     @Param("date") date: string,
   ) {
     try {
-      return await this.scheduleService.findWeekByDate(req, new Date(date));
+      return await this.scheduleService.findWeekByDate(req.user, new Date(date));
     } catch (e) {
       try {
         const fs = await import('fs')

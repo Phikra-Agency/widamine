@@ -31,9 +31,9 @@ const LINKS: {
   { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
   // { to: 'appointments', label: 'Rendez-vous', icon: Door, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
   { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST'] },
-  { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN'] },
-  { to: 'resources', label: 'Salles & Motifs', icon: Door, roles: ['ADMIN'] },
-  { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN'] },
+  { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
+  { to: 'resources', label: 'Salles & Motifs', icon: Door, roles: ['ADMIN', 'RECEPTIONIST'] },
+  { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN', 'RECEPTIONIST'] },
 ]
 
 export default function BackOfficeLayout() {

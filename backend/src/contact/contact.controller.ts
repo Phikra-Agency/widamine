@@ -8,6 +8,7 @@ import {
   UseGuards,
   Put,
   Query,
+  ParseBoolPipe,
 } from "@nestjs/common";
 import { ContactService } from "./contact.service";
 import { CreateContactDto } from "./dto/create-contact.dto";
@@ -25,7 +26,7 @@ export class ContactController {
 
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
   @Get()
-  findAll(@Query("read") read: boolean) {
+  findAll(@Query("read", new ParseBoolPipe({ optional: true })) read?: boolean) {
     return this.contactService.findAll(read);
   }
 
@@ -39,5 +40,11 @@ export class ContactController {
   @Put(":id/read")
   read(@Param("id") id: string) {
     return this.contactService.read(id);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.contactService.remove(id);
   }
 }

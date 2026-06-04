@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 const DEFAULT_MOTIF_COLORS = [
@@ -36,7 +36,7 @@ export class MotifService {
         name,
         slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         bookingType: bookingType || 'STANDARD',
-        serviceId: serviceId || '000000000000000000000000',
+        serviceId: serviceId || (() => { throw new BadRequestException("serviceId is required"); })(),
         duration: duration || 30,
         description,
         color: normalizeMotifColor(color) ?? getRandomMotifColor(),
@@ -58,12 +58,18 @@ export class MotifService {
   }
 
   async findAll() {
-    return this.prisma.motif.findMany({
-      include: { 
-        service: true,
-        practitionerAssignments: true
-      },
-    });
+    try {
+      return await this.prisma.motif.findMany({
+        include: { 
+          service: true,
+          practitionerAssignments: true
+        },
+      });
+    } catch {
+      return this.prisma.motif.findMany({
+        include: { practitionerAssignments: true },
+      });
+    }
   }
 
   async findOne(id: string) {
@@ -127,6 +133,8 @@ export class MotifService {
 
   async remove(id: string) {
     await this.prisma.motifPractitioner.deleteMany({ where: { motifId: id } });
+    await this.prisma.motifResource.deleteMany({ where: { motifId: id } });
+    await this.prisma.appointment.updateMany({ where: { motifId: id }, data: { motifId: null } });
     return this.prisma.motif.delete({ where: { id } });
   }
 }

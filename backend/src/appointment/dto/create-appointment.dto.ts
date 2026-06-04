@@ -16,7 +16,7 @@ export class CreateAppointmentDto {
   context?: string;
 
   @IsString()
-  dateTime: string;
+  datetime: string;
 
   @IsOptional()
   @IsNumber()

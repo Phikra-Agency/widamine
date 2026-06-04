@@ -2,26 +2,26 @@ import api from '@/lib/api'
 import { create } from 'zustand'
 
 interface Service {
-  id?: number
+  id?: string
   name: string
   price: number
   _count?: { sessions: number }
-  category?: { category: string }
-  categoryId?: number
-	doctor?: { name: string }
-	doctorId?: number
-  allowedDoctorIds?: number[]
-  allowedSalleIds?: number[]
-  sessions?: { id: number; session: number; duration: number }[]
+  category?: { name: string }
+  categoryId?: string
+	primaryDoctor?: { name: string }
+	primaryDoctorId?: string
+  allowedDoctorIds?: string[]
+  allowedSalleIds?: string[]
+  sessions?: { id: string; session: number; duration: number }[]
 }
 
 interface Doctor {
-	id:number
+	id: string
 	name: string
 }
 
 interface Resource {
-  id: number
+  id: string
   name: string
 }
 
@@ -32,7 +32,7 @@ interface ServiceStoreInterface {
   resources: Resource[]
   operation: 'create' | 'edit' | 'show' | 'delete'
   modalOpen: boolean
-  filters: { term: string; categoryId: number }
+  filters: { term: string; categoryId: string }
   setFilters: (filters: ServiceStoreInterface['filters']) => void
   setItem: (item: ServiceStoreInterface['item']) => void
   clearItem: () => void
@@ -51,12 +51,12 @@ interface ServiceStoreInterface {
 
 export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   items: [],
-  item: { name: '', price: 0, categoryId: undefined, doctorId: undefined, allowedDoctorIds: [], allowedSalleIds: [] },
+  item: { name: '', price: 0, categoryId: undefined, primaryDoctorId: undefined, allowedDoctorIds: [], allowedSalleIds: [] },
   doctors: [],
   resources: [],
   operation: 'create' as ServiceStoreInterface['operation'],
   modalOpen: false,
-  filters: { term: '', categoryId: 0 },
+  filters: { term: '', categoryId: '' },
   setFilters(filters) {
     set({ filters })
   },
@@ -67,10 +67,11 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
       allowedDoctorIds: item.allowedDoctorIds,
       allowedSalleIds: item.allowedSalleIds,
     }
-    set({ item: updated })
+    const { doctorId, ...rest } = updated as any
+    set({ item: { ...rest, primaryDoctorId: rest.primaryDoctorId || doctorId } })
   },
   clearItem: () => {
-    set({ item: { name: '', price: 0, categoryId: undefined, doctorId: undefined, allowedDoctorIds: [], allowedSalleIds: [] } })
+    set({ item: { name: '', price: 0, categoryId: undefined, primaryDoctorId: undefined, allowedDoctorIds: [], allowedSalleIds: [] } })
   },
   openModal: () => {
     set({ modalOpen: true })
@@ -99,11 +100,10 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   },
   saveItem: async () => {
     const item = get().item
-    // Convert arrays to JSON strings for API
+    const { doctorId, ...rest } = item as any
     const payload = {
-      ...item,
-      allowedDoctorIds: item.allowedDoctorIds?.length ? JSON.stringify(item.allowedDoctorIds) : undefined,
-      allowedSalleIds: item.allowedSalleIds?.length ? JSON.stringify(item.allowedSalleIds) : undefined,
+      ...rest,
+      primaryDoctorId: rest.primaryDoctorId || doctorId,
     }
     if (get().operation === 'edit') {
       await api.put('services/' + (get().item as Service).id, payload)
@@ -118,7 +118,7 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
     get().fetchItems()
     get().closeModal()
   },
-  saveSession: async (session: { id?: number; session: number; duration: number }, editing: boolean) => {
+  saveSession: async (session: { id?: string; session: number; duration: number }, editing: boolean) => {
     const serviceId = (get().item as Service).id
     if (!serviceId) return
 
@@ -129,7 +129,7 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
     }
     get().fetchItem()
   },
-  deleteSession: async (sessionId: number) => {
+  deleteSession: async (sessionId: string) => {
     await api.delete(`sessions/${sessionId}`)
     get().fetchItem()
   }

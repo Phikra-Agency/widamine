@@ -5,6 +5,15 @@ import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
 export default function Categories() {
+  const { closeModal: closeCatModal, setOperation: setCatOperation } = useCategoriesStore()
+
+  useEffect(() => {
+    return () => {
+      closeCatModal()
+      setCatOperation('create')
+    }
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

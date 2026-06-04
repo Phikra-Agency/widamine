@@ -5,6 +5,15 @@ import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
 export default function Motifs() {
+  const { closeModal: closeMotModal, setOperation: setMotOperation } = useMotifsStore()
+
+  useEffect(() => {
+    return () => {
+      closeMotModal()
+      setMotOperation('create')
+    }
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

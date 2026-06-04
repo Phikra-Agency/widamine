@@ -124,7 +124,16 @@ function Heading() {
 
 function Filters() {
   const { filters, setFilters, items } = usePatientStore()
-  const cities = useMemo(() => [...new Set(items.map(i => i.city).filter(Boolean))].sort(), [items])
+  const cities = useMemo(() => {
+    const norm = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
+    const map = new Map<string, string>()
+    items.forEach(i => {
+      if (!i.city) return
+      const key = i.city.trim().toLowerCase()
+      map.set(key, norm(i.city))
+    })
+    return [...map.values()].sort()
+  }, [items])
   const [showExtra, setShowExtra] = useState(false)
 
   return (

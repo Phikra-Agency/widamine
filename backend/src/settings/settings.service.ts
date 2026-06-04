@@ -13,18 +13,24 @@ export class SettingsService {
   private flatDoc(dto: UpdateNotificationSettingsDto) {
     return {
       singletonKey: this.key,
-      smsEnabled: dto.smsEnabled,
-      emailEnabled: dto.emailEnabled,
-      inAppEnabled: dto.inAppEnabled,
-      smsConfirmation: dto.smsTypes.confirmation,
-      smsReminder: dto.smsTypes.reminder,
-      smsCancellation: dto.smsTypes.cancellation,
-      emailConfirmation: dto.emailTypes.confirmation,
-      emailReminder: dto.emailTypes.reminder,
-      emailCancellation: dto.emailTypes.cancellation,
-      inAppConfirmation: dto.inAppTypes.confirmation,
-      inAppReminder: dto.inAppTypes.reminder,
-      inAppCancellation: dto.inAppTypes.cancellation,
+      ...(dto.smsEnabled !== undefined && { smsEnabled: dto.smsEnabled }),
+      ...(dto.emailEnabled !== undefined && { emailEnabled: dto.emailEnabled }),
+      ...(dto.inAppEnabled !== undefined && { inAppEnabled: dto.inAppEnabled }),
+      ...(dto.smsTypes && {
+        smsConfirmation: dto.smsTypes.confirmation,
+        smsReminder: dto.smsTypes.reminder,
+        smsCancellation: dto.smsTypes.cancellation,
+      }),
+      ...(dto.emailTypes && {
+        emailConfirmation: dto.emailTypes.confirmation,
+        emailReminder: dto.emailTypes.reminder,
+        emailCancellation: dto.emailTypes.cancellation,
+      }),
+      ...(dto.inAppTypes && {
+        inAppConfirmation: dto.inAppTypes.confirmation,
+        inAppReminder: dto.inAppTypes.reminder,
+        inAppCancellation: dto.inAppTypes.cancellation,
+      }),
     };
   }
 
@@ -99,7 +105,8 @@ export class SettingsService {
       new: true,
     });
 
-    const updated = (result as any).value as Record<string, unknown>;
+    const updated = (result as any).value as Record<string, unknown> | null;
+    if (!updated) return this.getNotificationSettings();
     return this.toResponse(updated);
   }
 }

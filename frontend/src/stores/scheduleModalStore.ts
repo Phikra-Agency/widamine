@@ -65,8 +65,8 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
       const res = await api.get('services') 
       let data = res.data.map((item: any) => ({
          ...item,
-         practitioners: item.doctor ? [{ ...item.doctor, id: item.doctorId || item.doctor.name || 'doctor-1' }] : [],
-         requiresPractitionerChoice: !!item.doctor
+         practitioners: item.primaryDoctor ? [{ ...item.primaryDoctor, id: item.primaryDoctorId || item.primaryDoctor.name || 'doctor-1' }] : [],
+         requiresPractitionerChoice: !!item.primaryDoctor
       }))
       set({ motifs: data })
     } catch (e: any) {

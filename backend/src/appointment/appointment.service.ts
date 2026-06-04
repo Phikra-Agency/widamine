@@ -31,7 +31,7 @@ export class AppointmentService {
         resourceId: { in: service.allowedSalleIds },
         status: { notIn: ['CANCELLED', 'COMPLETED'] },
         schedules: {
-          some: {
+          some: {2
             datetime: { gte: slotStart, lt: slotEnd },
           },
         },
@@ -213,6 +213,8 @@ export class AppointmentService {
   }
 
   async remove(id: string) {
+    await this.prisma.schedule.deleteMany({ where: { appointmentId: id } });
+    await this.prisma.notificationLog.deleteMany({ where: { appointmentId: id } });
     return this.prisma.appointment.delete({ where: { id } });
   }
 
