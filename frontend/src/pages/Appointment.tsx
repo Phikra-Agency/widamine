@@ -1,63 +1,83 @@
 import { useEffect } from 'react'
-import Header from '@/components/Header'
+import PublicNavbar from '@/components/PublicNavbar'
 import BookingFlow from '@/components/BookingFlow'
 import { ShieldCheck, Clock as Clock3, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 
+const C = { bg: '#F7F1EB', primary: '#2e90c0', secondary: '#1a3646' }
+
+const SM = {
+  hero: {
+    topLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abad49265e1cb980_header-top-left.avif',
+    topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af35669264ecc82de0caaa_header-top-right.avif',
+    midRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3566abad49265e1cb9a8_header-middle-right.avif',
+  },
+}
+
 export default function Appointment() {
-	const { restart, motifs, loadMotifs } = useScheduleModalStore()
+  const { restart, motifs, loadMotifs } = useScheduleModalStore()
 
-	useEffect(() => {
-		restart()
-		void loadMotifs()
-	}, [loadMotifs, restart])
+  useEffect(() => {
+    restart()
+    void loadMotifs()
+  }, [loadMotifs, restart])
 
-	return (
-		<div className='bg-custom-white'>
-			<Header page='Rendez-vous' />
-			<section className='mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-18'>
-				<div className='grid gap-8 xl:grid-cols-[0.86fr_1.14fr] xl:items-start'>
-					<div className='order-2 space-y-5 xl:order-1 xl:sticky xl:top-32'>
-						<div className='relative overflow-hidden rounded-[1.75rem] border border-secondary/10 bg-[#fffaf7] p-5 shadow-[0_24px_55px_rgba(26,54,70,0.06)] sm:rounded-[2.25rem] sm:p-8'>
-							<div className='pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(46,144,192,0.12),transparent_70%)]' />
-							<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Rendez-vous</p>
-							<h1 className='mt-4 max-w-lg font-amoria text-[2rem] leading-tight text-secondary sm:text-4xl md:text-5xl'>
-								Réservez votre consultation ou votre protocole sur mesure.
-							</h1>
-							<p className='mt-4 max-w-xl text-sm leading-7 text-secondary/68 sm:mt-5 sm:text-base sm:leading-8'>
-								Choisissez simplement votre motif principal, votre date et vos coordonnées. Le formulaire ci-contre reprend exactement l’expérience de réservation utilisée dans le popup du site.
-							</p>
-							<div className='mt-5 flex flex-wrap gap-2.5 sm:mt-6 sm:gap-3'>
-								<TrustPill icon={ShieldCheck} text='Même parcours que le popup' />
-								<TrustPill icon={Clock3} text='Réservation rapide' />
-								<TrustPill icon={Sparkles} text='Expérience cohérente' />
-							</div>
-						</div>
+  return (
+    <div className='min-h-screen' style={{ background: C.bg }}>
+      <PublicNavbar />
 
-						<div className='rounded-[1.55rem] border border-secondary/10 bg-secondary p-5 text-white shadow-[0_22px_45px_rgba(26,54,70,0.12)] sm:rounded-[1.9rem] sm:p-6'>
-							<p className='text-xs uppercase tracking-[0.26em] text-white/46'>Motifs disponibles</p>
-							<div className='mt-4 space-y-3.5 text-sm leading-7 text-white/72 sm:mt-5 sm:space-y-4'>
-								{motifs.map((motif) => (
-									<p key={motif.id}>{motif.name}.</p>
-								))}
-							</div>
-						</div>
-					</div>
+      {/* ─── Hero (same pattern as SM contact header) ─── */}
+      <section className='relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-20 lg:pt-48 lg:pb-24'>
+        <img src={SM.hero.topLeft} alt='' className='absolute left-0 top-16 w-36 sm:w-52 lg:w-64 widamine-tint opacity-50' loading='lazy' />
+        <img src={SM.hero.topRight} alt='' className='absolute right-0 top-16 w-36 sm:w-52 lg:w-64 widamine-tint opacity-50' loading='lazy' />
+        <img src={SM.hero.midRight} alt='' className='absolute right-0 bottom-0 w-28 sm:w-40 widamine-tint opacity-40' loading='lazy' />
 
-					<div className='order-1 flex justify-center xl:order-2 xl:justify-end'>
-						<BookingFlow embedded />
-					</div>
-				</div>
-			</section>
-		</div>
-	)
+        <div className='relative mx-auto max-w-6xl px-5 sm:px-8'>
+          <div className='grid gap-10 lg:grid-cols-[1fr_0.8fr] lg:items-start'>
+            {/* Left — heading + intro */}
+            <div>
+              <p className='text-xs font-semibold uppercase tracking-[0.28em]' style={{ color: C.primary }}>Rendez-vous</p>
+              <h1 className='mt-3 font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+                Réservez votre <span style={{ color: C.primary, fontStyle: 'italic' }}>consultation</span>
+              </h1>
+              <p className='mt-6 max-w-md text-sm leading-8 sm:text-base' style={{ color: `${C.secondary}b3` }}>
+                Choisissez votre motif, votre date et vos coordonnées. Le formulaire reprend exactement l'expérience de réservation du site.
+              </p>
+              <div className='mt-6 flex flex-wrap gap-3'>
+                <TrustPill icon={ShieldCheck} text='Réservation sécurisée' />
+                <TrustPill icon={Clock3} text='Réservation rapide' />
+                <TrustPill icon={Sparkles} text='Expérience cohérente' />
+              </div>
+            </div>
+
+            {/* Right — motifs card (white, same as SM contact cards) */}
+            <div className='rounded-2xl p-6 sm:p-8' style={{ background: 'white', boxShadow: '0 4px 20px -6px rgba(0,0,0,0.06)' }}>
+              <p className='text-xs uppercase tracking-[0.26em]' style={{ color: `${C.secondary}a0` }}>Motifs disponibles</p>
+              <div className='mt-4 space-y-3 text-sm leading-7' style={{ color: `${C.secondary}b3` }}>
+                {motifs.map((motif) => (
+                  <p key={motif.id}>{motif.name}.</p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Booking flow (full width, same as SM consult section pattern) ─── */}
+      <section className='mx-auto max-w-7xl px-5 pb-20 sm:px-8 sm:pb-28'>
+        <div className='flex justify-center'>
+          <BookingFlow embedded />
+        </div>
+      </section>
+    </div>
+  )
 }
 
 function TrustPill({ icon: Icon, text }: { icon: typeof ShieldCheck; text: string }) {
-	return (
-		<div className='inline-flex items-center gap-2 rounded-full border border-secondary/10 bg-white/80 px-3.5 py-2 text-[13px] text-secondary/70 shadow-[0_12px_24px_rgba(26,54,70,0.04)] sm:px-4 sm:text-sm'>
-			<Icon className='h-4 w-4 text-primary' />
-			{text}
-		</div>
-	)
+  return (
+    <div className='inline-flex items-center gap-2 rounded-full border border-black/5 bg-white px-3.5 py-2 text-[13px] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)]' style={{ color: `${C.secondary}b3` }}>
+      <Icon className='h-4 w-4' style={{ color: C.primary }} />
+      {text}
+    </div>
+  )
 }

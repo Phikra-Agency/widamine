@@ -1,1781 +1,627 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ArrowUpRightIcon } from '@phosphor-icons/react'
-import type { Icon } from '@phosphor-icons/react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import useEmblaCarousel from 'embla-carousel-react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, EffectCoverflow } from 'swiper/modules'
-import {
-	CaretLeft as ChevronLeft,
-	CaretRight as ChevronRight,
-	CalendarBlank as CalendarDays,
-	ClipboardText,
-	Clock as Clock3,
-	CrosshairSimple as Crosshair,
-	Drop as Droplets,
-	FileMagnifyingGlass,
-	HeartStraight,
-	MapPin,
-	PhoneCall,
-	ScanSmiley as ScanFace,
-	ShieldCheck,
-	Sparkle as Sparkles,
-	Star,
-} from '@phosphor-icons/react'
+import { MapPin, PhoneCall } from '@phosphor-icons/react'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { AnimatePresence, motion } from 'framer-motion'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Navigation, EffectCoverflow, EffectCreative } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/effect-coverflow'
+import 'swiper/css/effect-creative'
 import PublicNavbar from '@/components/PublicNavbar'
-import WIDAMINE_ASSETS, { WIDAMINE_CONTENT } from '@/lib/widamineSource'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const marqueeStyle = `
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* ── Square Moncey CDN images ────────────────────────────────── */
+
+const SM = {
+  hero: {
+    logo: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af2514716ef72443f348bc_home-logo-middle.svg',
+    topLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abad49265e1cb980_header-top-left.avif',
+    topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af35669264ecc82de0caaa_header-top-right.avif',
+    midRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3566abad49265e1cb9a8_header-middle-right.avif',
+    midLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abee64cc381d4b75_header-middle-left-vector.svg',
+  },
+  intro: {
+    topLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af332e5a631306c40e224a_intro-top-left.avif',
+    topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af332ea7af49462f09ea4d_intro-top-right.svg',
+    bottomRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af332e716ef72443fb8ca1_intro-bottom-right.avif',
+  },
+  energie: {
+    bubbles: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66aa4ea27518914b10e9001c_section-2-left-bubbles.svg',
+  },
+  concept: {
+    flower: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b0fbb4c50c3351ead87c66_concept-fleur.avif',
+    image: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b0fbb563b1cf32df3f8e4e_concept-image.avif',
+  },
+  team: {
+    bottomLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b22d8caadf7a99405e08ed_team-bottom-left.avif',
+    flamant: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66ba3959a7134def88b2861e_flammant.avif',
+    members: [
+      { name: 'Dr Marie JOURDAN', role: 'Dermatologue esthétique', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e104783e18488c7040f1_maria-jourdan-photo.webp' },
+      { name: 'Dr Myriam BITBOL', role: 'Médecin', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/69538763755ad040d580afe9_474726d3-e7de-4756-8501-41a0d2035149.jpeg' },
+      { name: 'Dr Isabelle DUQUENNE', role: 'Médecin', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/69e1d6078dcf0b6a8a5efdc7_IMG_3136%20-%20Grande.jpeg' },
+      { name: 'Tan', role: 'Responsable Relation Patient', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e12de21066e1b7a3e461_tan-photo.webp' },
+      { name: 'Anaëlle', role: 'Assistante Laser', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e151f8b8bb70e913332b_anaelle-photo.webp' },
+      { name: 'Sarah', role: 'Assistante Laser', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/68ea6759be37ce98f62a0b41_b89ddf20-4be8-4348-90ba-463f078747f3.jpeg' },
+    ],
+  },
+  gallery: [
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e9827c8084de52aefc84f6_Entre%CC%81e%20cabinet.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7daae31b9619c9a56fec2_2-salle-dattente.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7daf46da5094bf6d5334a_3-bureau.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dbb530eb7fe2c2e15bf5_4-jardin.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dbe7da29663d71b184ad_5-salle-vasculaire.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc0b733e8f8d49628eff_6-salle%20pigmentaire.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc20418ca91d088c449a_7-boudoir.webp',
+    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc38a7350acde7713f8c_8-sous-sol.webp',
+  ],
+  consult: {
+    branch: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66ba364172b57bbc64c50e1e_consult-branche-feuiille.avif',
+    map: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/6607f56f68f48578d6eedfe0_Map-Square-Moncey.webp',
+    logo: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/660ea8bba64a65f7285f5015_logo-square-moncey.svg',
+  },
 }
 
-@keyframes hero-story-marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+/* ── Widamine palette ────────────────────────────────────────── */
+
+const C = {
+  bg: '#F7F1EB',
+  primary: '#2e90c0',
+  secondary: '#1a3646',
+  accent: '#e8c5b8',
+  orange: '#ef6007',
+  yellow: '#ffb500',
+  green: '#62bca1',
 }
 
-@keyframes services-marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
+/* ── SVG Icons ────────────────────────────────────────────────── */
 
-.services-swiper .swiper-wrapper {
-  transition-timing-function: linear !important;
-}
+const RightArrow = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='14' viewBox='0 0 25 25' fill='none'>
+    <path d='M0.78047 22.4904L6.74449 16.5264C3.24591 12.2475 3.87845 5.94264 8.15731 2.44411C12.4362-1.05443 18.741-0.421981 22.2396 3.85689C25.7382 8.13575 25.1056 14.4406 20.8268 17.9392C17.1412 20.9527 11.8429 20.9527 8.15727 17.9392L2.19325 23.9032C1.79631 24.2866 1.16376 24.2756 0.780422 23.8786C0.406507 23.4914 0.406507 22.8776 0.78047 22.4904Z' fill='currentColor' />
+  </svg>
+)
 
-.hero-story-track {
-  width: max-content;
-  animation: hero-story-marquee 24s linear infinite;
-}
-`
+const ArrowLeft = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='14' viewBox='0 0 20 17' fill='none'>
+    <path d='M6.49909 1.37685L0.775882 7.1134C0.278934 7.61331 0 8.28956 0 8.99445C0 9.69934 0.278934 10.3756 0.775882 10.8755L6.49909 16.6121C6.74905 16.8605 7.08718 17 7.43962 17C7.79207 17 8.13019 16.8605 8.38015 16.6121C8.50519 16.488 8.60444 16.3405 8.67217 16.1779C8.7399 16.0153 8.77477 15.841 8.77477 15.6649C8.77477 15.4887 8.7399 15.3144 8.67217 15.1518C8.60444 14.9892 8.50519 14.8417 8.38015 14.7177L3.99102 10.3285L18.6659 10.3285C19.0197 10.3285 19.3591 10.188 19.6093 9.93779C19.8594 9.6876 20 9.34827 20 8.99445C20 8.64063 19.8594 8.3013 19.6093 8.05111C19.3591 7.80092 19.0197 7.66037 18.6659 7.66037L3.99102 7.66037L8.38015 3.27124C8.63136 3.0218 8.77319 2.68278 8.77444 2.32876C8.77569 1.97474 8.63626 1.63473 8.38682 1.38351C8.13738 1.1323 7.79835 0.990469 7.44434 0.989217C7.09032 0.987968 6.7503 1.1274 6.49909 1.37685Z' fill='currentColor' />
+  </svg>
+)
 
-	const SERVICES = [
-		{
-			iconClass: 'flaticon-arm',
-			title: 'Esthétique du visage',
-			image: WIDAMINE_ASSETS.pageHeader,
-			url: '#',
-			eyebrow: 'Visage',
-			description: 'Soins orientés éclat, texture et harmonie du teint avec une lecture esthétique précise avant chaque protocole.',
-			benefit: 'Peau plus uniforme',
-			duration: '30 min',
-		},
-		{
-			iconClass: 'flaticon-eye',
-			title: "Esthétique de l'œil",
-			image: WIDAMINE_ASSETS.pageHeader,
-			url: '#',
-			eyebrow: 'Regard',
-			description: 'Approche délicate du contour de l’œil pour apporter fraîcheur, précision visuelle et équilibre du regard.',
-			benefit: 'Regard reposé',
-			duration: '25 min',
-		},
-		{
-			iconClass: 'flaticon-lips',
-			title: 'Esthétique des lèvres',
-			image: WIDAMINE_ASSETS.pageHeader,
-			url: '#',
-			eyebrow: 'Lèvres',
-			description: 'Travail sur la définition, la proportion et l’élégance du volume pour un rendu naturel et maîtrisé.',
-			benefit: 'Contour redéfini',
-			duration: '20 min',
-		},
-	{
-		iconClass: 'flaticon-body',
-		title: 'Esthétique du corps',
-		image: '/services/service_1.png',
-		url: '#',
-		eyebrow: 'Corps',
-		description: 'Protocoles de remodelage et de silhouette inspirés du positionnement clinique du centre.',
-		benefit: 'Silhouette affinée',
-		duration: '45 min',
-	},
-	{
-		iconClass: 'flaticon-expertise',
-		title: 'Liposuccion Vaser',
-		image: '/services/service_1.png',
-		url: '#',
-		eyebrow: 'Expertise',
-		description: 'Accompagnement structuré autour du contour corporel avec une approche plus technique et plus ciblée.',
-		benefit: 'Zones ciblées',
-		duration: 'Consultation',
-	},
-		{
-			iconClass: 'flaticon-brows',
-			title: 'Esthétique des sourcils',
-			image: WIDAMINE_ASSETS.pageHeader,
-			url: '#',
-			eyebrow: 'Sourcils',
-			description: 'Correction visuelle et relecture de la ligne pour encadrer le visage avec plus de netteté.',
-			benefit: 'Ligne équilibrée',
-			duration: '20 min',
-		},
-		{
-			iconClass: 'flaticon-breast',
-			title: 'Augmentation mammaire',
-			image: '/services/service_1.png',
-			url: '#',
-			eyebrow: 'Silhouette',
-			description: 'Prise en charge orientée proportion, projection et cohérence de la silhouette globale.',
-			benefit: 'Volume harmonisé',
-			duration: 'Consultation',
-		},
-	{
-		iconClass: 'flaticon-booty',
-		title: 'Brazilian Butt Lift',
-		image: '/services/service_1.png',
-		url: '#',
-		eyebrow: 'Corps',
-		description: 'Lecture esthétique du galbe et du contour postérieur dans un parcours personnalisé et encadré.',
-		benefit: 'Courbes redessinées',
-		duration: 'Consultation',
-	},
+const ArrowRight = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='14' viewBox='0 0 20 17' fill='none'>
+    <path d='M13.5009 15.6232L19.2241 9.8866C19.7211 9.38669 20 8.71044 20 8.00555C20 7.30066 19.7211 6.62441 19.2241 6.12449L13.5009 0.387941C13.2509 0.139467 12.9128 0 12.5604 0C12.2079 0 11.8698 0.139467 11.6199 0.387941C11.4948 0.511961 11.3956 0.659512 11.3278 0.822082C11.2601 0.984652 11.2252 1.15902 11.2252 1.33514C11.2252 1.51125 11.2601 1.68563 11.3278 1.8482C11.3956 2.01077 11.4948 2.15832 11.6199 2.28234L16.009 6.67147L1.33408 6.67147C0.980261 6.67147 0.640932 6.81202 0.390743 7.06221C0.140554 7.3124 0 7.65173 0 8.00555C0 8.35937 0.140554 8.6987 0.390743 8.94889C0.640932 9.19907 0.98026 9.33963 1.33408 9.33963L16.009 9.33963L11.6199 13.7288C11.3686 13.9782 11.2268 14.3172 11.2256 14.6712C11.2243 15.0253 11.3637 15.3653 11.6132 15.6165C11.8626 15.8677 12.2016 16.0095 12.5557 16.0108C12.9097 16.012 13.2497 15.8726 13.5009 15.6232Z' fill='currentColor' />
+  </svg>
+)
+
+const HeartIcon = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' fill='none'>
+    <path d='M12.4777 6.21093C13.2241 6.2143 13.9403 6.50647 14.476 7.02625C15.0117 6.50651 15.7279 6.2143 16.4743 6.21093C18.1832 6.27012 19.5229 7.69917 19.4718 9.40825C19.4718 11.4066 17.4325 13.4679 15.721 14.8437C14.9924 15.424 13.9596 15.424 13.2311 14.8437C11.5195 13.4678 9.48018 11.4066 9.48018 9.40825C9.42915 7.69917 10.7689 6.27012 12.4777 6.21093ZM14.4701 13.2851C16.3225 11.7963 17.4736 10.3075 17.4736 9.40829C17.5234 8.80296 17.0788 8.26938 16.4744 8.2093C15.87 8.26938 15.4253 8.80296 15.4752 9.40829C15.4752 9.96011 15.0279 10.4075 14.476 10.4075C13.9242 10.4075 13.4768 9.96016 13.4768 9.40829C13.5267 8.80296 13.0821 8.26938 12.4776 8.2093C11.8732 8.26938 11.4286 8.80296 11.4785 9.40829C11.4786 10.3075 12.6296 11.7963 14.4701 13.2851Z' fill='currentColor' />
+  </svg>
+)
+
+const StarIcon = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 18 17' fill='none'>
+    <path d='M8.13024 0.533005C8.51342-0.142371 9.48658-0.142372 9.86976 0.533003L11.9616 4.22001C12.1041 4.47108 12.3481 4.64834 12.6308 4.70623L16.7838 5.55636C17.5445 5.71208 17.8453 6.63762 17.3214 7.21075L14.4612 10.3396C14.2665 10.5526 14.1733 10.8394 14.2056 11.1263L14.6804 15.3387C14.7674 16.1103 13.9801 16.6823 13.2731 16.3612L9.4136 14.6079C9.15079 14.4885 8.84921 14.4885 8.5864 14.6079L4.72688 16.3612C4.0199 16.6823 3.23259 16.1103 3.31957 15.3387L3.79439 11.1263C3.82672 10.8395 3.73353 10.5526 3.53877 10.3396L0.678637 7.21075C0.154726 6.63762 0.45545 5.71208 1.21618 5.55636L5.36916 4.70623C5.65195 4.64834 5.89593 4.47108 6.03838 4.22002L8.13024 0.533005Z' fill='currentColor' />
+  </svg>
+)
+
+const NavArrow = ({ dir }: { dir: 'left' | 'right' }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='18' height='15' viewBox='0 0 18 15' fill='none'>
+    <path d={dir === 'right'
+      ? 'M12.3049 14.2008L17.2842 9.20993C17.7165 8.775 17.9592 8.18665 17.9592 7.57338C17.9592 6.96011 17.7165 6.37176 17.2842 5.93682L12.3049 0.945914C12.0874 0.729737 11.7933 0.608398 11.4866 0.608398C11.18 0.608398 10.8858 0.729737 10.6683 0.945914L10.6683 0.945914C10.5596 1.05381 10.4732 1.18219 10.4143 1.32363C10.3554 1.46506 10.325 1.61677 10.325 1.76999C10.325 1.92322 10.3554 2.07492 10.4143 2.21636C10.4732 2.3578 10.5596 2.48618 10.6683 2.59408L14.487 6.4127L1.71952 6.4127C1.41169 6.4127 1.11647 6.53499 0.898798 6.75266C0.681129 6.97032 0.558845 7.26555 0.558845 7.57338C0.558845 7.88121 0.681129 8.17643 0.898798 8.3941C1.11647 8.61177 1.41169 8.73405 1.71952 8.73405L14.487 8.73406L10.6683 12.5527C10.4498 12.7697 10.3264 13.0647 10.3253 13.3727C10.3242 13.6807 10.4455 13.9765 10.6625 14.195C10.8796 14.4136 11.1745 14.537 11.4825 14.5381C11.7905 14.5392 12.0863 14.4179 12.3049 14.2008Z'
+      : 'M5.69509 0.799221L0.71582 5.79007C0.283488 6.225 0.040802 6.81335 0.040802 7.42662C0.040802 8.03989 0.283488 8.62824 0.71582 9.06318L5.69509 14.0541C5.91264 14.2703 6.20672 14.3916 6.5134 14.3916C6.82008 14.3916 7.1142 14.2703 7.3317 14.0541L7.3317 14.0541C7.4404 13.9462 7.5268 13.8178 7.5857 13.6764C7.6446 13.5349 7.675 13.3832 7.675 13.23C7.675 13.0768 7.6446 12.9251 7.5857 12.7836C7.5268 12.6422 7.4404 12.5138 7.3317 12.4059L3.513 8.5873L16.2805 8.5873C16.5883 8.5873 16.8835 8.46501 17.1012 8.24734C17.3189 8.02968 17.4412 7.73445 17.4412 7.42662C17.4412 7.11879 17.3189 6.82357 17.1012 6.6059C16.8835 6.38823 16.5883 6.26595 16.2805 6.26595L3.513 6.26595L7.3317 2.4473C7.5502 2.23033 7.6736 1.93532 7.6747 1.62732C7.6758 1.31931 7.5545 1.02347 7.3375 0.805034C7.1204 0.586599 6.8255 0.463208 6.5175 0.462066C6.2095 0.460923 5.91466 0.582297 5.6961 0.800769L5.69509 0.799221Z'
+    } fill='currentColor' />
+  </svg>
+)
+
+/* ── Plant SVG Icons (from Square Moncey) ────────────────────── */
+
+const PlantIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='91' viewBox='0 0 44 91' fill='none'>
+    <path d='M13.7736 64.6343C9.42909 66.5848 7.62586 70.846 7.77719 75.6056C7.92851 80.3651 10.9247 86.6199 15.1469 88.8223C19.3696 91.0242 24.6402 90.9164 28.9173 88.8223C33.2328 86.7096 36.6254 80.5319 36.4075 75.732C36.1991 71.1419 32.9537 67.3338 29.8782 63.9203C30.1378 63.5547 30.6852 58.9374 31.092 55.1963L13.6142 54.2195L13.7736 64.6343Z' fill='currentColor' />
+    <path d='M36.7295 25.8855C34.9362 26.1773 33.0686 26.4655 31.3293 25.9404C29.5899 25.4153 28.0304 23.8168 28.1863 22.0068C28.4047 19.4704 31.5146 18.3341 34.06 18.3024C36.6053 18.2707 39.4556 18.6554 41.4197 17.0361C42.914 15.8037 43.4133 13.5129 42.5678 11.7704C41.7224 10.0279 39.6133 9.00257 37.7208 9.41397C35.3544 9.92821 33.8819 12.2226 31.9468 13.6779C30.0117 15.1332 26.3939 15.1377 25.9721 12.7531C25.4909 10.0306 29.7299 8.85442 30.5346 6.20936C30.9818 4.73913 30.1903 3.10625 28.9737 2.16702C27.7572 1.22779 26.2018 0.855815 24.6813 0.633355C22.7222 0.346558 20.6575 0.280416 18.8294 1.04068C17.0012 1.80049 15.4757 3.56113 15.511 5.54062C15.5459 7.48658 16.9758 9.07733 17.892 10.7949C18.8081 12.5121 18.987 15.0906 17.2635 15.9953C14.9397 17.2159 12.8152 14.0988 10.4429 12.9756C8.19748 11.9127 5.1877 12.9847 4.1198 15.2278C3.0519 17.471 4.11708 20.4831 6.35754 21.556C8.53503 22.5989 11.094 21.8645 13.508 21.8156C15.922 21.7666 18.8846 23.1363 18.7474 25.5466C18.6654 26.9915 17.4026 28.1473 16.0235 28.5863C14.6443 29.0254 13.1591 28.9044 11.7147 28.8083C8.67729 28.6067 5.3558 28.6203 2.95087 30.4865C0.545946 32.3528 0.0724764 36.7594 2.77825 38.1539C4.51715 39.0501 6.64162 38.3352 8.35742 37.3946C10.0728 36.454 11.7768 35.2601 13.7318 35.194C15.6873 35.1278 17.8353 36.9025 17.2413 38.7665C16.8299 40.0564 15.3629 40.6921 14.0186 40.8525C12.6743 41.0128 11.2748 40.866 9.99665 41.3123C7.73218 42.1034 6.41282 44.9125 7.24965 47.1606C8.08693 49.4088 10.9218 50.6706 13.1528 49.788C15.0924 49.0205 16.2351 47.0691 17.5 45.4104C18.765 43.7517 20.6752 42.1569 22.7104 42.6136C25.5063 43.2406 26.0981 46.9345 27.9865 49.0898C29.304 50.5936 31.5128 51.3466 33.4071 50.7073C35.3014 50.0685 36.6375 47.9286 36.1473 45.9903C35.5066 43.4581 32.5757 42.4387 30.2668 41.2167C27.9579 39.9943 25.8117 36.9628 27.542 35.0055C28.6217 33.7845 30.5885 33.9023 32.0918 34.5316C33.5951 35.1609 34.9398 36.1939 36.5301 36.5509C39.3387 37.1816 42.4695 35.2157 43.1215 32.4121C43.7735 29.6085 41.7976 27.1287 40.0935 25.1733C39.8339 24.8758 39.5646 24.5875 39.2865 24.3085L36.7295 25.8855Z' fill={color} />
+  </svg>
+)
+
+const VaseIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='50' height='94' viewBox='0 0 50 94' fill='none'>
+    <path d='M17.6799 54.7661C19.1201 52.5061 19.0139 49.6408 17.6673 47.3233C17.2025 46.5234 17.0093 45.7193 17.4548 45.2908C18.4447 44.3382 19.961 44.2107 21.3316 44.3144C22.7015 44.418 24.1009 44.695 25.431 44.3512C28.9054 43.453 30.6673 38.706 34.2535 38.5772C35.0113 38.5501 35.9299 38.9273 35.9824 39.6835C36.038 40.4839 35.1377 40.9509 34.4374 41.3442C32.222 42.5877 30.8542 45.1983 31.0932 47.7278C31.322 50.1562 32.8693 52.266 34.6319 53.9517C36.3945 55.6374 38.4257 57.0401 40.0606 58.8507C43.8292 63.025 45.0781 69.3133 43.1918 74.6111C41.7405 78.6866 38.6489 82.4219 37.009 86.4491C35.8851 89.2089 33.2759 91.0771 30.3093 91.3621C30.2347 91.3693 30.1602 91.3765 30.0863 91.3836C27.2725 91.6526 24.5702 90.4015 22.8253 88.1782C20.2581 84.9073 16.3606 82.4123 13.792 79.0892C10.796 75.2133 9.71635 69.9253 10.954 65.1855C11.9301 61.4458 15.2919 58.5124 17.6799 54.7661Z' fill='currentColor' />
+    <path d='M14.2767 61.0182C13.2916 59.6946 12.1407 58.4926 10.9222 57.2214C9.96333 56.2197 8.97142 55.1842 8.05233 54.0698C5.29866 50.7302 3.97174 47.4123 4.10723 44.2095C4.27336 40.2811 7.37892 36.0106 11.7493 35.9623C14.2244 35.9235 16.7593 37.2776 18.5317 39.584C19.9803 41.4691 20.7759 43.6819 21.4768 45.6344L17.781 46.9616C17.1476 45.1981 16.4926 43.3743 15.4181 41.9767C14.4135 40.6698 13.0311 39.8698 11.8098 39.8884C9.76422 39.921 8.11926 42.2839 8.0304 44.3761C7.93708 46.5817 8.96398 49.003 11.0822 51.572C11.9085 52.5736 12.8069 53.512 13.7585 54.5052C15.0058 55.8073 16.2963 57.1545 17.4266 58.6733L14.2767 61.0182Z' fill='currentColor' />
+    <path d='M9.36928 26.0557C10.0357 17.7972 20.3462 29.1732 23.2329 26.2415C20.5139 20.8917 7.01425 20.0184 11.0218 11.9232C16.7409 5.75273 20.156 19.17 24.6317 18.4568C24.2756 13.8859 20.0646 10.6464 19.8446 6.01062C18.5327 0.159241 25.2382 0.69876 26.5805 5.32066C28.6804 7.09712 28.3705 15.5904 31.2934 14.2896C37.7225-5.45373 46.0284 10.0167 33.7313 22.5589C29.3734 33.8744 40.852 15.0468 43.5434 18.8468C44.9125 24.7539 39.8098 30.0743 34.0682 32.8493C30.8693 34.3952 27.1624 34.4665 23.8256 33.2467C18.7095 31.3766 10.4079 33.2055 9.36928 26.0557Z' fill={color} />
+  </svg>
+)
+
+const FlowerIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='94' viewBox='0 0 44 94' fill='none'>
+    <path d='M15.5078 91.367L24.7555 92.1761C27.1821 92.3884 29.442 90.9616 30.3233 88.6906C31.5216 85.6039 33.2547 82.6413 34.7331 79.7368C36.8062 75.6649 38.4612 71.0279 37.3838 66.5871C36.3063 62.1468 31.4768 58.4089 27.1976 60.0101L28.5164 53.3668L20.4766 52.3339L20.5861 59.8296C16.581 58.0721 11.5988 60.0753 9.10387 63.6675C6.60885 67.2602 6.2799 72.0093 7.2318 76.2782C7.99406 79.6968 9.49291 82.8859 10.7079 87.3808C11.3037 89.5847 13.2334 91.1681 15.5078 91.367Z' fill='currentColor' />
+    <path d='M14.7062 29.9963C12.0308 26.9437 6.19855 25.2227 6.65014 20.4075C8.62293 16.9743 12.3739 19.8038 14.5152 21.505C17.7635 17.9686 10.2882 11.4424 12.4373 6.58637C17.3312 1.61461 20.0722 15.6112 22.4791 12.86C25.5476 11.073 25.1314 7.32487 26.3904 4.46753C30.1049-1.5194 35.6536 6.06913 33.6664 10.6815C33.3974 11.3055 33.5356 12.5028 33.301 13.2458C32.9522 14.35 32.4047 15.381 32.0207 16.4716C31.531 17.8613 31.0211 21.6259 33.8552 20.4031C34.4629 20.1408 34.9422 19.6582 35.4475 19.2302C39.4894 15.808 40.1683 23.2367 39.8933 25.6525C39.4358 29.6712 35.615 31.2 32.0736 31.8448C22.936 33.6579 34.8671 46.4316 25.8405 49.5679C22.6481 49.9093 21.3049 45.3474 20.3242 42.9592C18.4218 39.6131 13.3863 39.5244 11.2208 36.1931C6.23032 29.3435 18.1428 34.1549 14.7062 29.9963Z' fill={color} />
+  </svg>
+)
+
+const QuoteIcon = () => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='35' height='41' viewBox='0 0 35 41' fill='none'>
+    <path d='M17.5006 0.875C12.8609 0.880734 8.4129 2.72638 5.13214 6.00714C1.85138 9.2879 0.00573373 13.7359 0 18.3756C0 23.0858 3.66679 29.6527 10.902 37.8913C11.7271 38.8289 12.7425 39.5799 13.8806 40.0944C15.0187 40.6089 16.2533 40.875 17.5023 40.875C18.7512 40.875 19.9859 40.6089 21.1239 40.0944C22.262 39.5799 23.2774 38.8289 24.1025 37.8913C31.3344 29.6543 35.0012 23.0874 35.0012 18.3756C34.9955 13.7359 33.1498 9.2879 29.8691 6.00714C26.5883 2.72638 22.1403 0.880734 17.5006 0.875ZM20.344 34.5945C19.9806 34.9852 19.5405 35.2968 19.0513 35.5099C18.5621 35.723 18.0342 35.8329 17.5006 35.8329C16.967 35.8329 16.4391 35.723 15.9499 35.5099C15.4607 35.2968 15.0206 34.9852 14.6572 34.5945C8.51863 27.6026 4.99017 21.6907 4.99017 18.3773C4.99017 15.062 6.30718 11.8824 8.65146 9.53813C10.9957 7.19385 14.1753 5.87684 17.4906 5.87684C20.8059 5.87684 23.9855 7.19385 26.3297 9.53813C28.674 11.8824 29.991 15.062 29.991 18.3773C30.001 21.6907 26.4826 27.6026 20.344 34.5945Z' fill='currentColor' />
+    <path d='M17.5007 10.9668C16.0624 10.9668 14.6565 11.3933 13.4606 12.1923C12.2648 12.9914 11.3327 14.1271 10.7823 15.4559C10.2319 16.7846 10.0879 18.2468 10.3685 19.6574C10.6491 21.068 11.3417 22.3637 12.3587 23.3807C13.3757 24.3977 14.6714 25.0903 16.082 25.3709C17.4926 25.6515 18.9548 25.5075 20.2835 24.9571C21.6123 24.4067 22.748 23.4746 23.5471 22.2788C24.3461 21.0829 24.7726 19.677 24.7726 18.2387C24.7704 16.3108 24.0035 14.4624 22.6403 13.0991C21.277 11.7359 19.4286 10.969 17.5007 10.9668ZM17.5007 20.5105C17.0514 20.5105 16.6122 20.3772 16.2386 20.1276C15.865 19.878 15.5738 19.5232 15.4019 19.1081C15.2299 18.693 15.1849 18.2362 15.2726 17.7955C15.3602 17.3548 15.5766 16.9501 15.8943 16.6323C16.212 16.3146 16.6168 16.0983 17.0575 16.0106C17.4982 15.923 17.9549 15.968 18.37 16.1399C18.7851 16.3118 19.1399 16.603 19.3896 16.9766C19.6392 17.3502 19.7724 17.7894 19.7724 18.2387C19.772 18.8411 19.5325 19.4187 19.1066 19.8446C18.6806 20.2705 18.103 20.51 17.5007 20.5105Z' fill='currentColor' />
+  </svg>
+)
+
+/* ── Content ──────────────────────────────────────────────────── */
+
+const QUOTES = [
+  '"La nature nous donne la beauté, la sagesse nous aide à la révéler."',
+  '"La beauté réside dans la vérité."',
+  '"La simplicité est la sophistication suprême."',
+  '"La beauté commence au moment où vous décidez d\'être vous-même."',
+  '"Je vous souhaite d\'être au lieu de paraître."',
+  '"On ne peut percevoir la beauté qu\'avec un esprit serein."',
 ]
 
-const MEDICAL_INSIGHTS = [
-	{
-		icon: ScanFace,
-		title: 'Notre Objectif',
-		description: "Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu. Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.",
-	},
-	{
-		icon: Droplets,
-		title: 'Notre Vision',
-		description: 'Être le centre de référence en dermatologie et esthétique médicale, où innovation et qualité se rencontrent. Nous aspirons à créer une expérience unique, où chaque patient se sent valorisé et transformé.',
-	},
-	{
-		icon: Crosshair,
-		title: 'Notre Mission',
-		description: 'Nous sommes dédiés à améliorer la vie de nos patients par des soins dermatologiques et esthétiques personnalisés. Notre mission est de combiner expertise médicale, technologies avancées et un service personnalisé pour offrir une expérience incomparable.',
-	},
+const TESTIMONIALS = [
+  { name: 'Sara C.', text: 'Après 5 praticiens différents, 5 techniques différentes, sans amélioration, j\'ai trouvé LA dermatologue parfaite. Je viens à bout de cette rosacée hormonale qui me gâchait la vie !!' },
+  { name: 'Hila S.', text: 'Oui, 5 ⭐️ pour ce cabinet innovant et absolument magnifique. Les méthodes proposées pour venir à bout de chaque problème, non invasif avec des résultats plus durables. Je recommande 1000 fois !' },
+  { name: 'Marine D.', text: 'Félicitation pour ce bel espace que vous avez créé à votre image : apaisant, élégant et raffiné. Je ne peux qu\'une fois de plus vous remercier pour votre écoute, votre professionnalisme.' },
+  { name: 'Guillaume C.', text: 'J\'ai eu une expérience exceptionnelle à Square Moncey. L\'accueil chaleureux de Monsieur Tan a rendu ma visite très agréable. Je recommande vivement cet endroit !' },
+  { name: 'Romina S.', text: 'C\'est un cabinet à l\'image de Dr. Jourdan : Chaleureux, discret, hautement précis dans son expertise. Je conseil à 1000% le Square Moncey.' },
 ]
 
-const JOURNEY_CARDS = [
-	{
-		icon: FileMagnifyingGlass,
-		title: 'Diagnostic précis',
-		description: 'Chaque parcours démarre par une lecture précise des besoins du patient et un diagnostic adapté à sa situation.',
-		tone: 'bg-secondary text-custom-white',
-	},
-	{
-		icon: ClipboardText,
-		title: 'Protocoles sur mesure',
-		description: 'Chaque patient bénéficie d’un plan de traitement personnalisé, construit autour de ses attentes et de ses priorités.',
-		tone: 'bg-accent/80 text-secondary',
-	},
-	{
-		icon: HeartStraight,
-		title: 'Suivi attentif',
-		description: 'Notre équipe accompagne chaque étape du parcours avec une présence claire, rassurante et continue.',
-		tone: 'bg-primary/85 text-custom-white',
-	},
-]
+const TEAM_ICONS = ['#62bca1', '#62bca1', '#62bca1', '#ffb500', C.primary, C.primary]
 
-const EXPERTISES = [
-	{
-		name: 'Dr. SLAOUI WIDAD',
-		role: 'Plastic Surgery',
-		image: '/hero.png',
-		description: "Votre bien-être nous est confié. Notre équipe d'experts, pour des résultats à la hauteur de vos attentes.",
-	},
-	{
-		name: 'Équipe Widamine',
-		role: 'Accompagnement patient',
-		image: '/services/service_1.png',
-		description: "Des professionnels dévoués présents à chaque étape pour guider, rassurer et structurer l'expérience patient.",
-	},
-]
+/* ── Sections ─────────────────────────────────────────────────── */
 
-const TRUST_POINTS = [
-	{
-		icon: ShieldCheck,
-		title: 'Fiabilité',
-		description: 'Des services précis, fiables et éthiques portés par une équipe experte.',
-	},
-	{
-		icon: Sparkles,
-		title: 'Empathie',
-		description: 'Une écoute attentive pour comprendre vos besoins médicaux et vos aspirations personnelles.',
-	},
-	{
-		icon: Crosshair,
-		title: 'Innovation',
-		description: 'Les dernières technologies intégrées à une approche harmonieuse et équilibrée.',
-	},
-	{
-		icon: Droplets,
-		title: 'Éthique',
-		description: 'Des pratiques transparentes et respectueuses de votre peau, de votre santé et de votre confiance.',
-	},
-]
+function HeroSection() {
+  const heroRef = useRef<HTMLElement>(null)
+  const { open } = useScheduleModalStore()
 
-const NEWS_POSTS = [
-	{
-		title: 'Fat Injection',
-		category: 'Aesthetic & Plastic Surgery',
-		date: '20.05.2022',
-		excerpt: "L’injection de graisse permet de redonner volume, équilibre et douceur à certaines zones du visage ou du corps en utilisant la propre graisse du patient.",
-	},
-	{
-		title: 'How to Prevent Jowl Sagging?',
-		category: 'Aesthetic & Plastic Surgery',
-		date: '20.05.2022',
-		excerpt: "Le relâchement du bas du visage peut être anticipé avec une évaluation précoce, des gestes adaptés et une stratégie de soin cohérente.",
-	},
-	{
-		title: 'Liposuction',
-		category: 'Aesthetic & Plastic Surgery',
-		date: '20.05.2022',
-		excerpt: "La liposuccion cible le plus souvent l’abdomen, les hanches, les cuisses, le dos, les bras et certaines zones localisées du visage.",
-	},
-]
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo('[data-fade]', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.15 })
+    }, heroRef)
+    return () => ctx.revert()
+  }, [])
 
-const CARE_UNIVERSES = [
-	{
-		title: 'Consultation',
-		eyebrow: 'Diagnostic',
-		description: 'Consultation générale et urgence dermatologique dans un parcours de prise en charge clair et réactif.',
-		items: ['Consultation générale', 'Urgence dermatologique'],
-	},
-	{
-		title: 'Dermatologie esthétique',
-		eyebrow: 'Esthétique médicale',
-		description: 'Des traitements ciblés pour le visage, l’anti-âge et la qualité de peau, portés par une lecture médicale précise.',
-		items: ['Injection Botox & acide hyaluronique', 'Peeling', 'Traitement anti-âge', 'Soins du visage'],
-	},
-	{
-		title: 'Séances laser',
-		eyebrow: 'Technologies',
-		description: 'Des protocoles laser ajustés selon l’indication, la peau et l’objectif thérapeutique ou esthétique.',
-		items: ['Épilation laser', 'Traitement des taches', 'Cicatrices / acné', 'Détatouage'],
-	},
-]
+  return (
+    <section ref={heroRef} className='relative' style={{ background: C.bg, minHeight: '100svh' }}>
+      <div className='relative z-10 mx-auto max-w-7xl px-4 sm:px-6 text-center pt-32 sm:pt-40 lg:pt-48'>
+        <img src={SM.hero.logo} alt='Logo' data-fade className='mx-auto w-20 sm:w-24 lg:w-28' />
+        <h1 data-fade className='mt-10 font-amoria text-[2.2rem] leading-[1.08] sm:text-5xl md:text-6xl' style={{ color: C.secondary }}>
+          Bienvenue dans <span style={{ color: C.primary, fontStyle: 'italic' }}>la jungle</span> de la
+          <br className='hidden sm:block' />
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>dermatologie</span> esthétique et laser.
+        </h1>
+        <p data-fade className='mx-auto mt-6 max-w-xl text-base leading-7' style={{ color: `${C.secondary}99` }}>
+          Le centre de dermatologie esthétique et laser qui vous propose des solutions fiables et durables.
+        </p>
+        <button data-fade onClick={open} className='mt-10 inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.secondary }}>
+          Prendre rendez-vous <RightArrow />
+        </button>
+      </div>
 
-const PROGRAM_GROUPS = [
-	{
-		title: 'Packs Amincissement & Remodelage',
-		label: 'Silhouette',
-		description: 'Des protocoles multi-machines à volume élevé pour la silhouette, le raffermissement et le body contouring.',
-		items: [
-			'Pack renforcement musculaire : 8 séances de I Model, 8 séances de Stimsure, 8 séances de Diasculpt et 8 séances de Lifting colombien.',
-			'Pack raffermissement de peau : 5 séances de Tempsure Firm, 10 séances EMS, 10 séances de Diasculpt et 5 séances d’onde de choc.',
-			'Pack cellulite : 4 séances de Tempsure Firm, 10 séances de Diasculpt et 10 séances d’onde de choc.',
-			'Pack body contouring complet : protocole intensif incluant notamment 16 séances de Diasculpt, 8 séances de Stimsure, 8 séances de I Model et 8 séances de drainage.',
-			'Pack I Model seul : forfaits de 8, 20, 30 ou 52 séances.',
-		],
-	},
-	{
-		title: 'Soins Thérapeutiques & Post-Opératoires',
-		label: 'Suivi',
-		description: 'Des intervalles stricts et une organisation précise, particulièrement importants pour le calendrier et le suivi post-opératoire.',
-		items: [
-			'Liposuccion post-op : 8 séances de Diasculpt espacées de 5 jours, à commencer 2 à 3 jours après l’intervention.',
-			'Abdominoplastie post-op : 10 séances de drainage manuel dès le lendemain de l’intervention, accompagnées de 4 séances de LED.',
-			'Tendinite : 10 séances de Diasculpt avec 3 jours d’intervalle, plus 3 séances de TECAR.',
-			'Fasciite plantaire / Déchirures : 8 séances de Diasculpt avec une semaine d’intervalle.',
-			'Transit intestinal : 5 séances espacées d’une semaine.',
-			'Kiné sportive : 5 à 10 séances de TECAR avec une fréquence de 1 à 3 séances par semaine.',
-		],
-	},
-	{
-		title: 'Soins Visage & Esthétique',
-		label: 'Visage',
-		description: 'Une offre visage et esthétique qui combine séances unitaires, cures et traitements dépendant du besoin réel du patient.',
-		items: [
-			'Pack Iface Esthetic : 1 séance ou 12 séances.',
-			'Injections : Botox, acide hyaluronique et Skinbooster selon l’indication.',
-			'Épilation laser : protocole évolutif selon la pilosité et la zone traitée.',
-		],
-	},
-]
+      <div className='max-w-4xl mx-auto px-4 mt-20 sm:mt-28 pb-16 relative z-20' data-video-wrap>
+        <div data-fade className='overflow-hidden rounded-[2rem] relative' style={{ aspectRatio: '16/9', boxShadow: '0 25px 60px -12px rgba(0,0,0,0.25), 0 8px 24px -8px rgba(0,0,0,0.15)' }}>
+          <img src='https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/660ea71c6f94851cc9dbd4a9_cabine1.jpg' alt='' className='absolute inset-0 h-full w-full object-cover widamine-tint' loading='eager' />
+          <video autoPlay muted loop playsInline className='absolute inset-0 h-full w-full object-cover'>
+            <source src='https://cdn.pixabay.com/video/2020/07/30/45349-445002403_large.mp4' type='video/mp4' />
+          </video>
+        </div>
+      </div>
 
-const revealProps = {
-	initial: { opacity: 0, y: 34, scale: 0.985, filter: 'blur(16px)' },
-	whileInView: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
-	viewport: { once: true, amount: 0.2 },
-	transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
+      <div className='absolute inset-0 pointer-events-none'>
+        <img src={SM.hero.topLeft} alt='' className='absolute left-0 top-0 w-44 sm:w-56 opacity-60 widamine-tint' loading='lazy' />
+        <img src={SM.hero.topRight} alt='' className='absolute right-0 top-0 w-44 sm:w-56 opacity-60 widamine-tint' loading='lazy' />
+        <img src={SM.hero.midRight} alt='' className='absolute right-0 top-1/3 w-36 sm:w-44 opacity-50 widamine-tint' loading='lazy' />
+        <img src={SM.hero.midLeft} alt='' className='absolute left-0 bottom-0 w-44 sm:w-56 opacity-50 widamine-tint' loading='lazy' />
+      </div>
+    </section>
+  )
 }
 
-function RevealBlock({
-	children,
-	className,
-	delay = 0,
-}: {
-	children: ReactNode
-	className?: string
-	delay?: number
-}) {
-	return (
-		<motion.div
-			className={className}
-			initial={revealProps.initial}
-			whileInView={revealProps.whileInView}
-			viewport={revealProps.viewport}
-			transition={{ ...revealProps.transition, delay }}
-		>
-			{children}
-		</motion.div>
-	)
+function IntroSection() {
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10'>
+        <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+          Widamine Center, plus qu'un cabinet, <span style={{ color: C.primary, fontStyle: 'italic' }}>Un lieu.</span>
+        </h2>
+        <p className='mx-auto mt-8 max-w-[700px] text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+          Un espace pensé pour allier expertise médicale et expérience esthétique, dans un environnement où chaque détail accompagne la confiance, la précision et le bien-être.
+        </p>
+      </div>
+      <img src={SM.intro.topLeft} alt='' className='absolute left-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
+      <img src={SM.intro.topRight} alt='' className='absolute right-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
+      <img src={SM.intro.bottomRight} alt='' className='absolute right-0 bottom-0 w-40 sm:w-52 opacity-40 widamine-tint' loading='lazy' />
+    </section>
+  )
 }
 
-function LeafAccent({
-	className,
-	tone,
-	float,
-	entrance,
-	size = 360,
-}: {
-	className: string
-	tone: string
-	float: { y: number[]; rotate: number[]; duration: number }
-	entrance: { x: number; delay: number; duration: number; rotate: number }
-	size?: number
-}) {
-	return (
-		<motion.div
-			className={className}
-			aria-hidden='true'
-			initial={{ opacity: 0, x: entrance.x, scale: 0.8, rotate: entrance.rotate }}
-			animate={{
-				opacity: 1,
-				x: 0,
-				scale: 1,
-				rotate: 0,
-			}}
-			transition={{
-				duration: entrance.duration,
-				delay: entrance.delay,
-				ease: [0.25, 0.46, 0.45, 0.94],
-			}}
-		>
-			<motion.div animate={{ y: float.y, rotate: float.rotate }} transition={{ duration: float.duration, repeat: Infinity, ease: 'easeInOut' }}>
-				<svg width={size} height={size} viewBox='0 0 260 260' fill='none' xmlns='http://www.w3.org/2000/svg'>
-					<path
-						d='M52 194c36-52 70-85 114-110 40-24 66-46 88-74-6 56-20 98-46 132-28 38-68 68-118 86-14 5-27 7-38 8Z'
-						stroke={tone}
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-					/>
-					<path
-						d='M74 176c18-18 34-30 52-40 16-10 32-20 48-38-8 24-18 40-32 56-14 16-34 30-60 42'
-						stroke={tone}
-						strokeWidth='1.6'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						opacity='0.7'
-					/>
-				</svg>
-			</motion.div>
-		</motion.div>
-	)
+function EnergieSection() {
+  const [quoteIdx, setQuoteIdx] = useState(0)
+
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
+          <div>
+            <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+              <span style={{ color: C.primary, fontStyle: 'italic' }}>L'énergie</span> du Widamine Center
+            </h2>
+            <p className='mt-8 text-lg font-medium leading-8' style={{ color: C.secondary }}>
+              Que ça soit pour des rides, de la couperose, des taches de soleil ou des cicatrices disgracieuses, des solutions existent.
+            </p>
+            <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+              Elles demandent une expertise médicale et une compétence particulière, et doivent s'employer à respecter la peau et sa physiologie.
+            </p>
+            <Link to='/services/visage' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+              Traitements du visage <RightArrow />
+            </Link>
+          </div>
+          <div className='rounded-2xl bg-white p-8 sm:p-10 shadow-xl border border-black/5 relative z-10' style={{ minHeight: 260 }}>
+            <div className='relative h-full'>
+              <div className='absolute -top-1 -left-1' style={{ color: C.primary }}>
+                <QuoteIcon />
+              </div>
+              <blockquote className='pl-8 pt-6 text-lg italic leading-relaxed' style={{ color: C.primary }}>
+                {QUOTES[quoteIdx]}
+              </blockquote>
+            </div>
+            <div className='mt-8 flex justify-end gap-3'>
+              <button onClick={() => setQuoteIdx((quoteIdx - 1 + QUOTES.length) % QUOTES.length)} className='flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
+                <ArrowLeft />
+              </button>
+              <button onClick={() => setQuoteIdx((quoteIdx + 1) % QUOTES.length)} className='flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
+                <ArrowRight />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <img src={SM.energie.bubbles} alt='' className='absolute left-0 bottom-0 opacity-30 hidden lg:block w-48 widamine-tint' loading='lazy' />
+    </section>
+  )
 }
 
-export default function Home() {
-    return (
-        <>
-            <style>{marqueeStyle}</style>
-            <Hero />
-			<Services />
-			<ServiceUniverseSection />
-			<MedicalAestheticsSection />
-			<BeforeAfterSection />
-			<PatientJourney />
-			<ExpertsSection />
-			<TestimonialsSection />
-			<TrustSection />
-			<NewsSection />
-			<ConsultationBanner />
-			<ClosingSection />
-		</>
-	)
+function ConceptSection() {
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
+          <div className='relative'>
+            <div className='overflow-hidden rounded-[2rem]' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+              <img src={SM.concept.image} alt='Concept Widamine' className='h-full w-full object-cover widamine-tint' loading='lazy' style={{ minHeight: 320 }} />
+            </div>
+            <img src={SM.concept.flower} alt='' className='absolute -bottom-8 -right-8 w-32 sm:w-44 opacity-70 widamine-tint' loading='lazy' />
+          </div>
+          <div>
+            <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+              <span style={{ color: C.primary, fontStyle: 'italic' }}>Un concept</span> qui vous ressemble
+            </h2>
+            <p className='mt-8 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+              Widamine Center est une nouvelle façon d'aborder l'esthétique en médecine.
+            </p>
+            <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+              Un lieu chaleureux où l'expertise médicale et les compétences en laser se mettent au service de la santé et du bien-être.
+            </p>
+            <Link to='/concept' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+              Découvrir le concept <RightArrow />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
-function Hero() {
-	const heroRef = useRef<HTMLElement>(null)
-	const { open } = useScheduleModalStore()
+function MethodeSection() {
+  const cards = [
+    { icon: <PlantIcon color='#fff' />, bg: C.primary, title: 'Traitements du visage', btn: 'Découvrir les traitements', link: '/services/visage' },
+    { icon: <VaseIcon color={C.orange} />, bg: C.green, title: 'Traitements du corps', btn: 'Découvrir les traitements', link: '/services/corps' },
+    { icon: <FlowerIcon color={C.yellow} />, bg: C.yellow, title: 'Les différentes techniques', btn: 'Découvrir les techniques', link: '/services/laser' },
+  ]
 
-	useEffect(() => {
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				'[data-hero-anim]',
-				{ opacity: 0, y: 22 },
-				{
-					opacity: 1,
-					y: 0,
-					duration: 1,
-					stagger: 0.12,
-					ease: 'power3.out',
-					delay: 0.15,
-				}
-			)
-		}, heroRef)
-
-		return () => ctx.revert()
-	}, [])
-
-	return (
-		<section ref={heroRef} className='relative z-[1200] min-h-[100svh] overflow-hidden isolate bg-custom-white'>
-            <div className='absolute inset-0'>
-                {/* background image removed - restored to source look (logo + overlays only) */}
-				<div className='absolute inset-0 bg-radial-[circle_at_30%_25%] from-accent/25 via-custom-white to-custom-white' />
-				<div className='absolute inset-0 bg-radial-[circle_at_75%_70%] from-primary/12 via-transparent to-transparent' />
-				<div className='absolute -top-48 -left-48 hidden h-[34rem] w-[34rem] rounded-full bg-accent/25 blur-2xl sm:block' />
-				<div className='absolute -bottom-56 -right-56 hidden h-[38rem] w-[38rem] rounded-full bg-primary/10 blur-2xl sm:block' />
-				<div className='absolute -top-16 -left-16 h-40 w-40 rounded-full bg-accent/12 blur-2xl sm:hidden' />
-				<div className='absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-2xl sm:hidden' />
-				<div className='absolute top-1/4 -right-12 h-32 w-32 rounded-full bg-accent/8 blur-xl sm:hidden' />
-				<div className='pointer-events-none absolute inset-0 hidden bg-[linear-gradient(to_right,rgba(26,54,70,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(26,54,70,0.08)_1px,transparent_1px)] opacity-[0.22] [background-size:64px_64px] sm:block' />
-				<div className='pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(26,54,70,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(26,54,70,0.05)_1px,transparent_1px)] opacity-[0.15] [background-size:40px_40px] sm:hidden' />
-				<div className='pointer-events-none absolute inset-0 opacity-[0.14] bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.9),transparent_55%)]' />
-				<div className='pointer-events-none absolute inset-0 opacity-[0.30] bg-[radial-gradient(circle_at_85%_30%,rgba(46,144,192,0.22),transparent_55%)]' />
-				<div className='pointer-events-none absolute inset-0 opacity-[0.22] bg-[radial-gradient(circle_at_18%_75%,rgba(232,197,184,0.22),transparent_52%)]' />
-				<div className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(255,255,255,0.92)_92%)]' />
-				<div className='pointer-events-none absolute -top-24 right-10 hidden h-56 w-56 rounded-full border border-secondary/10 bg-custom-white/40 backdrop-blur-[2px] sm:block' />
-				<div className='pointer-events-none absolute bottom-16 left-10 hidden h-40 w-40 rounded-full border border-secondary/10 bg-custom-white/35 backdrop-blur-[2px] sm:block' />
-				<LeafAccent
-					className='pointer-events-none absolute -left-24 top-8 hidden opacity-[0.55] mix-blend-multiply blur-[0.2px] sm:block'
-					tone='rgba(26,54,70,0.32)'
-					float={{ y: [0, -10, 0], rotate: [-1.2, 0.8, -1.2], duration: 12 }}
-					entrance={{ x: -100, delay: 0.3, duration: 1.2, rotate: -15 }}
-					size={360}
-				/>
-				<LeafAccent
-					className='pointer-events-none absolute -right-36 -bottom-12 hidden scale-x-[-1] rotate-180 opacity-[0.45] mix-blend-multiply blur-[0.2px] sm:block'
-					tone='rgba(46,144,192,0.30)'
-					float={{ y: [0, 12, 0], rotate: [1.1, -0.7, 1.1], duration: 13 }}
-					entrance={{ x: 100, delay: 0.5, duration: 1.2, rotate: 15 }}
-					size={360}
-				/>
-				<LeafAccent
-					className='pointer-events-none absolute left-2 top-32 opacity-[0.25] sm:hidden'
-					tone='rgba(26,54,70,0.20)'
-					float={{ y: [0, -3, 0], rotate: [-0.5, 0.3, -0.5], duration: 12 }}
-					entrance={{ x: -15, delay: 0.4, duration: 1, rotate: -3 }}
-					size={60}
-				/>
-				<LeafAccent
-					className='pointer-events-none absolute right-4 bottom-48 opacity-[0.20] sm:hidden'
-					tone='rgba(46,144,192,0.18)'
-					float={{ y: [0, 3, 0], rotate: [0.4, -0.2, 0.4], duration: 14 }}
-					entrance={{ x: 15, delay: 0.6, duration: 1, rotate: 3 }}
-					size={50}
-				/>
-			</div>
-			<div className='pointer-events-none absolute inset-0 opacity-[0.25]'>
-				<div className='absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/20' />
-				<div className='absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.55),transparent_60%)]' />
-			</div>
-
-			<PublicNavbar theme='light' />
-
-			<motion.div
-				className='relative z-0 flex min-h-[100svh] items-center justify-center px-4 pt-18 pb-18 sm:px-6 sm:pt-20 sm:pb-24'
-				initial={{ opacity: 0, scale: 0.95 }}
-				animate={{ opacity: 1, scale: 1 }}
-				transition={{
-					duration: 0.8,
-					ease: [0.25, 0.1, 0.25, 1],
-				}}
-			>
-				<div className='w-full max-w-4xl text-center'>
-					<motion.div
-						className='flex -translate-y-10 flex-col items-center sm:-translate-y-14'
-						initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-						transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-					>
-                        <div className='flex h-14 w-14 items-center justify-center rounded-full border border-secondary/10 bg-custom-white/80 shadow-sm sm:h-16 sm:w-16'>
-                            <img src={WIDAMINE_ASSETS.logos.primary} alt='Widamine' className='h-9 w-9 object-contain' />
-                        </div>
-						<h1 className='mt-3 font-amoria text-lg tracking-[0.2em] text-secondary sm:mt-4 sm:text-xl'>WIDAMINE</h1>
-						<p className='mt-1 text-[10px] uppercase tracking-[0.34em] text-secondary/60'>Sobriété Esthétique</p>
-					</motion.div>
-
-						<motion.h2
-							className='mt-2 flex flex-col items-center px-1 font-amoria text-[2rem] leading-[1.08] text-secondary sm:mt-3 sm:px-0 sm:text-5xl sm:leading-[1.03] md:text-6xl md:leading-[1.01] lg:text-6xl xl:text-7xl'
-						initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
-						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-						transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-					>
-						<motion.span className='hidden whitespace-nowrap text-center sm:block' initial={{ opacity: 0, x: -20, filter: 'blur(6px)' }} animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }} transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
-							Bienvenue chez Widamine.
-						</motion.span>
-						<motion.span className='text-center sm:hidden' initial={{ opacity: 0, x: -20, filter: 'blur(6px)' }} animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }} transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
-							Bienvenue chez
-						</motion.span>
-						<motion.span className='text-center sm:hidden' initial={{ opacity: 0, x: 20, filter: 'blur(6px)' }} animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }} transition={{ duration: 0.6, delay: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}>
-							Widamine.
-						</motion.span>
-							<motion.span className='mt-0 text-center sm:mt-2' initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 0.6, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}>
-								L'expertise <span className='italic text-primary'>sur mesure</span>.
-							</motion.span>
-						</motion.h2>
-
-						<motion.p
-							className='mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-secondary/66 sm:mt-6 sm:text-lg sm:leading-8'
-							initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
-							animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-							transition={{ duration: 0.6, delay: 0.74, ease: [0.25, 0.46, 0.45, 0.94] }}
-						>
-							Ici, chaque traitement est une promesse d’excellence. Grâce à une combinaison unique de technologies de pointe et de savoir-faire expert, nous vous aidons à redécouvrir votre beauté et à retrouver une peau saine et éclatante.
-						</motion.p>
-
-						<motion.div
-							className='mt-8 flex w-full flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row'
-						initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
-						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-						transition={{ duration: 0.6, delay: 0.75, ease: [0.25, 0.46, 0.45, 0.94] }}
-					>
-						<a
-							href='/catalogue.pdf'
-							download
-							className='inline-flex w-full items-center justify-center rounded-full border border-secondary/15 bg-custom-white/70 px-6 py-3.5 text-sm font-medium text-secondary/80 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-custom-white hover:text-secondary active:translate-y-0 sm:w-auto'
-						>
-							Télécharger Notre Catalogue
-						</a>
-							<button
-							onClick={open}
-							className='group inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-custom-white shadow-[0_14px_30px_rgba(46,144,192,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0 sm:w-auto'
-						>
-								Réserver une consultation
-							</button>
-						</motion.div>
-					</div>
-				</motion.div>
-			</section>
-		)
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>La méthode</span> Widamine Center
+        </h2>
+        <div className='mt-14 grid gap-6 sm:grid-cols-3' data-methode-wrap>
+          {cards.map((card, i) => (
+            <Link
+              key={i}
+              to={card.link}
+              data-methode-item={i === 0 ? 'first' : i === 2 ? 'third' : 'second'}
+              className='relative flex flex-col overflow-hidden rounded-[2rem] p-8 text-white shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl'
+              style={{ background: card.bg }}
+            >
+              <div className='mb-6 h-20 flex items-end'>{card.icon}</div>
+              <h3 className='text-xl font-semibold'>{card.title}</h3>
+              <div className='mt-auto pt-8 flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white transition-colors'>
+                {card.btn} <RightArrow />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }
 
-export function ServicesArchived() {
-	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-	const [panelY, setPanelY] = useState(164)
-	const [isDragging, setIsDragging] = useState(false)
-	const stageRef = useRef<HTMLDivElement>(null)
-	const pointerRef = useRef({ active: false, originX: 0, hasMoved: false })
-	const autoplayRef = useRef<number | null>(null)
-	const [emblaRef, emblaApi] = useEmblaCarousel({
-		loop: true,
-		align: 'start',
-		dragFree: true,
-		containScroll: false,
-	})
-	const hoveredService = hoveredIndex !== null ? SERVICES[hoveredIndex] : null
-	const dragThresholdPx = 8
-
-	function updatePanelPosition(clientY: number) {
-		const panelHeight = 360
-		const nextY = clientY - panelHeight / 2 - 72
-		const clamped = Math.max(92, Math.min(nextY, window.innerHeight - panelHeight - 28))
-		setPanelY(clamped)
-	}
-
-	function clearHover() {
-		setHoveredIndex(null)
-	}
-
-	function findNearestVisibleCard(clientX: number) {
-		if (!emblaApi || !stageRef.current) return null
-
-		const stageRect = stageRef.current.getBoundingClientRect()
-		if (clientX < stageRect.left || clientX > stageRect.right) return null
-
-		const cards = emblaApi.slideNodes()
-		let bestMatch: { index: number; distance: number } | null = null
-
-		for (const [index, cardElement] of cards.entries()) {
-			const rect = cardElement.getBoundingClientRect()
-			if (rect.right < stageRect.left || rect.left > stageRect.right) continue
-
-			const centerX = rect.left + rect.width / 2
-			const distance = Math.abs(clientX - centerX)
-
-			if (!bestMatch || distance < bestMatch.distance) {
-				bestMatch = { index, distance }
-			}
-		}
-
-		return bestMatch
-	}
-
-	function handleStageHover(clientX: number, clientY: number) {
-		if (isDragging) return
-		const target = findNearestVisibleCard(clientX)
-		if (!target) {
-			clearHover()
-			return
-		}
-
-		setHoveredIndex(target.index)
-		updatePanelPosition(clientY)
-	}
-
-	useEffect(() => {
-		const stopDragging = () => {
-			pointerRef.current.active = false
-			setIsDragging(false)
-		}
-		window.addEventListener('pointerup', stopDragging)
-		window.addEventListener('pointercancel', stopDragging)
-		return () => {
-			window.removeEventListener('pointerup', stopDragging)
-			window.removeEventListener('pointercancel', stopDragging)
-		}
-	}, [])
-
-	useEffect(() => {
-		if (!emblaApi) return
-		const onPointerDown = () => {
-			setIsDragging(true)
-			clearHover()
-		}
-		const onSettle = () => {
-			if (!pointerRef.current.active) setIsDragging(false)
-		}
-		emblaApi.on('pointerDown', onPointerDown)
-		emblaApi.on('settle', onSettle)
-
-		return () => {
-			emblaApi.off('pointerDown', onPointerDown)
-			emblaApi.off('settle', onSettle)
-		}
-	}, [emblaApi])
-
-	useEffect(() => {
-		if (!emblaApi) return
-
-		if (autoplayRef.current !== null) {
-			window.clearInterval(autoplayRef.current)
-			autoplayRef.current = null
-		}
-
-		if (hoveredIndex !== null || isDragging) return
-
-		autoplayRef.current = window.setInterval(() => {
-			emblaApi.scrollNext()
-		}, 2800)
-
-		return () => {
-			if (autoplayRef.current !== null) {
-				window.clearInterval(autoplayRef.current)
-				autoplayRef.current = null
-			}
-		}
-	}, [emblaApi, hoveredIndex, isDragging])
-
-	useEffect(() => {
-		return () => {
-			document.body.style.userSelect = ''
-			if (autoplayRef.current !== null) {
-				window.clearInterval(autoplayRef.current)
-				autoplayRef.current = null
-			}
-		}
-	}, [])
-
-	return (
-		<section className='bg-custom-white pt-8 pb-8 lg:pt-12 lg:pb-10'>
-			<div className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<RevealBlock className='space-y-3 text-center'>
-					<h2 className='font-amoria text-4xl text-secondary md:text-5xl'>Nos Prestations</h2>
-					<p className='mx-auto max-w-2xl text-secondary/58'>Découvrez nos traitements dermo-esthétiques sur mesure</p>
-				</RevealBlock>
-
-				<div className='relative mt-6'>
-					<div
-						ref={stageRef}
-						className='services-stage relative isolate mx-auto h-[20.5rem] max-w-[72rem] cursor-grab select-none overflow-hidden rounded-[1.8rem] active:cursor-grabbing sm:h-[28rem] sm:rounded-[3rem] lg:h-[32rem]'
-						onPointerEnter={(e) => {
-							handleStageHover(e.clientX, e.clientY)
-						}}
-						onPointerDown={(e) => {
-							if (e.pointerType === 'mouse' && e.button !== 0) return
-							pointerRef.current = { active: true, originX: e.clientX, hasMoved: false }
-							clearHover()
-						}}
-						onPointerMove={(e) => {
-							if (pointerRef.current.active && !pointerRef.current.hasMoved && Math.abs(e.clientX - pointerRef.current.originX) > dragThresholdPx) {
-								pointerRef.current.hasMoved = true
-								setIsDragging(true)
-								clearHover()
-							}
-
-							if (!pointerRef.current.hasMoved) handleStageHover(e.clientX, e.clientY)
-						}}
-						onPointerUp={() => {
-							pointerRef.current.active = false
-							setIsDragging(false)
-						}}
-						onPointerCancel={() => {
-							pointerRef.current.active = false
-							setIsDragging(false)
-							clearHover()
-						}}
-						onPointerLeave={() => {
-							if (!pointerRef.current.active) clearHover()
-						}}
-						style={{ perspective: '2200px' }}
-					>
-						<div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(251,244,240,0.52),transparent_34%)]' />
-						<div className='pointer-events-none absolute inset-x-0 bottom-0 z-0 h-24 bg-gradient-to-t from-custom-white via-custom-white/82 to-transparent' />
-						<div className='pointer-events-none absolute inset-y-0 left-0 z-[30] w-16 bg-gradient-to-r from-custom-white via-custom-white/94 to-transparent sm:w-24 lg:w-32' />
-						<div className='pointer-events-none absolute inset-y-0 right-0 z-[30] w-16 bg-gradient-to-l from-custom-white via-custom-white/94 to-transparent sm:w-24 lg:w-32' />
-
-						<div className='absolute inset-0 z-10 overflow-hidden' ref={emblaRef}>
-							<div className='flex h-full'>
-								{SERVICES.map((service, index) => {
-									const isHovered = hoveredIndex === index
-
-									return (
-										<motion.div
-											key={service.title}
-											className='flex h-full min-w-0 flex-[0_0_12rem] items-end px-2 sm:flex-[0_0_15.5rem] sm:px-3 lg:flex-[0_0_18.5rem] lg:px-3'
-											data-service-card='true'
-											data-service-index={index}
-											animate={{
-												y: isHovered ? -10 : 0,
-												scale: isHovered ? 1.025 : 1,
-											}}
-											transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-											style={{
-												transformStyle: 'preserve-3d',
-												transformOrigin: 'center bottom',
-												zIndex: isHovered ? 20 : 10,
-											}}
-										>
-											<ServiceCard service={service} isHovered={isHovered} />
-										</motion.div>
-									)
-								})}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<AnimatePresence>
-				{hoveredService && !isDragging && (
-					<motion.div
-						key={hoveredService.title}
-						initial={{ opacity: 0, x: 26, scale: 0.97, filter: 'blur(10px)' }}
-						animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)', top: panelY }}
-						exit={{ opacity: 0, x: 18, scale: 0.97, filter: 'blur(8px)' }}
-						transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-						className='pointer-events-none fixed z-[140] hidden w-[18rem] xl:block'
-						style={{ right: 'max(1.5rem, calc((100vw - 80rem) / 2 - 0.5rem))' }}
-					>
-						<div className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white/84 shadow-[0_26px_60px_rgba(26,54,70,0.14)] backdrop-blur-[22px]'>
-							<div className='relative h-44 overflow-hidden'>
-								<div className='absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.7),transparent_34%),linear-gradient(180deg,rgba(232,197,184,0.20),rgba(46,144,192,0.08))]' />
-								<img src={hoveredService.image} alt={hoveredService.title} className='h-full w-full object-cover opacity-92' />
-							</div>
-							<div className='space-y-5 p-6'>
-								<div>
-									<p className='text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/74'>{hoveredService.eyebrow}</p>
-									<h3 className='mt-3 text-[1.8rem] leading-tight font-medium text-secondary'>{hoveredService.title}</h3>
-								</div>
-								<p className='text-sm leading-7 text-secondary/66'>{hoveredService.description}</p>
-								<div className='grid grid-cols-2 gap-3'>
-									<div className='rounded-2xl border border-secondary/8 bg-secondary/4 px-4 py-3'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/44'>Bénéfice</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>{hoveredService.benefit}</p>
-									</div>
-									<div className='rounded-2xl border border-secondary/8 bg-primary/6 px-4 py-3'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/44'>Durée</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>{hoveredService.duration}</p>
-									</div>
-								</div>
-								<div className='flex items-center justify-between text-sm text-secondary/56'>
-									<span>Consultation personnalisée</span>
-									<span className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/18 bg-primary/8 text-primary'>
-										<ArrowUpRightIcon size={22} />
-									</span>
-								</div>
-							</div>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</section>
-	)
+function TeamSection() {
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>L'équipe</span> du Widamine Center
+        </h2>
+        <div className='mt-14'>
+          <Swiper
+            modules={[Autoplay, Navigation]}
+            navigation={{ prevEl: '.team-prev', nextEl: '.team-next' }}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            slidesPerView={3}
+            spaceBetween={24}
+            speed={600}
+            loop
+            className='team-swiper py-8'
+          >
+            {SM.team.members.map((m, i) => (
+              <SwiperSlide key={i}>
+                <article className='overflow-hidden rounded-[2rem] border border-black/5 bg-white transition-all duration-300 hover:-translate-y-1 h-full' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+                  <div className='relative h-72 overflow-hidden'>
+                    <img src={m.img} alt={m.name} className='h-full w-full object-cover' loading='lazy' />
+                  </div>
+                  <div className='p-6 text-center'>
+                    <div className='mx-auto mb-3 h-10 w-10 rounded-full flex items-center justify-center' style={{ background: TEAM_ICONS[i] }}>
+                      <svg width='20' height='20' viewBox='0 0 24 24' fill='white'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>
+                    </div>
+                    <h3 className='text-lg font-semibold' style={{ color: C.secondary }}>{m.name}</h3>
+                    <p className='mt-1 text-xs font-medium' style={{ color: C.primary }}>{m.role}</p>
+                  </div>
+                </article>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <div className='mt-6 flex justify-center gap-3'>
+            <button className='team-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
+              <ArrowLeft />
+            </button>
+            <button className='team-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
+              <ArrowRight />
+            </button>
+          </div>
+        </div>
+      </div>
+      <img src={SM.team.bottomLeft} alt='' className='absolute left-0 bottom-0 w-40 opacity-40 hidden lg:block widamine-tint' loading='lazy' />
+      <img src={SM.team.flamant} alt='' className='absolute right-0 top-1/4 w-36 opacity-40 hidden lg:block widamine-tint' loading='lazy' />
+    </section>
+  )
 }
 
-function Services() {
-	const [activeIndex, setActiveIndex] = useState(0)
-	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-	const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 })
-	const swiperRef = useRef<import('swiper').Swiper | null>(null)
-	const hoverFrameRef = useRef<number | null>(null)
-	const hoveredService = SERVICES[hoveredIndex ?? activeIndex]
-
-	function updatePanelPosition(clientX: number, clientY: number) {
-		const panelWidth = 320
-		const panelHeight = 380
-		const nextX = Math.min(clientX + 28, window.innerWidth - panelWidth - 24)
-		const nextY = Math.min(Math.max(clientY - panelHeight / 2, 96), window.innerHeight - panelHeight - 24)
-		setPanelPosition({ x: nextX, y: nextY })
-	}
-
-	function handleSlideHover(index: number, clientX: number, clientY: number) {
-		if (hoveredIndex !== index) {
-			swiperRef.current?.autoplay?.stop()
-			setHoveredIndex(index)
-		}
-
-		if (hoverFrameRef.current !== null) {
-			window.cancelAnimationFrame(hoverFrameRef.current)
-		}
-
-		hoverFrameRef.current = window.requestAnimationFrame(() => {
-			updatePanelPosition(clientX, clientY)
-			hoverFrameRef.current = null
-		})
-	}
-
-	function handleStageLeave() {
-		if (hoverFrameRef.current !== null) {
-			window.cancelAnimationFrame(hoverFrameRef.current)
-			hoverFrameRef.current = null
-		}
-		setHoveredIndex(null)
-		swiperRef.current?.autoplay?.start()
-	}
-
-	function handleStageMove(clientX: number, clientY: number) {
-		const swiper = swiperRef.current
-		if (!swiper) return
-
-		let bestMatch: { index: number; distance: number } | null = null
-
-		for (const slide of swiper.slides) {
-			const rect = slide.getBoundingClientRect()
-			if (rect.right <= 0 || rect.left >= window.innerWidth) continue
-
-			const slideIndex = Number(slide.getAttribute('data-swiper-slide-index'))
-			if (Number.isNaN(slideIndex)) continue
-
-			const centerX = rect.left + rect.width / 2
-			const distance = Math.abs(clientX - centerX)
-
-			if (!bestMatch || distance < bestMatch.distance) {
-				bestMatch = { index: slideIndex, distance }
-			}
-		}
-
-		if (!bestMatch) return
-
-		handleSlideHover(bestMatch.index, clientX, clientY)
-	}
-
-	useEffect(() => {
-		return () => {
-			if (hoverFrameRef.current !== null) {
-				window.cancelAnimationFrame(hoverFrameRef.current)
-			}
-		}
-	}, [])
-
-	return (
-		<section className='bg-custom-white pt-8 pb-16 lg:pt-10 lg:pb-24'>
-			<div className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<RevealBlock className='space-y-3 text-center'>
-					<h2 className='font-amoria text-4xl text-secondary md:text-5xl'>Nos Prestations</h2>
-					<p className='mx-auto max-w-2xl text-secondary/58'>Découvrez nos traitements dermo-esthétiques sur mesure</p>
-				</RevealBlock>
-
-				<div className='relative mt-3'>
-					<div
-						className='relative overflow-hidden rounded-[3rem] bg-[radial-gradient(circle_at_50%_18%,rgba(251,244,240,0.52),transparent_34%)] px-2 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5'
-						onMouseMove={(event) => {
-							handleStageMove(event.clientX, event.clientY)
-						}}
-						onMouseLeave={handleStageLeave}
-						style={{
-							maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.18) 7%, rgba(0,0,0,0.92) 13%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, rgba(0,0,0,0.92) 87%, rgba(0,0,0,0.18) 93%, transparent 100%)',
-							WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.18) 7%, rgba(0,0,0,0.92) 13%, rgba(0,0,0,1) 20%, rgba(0,0,0,1) 80%, rgba(0,0,0,0.92) 87%, rgba(0,0,0,0.18) 93%, transparent 100%)',
-						}}
-					>
-						<div className='pointer-events-none absolute inset-y-0 left-0 z-20 w-24 bg-gradient-to-r from-custom-white via-custom-white/95 to-transparent blur-[14px] sm:w-32 lg:w-44' />
-						<div className='pointer-events-none absolute inset-y-0 right-0 z-20 w-24 bg-gradient-to-l from-custom-white via-custom-white/95 to-transparent blur-[14px] sm:w-32 lg:w-44' />
-						<div className='pointer-events-none absolute inset-y-0 left-0 z-[19] w-16 bg-custom-white/78 sm:w-20 lg:w-24' />
-						<div className='pointer-events-none absolute inset-y-0 right-0 z-[19] w-16 bg-custom-white/78 sm:w-20 lg:w-24' />
-
-						<Swiper
-							modules={[Autoplay, EffectCoverflow]}
-							loop
-							effect='coverflow'
-							centeredSlides
-							speed={3200}
-							grabCursor
-							watchSlidesProgress
-							autoplay={{
-								delay: 1,
-								disableOnInteraction: false,
-								pauseOnMouseEnter: true,
-								waitForTransition: true,
-							}}
-								coverflowEffect={{
-									rotate: 0,
-									stretch: -122,
-									depth: 240,
-									scale: 0.84,
-									modifier: 1,
-									slideShadows: false,
-								}}
-								breakpoints={{
-									0: { slidesPerView: 1.55, spaceBetween: -56 },
-									640: { slidesPerView: 2.95, spaceBetween: -82 },
-									1024: { slidesPerView: 5, spaceBetween: -138 },
-								}}
-							onSwiper={(swiper) => {
-								swiperRef.current = swiper
-							}}
-							onRealIndexChange={(swiper) => {
-								setActiveIndex(swiper.realIndex)
-							}}
-							onTouchStart={() => {
-								setHoveredIndex(null)
-							}}
-							onSliderMove={() => {
-								setHoveredIndex(null)
-							}}
-							className='services-swiper !overflow-visible !py-8 [perspective:1800px]'
-						>
-								{SERVICES.map((service, index) => {
-									const isHovered = hoveredIndex === index
-									const isCentered = activeIndex === index
-
-									return (
-										<SwiperSlide
-											key={service.title}
-											className='!h-auto'
-											data-service-index={index}
-										>
-											<div className='flex h-full items-end pb-4 pt-8'>
-												<motion.div
-													animate={{
-														y: isHovered ? -22 : 0,
-														scale: isHovered ? 1.05 : isCentered ? 0.96 : 0.82,
-														opacity: isHovered ? 1 : isCentered ? 0.86 : 0.44,
-													}}
-													transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-													className='w-full'
-													style={{ zIndex: isHovered ? 40 : isCentered ? 20 : 10 }}
-												>
-													<ServiceCard service={service} isHovered={isHovered} />
-												</motion.div>
-											</div>
-										</SwiperSlide>
-								)
-							})}
-						</Swiper>
-					</div>
-				</div>
-			</div>
-
-			<AnimatePresence mode='wait'>
-				{hoveredIndex !== null && (
-					<motion.div
-						key={hoveredService.title}
-						initial={{ opacity: 0, x: 18, scale: 0.96, filter: 'blur(10px)' }}
-						animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
-						exit={{ opacity: 0, x: 12, scale: 0.97, filter: 'blur(8px)' }}
-						transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-						className='pointer-events-none fixed z-[220] hidden w-[20rem] xl:block'
-						style={{ left: panelPosition.x, top: panelPosition.y }}
-					>
-						<div className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white/84 shadow-[0_26px_60px_rgba(26,54,70,0.14)] backdrop-blur-[22px]'>
-							<div className='relative h-44 overflow-hidden'>
-								<div className='absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.7),transparent_34%),linear-gradient(180deg,rgba(232,197,184,0.20),rgba(46,144,192,0.08))]' />
-								<img src={hoveredService.image} alt={hoveredService.title} className='h-full w-full object-cover opacity-92' />
-							</div>
-							<div className='space-y-5 p-6'>
-								<div>
-									<p className='text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/74'>{hoveredService.eyebrow}</p>
-									<h3 className='mt-3 text-[1.8rem] leading-tight font-medium text-secondary'>{hoveredService.title}</h3>
-								</div>
-								<p className='text-sm leading-7 text-secondary/66'>{hoveredService.description}</p>
-								<div className='grid grid-cols-2 gap-3'>
-									<div className='rounded-2xl border border-secondary/8 bg-secondary/4 px-4 py-3'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/44'>Bénéfice</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>{hoveredService.benefit}</p>
-									</div>
-									<div className='rounded-2xl border border-secondary/8 bg-primary/6 px-4 py-3'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/44'>Durée</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>{hoveredService.duration}</p>
-									</div>
-								</div>
-								<div className='flex items-center justify-between text-sm text-secondary/56'>
-									<span>Consultation personnalisée</span>
-									<span className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/18 bg-primary/8 text-primary'>
-										<ArrowUpRightIcon size={22} />
-									</span>
-								</div>
-							</div>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
-		</section>
-	)
-}
-
-function ServiceCard({
-	service,
-	isHovered,
-}: {
-	service: (typeof SERVICES)[number]
-	isHovered?: boolean
-}) {
-	return (
-		<div
-			className='relative mx-auto w-full max-w-[18rem] cursor-pointer select-none overflow-hidden rounded-t-[5rem] border border-[#eedcd3] bg-[linear-gradient(180deg,#fbf4ef_0%,#fffaf7_100%)]'
-			style={{
-				boxShadow: isHovered
-					? '0 32px 60px -34px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(237, 220, 211, 0.95)'
-					: '0 16px 28px -24px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(237, 220, 211, 0.78)',
-			}}
-		>
-			<div className='relative overflow-hidden rounded-t-[5rem]'>
-				<img
-					src={service.image}
-					alt={service.title}
-					className='aspect-[4/5] w-full object-cover object-center pointer-events-none select-none'
-					draggable={false}
-				/>
-				<div className='pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(251,244,239,0.04)_0%,rgba(251,244,239,0.42)_100%)]' />
-				{isHovered && <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/7 via-transparent to-transparent' />}
-			</div>
-			<div className='flex items-end justify-between border-t border-[#eedcd3] bg-[linear-gradient(180deg,#fffdfa_0%,#fff_100%)] px-4 py-3.5 lg:px-5 lg:py-4'>
-    <p className='max-w-[10rem] text-sm leading-6 font-medium text-secondary lg:max-w-[10.5rem] lg:text-[1rem]'>{service.title}</p>
-                                <span className='ml-4 shrink-0 text-primary'>
-                                    {/* prefer source flaticon class if available; falls back to ArrowUpRightIcon */}
-                                    {service.iconClass ? <i className={service.iconClass} aria-hidden /> : <ArrowUpRightIcon size={24} />}
-                                </span>
-			</div>
-		</div>
-	)
-}
-
-function MedicalAestheticsSection() {
-	return (
-		<section className='bg-custom-white pt-16 pb-32 lg:pt-20 lg:pb-52'>
-			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-10'>
-				<div className='grid gap-4 sm:grid-cols-2'>
-					<motion.div
-						className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white p-3 shadow-[0_26px_55px_rgba(26,54,70,0.08)] sm:row-span-2'
-						initial={{ opacity: 0, x: -30, y: 18, rotate: -1.5, filter: 'blur(14px)' }}
-						whileInView={{ opacity: 1, x: 0, y: 0, rotate: 0, filter: 'blur(0px)' }}
-						viewport={{ once: true, amount: 0.2 }}
-						transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-					>
-                        <img src={WIDAMINE_ASSETS.pageHeader} alt='Soin du visage Widamine' className='h-full min-h-[23rem] w-full rounded-[1.5rem] object-cover' />
-					</motion.div>
-					<motion.div
-						className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white p-3 shadow-[0_22px_45px_rgba(26,54,70,0.07)]'
-						initial={{ opacity: 0, x: 24, y: 22, filter: 'blur(14px)' }}
-						whileInView={{ opacity: 1, x: 0, y: 0, filter: 'blur(0px)' }}
-						viewport={{ once: true, amount: 0.2 }}
-						transition={{ duration: 0.75, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-					>
-                        <img src={WIDAMINE_ASSETS.pageHeader} alt='Esthétique médicale' className='h-40 w-full rounded-[1.5rem] object-cover' />
-					</motion.div>
-					<motion.div
-						className='rounded-[2rem] border border-secondary/10 bg-[#f8fbfd] p-6 shadow-[0_22px_45px_rgba(26,54,70,0.07)]'
-						initial={{ opacity: 0, y: 18, filter: 'blur(12px)' }}
-						whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-						viewport={{ once: true, amount: 0.2 }}
-						transition={{ duration: 0.75, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
-					>
-						<p className='text-sm leading-7 text-secondary/68'>
-							Ici, chaque traitement est une promesse d’excellence, avec une approche qui reste clinique, précise et personnalisée.
-						</p>
-					</motion.div>
-				</div>
-
-				<div className='space-y-7'>
-					<div className='space-y-3'>
-						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Esthétique médicale</p>
-						<h2 className='max-w-xl font-amoria text-4xl leading-tight text-secondary md:text-5xl'>
-							Bienvenue à Widamine Aesthetic Center.
-						</h2>
-					</div>
-					<p className='max-w-2xl text-base leading-8 text-secondary/70'>
-						Nous combinons technologies de pointe, savoir-faire expert et accompagnement personnalisé pour offrir des résultats remarquables et durables, adaptés aux besoins uniques de chaque patient.
-					</p>
-					<div className='grid gap-4 md:grid-cols-3'>
-						{MEDICAL_INSIGHTS.map((item) => {
-							const Icon = item.icon
-							return (
-								<div key={item.title} className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-5 shadow-[0_18px_40px_rgba(26,54,70,0.06)]'>
-									<div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary'>
-										<Icon size={20} />
-									</div>
-									<h3 className='mt-5 text-lg font-semibold text-secondary'>{item.title}</h3>
-									<p className='mt-3 text-sm leading-7 text-secondary/66'>{item.description}</p>
-								</div>
-							)
-						})}
-					</div>
-						<div className='flex flex-wrap gap-3 text-sm'>
-							<span className='rounded-full border border-primary/15 bg-primary/6 px-4 py-2 text-secondary'>Hydratation profonde</span>
-							<span className='rounded-full border border-primary/15 bg-primary/6 px-4 py-2 text-secondary'>Texture raffinée</span>
-							<span className='rounded-full border border-primary/15 bg-primary/6 px-4 py-2 text-secondary'>Aesthetics du visage</span>
-							<span className='rounded-full border border-primary/15 bg-primary/6 px-4 py-2 text-secondary'>Approche sur mesure</span>
-						</div>
-					</div>
-				</RevealBlock>
-			</section>
-		)
-}
-
-function ServiceUniverseSection() {
-	const [activeProgramIndex, setActiveProgramIndex] = useState(0)
-	const activeProgram = PROGRAM_GROUPS[activeProgramIndex]
-	const intervalRef = useRef<number | null>(null)
-
-	function showPrevProgram() {
-		setActiveProgramIndex((current) => (current === 0 ? PROGRAM_GROUPS.length - 1 : current - 1))
-	}
-
-	function showNextProgram() {
-		setActiveProgramIndex((current) => (current === PROGRAM_GROUPS.length - 1 ? 0 : current + 1))
-	}
-
-	function startAutoSwitch() {
-		stopAutoSwitch()
-		intervalRef.current = window.setInterval(() => {
-			setActiveProgramIndex((current) => (current === PROGRAM_GROUPS.length - 1 ? 0 : current + 1))
-		}, 4000)
-	}
-
-	function stopAutoSwitch() {
-		if (intervalRef.current !== null) {
-			window.clearInterval(intervalRef.current)
-			intervalRef.current = null
-		}
-	}
-
-	useEffect(() => {
-		startAutoSwitch()
-		return () => stopAutoSwitch()
-	}, [])
-
-	return (
-		<section className='bg-custom-white pt-16 pb-32 lg:pt-20 lg:pb-52'>
-			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='grid gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:items-start'>
-					<div className='space-y-6'>
-						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Parcours & protocoles</p>
-						<h2 className='mt-4 max-w-xl font-amoria text-4xl leading-tight text-secondary md:text-5xl'>
-							Une carte de soins plus complète, du diagnostic aux protocoles intensifs.
-						</h2>
-						<p className='mt-5 max-w-xl text-base leading-8 text-secondary/68'>
-							Le centre articule sa prise en charge autour de la consultation, de la dermatologie esthétique, des séances laser, des packs silhouette et des suivis thérapeutiques ou post-opératoires.
-						</p>
-
-						<div className='grid max-w-xl gap-3 sm:grid-cols-2'>
-							<div className='rounded-[1.5rem] border border-secondary/10 bg-[#fffaf7] px-5 py-4 shadow-[0_14px_30px_rgba(26,54,70,0.05)]'>
-								<p className='text-[11px] uppercase tracking-[0.24em] text-secondary/40'>Univers</p>
-								<p className='mt-3 text-3xl text-secondary'>03</p>
-								<p className='mt-2 text-sm leading-6 text-secondary/62'>Consultation, dermatologie esthétique et technologies laser.</p>
-							</div>
-							<div className='rounded-[1.5rem] border border-secondary/10 bg-custom-white px-5 py-4 shadow-[0_14px_30px_rgba(26,54,70,0.05)]'>
-								<p className='text-[11px] uppercase tracking-[0.24em] text-secondary/40'>Parcours</p>
-								<p className='mt-3 text-3xl text-secondary'>360°</p>
-								<p className='mt-2 text-sm leading-6 text-secondary/62'>Des protocoles de la première consultation jusqu’au suivi spécialisé.</p>
-							</div>
-						</div>
-					</div>
-
-					<div className='grid gap-5 lg:grid-cols-[0.98fr_1.04fr_0.98fr]'>
-						{CARE_UNIVERSES.map((group, index) => (
-							<div
-								key={group.title}
-								className={`relative overflow-hidden rounded-[2rem] border border-secondary/10 bg-[linear-gradient(180deg,#fffdfa_0%,#fff6f0_100%)] p-6 shadow-[0_18px_40px_rgba(26,54,70,0.06)] ${
-									index === 1 ? 'lg:-translate-y-4 lg:shadow-[0_24px_50px_rgba(26,54,70,0.08)]' : 'lg:translate-y-6'
-								}`}
-							>
-								<div className='pointer-events-none absolute -right-8 top-0 h-24 w-24 rounded-full bg-primary/10 blur-3xl' />
-								<p className='relative text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/72'>{group.eyebrow}</p>
-								<h3 className='relative mt-4 text-[1.85rem] leading-[1.02] text-secondary'>{group.title}</h3>
-								<p className='relative mt-4 min-h-[9.25rem] text-sm leading-7 text-secondary/66'>{group.description}</p>
-								<div className='relative mt-5 space-y-3'>
-									{group.items.map((item) => (
-										<div key={item} className='flex gap-3 text-sm leading-6 text-secondary/72'>
-											<span className='mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary' />
-											<span>{item}</span>
-										</div>
-									))}
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-
-                <div
-                    className='mt-20 overflow-hidden rounded-[2.9rem] border border-secondary/10 bg-[linear-gradient(135deg,#fff8f3_0%,#fffdfb_58%,#f6eee7_100%)] px-7 py-8 shadow-[0_30px_70px_rgba(26,54,70,0.08)] md:px-10 md:py-10'
-                    onMouseEnter={() => stopAutoSwitch()}
-                    onMouseLeave={() => startAutoSwitch()}
-                    onFocus={() => stopAutoSwitch()}
-                    onBlur={() => startAutoSwitch()}
-                >
-                    <div className='relative grid min-h-[28rem] gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:min-h-[32rem]'>
-                        <AnimatePresence mode='wait'>
-                            <motion.div
-                                key={activeProgram.title}
-                                initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-                                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-                                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                                // ensure the program pane fills the fixed parent height and scrolls internally when needed
-                                className='flex h-full flex-col justify-between rounded-[2.2rem] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.45))] p-7 shadow-[0_18px_45px_rgba(26,54,70,0.05)] backdrop-blur-sm overflow-hidden'
-                            >
-                                <div className='flex flex-wrap items-center gap-4'>
-									<div className='rounded-full bg-primary/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-primary'>
-										{activeProgram.label}
-									</div>
-									<div className='h-px w-16 bg-secondary/14' />
-									<div className='text-[11px] uppercase tracking-[0.28em] text-secondary/42'>
-										Programme {String(activeProgramIndex + 1).padStart(2, '0')}
-									</div>
-								</div>
-
-								<h3 className='max-w-[34rem] font-amoria text-4xl leading-[1.04] text-secondary md:text-5xl'>
-									{activeProgram.title}
-								</h3>
-
-								<p className='max-w-[38rem] text-lg leading-9 text-secondary/74'>
-									{activeProgram.description}
-								</p>
-
-								<div className='grid gap-3'>
-									{activeProgram.items.slice(0, 3).map((item) => (
-										<div key={item} className='flex items-start gap-4 rounded-[1.5rem] border border-secondary/8 bg-white/78 px-5 py-4 shadow-[0_12px_28px_rgba(26,54,70,0.04)] backdrop-blur-sm'>
-											<div className='mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary' />
-											<p className='text-sm leading-7 text-secondary/72'>{item}</p>
-										</div>
-									))}
-								</div>
-
-								<div className='mt-7 flex flex-wrap items-center gap-3'>
-									<div className='inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3 text-sm font-medium text-custom-white shadow-[0_18px_35px_rgba(46,144,192,0.22)]'>
-										<span>Découvrir ce programme</span>
-										<ArrowUpRightIcon size={18} />
-									</div>
-									<div className='rounded-full border border-secondary/10 bg-white/72 px-5 py-3 text-sm text-secondary/62'>
-										{activeProgram.items.length} modules dans ce parcours
-									</div>
-								</div>
-							</motion.div>
-						</AnimatePresence>
-
-                        <div className='relative flex min-h-[28rem] items-center lg:min-h-[32rem]'>
-							<div className='pointer-events-none absolute -right-10 -top-8 h-40 w-40 rounded-full bg-primary/10 blur-3xl' />
-							<div className='pointer-events-none absolute -bottom-10 left-8 h-44 w-44 rounded-full bg-accent/18 blur-3xl' />
-
-							<AnimatePresence mode='wait'>
-								<motion.div
-									key={`${activeProgram.title}-aside`}
-									initial={{ opacity: 0, x: 18, filter: 'blur(8px)' }}
-									animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-									exit={{ opacity: 0, x: -12, filter: 'blur(8px)' }}
-									transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                                className='relative flex h-full w-full flex-col justify-between rounded-[2.25rem] border border-white/60 bg-white/84 p-7 shadow-[0_20px_50px_rgba(26,54,70,0.08)] backdrop-blur-xl lg:min-h-[32rem]'
-                                >
-									<div className='flex items-center justify-between'>
-										<div className='rounded-full border border-primary/20 bg-primary/8 px-3 py-2 text-[10px] uppercase tracking-[0.24em] text-primary/80'>
-											Sélection active
-										</div>
-										<div className='rounded-full border border-secondary/10 bg-white/70 px-3 py-2 text-[10px] uppercase tracking-[0.24em] text-secondary/46'>
-											{activeProgram.items.length} modules
-										</div>
-									</div>
-
-                                    <div className='overflow-auto'>
-                                        <p className='mt-8 text-[1.8rem] leading-[1.42] text-secondary'>
-                                            « {activeProgram.items[0]} »
-                                        </p>
-
-                                        <p className='mt-8 text-sm leading-7 text-secondary/62'>
-                                            Chaque programme est organisé comme un protocole réel : rythme, nombre de séances et combinaison d’appareils sont pensés pour garder une logique clinique et une vraie cohérence de résultats.
-                                        </p>
-                                    </div>
-
-									<div className='mt-8 space-y-3 rounded-[1.5rem] border border-secondary/8 bg-[#fff9f5] p-4'>
-										{activeProgram.items.slice(1, 3).map((item) => (
-											<div key={item} className='flex gap-3 text-sm leading-7 text-secondary/70'>
-												<span className='mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary' />
-												<span>{item}</span>
-											</div>
-										))}
-									</div>
-
-									<div className='mt-8 flex items-center justify-between'>
-										<div className='text-sm text-secondary/48'>
-											{activeProgram.label} · Widamine Aesthetic Center
-										</div>
-
-										<div className='flex items-center gap-3'>
-                                            <button
-                                                type='button'
-                                                onClick={() => {
-                                                    stopAutoSwitch()
-                                                    showPrevProgram()
-                                                }}
-                                                onBlur={() => startAutoSwitch()}
-                                                onFocus={() => stopAutoSwitch()}
-                                                className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
-                                                aria-label='Programme précédent'
-                                            >
-                                                <ChevronLeft size={18} />
-                                            </button>
-                                            <button
-                                                type='button'
-                                                onClick={() => {
-                                                    stopAutoSwitch()
-                                                    showNextProgram()
-                                                }}
-                                                onBlur={() => startAutoSwitch()}
-                                                onFocus={() => stopAutoSwitch()}
-                                                className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white transition hover:bg-primary/90'
-                                                aria-label='Programme suivant'
-                                            >
-                                                <ChevronRight size={18} />
-                                            </button>
-										</div>
-									</div>
-								</motion.div>
-							</AnimatePresence>
-						</div>
-					</div>
-				</div>
-			</RevealBlock>
-		</section>
-	)
-}
-
-function BeforeAfterSection() {
-	const [split, setSplit] = useState(54)
-
-	return (
-		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
-			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='mx-auto max-w-3xl text-center'>
-					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Avant / Après</p>
-					<h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>Une lecture visuelle plus claire du résultat</h2>
-					<p className='mt-5 text-base leading-8 text-secondary/68'>
-						La page de référence utilise des preuves visuelles pour soutenir la confiance. Ce composant apporte cette lecture comparative et pourra accueillir vos vrais cas avant/après.
-					</p>
-				</div>
-					<div className='mt-12 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center'>
-						<motion.div
-							className='relative overflow-hidden rounded-[2.5rem] border border-secondary/10 bg-custom-white shadow-[0_32px_65px_rgba(26,54,70,0.10)]'
-							initial={{ opacity: 0, y: 26, scale: 0.985, filter: 'blur(14px)' }}
-							whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-							viewport={{ once: true, amount: 0.2 }}
-							transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-						>
-							<div className='relative aspect-[16/10] overflow-hidden'>
-                            <img src={WIDAMINE_ASSETS.beforeAfter[1]} alt='Après' className='absolute inset-0 h-full w-full object-cover' />
-							<div className='absolute inset-0 overflow-hidden' style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}>
-                                <img src={WIDAMINE_ASSETS.beforeAfter[0]} alt='Avant' className='h-full w-full object-cover grayscale contrast-90 brightness-90' />
-							</div>
-							<div className='pointer-events-none absolute inset-y-0 z-10 w-px bg-white/90 shadow-[0_0_0_1px_rgba(255,255,255,0.4)]' style={{ left: `${split}%` }} />
-							<div className='pointer-events-none absolute top-6 left-6 rounded-full bg-custom-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-secondary shadow-sm'>
-								Avant
-							</div>
-							<div className='pointer-events-none absolute top-6 right-6 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-custom-white shadow-sm'>
-								Après
-							</div>
-							<div className='pointer-events-none absolute top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/65 bg-custom-white/92 text-secondary shadow-[0_14px_30px_rgba(26,54,70,0.16)]' style={{ left: `calc(${split}% - 24px)` }}>
-								<div className='h-4 w-4 rounded-full border border-secondary/18 bg-custom-white' />
-							</div>
-							<input
-								type='range'
-								min='20'
-								max='80'
-								value={split}
-								onChange={(e) => setSplit(Number(e.target.value))}
-								className='absolute inset-0 z-30 h-full w-full cursor-ew-resize opacity-0'
-								aria-label='Comparer avant et après'
-							/>
-							</div>
-						</motion.div>
-
-						<motion.div
-							className='space-y-5'
-							initial={{ opacity: 0, x: 24, y: 18, filter: 'blur(14px)' }}
-							whileInView={{ opacity: 1, x: 0, y: 0, filter: 'blur(0px)' }}
-							viewport={{ once: true, amount: 0.25 }}
-							transition={{ duration: 0.75, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-						>
-							<div className='rounded-[2rem] border border-secondary/10 bg-[#f8fbfd] p-7 shadow-[0_22px_48px_rgba(26,54,70,0.07)]'>
-								<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Résultat observé</p>
-								<h3 className='mt-4 text-3xl font-medium leading-tight text-secondary'>Des résultats remarquables et durables, dans un cadre sécuritaire.</h3>
-								<p className='mt-4 text-sm leading-7 text-secondary/68'>
-									Nous combinons des technologies de pointe à un savoir-faire expert pour améliorer la santé de la peau, rajeunir l’apparence et traiter des besoins spécifiques.
-								</p>
-							</div>
-								<div className='grid gap-4 sm:grid-cols-2'>
-									<div className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-5'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/45'>Lecture</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>Comparaison immédiate</p>
-									</div>
-									<div className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-5'>
-										<p className='text-[10px] uppercase tracking-[0.22em] text-secondary/45'>Usage</p>
-										<p className='mt-2 text-sm font-medium text-secondary'>Idéal pour vrais cas patients</p>
-									</div>
-								</div>
-						</motion.div>
-					</div>
-				</RevealBlock>
-			</section>
-		)
-}
-
-function PatientJourney() {
-	return (
-		<section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
-			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='mx-auto max-w-3xl text-center'>
-					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Votre parcours</p>
-					<h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>Une expérience pensée pour mettre le patient à l’aise</h2>
-					<p className='mt-5 text-base leading-8 text-secondary/68'>
-						La référence partage une progression en blocs très lisibles. J’ai repris cette logique avec vos couleurs pour créer un parcours clair et crédible.
-					</p>
-				</div>
-					<div className='mt-14 grid gap-5 lg:grid-cols-3'>
-						{JOURNEY_CARDS.map((card) => {
-							const Icon = card.icon as Icon
-							return (
-								<motion.div
-									key={card.title}
-									className={`rounded-[2rem] p-8 shadow-[0_25px_50px_rgba(26,54,70,0.08)] ${card.tone}`}
-									initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-									whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-									viewport={{ once: true, amount: 0.2 }}
-									transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-								>
-									<div className='mb-10 flex h-14 w-14 items-center justify-center rounded-[1.15rem] border border-current/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]'>
-										<Icon size={22} weight='duotone' />
-									</div>
-									<h3 className='text-2xl font-semibold'>{card.title}</h3>
-									<p className='mt-4 max-w-sm text-sm leading-7 opacity-90'>{card.description}</p>
-								</motion.div>
-							)
-						})}
-					</div>
-						<div className='mt-10 flex flex-wrap justify-center gap-3 text-sm'>
-							<span className='rounded-full border border-secondary/10 bg-custom-white px-4 py-2 text-secondary/72'>Traitements des rides</span>
-							<span className='rounded-full border border-secondary/10 bg-custom-white px-4 py-2 text-secondary/72'>Restauration du volume</span>
-							<span className='rounded-full border border-secondary/10 bg-custom-white px-4 py-2 text-secondary/72'>Amélioration des lèvres</span>
-							<span className='rounded-full border border-secondary/10 bg-custom-white px-4 py-2 text-secondary/72'>Nettoyage de peau en profondeur</span>
-						</div>
-				</RevealBlock>
-			</section>
-		)
-	}
-
-function ExpertsSection() {
-	return (
-		<section className='relative overflow-hidden bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
-			<div className='pointer-events-none absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_top_left,rgba(232,197,184,0.28),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(46,144,192,0.18),transparent_30%)]' />
-			<RevealBlock className='relative mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
-					<div className='max-w-2xl'>
-						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Notre équipe</p>
-						<h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>Des visages et une présence, pas seulement des services</h2>
-					</div>
-					<p className='max-w-xl text-base leading-8 text-secondary/68'>
-						La page gagne en confiance quand elle montre les personnes, la méthode et la qualité de l’accompagnement.
-					</p>
-				</div>
-				<div className='mt-14 grid gap-6 lg:grid-cols-3'>
-                    {EXPERTISES.map((expert, idx) => (
-                        <motion.article
-                            key={expert.name}
-							className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white shadow-[0_28px_55px_rgba(26,54,70,0.08)]'
-							initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-							whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-							viewport={{ once: true, amount: 0.18 }}
-							transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-						>
-                            <div className='h-72 overflow-hidden bg-secondary/5'>
-                                <img src={expert.image ?? WIDAMINE_CONTENT.experts[idx % WIDAMINE_CONTENT.experts.length].image} alt={expert.name} className='h-full w-full object-cover' />
-                            </div>
-							<div className='space-y-4 p-7'>
-								<div>
-									<p className='text-sm uppercase tracking-[0.18em] text-primary'>{expert.role}</p>
-									<h3 className='mt-2 text-2xl font-semibold text-secondary'>{expert.name}</h3>
-								</div>
-								<p className='text-sm leading-7 text-secondary/68'>{expert.description}</p>
-								<div className='flex items-center gap-2 text-sm text-secondary/55'>
-									<Star size={15} className='fill-accent text-accent' />
-									<span>Approche personnalisée et cadre premium</span>
-								</div>
-							</div>
-						</motion.article>
-					))}
-				</div>
-			</RevealBlock>
-		</section>
-	)
+function GallerySection() {
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl mb-14' style={{ color: C.secondary }}>
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>Notre</span> espace
+        </h2>
+        <Swiper
+          modules={[Autoplay, Navigation, EffectCoverflow]}
+          effect='coverflow'
+          grabCursor
+          centeredSlides
+          slidesPerView={3}
+          spaceBetween={24}
+          coverflowEffect={{ rotate: 0, stretch: 0, depth: 200, modifier: 1.5, slideShadows: false }}
+          navigation={{ prevEl: '.gallery-prev', nextEl: '.gallery-next' }}
+          autoplay={{ delay: 3500, disableOnInteraction: false }}
+          speed={600}
+          loop
+          className='gallery-swiper'
+        >
+          {SM.gallery.map((src, i) => (
+            <SwiperSlide key={i}>
+              <div className='h-[250px] sm:h-[300px] overflow-hidden rounded-2xl mx-2' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+                <img src={src} alt={`Espace ${i + 1}`} className='h-full w-full object-cover transition-transform duration-500 hover:scale-110' loading='lazy' />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        <div className='mt-6 flex justify-center gap-3'>
+          <button className='gallery-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
+            <ArrowLeft />
+          </button>
+          <button className='gallery-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
+            <ArrowRight />
+          </button>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function TestimonialsSection() {
-    return (
-        <section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
-            <RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-                <div className='mx-auto max-w-3xl text-center'>
-                    <p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Que disent nos clients ?</p>
-                    <h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>La satisfaction et la confiance au centre de l’expérience</h2>
-                    <p className='mt-5 text-base leading-8 text-secondary/68'>
-                        Découvrez les retours des personnes ayant bénéficié de nos services en dermatologie et en esthétique médicale.
-                    </p>
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl mb-14' style={{ color: C.secondary }}>
+          Les <span style={{ color: C.primary, fontStyle: 'italic' }}>Témoignages</span> de nos patientes
+        </h2>
+        <Swiper
+          modules={[Autoplay, Navigation]}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          centeredSlides
+          slidesPerView={3}
+          spaceBetween={24}
+          speed={600}
+          loop
+          grabCursor
+          navigation={{ prevEl: '.test-prev', nextEl: '.test-next' }}
+          className='test-swiper py-8'
+        >
+          {TESTIMONIALS.map((t, i) => (
+            <SwiperSlide key={i}>
+              <div className='rounded-[2rem] bg-white p-8 border border-black/5 flex flex-col' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)', height: 280 }}>
+                <div className='flex items-center gap-1 text-[#ffb500] mb-4'>
+                  {Array.from({ length: 5 }).map((_, j) => <StarIcon key={j} />)}
                 </div>
+                <p className='text-sm leading-6 mb-6 flex-1' style={{ color: `${C.secondary}b3` }}>"{t.text}"</p>
+                <p className='font-semibold text-sm' style={{ color: C.secondary }}>{t.name}</p>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        <div className='mt-6 flex justify-center gap-3'>
+          <button className='test-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
+            <ArrowLeft />
+          </button>
+          <button className='test-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
+            <ArrowRight />
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-                <div className='mt-14 grid gap-6 lg:grid-cols-3'>
-                    {WIDAMINE_CONTENT.testimonials.map((t, idx) => (
-                        <motion.article
-                            key={t.name}
-                            className='rounded-[2rem] border border-secondary/10 bg-[#fffaf7] p-7 shadow-[0_24px_50px_rgba(26,54,70,0.06)]'
-                            initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-                            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                            viewport={{ once: true, amount: 0.18 }}
-                            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                            <div className='flex items-center gap-3'>
-                                <img src={WIDAMINE_ASSETS.testimonials[idx % WIDAMINE_ASSETS.testimonials.length]} alt={t.name} className='h-12 w-12 rounded-full object-cover' />
-                                <div className='flex items-center gap-1 text-accent'>
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <Star key={i} size={16} className='fill-accent text-accent' />
-                                    ))}
-                                </div>
-                            </div>
-                            <p className='mt-6 text-base leading-8 text-secondary/74'>“{t.quote}”</p>
-                            <div className='mt-8 border-t border-secondary/8 pt-5'>
-                                <p className='text-sm font-semibold text-secondary'>{t.name}</p>
-                                <p className='mt-1 text-xs uppercase tracking-[0.18em] text-primary'>{t.service}</p>
-                            </div>
-                        </motion.article>
-                    ))}
+function ConsultSection() {
+  const { open } = useScheduleModalStore()
+
+  return (
+    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+        <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
+          <div>
+            <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+              Comment <span style={{ color: C.primary, fontStyle: 'italic' }}>prendre rendez-vous</span> au Widamine Center?
+            </h2>
+            <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+              La consultation en présentielle ou la visio-consultation (qui permet souvent de diminuer le délai).
+            </p>
+            <div className='mt-8 space-y-4'>
+              <div className='flex items-start gap-4'>
+                <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
+                  <PhoneCall className='h-5 w-5' style={{ color: C.primary }} />
                 </div>
-            </RevealBlock>
-        </section>
-    )
+                <div>
+                  <p className='font-semibold' style={{ color: C.secondary }}>Par téléphone</p>
+                  <p className='text-sm' style={{ color: `${C.secondary}99` }}>+212 6 61 23 45 67</p>
+                </div>
+              </div>
+              <div className='flex items-start gap-4'>
+                <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
+                  <MapPin className='h-5 w-5' style={{ color: C.primary }} />
+                </div>
+                <div>
+                  <p className='font-semibold' style={{ color: C.secondary }}>En personne</p>
+                  <p className='text-sm' style={{ color: `${C.secondary}99` }}>123 Avenue Hassan II, Casablanca</p>
+                </div>
+              </div>
+            </div>
+            <button onClick={open} className='mt-8 inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+              Prendre rendez-vous <RightArrow />
+            </button>
+          </div>
+          <div className='w-full overflow-hidden rounded-[2rem] relative' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+            <iframe
+              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3323.846!2d-7.589!3d33.573!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDM0JzIyLjgiTiA3wrAzNScyMC40Ilc!5e0!3m2!1sfr!2sma!4v1700000000000'
+              width='100%'
+              height='380'
+              style={{ border: 0 }}
+              allowFullScreen
+              loading='lazy'
+              referrerPolicy='no-referrer-when-downgrade'
+              className='w-full'
+            />
+          </div>
+        </div>
+      </div>
+      <img src={SM.consult.branch} alt='' className='absolute left-0 bottom-0 w-40 opacity-40 hidden lg:block widamine-tint' loading='lazy' />
+    </section>
+  )
 }
 
-function TrustSection() {
-	return (
-		<section className='bg-custom-white pt-0 pb-16 sm:pb-20 lg:pb-24'>
-			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-10'>
-				<div className='rounded-[2.25rem] bg-secondary px-8 py-10 text-custom-white shadow-[0_30px_60px_rgba(26,54,70,0.18)] md:px-10'>
-					<p className='text-xs uppercase tracking-[0.28em] text-custom-white/70'>Pourquoi Widamine</p>
-					<h2 className='mt-4 font-amoria text-4xl leading-tight md:text-5xl'>Une page qui vend mieux quand elle rassure mieux.</h2>
-					<p className='mt-6 max-w-lg text-base leading-8 text-custom-white/78'>
-						Le nouveau milieu de page apporte ce qui manquait visuellement: plus de rythme, plus de preuves, et plus de repères pratiques pour convertir.
-					</p>
-					<div className='mt-8 grid gap-4 sm:grid-cols-3'>
-						<div>
-							<div className='text-3xl font-semibold'>12+</div>
-							<p className='mt-2 text-sm text-custom-white/70'>Protocoles personnalisables</p>
-						</div>
-						<div>
-							<div className='text-3xl font-semibold'>1:1</div>
-							<p className='mt-2 text-sm text-custom-white/70'>Suivi individualisé</p>
-						</div>
-						<div>
-							<div className='text-3xl font-semibold'>100%</div>
-							<p className='mt-2 text-sm text-custom-white/70'>Palette Widamine conservée</p>
-						</div>
-					</div>
-				</div>
+/* ── GSAP Animations ──────────────────────────────────────────── */
 
-				<div className='grid gap-5 sm:grid-cols-2'>
-					{TRUST_POINTS.map((point) => {
-						const Icon = point.icon
-						return (
-							<motion.div
-								key={point.title}
-								className='rounded-[1.75rem] border border-secondary/10 bg-[#fffaf7] p-6 shadow-[0_22px_45px_rgba(26,54,70,0.06)]'
-								initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-								whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-								viewport={{ once: true, amount: 0.2 }}
-								transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-							>
-								<div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary'>
-									<Icon size={20} />
-								</div>
-								<h3 className='mt-6 text-xl font-semibold text-secondary'>{point.title}</h3>
-								<p className='mt-3 text-sm leading-7 text-secondary/68'>{point.description}</p>
-							</motion.div>
-						)
-					})}
-				</div>
-			</RevealBlock>
-		</section>
-	)
+function useGSAPAnimations() {
+  useEffect(() => {
+    const scroller = '#app-scroll'
+    const ctx = gsap.context(() => {
+      // Navbar show/hide
+      ScrollTrigger.create({
+        trigger: 'body',
+        scroller,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          const nav = document.querySelector('[data-public-nav]')
+          if (!nav) return
+          if (self.direction === 1) gsap.to(nav, { y: '-100%', duration: 0.6, ease: 'power2.inOut' })
+          else gsap.to(nav, { y: '0%', duration: 0.6, ease: 'power2.inOut' })
+        },
+      })
+
+      // Fade-in animations on scroll
+      gsap.utils.toArray<HTMLElement>('[data-fade-scroll]').forEach((el) => {
+        gsap.fromTo(el, { opacity: 0, y: 30 }, {
+          opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: el, scroller, start: 'top 85%', toggleActions: 'play none none none' },
+        })
+      })
+
+      // Method cards rotation on scroll (desktop)
+      gsap.matchMedia().add('(min-width: 992px)', () => {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: '[data-methode-wrap]',
+            scroller,
+            start: '-5% center',
+            end: '50% 40%',
+            scrub: 1.5,
+          },
+        }).to('[data-methode-item="first"]', { rotation: -8 })
+          .to('[data-methode-item="third"]', { rotation: 8 }, '<')
+          .to('[data-methode-item="second"]', { y: '-2rem' }, '<')
+      })
+
+      // Hero video scale on scroll
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '[data-video-wrap]',
+          scroller,
+          start: 'top 90%',
+          end: 'top 20%',
+          scrub: 2,
+        },
+      }).fromTo('[data-video-wrap] > div', { scale: 0.85, y: 40 }, { scale: 1, y: 0 })
+    })
+
+    return () => ctx.revert()
+  }, [])
 }
 
-function NewsSection() {
-	return (
-		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
-			<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-				<div className='flex flex-col gap-4 md:flex-row md:items-end md:justify-between'>
-					<div className='max-w-2xl'>
-						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Latest News</p>
-						<h2 className='mt-4 font-amoria text-4xl text-secondary md:text-5xl'>Actualités, services et conseils du centre</h2>
-					</div>
-					<p className='max-w-xl text-base leading-8 text-secondary/68'>
-						Retrouvez nos actualités, services et sujets d’esthétique médicale dans un espace éditorial pensé pour prolonger l’univers du centre.
-					</p>
-				</div>
-				<div className='mt-12 grid gap-6 lg:grid-cols-3'>
-					{NEWS_POSTS.map((post) => (
-						<motion.article
-							key={post.title}
-							className='overflow-hidden rounded-[2rem] border border-secondary/10 bg-custom-white shadow-[0_22px_45px_rgba(26,54,70,0.06)]'
-							initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }}
-							whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-							viewport={{ once: true, amount: 0.18 }}
-							transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-						>
-                                <div className='h-52 overflow-hidden bg-secondary/6'>
-                                <img src={WIDAMINE_ASSETS.pageHeader} alt={post.title} className='h-full w-full object-cover' />
-                            </div>
-							<div className='space-y-4 p-6'>
-								<div className='flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.22em] text-secondary/45'>
-									<span>{post.category}</span>
-									<span>{post.date}</span>
-								</div>
-								<h3 className='text-2xl font-medium text-secondary'>{post.title}</h3>
-								<p className='text-sm leading-7 text-secondary/68'>{post.excerpt}</p>
-								<div className='inline-flex items-center gap-2 text-sm font-medium text-primary'>
-									Lire plus
-									<ArrowUpRightIcon size={18} />
-								</div>
-							</div>
-						</motion.article>
-					))}
-				</div>
-			</RevealBlock>
-		</section>
-	)
-}
+/* ── Page ──────────────────────────────────────────────────────── */
 
-function ConsultationBanner() {
-	const { open } = useScheduleModalStore()
+export default function Home() {
+  useGSAPAnimations()
 
-	return (
-		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
-				<RevealBlock className='mx-auto max-w-7xl px-4 sm:px-6'>
-					<div className='relative overflow-hidden rounded-[1.75rem] bg-accent px-5 py-6 text-secondary shadow-[0_28px_55px_rgba(232,197,184,0.35)] sm:rounded-[2.5rem] sm:px-8 sm:py-10 md:px-12 md:py-12'>
-						<div className='pointer-events-none absolute -top-14 right-10 h-36 w-36 rounded-full bg-custom-white/20 blur-2xl' />
-						<div className='pointer-events-none absolute -bottom-16 left-12 h-44 w-44 rounded-full bg-secondary/10 blur-2xl' />
-						<div className='relative grid gap-8 lg:grid-cols-[1fr_280px] lg:items-center'>
-							<motion.div
-								initial={{ opacity: 0, x: -20, y: 14, filter: 'blur(12px)' }}
-								whileInView={{ opacity: 1, x: 0, y: 0, filter: 'blur(0px)' }}
-								viewport={{ once: true, amount: 0.35 }}
-								transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-							>
-								<p className='text-xs font-semibold uppercase tracking-[0.28em] text-secondary/60'>Consultation</p>
-								<h2 className='mt-4 max-w-2xl font-amoria text-[2rem] leading-tight sm:text-4xl md:text-5xl'>
-									Planifiez votre consultation gratuite et découvrez une approche esthétique sur mesure.
-								</h2>
-								<p className='mt-4 max-w-2xl text-[15px] leading-7 text-secondary/72 sm:mt-5 sm:text-base sm:leading-8'>
-									Notre équipe est là pour répondre à vos questions, évaluer vos besoins et construire avec vous un plan de traitement personnalisé dans un cadre accueillant et rassurant.
-								</p>
-								<div className='mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row'>
-								<button onClick={open} className='inline-flex w-full items-center justify-center rounded-full bg-secondary px-7 py-3.5 text-sm font-medium text-custom-white transition hover:bg-secondary/92 sm:w-auto'>
-									Réserver maintenant
-								</button>
-								<Link to='/appointment' className='inline-flex w-full items-center justify-center rounded-full border border-secondary/15 bg-custom-white/75 px-7 py-3.5 text-sm font-medium text-secondary transition hover:bg-custom-white sm:w-auto'>
-									Voir les prestations
-								</Link>
-								</div>
-							</motion.div>
-							<motion.div
-								className='rounded-[1.6rem] border border-secondary/10 bg-custom-white/96 p-5 shadow-[0_18px_40px_rgba(26,54,70,0.08)] sm:rounded-[2rem]'
-								initial={{ opacity: 0, y: 18, scale: 0.98, filter: 'blur(10px)' }}
-								whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-								viewport={{ once: true, amount: 0.45 }}
-								transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-							>
-                                <img
-                                    src={WIDAMINE_ASSETS.logos.primary}
-                                    alt='Widamine'
-                                    width='64'
-                                    height='64'
-                                    loading='eager'
-                                    decoding='sync'
-                                    fetchPriority='high'
-                                    className='mx-auto h-16 w-16 object-contain'
-                                />
-								<div className='mt-6 space-y-4 text-sm text-secondary/72'>
-									<div className='flex items-center gap-3'>
-										<CalendarDays size={18} className='text-primary' />
-										<span>Consultation gratuite sur rendez-vous</span>
-									</div>
-									<div className='flex items-center gap-3'>
-										<Clock3 size={18} className='text-primary' />
-										<span>Lundi au samedi, de 9h à 19h</span>
-									</div>
-									<div className='flex items-center gap-3'>
-										<PhoneCall size={18} className='text-primary' />
-										<span>+212 535 624 696</span>
-									</div>
-									<div className='flex items-center gap-3'>
-										<MapPin size={18} className='text-primary' />
-										<span>Boulevard Slaoui, Bureaux Nour, 2ème étage, Fès</span>
-									</div>
-								</div>
-							</motion.div>
-					</div>
-				</div>
-			</RevealBlock>
-		</section>
-	)
-}
-
-function ClosingSection() {
-	return (
-		<section className='bg-custom-white pt-0 pb-24 lg:pt-0 lg:pb-32'>
-			<RevealBlock className='mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]'>
-					<div className='rounded-[2rem] border border-secondary/10 bg-[#f8fbfd] p-8'>
-						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Informations</p>
-						<h2 className='mt-4 font-amoria text-4xl text-secondary'>Contactez Widamine Aesthetic Center</h2>
-						<p className='mt-4 max-w-lg text-base leading-8 text-secondary/68'>
-							Pour en savoir plus sur nos traitements, planifier une consultation ou poser une question à notre équipe, nous restons disponibles pour vous accompagner.
-						</p>
-					</div>
-				<div className='grid gap-5 sm:grid-cols-3'>
-						<motion.div className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-6 shadow-[0_18px_40px_rgba(26,54,70,0.06)]' initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-							<MapPin size={18} className='text-primary' />
-							<h3 className='mt-5 text-xl font-semibold text-secondary'>Adresse</h3>
-							<p className='mt-3 text-sm leading-7 text-secondary/68'>Boulevard Slaoui, Bureaux Nour (en face cinéma Astor), 2ème étage, Fès.</p>
-						</motion.div>
-					<motion.div className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-6 shadow-[0_18px_40px_rgba(26,54,70,0.06)]' initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-						<PhoneCall size={18} className='text-primary' />
-						<h3 className='mt-5 text-xl font-semibold text-secondary'>Téléphone</h3>
-						<p className='mt-3 text-sm leading-7 text-secondary/68'>+212 (535) 624 696<br />+212 (535) 930 182<br />+212 (694) 722 113</p>
-					</motion.div>
-						<motion.div className='rounded-[1.75rem] border border-secondary/10 bg-custom-white p-6 shadow-[0_18px_40px_rgba(26,54,70,0.06)]' initial={{ opacity: 0, y: 24, filter: 'blur(14px)' }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-							<Clock3 size={18} className='text-primary' />
-							<h3 className='mt-5 text-xl font-semibold text-secondary'>Horaires</h3>
-							<p className='mt-3 text-sm leading-7 text-secondary/68'>Lundi à samedi, de 9h à 19h<br />Consultations et accueil sur rendez-vous</p>
-						</motion.div>
-				</div>
-			</RevealBlock>
-		</section>
-	)
+  return (
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Amoria&display=swap'); .font-amoria{font-family:'Amoria',serif;}`}</style>
+      <PublicNavbar />
+      <main className='page-landing'>
+        <HeroSection />
+        <IntroSection />
+        <EnergieSection />
+        <ConceptSection />
+        <MethodeSection />
+        <TeamSection />
+        <GallerySection />
+        <TestimonialsSection />
+        <ConsultSection />
+      </main>
+    </>
+  )
 }

@@ -31,7 +31,7 @@ export class AppointmentService {
         resourceId: { in: service.allowedSalleIds },
         status: { notIn: ['CANCELLED', 'COMPLETED'] },
         schedules: {
-          some: {2
+          some: {
             datetime: { gte: slotStart, lt: slotEnd },
           },
         },
