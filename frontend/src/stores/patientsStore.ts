@@ -10,6 +10,7 @@ interface PatientAppointment {
   status: string
   createdAt: string
   service?: { name: string }
+  motif?: { name: string; color: string }
   schedules?: { id: string; datetime: string }[]
 }
 

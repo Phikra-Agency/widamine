@@ -84,6 +84,7 @@ export class PatientService {
           orderBy: { createdAt: "desc" },
           include: {
             service: { select: { name: true } },
+            motif: { select: { name: true, color: true } },
             schedules: true,
           },
         },
@@ -105,6 +106,7 @@ export class PatientService {
           orderBy: { createdAt: "desc" },
           include: {
             service: { select: { name: true } },
+            motif: { select: { name: true, color: true } },
             schedules: true,
           },
         },
@@ -134,6 +136,7 @@ export class PatientService {
           orderBy: { createdAt: "desc" },
           include: {
             service: { select: { name: true } },
+            motif: { select: { name: true, color: true } },
             practitioner: { select: { name: true } },
             schedules: true,
           },

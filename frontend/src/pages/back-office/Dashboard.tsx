@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { openCalendarForAppointment } from '@/lib/scheduleNavigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useStatsStore } from '@/stores/statsStore'
 import {
@@ -15,7 +16,7 @@ import {
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 
 function parseSchedule(datetime?: string): Date | null {
@@ -163,6 +164,7 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 
 export default function Dashboard() {
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const { stats: sharedStats, fetchStats: fetchSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
   const [stats, setStats] = useState<DashboardStats>(sharedStats || EMPTY_STATS)
@@ -237,9 +239,18 @@ export default function Dashboard() {
 
   const openDetails = useCallback(
     (item: ApptItem) => {
-      openDrawer(item.id)
+      const scheduleDate = item.schedules?.[0]?.datetime
+      if (scheduleDate) {
+        openCalendarForAppointment(navigate, {
+          ...item,
+          id: item.id,
+          schedules: item.schedules,
+        })
+      } else {
+        openDrawer(item.id)
+      }
     },
-    [openDrawer],
+    [navigate, openDrawer],
   )
 
   const drawerMotion = {
@@ -681,12 +692,21 @@ export default function Dashboard() {
                       )}
 
                       <div className='pt-2'>
-                        <Link
-                          to='/back-office/calendar'
+                        <button
+                          type='button'
+                          onClick={() => {
+                            if (details?.schedules?.[0]?.datetime) {
+                              openCalendarForAppointment(navigate, {
+                                ...details,
+                                id: details.id,
+                                schedules: details.schedules,
+                              })
+                            }
+                          }}
                           className='inline-flex items-center gap-1 text-sm text-primary hover:text-primary/70 font-medium transition-colors'
                         >
                           Ouvrir calendrier <ArrowRight size={12} />
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </>

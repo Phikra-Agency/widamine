@@ -624,7 +624,9 @@ function UpcomingAppointmentRow({
 }) {
   const hasSlot = appt._dt > 0
   const appointmentId = normalizeAppointmentId(appt)
-  const isClickable = hasSlot && appointmentId && appt.status === 'CONFIRMED'
+  const isClickable = hasSlot && appointmentId
+
+  const motifName = appt.motif?.name || appt.service?.name || ''
 
   if (!isClickable) {
     return (
@@ -632,7 +634,7 @@ function UpcomingAppointmentRow({
         <div className='min-w-0 flex-1'>
           <p className='text-sm font-medium text-secondary truncate'>{appt.name}</p>
           <div className='mt-0.5 flex items-center gap-2 text-[11px] text-secondary/40'>
-            {appt.service && <span>{appt.service.name}</span>}
+            {motifName && <span>{motifName}</span>}
             <StatusBadge status={appt.status} />
           </div>
         </div>
@@ -650,7 +652,7 @@ function UpcomingAppointmentRow({
       <div className='min-w-0 flex-1'>
         <p className='text-sm font-medium text-secondary truncate'>{appt.name}</p>
         <div className='mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-secondary/40'>
-          {appt.service && <span>{appt.service.name}</span>}
+          {motifName && <span>{motifName}</span>}
           <StatusBadge status={appt.status} />
           <span className='font-medium text-primary/70'>Voir au calendrier →</span>
         </div>
