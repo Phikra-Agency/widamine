@@ -153,118 +153,38 @@ async function main() {
 
   // 3. SERVICES
   console.log('Creating services...')
-  const services = await Promise.all([
-    prisma.service.create({
-      data: {
-        name: 'Injection Botox',
-        slug: 'injection-botox',
-        price: 2500,
-        categoryId: categories[5].id,
-        primaryDoctorId: doctor1.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Acide Hyaluronique',
-        slug: 'acide-hyaluronique',
-        price: 3200,
-        categoryId: categories[5].id,
-        primaryDoctorId: doctor1.id,
-        allowedDoctorIds: [doctor1.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Liposuccion Vaser',
-        slug: 'liposuccion-vaser',
-        price: 25000,
-        categoryId: categories[2].id,
-        primaryDoctorId: doctor2.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Augmentation Mammaire',
-        slug: 'augmentation-mammaire',
-        price: 35000,
-        categoryId: categories[2].id,
-        primaryDoctorId: doctor1.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Blépharoplastie',
-        slug: 'blepharoplastie',
-        price: 18000,
-        categoryId: categories[2].id,
-        primaryDoctorId: doctor3.id,
-        allowedDoctorIds: [doctor1.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Peeling Chimique',
-        slug: 'peeling-chimique',
-        price: 1500,
-        categoryId: categories[0].id,
-        primaryDoctorId: doctor1.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Épilation Laser',
-        slug: 'epilation-laser',
-        price: 800,
-        categoryId: categories[4].id,
-        primaryDoctorId: doctor2.id,
-        allowedDoctorIds: [doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Traitement des Taches',
-        slug: 'traitement-taches',
-        price: 1200,
-        categoryId: categories[3].id,
-        primaryDoctorId: doctor1.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Brazilian Butt Lift',
-        slug: 'bbl',
-        price: 28000,
-        categoryId: categories[2].id,
-        primaryDoctorId: doctor2.id,
-        allowedDoctorIds: [doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-    prisma.service.create({
-      data: {
-        name: 'Soin du Visage',
-        slug: 'soin-visage',
-        price: 600,
-        categoryId: categories[0].id,
-        primaryDoctorId: doctor3.id,
-        allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id],
-        allowedSalleIds: [],
-      },
-    }),
-  ])
+
+  // We'll set allowedSalleIds after resources are created, so create them in two passes
+  const serviceData = [
+    { name: 'Injection Botox', slug: 'injection-botox', price: 2500, categoryId: categories[5].id, primaryDoctorId: doctor1.id, allowedDoctorIds: [doctor1.id, doctor2.id], types: ['CONSULTATION', 'TREATMENT'] },
+    { name: 'Acide Hyaluronique', slug: 'acide-hyaluronique', price: 3200, categoryId: categories[5].id, primaryDoctorId: doctor1.id, allowedDoctorIds: [doctor1.id, doctor3.id], types: ['CONSULTATION', 'TREATMENT'] },
+    { name: 'Liposuccion Vaser', slug: 'liposuccion-vaser', price: 25000, categoryId: categories[2].id, primaryDoctorId: doctor2.id, allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id], types: ['TREATMENT', 'SURGERY'] },
+    { name: 'Augmentation Mammaire', slug: 'augmentation-mammaire', price: 35000, categoryId: categories[2].id, primaryDoctorId: doctor1.id, allowedDoctorIds: [doctor1.id, doctor2.id], types: ['TREATMENT', 'SURGERY'] },
+    { name: 'Blépharoplastie', slug: 'blepharoplastie', price: 18000, categoryId: categories[2].id, primaryDoctorId: doctor3.id, allowedDoctorIds: [doctor1.id, doctor3.id], types: ['TREATMENT', 'SURGERY'] },
+    { name: 'Peeling Chimique', slug: 'peeling-chimique', price: 1500, categoryId: categories[0].id, primaryDoctorId: doctor1.id, allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id], types: ['CONSULTATION', 'TREATMENT'] },
+    { name: 'Épilation Laser', slug: 'epilation-laser', price: 800, categoryId: categories[4].id, primaryDoctorId: doctor2.id, allowedDoctorIds: [doctor2.id, doctor3.id], types: ['LASER'] },
+    { name: 'Traitement des Taches', slug: 'traitement-taches', price: 1200, categoryId: categories[3].id, primaryDoctorId: doctor1.id, allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id], types: ['CONSULTATION', 'TREATMENT'] },
+    { name: 'Brazilian Butt Lift', slug: 'bbl', price: 28000, categoryId: categories[2].id, primaryDoctorId: doctor2.id, allowedDoctorIds: [doctor2.id, doctor3.id], types: ['TREATMENT', 'SURGERY'] },
+    { name: 'Soin du Visage', slug: 'soin-visage', price: 600, categoryId: categories[0].id, primaryDoctorId: doctor3.id, allowedDoctorIds: [doctor1.id, doctor2.id, doctor3.id], types: ['CONSULTATION', 'TREATMENT'] },
+  ]
+
+  // We'll assign allowedSalleIds after resources are created
+  // For now, store the raw data and create services with placeholder allowedSalleIds
+  const services = await Promise.all(
+    serviceData.map((sd) =>
+      prisma.service.create({
+        data: {
+          name: sd.name,
+          slug: sd.slug,
+          price: sd.price,
+          categoryId: sd.categoryId,
+          primaryDoctorId: sd.primaryDoctorId,
+          allowedDoctorIds: sd.allowedDoctorIds,
+          allowedSalleIds: [], // will be updated after resources are created
+        },
+      })
+    )
+  )
 
   console.log(`✅ Created ${services.length} services`)
 
@@ -375,6 +295,98 @@ async function main() {
         serviceId: services[5].id,
       },
     }),
+    // Augmentation Mammaire (services[3])
+    prisma.motif.create({
+      data: {
+        name: 'Consultation Augmentation',
+        slug: 'consultation-augmentation',
+        bookingType: 'CONSULTATION',
+        description: 'Consultation pré-opératoire pour augmentation mammaire',
+        duration: 45,
+        color: '#f59e0b',
+        serviceId: services[3].id,
+      },
+    }),
+    prisma.motif.create({
+      data: {
+        name: 'Suivi Post-Augmentation',
+        slug: 'suivi-post-augmentation',
+        bookingType: 'FOLLOWUP',
+        description: 'Contrôle post-opératoire après augmentation',
+        duration: 30,
+        color: '#06b6d4',
+        serviceId: services[3].id,
+      },
+    }),
+    // Blépharoplastie (services[4])
+    prisma.motif.create({
+      data: {
+        name: 'Consultation Blépharoplastie',
+        slug: 'consultation-blepharoplastie',
+        bookingType: 'CONSULTATION',
+        description: 'Consultation pour blépharoplastie',
+        duration: 45,
+        color: '#f59e0b',
+        serviceId: services[4].id,
+      },
+    }),
+    prisma.motif.create({
+      data: {
+        name: 'Suivi Post-Blépharoplastie',
+        slug: 'suivi-post-blepharoplastie',
+        bookingType: 'FOLLOWUP',
+        description: 'Contrôle post-opératoire après blépharoplastie',
+        duration: 30,
+        color: '#06b6d4',
+        serviceId: services[4].id,
+      },
+    }),
+    // BBL (services[8])
+    prisma.motif.create({
+      data: {
+        name: 'Consultation BBL',
+        slug: 'consultation-bbl',
+        bookingType: 'CONSULTATION',
+        description: 'Consultation pré-opératoire pour lipofilling fessier',
+        duration: 45,
+        color: '#f59e0b',
+        serviceId: services[8].id,
+      },
+    }),
+    prisma.motif.create({
+      data: {
+        name: 'Suivi Post-BBL',
+        slug: 'suivi-post-bbl',
+        bookingType: 'FOLLOWUP',
+        description: 'Contrôle post-opératoire après BBL',
+        duration: 30,
+        color: '#06b6d4',
+        serviceId: services[8].id,
+      },
+    }),
+    // Soin du Visage (services[9])
+    prisma.motif.create({
+      data: {
+        name: 'Consultation Soin Visage',
+        slug: 'consultation-soin-visage',
+        bookingType: 'CONSULTATION',
+        description: 'Consultation pour soin du visage',
+        duration: 30,
+        color: '#3b82f6',
+        serviceId: services[9].id,
+      },
+    }),
+    prisma.motif.create({
+      data: {
+        name: 'Séance Soin Visage',
+        slug: 'seance-soin-visage',
+        bookingType: 'TREATMENT',
+        description: 'Séance de soin du visage',
+        duration: 60,
+        color: '#8b5cf6',
+        serviceId: services[9].id,
+      },
+    }),
   ])
 
   console.log(`✅ Created ${motifs.length} motifs`)
@@ -456,6 +468,37 @@ async function main() {
 
   console.log(`✅ Created ${resources.length} resources`)
 
+  // 6a. Update services with allowedSalleIds based on resource types
+  console.log('Assigning allowedSalleIds to services...')
+  // Mapping: CONSULTATION resources[0,1], TREATMENT resources[2,3], LASER resource[4], SURGERY resource[5], RECOVERY resource[6]
+  const consultationSalles = [resources[0].id, resources[1].id]
+  const treatmentSalles = [resources[2].id, resources[3].id]
+  const laserSalles = [resources[4].id]
+  const surgerySalles = [resources[5].id]
+  const recoverySalles = [resources[6].id]
+
+  // services[0]=Injection Botox: CONSULTATION + TREATMENT
+  await prisma.service.update({ where: { id: services[0].id }, data: { allowedSalleIds: [...consultationSalles, ...treatmentSalles] } })
+  // services[1]=Acide Hyaluronique: CONSULTATION + TREATMENT
+  await prisma.service.update({ where: { id: services[1].id }, data: { allowedSalleIds: [...consultationSalles, ...treatmentSalles] } })
+  // services[2]=Liposuccion Vaser: TREATMENT + SURGERY + RECOVERY
+  await prisma.service.update({ where: { id: services[2].id }, data: { allowedSalleIds: [...treatmentSalles, ...surgerySalles, ...recoverySalles] } })
+  // services[3]=Augmentation Mammaire: TREATMENT + SURGERY + RECOVERY
+  await prisma.service.update({ where: { id: services[3].id }, data: { allowedSalleIds: [...treatmentSalles, ...surgerySalles, ...recoverySalles] } })
+  // services[4]=Blépharoplastie: TREATMENT + SURGERY + RECOVERY
+  await prisma.service.update({ where: { id: services[4].id }, data: { allowedSalleIds: [...treatmentSalles, ...surgerySalles, ...recoverySalles] } })
+  // services[5]=Peeling Chimique: CONSULTATION + TREATMENT
+  await prisma.service.update({ where: { id: services[5].id }, data: { allowedSalleIds: [...consultationSalles, ...treatmentSalles] } })
+  // services[6]=Épilation Laser: LASER
+  await prisma.service.update({ where: { id: services[6].id }, data: { allowedSalleIds: laserSalles } })
+  // services[7]=Traitement des Taches: CONSULTATION + TREATMENT
+  await prisma.service.update({ where: { id: services[7].id }, data: { allowedSalleIds: [...consultationSalles, ...treatmentSalles] } })
+  // services[8]=BBL: TREATMENT + SURGERY + RECOVERY
+  await prisma.service.update({ where: { id: services[8].id }, data: { allowedSalleIds: [...treatmentSalles, ...surgerySalles, ...recoverySalles] } })
+  // services[9]=Soin du Visage: CONSULTATION + TREATMENT
+  await prisma.service.update({ where: { id: services[9].id }, data: { allowedSalleIds: [...consultationSalles, ...treatmentSalles] } })
+  console.log('✅ Assigned allowedSalleIds to all services')
+
   // 6b. RESOURCE-PRACTITIONER links
   console.log('Linking resources to practitioners...')
   for (const resource of resources) {
@@ -523,50 +566,55 @@ async function main() {
 
   // 6d. MOTIF-RESOURCE links
   console.log('Linking motifs to resources...')
+  // Re-fetch services to get updated allowedSalleIds
+  const freshServices = await prisma.service.findMany()
   for (const motif of motifs) {
-    const motifService = services.find(s => s.id === motif.serviceId)
+    const motifService = freshServices.find(s => s.id === motif.serviceId)
     if (!motifService) continue
 
-    // Assign appropriate rooms based on motif type
-    if (motif.bookingType === 'CONSULTATION' || motif.bookingType === 'FOLLOWUP') {
-      // Consultation motifs → consultation rooms
-      const consultationRooms = resources.filter(r => r.type === 'CONSULTATION')
-      for (const room of consultationRooms) {
-        await prisma.motifResource.create({
-          data: {
-            motifId: motif.id,
-            resourceId: room.id,
-            priority: room.priority,
-            isRequired: false,
-          },
-        })
-      }
-    } else if (motif.bookingType === 'TREATMENT') {
-      // Treatment motifs → treatment rooms + laser if applicable
-      const treatmentRooms = resources.filter(r => r.type === 'TREATMENT' || (r.type === 'LASER' && motif.name.toLowerCase().includes('laser')))
-      for (const room of treatmentRooms) {
-        await prisma.motifResource.create({
-          data: {
-            motifId: motif.id,
-            resourceId: room.id,
-            priority: room.priority,
-            isRequired: false,
-          },
-        })
-      }
-    } else if (motif.bookingType === 'URGENCY') {
-      // Urgency → any available room
-      const urgentRooms = resources.filter(r => r.type === 'CONSULTATION' || r.type === 'TREATMENT')
-      for (const room of urgentRooms.slice(0, 2)) {
-        await prisma.motifResource.create({
-          data: {
-            motifId: motif.id,
-            resourceId: room.id,
-            priority: room.priority,
-            isRequired: false,
-          },
-        })
-      }
+    // Get the service's allowed resource IDs
+    const allowedIds = new Set(motifService.allowedSalleIds.map(String))
+
+    // Filter resources that this service allows
+    const allowedResources = resources.filter(r => allowedIds.has(r.id))
+
+    // Determine which room types are relevant for this motif's bookingType
+    let relevantTypes: string[] = []
+    switch (motif.bookingType) {
+      case 'CONSULTATION':
+        relevantTypes = ['CONSULTATION']
+        break
+      case 'FOLLOWUP':
+        relevantTypes = ['CONSULTATION', 'RECOVERY']
+        break
+      case 'TREATMENT':
+        relevantTypes = motif.name.toLowerCase().includes('laser')
+          ? ['TREATMENT', 'LASER']
+          : ['TREATMENT']
+        break
+      case 'URGENCY':
+        relevantTypes = ['CONSULTATION', 'TREATMENT']
+        break
+      default:
+        relevantTypes = ['CONSULTATION', 'TREATMENT']
+    }
+
+    // Link motif to allowed resources whose type is relevant
+    const matchedRooms = allowedResources.filter(r => relevantTypes.includes(r.type))
+
+    // If no type match (e.g. CONSULTATION motif on a surgery-only service),
+    // fall back to ALL allowed resources for that service
+    const roomsToLink = matchedRooms.length > 0 ? matchedRooms : allowedResources
+
+    for (const room of roomsToLink) {
+      await prisma.motifResource.create({
+        data: {
+          motifId: motif.id,
+          resourceId: room.id,
+          priority: room.priority,
+          isRequired: false,
+        },
+      })
     }
   }
   console.log('✅ Linked motifs to resources')

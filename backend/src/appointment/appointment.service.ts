@@ -20,7 +20,18 @@ export class AppointmentService {
         orderBy: { number: 'asc' },
       }),
     ])
-    if (!service?.allowedSalleIds?.length) return undefined
+
+    // If service has no allowed salles, fallback to any active resource
+    let salleIds = service?.allowedSalleIds
+    if (!salleIds?.length) {
+      const fallbackResources = await this.prisma.resource.findMany({
+        where: { isActive: true },
+        select: { id: true },
+        orderBy: { priority: 'asc' },
+      })
+      salleIds = fallbackResources.map(r => r.id)
+      if (!salleIds.length) return undefined
+    }
 
     const duration = firstSession?.duration || 30
     const slotStart = new Date(datetime)
@@ -28,7 +39,7 @@ export class AppointmentService {
 
     const bookedResources = await this.prisma.appointment.findMany({
       where: {
-        resourceId: { in: service.allowedSalleIds },
+        resourceId: { in: salleIds },
         status: { notIn: ['CANCELLED', 'COMPLETED'] },
         schedules: {
           some: {
@@ -40,7 +51,7 @@ export class AppointmentService {
     })
 
     const bookedIds = new Set(bookedResources.map(r => r.resourceId).filter(Boolean))
-    const availableIds = service.allowedSalleIds.filter(id => !bookedIds.has(id))
+    const availableIds = salleIds.filter(id => !bookedIds.has(id))
     if (!availableIds.length) return undefined
 
     if (availableIds.length === 1) return availableIds[0]
