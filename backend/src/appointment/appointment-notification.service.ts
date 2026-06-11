@@ -19,7 +19,6 @@ export class AppointmentNotificationService {
         emailCancellation: true,
       },
     });
-
     if (!settings) return true;
     if (!settings.emailEnabled) return false;
     if (type === "confirmation") return settings.emailConfirmation;
@@ -36,412 +35,356 @@ export class AppointmentNotificationService {
     return settings.emailEnabled;
   }
 
-  // ── Widamine email theme constants ───────────────────────────
+  // ════════════════════════════════════════════════════════════════
+  //  NEW CLEAN THEME — Widamine Medical Emails
+  // ════════════════════════════════════════════════════════════════
+
   private readonly COLORS = {
     primary: '#2e90c0',
     secondary: '#1a3646',
     accent: '#e8c5b8',
-    bg: '#f9fafc',
-    cardBg: '#fffaf7',
-    text: '#1a3646',
-    textLight: 'rgba(26,54,70,0.72)',
-    textMuted: 'rgba(26,54,70,0.55)',
+    bg: '#F7F1EB',
+    white: '#ffffff',
+    text: '#2d3748',
+    textLight: '#718096',
+    success: '#48bb78',
+    warning: '#ecc94b',
+    danger: '#fc8181',
   };
 
   private readonly FONTS = {
-    heading: "Georgia, 'Times New Roman', serif",
-    body: "'Raleway', Arial, Helvetica, sans-serif",
+    sans: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+    serif: "Georgia, 'Times New Roman', serif",
   };
 
-  private emailWrapper(inner: string): string {
+  private wrap(content: string, accentColor?: string): string {
+    const accent = accentColor || this.COLORS.primary;
     return `
-      <div style="font-family:${this.FONTS.body};max-width:560px;margin:0 auto;background:${this.COLORS.bg};">
-        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-          <tr><td style="height:4px;background:${this.COLORS.primary};font-size:0;line-height:0;">&nbsp;</td></tr>
-        </table>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background: ${this.COLORS.bg}; font-family: ${this.FONTS.sans};">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background: ${this.COLORS.bg};">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="500" style="max-width: 500px; width: 100%;">
 
-        <div style="padding:36px 32px 8px;text-align:center;">
-          <p style="font-family:${this.FONTS.heading};font-size:26px;font-weight:400;color:${this.COLORS.secondary};letter-spacing:3px;margin:0;text-transform:uppercase;">Widamine</p>
-          <p style="font-size:10px;color:${this.COLORS.primary};letter-spacing:3px;margin:4px 0 0;text-transform:uppercase;font-weight:600;">Sobriété Esthétique</p>
-        </div>
-
-        <div style="margin:24px 32px;background:${this.COLORS.cardBg};border-radius:28px;border:1px solid rgba(26,54,70,0.10);padding:40px 32px;box-shadow:0 18px 40px rgba(26,54,70,0.06);">
-          ${inner}
-        </div>
-
-        <div style="background:${this.COLORS.secondary};border-radius:28px;margin:0 32px 32px;padding:24px 32px;text-align:center;">
-          <p style="font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:1px;margin:0;text-transform:uppercase;">1<sup>er</sup> centre médical de Dermato-Esthétique</p>
-          <p style="font-size:10px;color:rgba(255,255,255,0.3);margin:6px 0 0;letter-spacing:1px;">Fès, Maroc</p>
-        </div>
-      </div>
-    `;
-  }
-
-  private heading(icon: string, text: string): string {
-    return `
-      <div style="text-align:center;margin-bottom:28px;">
-        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,${this.COLORS.accent},#f0d5cb);margin:0 auto 16px;">
-          <table cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
-            <tr><td style="text-align:center;vertical-align:middle;color:${this.COLORS.secondary};font-size:22px;">${icon}</td></tr>
-          </table>
-        </div>
-        <h1 style="font-family:${this.FONTS.heading};font-size:26px;font-weight:400;color:${this.COLORS.secondary};margin:0;letter-spacing:0.5px;">${text}</h1>
-      </div>
-    `;
-  }
-
-  private infoTable(rows: [string, string][]): string {
-    const cellStyle = `padding:12px 16px;border:1px solid rgba(26,54,70,0.08);font-size:14px;color:${this.COLORS.text};`;
-    const labelStyle = `padding:12px 16px;border:1px solid rgba(26,54,70,0.08);font-size:14px;color:${this.COLORS.text};background:${this.COLORS.bg};font-weight:600;`;
-    return `
-      <table style="border-collapse:collapse;width:100%;margin:16px 0;border-radius:12px;overflow:hidden;">
-        ${rows.map(([label, value]) => `
+          <!-- Top accent line -->
           <tr>
-            <td style="${labelStyle}">${label}</td>
-            <td style="${cellStyle}">${value}</td>
+            <td style="height: 4px; background: ${accent}; font-size: 0; line-height: 0;">&nbsp;</td>
+          </tr>
+
+          <!-- Header -->
+          <tr>
+            <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 24px; font-weight: 400; color: ${this.COLORS.white}; letter-spacing: 3px; text-transform: uppercase;">WIDAMINE</h1>
+              <p style="margin: 8px 0 0; font-size: 11px; color: ${this.COLORS.accent}; letter-spacing: 2px; text-transform: uppercase; font-weight: 300;">Sobriété Esthétique</p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="background: ${this.COLORS.white}; padding: 48px 40px;">
+              ${content}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">Fès, Maroc</p>
+              <p style="margin: 16px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">
+                <a href="https://widamine.com" style="color: ${this.COLORS.accent}; text-decoration: none;">widamine.com</a>
+                &nbsp;&nbsp;·&nbsp;&nbsp;
+                <a href="mailto:contact@widamine.com" style="color: ${this.COLORS.accent}; text-decoration: none;">contact@widamine.com</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  private title(icon: string, text: string, color?: string): string {
+    const c = color || this.COLORS.secondary;
+    return `
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 48px; height: 48px; background: ${c}; border-radius: 50%; margin: 0 auto 16px; line-height: 48px; font-size: 20px; color: ${this.COLORS.white};">${icon}</div>
+        <h2 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 28px; font-weight: 400; color: ${c};">${text}</h2>
+      </div>`;
+  }
+
+  private paragraph(text: string): string {
+    return `<p style="margin: 0 0 20px; font-size: 15px; color: ${this.COLORS.text}; line-height: 1.7;">${text}</p>`;
+  }
+
+  private detailsTable(rows: [string, string][]): string {
+    return `
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        ${rows.map(([label, value], i) => `
+          <tr>
+            <td style="padding: 14px 20px; background: ${i % 2 === 0 ? '#f7fafc' : this.COLORS.white}; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: ${this.COLORS.textLight}; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; width: 35%;">${label}</td>
+            <td style="padding: 14px 20px; background: ${i % 2 === 0 ? '#f7fafc' : this.COLORS.white}; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: ${this.COLORS.text};">${value}</td>
           </tr>
         `).join('')}
-      </table>
-    `;
+      </table>`;
   }
 
-  private greeting(name: string): string {
-    return `<p style="font-size:15px;color:${this.COLORS.text};line-height:1.7;margin:0 0 20px;">Bonjour <strong style="color:${this.COLORS.primary};">${name}</strong>,</p>`;
-  }
-
-  private bodyText(text: string): string {
-    return `<p style="font-size:15px;color:${this.COLORS.textLight};line-height:1.8;margin:0 0 20px;">${text}</p>`;
-  }
-
-  private signature(): string {
+  private note(text: string): string {
     return `
-      <p style="font-size:15px;color:${this.COLORS.textLight};line-height:1.8;margin:24px 0 0;">
-        Cordialement,<br>
-        <strong style="color:${this.COLORS.primary};">L'équipe Widamine</strong>
-      </p>
-    `;
+      <div style="background: #f7fafc; border-left: 4px solid ${this.COLORS.accent}; padding: 16px 20px; margin: 24px 0; border-radius: 0 4px 4px 0;">
+        <p style="margin: 0; font-size: 14px; color: ${this.COLORS.text}; line-height: 1.6;">${text}</p>
+      </div>`;
   }
 
-  // ── 1. Booking acknowledgment (sent to patient on creation) ──
+  private serviceBox(name: string): string {
+    return `
+      <div style="background: linear-gradient(135deg, #f7fafc, #edf2f7); padding: 20px 24px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 4px; font-size: 11px; color: ${this.COLORS.primary}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Service</p>
+        <p style="margin: 0; font-size: 18px; color: ${this.COLORS.secondary}; font-family: ${this.FONTS.serif};">${name}</p>
+      </div>`;
+  }
+
+  private dateStr(d?: Date | null): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  private patientName(a: { name: string; patient?: { firstName: string; lastName: string } | null }): string {
+    return a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : a.name;
+  }
+
+  private closing(name?: string): string {
+    return `
+      <p style="margin: 32px 0 0; font-size: 14px; color: ${this.COLORS.textLight}; line-height: 1.6;">
+        Cordialement,<br>
+        <strong style="color: ${this.COLORS.secondary};">${name || "L'équipe Widamine"}</strong>
+      </p>`;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  1. BOOKING ACKNOWLEDGMENT — patient
+  // ════════════════════════════════════════════════════════════════
 
   async sendNewBookingAcknowledgment(appointmentId: string) {
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true },
     });
-    if (!appointment || !appointment.email) return;
+    if (!appt || !appt.email) return;
 
-    const serviceName = appointment.service?.name || "Consultation";
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#10003;', 'Réservation reçue')}
-
-      ${this.greeting(appointment.name)}
-      ${this.bodyText('Nous avons bien reçu votre demande de rendez-vous au <strong style="color:' + this.COLORS.secondary + ';">Cabinet Widamine</strong>.')}
-
-      <div style="background:linear-gradient(180deg,#fbf4ef,#fffaf7);border-radius:20px;padding:20px 24px;margin:0 0 20px;border:1px solid rgba(232,197,184,0.35);">
-        <p style="font-size:10px;color:${this.COLORS.primary};letter-spacing:3px;margin:0 0 4px;text-transform:uppercase;font-weight:600;">Service demandé</p>
-        <p style="font-family:${this.FONTS.heading};font-size:20px;font-weight:400;color:${this.COLORS.secondary};margin:0;">${serviceName}</p>
-      </div>
-
-      <div style="background:${this.COLORS.bg};border-radius:16px;padding:20px 24px;margin:0 0 24px;border-left:3px solid ${this.COLORS.accent};">
-        <p style="font-size:14px;color:${this.COLORS.textLight};line-height:1.8;margin:0;">
-          Notre équipe va <strong style="color:${this.COLORS.secondary};">examiner votre demande</strong> et vous recontacter <strong style="color:${this.COLORS.secondary};">dans les plus brefs délais</strong> pour confirmer ou refuser votre rendez-vous.
-        </p>
-        <p style="font-size:14px;color:${this.COLORS.textLight};line-height:1.8;margin:12px 0 0;">
-          Vous recevrez un email de confirmation dès que votre réservation sera validée.
-        </p>
-      </div>
-
-      <p style="font-size:14px;color:${this.COLORS.textMuted};line-height:1.8;margin:0 0 4px;">
-        Pour toute question, n'hésitez pas à nous contacter.
-      </p>
-      ${this.signature()}
+    const html = this.wrap(`
+      ${this.title('✓', 'Réservation reçue')}
+      ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
+      ${this.paragraph('Votre demande de rendez-vous a bien été enregistrée.')}
+      ${this.serviceBox(appt.service?.name || 'Consultation')}
+      ${this.note(`
+        Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
+        <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
+      `)}
+      ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:contact@widamine.com" style="color: ' + this.COLORS.primary + ';">contact@widamine.com</a>.')}
+      ${this.closing()}
     `);
 
-    await this.mailService.sendMail(
-      appointment.email,
-      `Réservation reçue — Widamine`,
-      html,
-    );
+    await this.mailService.sendMail(appt.email, 'Réservation reçue — Widamine', html);
   }
 
-  // ── 2. Confirmation (sent to patient when status → CONFIRMED) ──
+  // ════════════════════════════════════════════════════════════════
+  //  2. CONFIRMATION — patient
+  // ════════════════════════════════════════════════════════════════
 
   async sendConfirmation(appointmentId: string) {
     if (!(await this.canSendEmail("confirmation"))) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true },
     });
-    if (!appointment || !appointment.email) return;
+    if (!appt || !appt.email) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "à confirmer";
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#10003;', 'Rendez-vous confirmé')}
-
-      ${this.greeting(appointment.name)}
-      ${this.bodyText('Votre rendez-vous a été <strong style="color:' + this.COLORS.secondary + ';">confirmé</strong> par notre équipe.')}
-
-      ${this.infoTable([
-        ['Service', appointment.service?.name || '-'],
-        ['Praticien', appointment.practitioner?.name || '-'],
-        ['Date', date],
+    const html = this.wrap(`
+      ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
+      ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
+      ${this.paragraph(`Bonne nouvelle ! Votre rendez-vous pour <strong>${appt.service?.name || '—'}</strong> a été confirmé.`)}
+      ${this.detailsTable([
+        ['Service', appt.service?.name || '—'],
+        ['Praticien', appt.practitioner?.name || '—'],
+        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
+      ${this.note('Nous vous attendons. En cas d\'empêchement, merci de nous prévenir au moins <strong>24 heures</strong> à l\'avance.')}
+      ${this.closing()}
+    `, this.COLORS.success);
 
-      <div style="background:${this.COLORS.bg};border-radius:16px;padding:20px 24px;margin:0 0 24px;border-left:3px solid ${this.COLORS.accent};">
-        <p style="font-size:14px;color:${this.COLORS.textLight};line-height:1.8;margin:0;">
-          Nous vous attendons avec impatience. En cas d'empêchement, merci de nous prévenir au moins 24h à l'avance.
-        </p>
-      </div>
-
-      ${this.signature()}
-    `);
-
-    await this.mailService.sendMail(
-      appointment.email,
-      `Confirmation de votre rendez-vous — ${appointment.service?.name || "Widamine"}`,
-      html,
-    );
+    await this.mailService.sendMail(appt.email, `Confirmation — ${appt.service?.name || 'Widamine'}`, html);
   }
 
-  // ── 3. Cancellation (sent to patient when status → CANCELLED) ──
+  // ════════════════════════════════════════════════════════════════
+  //  3. CANCELLATION — patient
+  // ════════════════════════════════════════════════════════════════
 
   async sendCancellation(appointmentId: string) {
     if (!(await this.canSendEmail("cancellation"))) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true },
     });
-    if (!appointment || !appointment.email) return;
+    if (!appt || !appt.email) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "";
+    const date = appt.schedules[0] ? this.dateStr(appt.schedules[0].datetime) : '';
 
-    const html = this.emailWrapper(`
-      ${this.heading('&#10007;', 'Rendez-vous annulé')}
+    const html = this.wrap(`
+      ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
+      ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
+      ${this.paragraph(`Votre rendez-vous${date ? ` du <strong>${date}</strong>` : ''}${appt.service ? ` pour <strong>${appt.service.name}</strong>` : ''} a été annulé.`)}
+      ${this.note('Si vous souhaitez reprendre rendez-vous, contactez-nous directement. Nous restons à votre disposition.')}
+      ${this.closing()}
+    `, this.COLORS.danger);
 
-      ${this.greeting(appointment.name)}
-      ${this.bodyText(`Votre rendez-vous${date ? ` du <strong style="color:${this.COLORS.secondary};">${date}</strong> pour <strong style="color:${this.COLORS.secondary};">${appointment.service?.name || ""}</strong>` : ''} a été <strong style="color:${this.COLORS.secondary};">annulé</strong>.`)}
-
-      <p style="font-size:14px;color:${this.COLORS.textLight};line-height:1.8;margin:0 0 20px;">
-        Pour reprendre rendez-vous, vous pouvez revisiter notre site ou nous contacter directement.
-      </p>
-
-      ${this.signature()}
-    `);
-
-    await this.mailService.sendMail(
-      appointment.email,
-      `Annulation de votre rendez-vous — Widamine`,
-      html,
-    );
+    await this.mailService.sendMail(appt.email, 'Annulation — Widamine', html);
   }
 
-  // ── 4. Reminder (sent to patient the day before) ──
+  // ════════════════════════════════════════════════════════════════
+  //  4. REMINDER — patient
+  // ════════════════════════════════════════════════════════════════
 
   async sendReminder(appointmentId: string) {
     if (!(await this.canSendEmail("reminder"))) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true },
     });
-    if (!appointment || !appointment.email) return;
+    if (!appt || !appt.email) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "à confirmer";
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#9200;', 'Rappel de rendez-vous')}
-
-      ${this.greeting(appointment.name)}
-      ${this.bodyText('Ceci est un rappel pour votre rendez-vous <strong style="color:' + this.COLORS.secondary + ';">demain</strong>.')}
-
-      ${this.infoTable([
-        ['Service', appointment.service?.name || '-'],
-        ['Praticien', appointment.practitioner?.name || '-'],
-        ['Date', date],
+    const html = this.wrap(`
+      ${this.title('⏰', 'Rappel de rendez-vous', this.COLORS.warning)}
+      ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
+      ${this.paragraph('Ceci est un rappel pour votre rendez-vous <strong>demain</strong>.')}
+      ${this.detailsTable([
+        ['Service', appt.service?.name || '—'],
+        ['Praticien', appt.practitioner?.name || '—'],
+        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
+      ${this.note('Merci de confirmer votre présence. En cas d\'empêchement, contactez-nous dès que possible.')}
+      ${this.closing()}
+    `, this.COLORS.warning);
 
-      <div style="background:${this.COLORS.bg};border-radius:16px;padding:20px 24px;margin:0 0 24px;border-left:3px solid ${this.COLORS.accent};">
-        <p style="font-size:14px;color:${this.COLORS.textLight};line-height:1.8;margin:0;">
-          Merci de confirmer votre présence. En cas d'empêchement, contactez-nous au plus tôt.
-        </p>
-      </div>
-
-      ${this.signature()}
-    `);
-
-    await this.mailService.sendMail(
-      appointment.email,
-      `Rappel : votre rendez-vous demain — ${appointment.service?.name || "Widamine"}`,
-      html,
-    );
+    await this.mailService.sendMail(appt.email, `Rappel — ${appt.service?.name || 'Widamine'}`, html);
   }
 
-  // ── 5. Doctor: new appointment ──
+  // ════════════════════════════════════════════════════════════════
+  //  5. DOCTOR — new appointment
+  // ════════════════════════════════════════════════════════════════
 
   async notifyDoctorNewAppointment(appointmentId: string) {
     if (!(await this.canSendAnyEmail())) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appointment?.practitionerId) return;
+    if (!appt?.practitionerId) return;
 
-    const doctor = await this.prisma.user.findUnique({
-      where: { id: appointment.practitionerId },
-    });
+    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
     if (!doctor) return;
-    const doctorEmail = doctor.notificationEmail ?? doctor.email;
-    if (!doctorEmail) return;
+    const to = doctor.notificationEmail ?? doctor.email;
+    if (!to) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "à planifier";
-
-    const patientName = appointment.patient
-      ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
-      : appointment.name;
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#128203;', 'Nouvelle réservation')}
-
-      ${this.greeting(doctor.name || '')}
-      ${this.bodyText('Un nouveau rendez-vous vous a été assigné.')}
-
-      ${this.infoTable([
-        ['Patient', patientName],
-        ['Téléphone', appointment.phone || '-'],
-        ['Service', appointment.service?.name || '-'],
-        ['Date', date],
-        ['Contexte', appointment.context || '-'],
+    const html = this.wrap(`
+      ${this.title('📋', 'Nouvelle réservation')}
+      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+      ${this.paragraph('Un nouveau rendez-vous vous a été assigné.')}
+      ${this.detailsTable([
+        ['Patient', this.patientName(appt)],
+        ['Téléphone', appt.phone || '—'],
+        ['Service', appt.service?.name || '—'],
+        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
+        ['Note', appt.context || '—'],
       ])}
-
-      ${this.signature()}
+      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
     `);
 
-    await this.mailService.sendMail(
-      doctorEmail,
-      `Nouvelle réservation — ${appointment.service?.name || "Widamine"}`,
-      html,
-    );
+    await this.mailService.sendMail(to, `Nouvelle réservation — ${appt.service?.name || 'Widamine'}`, html);
   }
 
-  // ── 6. Doctor: confirmation ──
+  // ════════════════════════════════════════════════════════════════
+  //  6. DOCTOR — confirmation
+  // ════════════════════════════════════════════════════════════════
 
   async notifyDoctorConfirmation(appointmentId: string) {
     if (!(await this.canSendAnyEmail())) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appointment?.practitionerId) return;
+    if (!appt?.practitionerId) return;
 
-    const doctor = await this.prisma.user.findUnique({
-      where: { id: appointment.practitionerId },
-    });
+    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
     if (!doctor) return;
-    const doctorEmail = doctor.notificationEmail ?? doctor.email;
-    if (!doctorEmail) return;
+    const to = doctor.notificationEmail ?? doctor.email;
+    if (!to) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "à planifier";
-
-    const patientName = appointment.patient
-      ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
-      : appointment.name;
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#10003;', 'Rendez-vous confirmé')}
-
-      ${this.greeting(doctor.name || '')}
-      ${this.bodyText('Le rendez-vous suivant a été confirmé.')}
-
-      ${this.infoTable([
-        ['Patient', patientName],
-        ['Service', appointment.service?.name || '-'],
-        ['Date', date],
+    const html = this.wrap(`
+      ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
+      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+      ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
+      ${this.detailsTable([
+        ['Patient', this.patientName(appt)],
+        ['Service', appt.service?.name || '—'],
+        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
+      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
+    `, this.COLORS.success);
 
-      ${this.signature()}
-    `);
-
-    await this.mailService.sendMail(
-      doctorEmail,
-      `Rendez-vous confirmé — ${appointment.service?.name || "Widamine"}`,
-      html,
-    );
+    await this.mailService.sendMail(to, `Confirmé — ${appt.service?.name || 'Widamine'}`, html);
   }
 
-  // ── 7. Doctor: cancellation ──
+  // ════════════════════════════════════════════════════════════════
+  //  7. DOCTOR — cancellation
+  // ════════════════════════════════════════════════════════════════
 
   async notifyDoctorCancellation(appointmentId: string) {
     if (!(await this.canSendAnyEmail())) return;
 
-    const appointment = await this.prisma.appointment.findUnique({
+    const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { service: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appointment?.practitionerId) return;
+    if (!appt?.practitionerId) return;
 
-    const doctor = await this.prisma.user.findUnique({
-      where: { id: appointment.practitionerId },
-    });
+    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
     if (!doctor) return;
-    const doctorEmail = doctor.notificationEmail ?? doctor.email;
-    if (!doctorEmail) return;
+    const to = doctor.notificationEmail ?? doctor.email;
+    if (!to) return;
 
-    const date = appointment.schedules[0]
-      ? new Date(appointment.schedules[0].datetime).toLocaleDateString("fr-FR", {
-          weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-        })
-      : "";
-
-    const patientName = appointment.patient
-      ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
-      : appointment.name;
-
-    const html = this.emailWrapper(`
-      ${this.heading('&#10007;', 'Rendez-vous annulé')}
-
-      ${this.greeting(doctor.name || '')}
-      ${this.bodyText('Un rendez-vous a été <strong style="color:' + this.COLORS.secondary + ';">annulé</strong>.')}
-
-      ${this.infoTable([
-        ['Patient', patientName],
-        ['Service', appointment.service?.name || '-'],
-        ['Date', date],
+    const html = this.wrap(`
+      ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
+      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+      ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
+      ${this.detailsTable([
+        ['Patient', this.patientName(appt)],
+        ['Service', appt.service?.name || '—'],
+        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
+      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
+    `, this.COLORS.danger);
 
-      ${this.signature()}
-    `);
-
-    await this.mailService.sendMail(
-      doctorEmail,
-      `Rendez-vous annulé — ${appointment.service?.name || "Widamine"}`,
-      html,
-    );
+    await this.mailService.sendMail(to, `Annulé — ${appt.service?.name || 'Widamine'}`, html);
   }
 }
