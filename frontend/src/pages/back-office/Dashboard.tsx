@@ -1,5 +1,4 @@
 import api from '@/lib/api'
-import { openCalendarForAppointment } from '@/lib/scheduleNavigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useStatsStore } from '@/stores/statsStore'
 import {
@@ -16,7 +15,7 @@ import {
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 
 function parseSchedule(datetime?: string): Date | null {
@@ -164,7 +163,6 @@ function groupBySlot(items: ReturnType<typeof enrichAppts>) {
 
 export default function Dashboard() {
   const { user } = useAuthStore()
-  const navigate = useNavigate()
   const { stats: sharedStats, fetchStats: fetchSharedStats } = useStatsStore()
   const isAdminOrReceptionist = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
   const [stats, setStats] = useState<DashboardStats>(sharedStats || EMPTY_STATS)
@@ -239,18 +237,9 @@ export default function Dashboard() {
 
   const openDetails = useCallback(
     (item: ApptItem) => {
-      const scheduleDate = item.schedules?.[0]?.datetime
-      if (scheduleDate) {
-        openCalendarForAppointment(navigate, {
-          ...item,
-          id: item.id,
-          schedules: item.schedules,
-        })
-      } else {
-        openDrawer(item.id)
-      }
+      openDrawer(item.id)
     },
-    [navigate, openDrawer],
+    [openDrawer],
   )
 
   const drawerMotion = {
@@ -692,21 +681,14 @@ export default function Dashboard() {
                       )}
 
                       <div className='pt-2'>
-                        <button
-                          type='button'
-                          onClick={() => {
-                            if (details?.schedules?.[0]?.datetime) {
-                              openCalendarForAppointment(navigate, {
-                                ...details,
-                                id: details.id,
-                                schedules: details.schedules,
-                              })
-                            }
-                          }}
+                        <Link
+                          to={details?.schedules?.[0]?.datetime
+                            ? `/back-office/calendar?openAppointment=${details.id}&date=${new Date(details.schedules[0].datetime).toISOString().split('T')[0]}`
+                            : '/back-office/calendar'}
                           className='inline-flex items-center gap-1 text-sm text-primary hover:text-primary/70 font-medium transition-colors'
                         >
                           Ouvrir calendrier <ArrowRight size={12} />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </>
