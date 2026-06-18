@@ -118,7 +118,7 @@ export default function Login() {
           <div className='mb-10'>
             <div className='flex items-center gap-3 mb-6'>
               <div className='flex h-11 w-11 items-center justify-center rounded-full border border-secondary/10 bg-custom-white/80 shadow-sm'>
-                <img src='/logo.png' alt='Widamine' className='h-6 w-6 object-contain' />
+                <img src='/logo.svg' alt='Widamine' className='h-6 w-6 object-contain' />
               </div>
               <div>
                 <p className='font-amoria text-sm tracking-[0.18em] text-secondary'>WIDAMINE</p>

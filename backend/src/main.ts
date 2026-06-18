@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
+import { AllExceptionsFilter } from "@/common/filters/all-exceptions.filter";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 
@@ -25,6 +26,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = process.env.PORT ?? 3000;
   const host = process.env.HOST ?? "0.0.0.0";

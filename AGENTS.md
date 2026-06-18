@@ -14,10 +14,15 @@ npx prisma generate
 npm run seed            # creates admin + demo data
 npm run start:dev       # starts on :3000
 
-# 3. Frontend
+# 3. Frontend (legacy)
 cd frontend
 npm install
 npm run dev             # starts on :5173, proxies /api → :3000
+
+# 3b. New back-office (recommended)
+cd new-widamine
+npm install
+npm run dev             # starts on :5174, proxies /api → :3000
 
 # 4. Login: admin@widamine.com / admin123
 ```
@@ -30,11 +35,13 @@ widamine/
 │   ├── src/          # Controllers, services, modules
 │   ├── prisma/       # Schema + seed
 │   └── dist/         # Compiled JS (build before prod run)
-├── frontend/         # React + Vite + Tailwind v4 + Framer Motion
+├── frontend/         # Legacy React + Vite + Tailwind v4
+├── new-widamine/     # Redesigned back-office — shadcn/ui + DM Sans
 │   └── src/
-│       ├── pages/back-office/   # 12 lazy-loaded pages
-│       ├── components/          # Shared components
-│       └── stores/              # Zustand stores
+│       ├── components/ui/   # shadcn primitives (Button, Card, Dialog, …)
+│       ├── components/bo/   # FormDialog and back-office helpers
+│       ├── pages/back-office/
+│       └── stores/
 ├── start-mongodb.sh  # MongoDB replica set startup
 └── AGENTS.md         # This file
 ```
@@ -71,28 +78,31 @@ VITE_PUBLIC_API_URL="/api"   # Vite proxy → :3000
 | Role            | Email                  | Password    |
 |-----------------|------------------------|-------------|
 | ADMIN           | admin@widamine.com     | admin123    |
-| DOCTOR          | dr.slaoui@widamine.com | doctor123   |
-| RECEPTIONIST    | Contact in seed        | —           |
+
+Seed creates **admin only** (minimal). Legacy demo users removed.
 
 Seed: `cd backend && npm run seed`
 
 ## Key Conventions
 
-### Back-office UI (12 pages)
-- **Entrance animation**: `0.4s, ease [0.22, 1, 0.36, 1], y:20` on all pages
-- **Page layout**: `bo-page` > `bo-page-inner bo-page-stack` > `bo-section-stack` + scrollable content
-- **Utility classes** (in `index.css`): `bo-surface`, `bo-title`, `bo-subtitle`, `bo-primary-btn`, `bo-fab`, `bo-glass`, `bo-input`, `bo-select`, `bo-page`, `bo-page-inner`, `bo-page-stack`, `bo-section-stack`, `bo-page-scroll`
-- **Modal standard**: `shadow-bo-elevated` + `border-black/[0.06]` + `bo-glass` backdrop
-- **All pages lazy-loaded** via `React.lazy` with `Suspense`
-- **FABs**: `bo-fab lg:hidden` (mobile only), desktop gets `hidden lg:inline-flex` button in heading
+### `new-widamine/` back-office (shadcn/ui)
+- **Dev**: `cd new-widamine && npm run dev` → `:5174`
+- **UI kit**: shadcn/ui v4 (base-nova, `@base-ui/react`) — import from `@/components/ui`
+- **Forms/modals**: `FormDialog` from `@/components/bo/FormDialog` for CRUD overlays
+- **Layout utilities** (in `index.css`): `bo-page`, `bo-page-inner`, `bo-page-stack`, `bo-section-stack`, `bo-page-scroll`, `bo-title`, `bo-chip`, `bo-drawer`
+- **No entrance animations** — avoid `transition-all`, framer-motion
+- **Font**: DM Sans (body), Amoria (display logo)
+- **Add components**: `npx shadcn add <name> -y` (aliases in `components.json` point to `src/components`)
 
-### Tailwind v4
+### Legacy `frontend/` back-office
 - Uses `@import 'tailwindcss'` + `@theme` directive in `index.css`
 - Theme colors: `--color-primary: #2e90c0`, `--color-secondary: #1a3646`, `--color-accent: #e8c5b8`
 
-### Fonts
-- Amoria (display): `/public/fonts/Amoria.otf`
-- Raleway (body): Google Fonts
+### Fonts (`new-widamine`)
+- DM Sans (body): Google Fonts in `index.html`
+- Amoria (display): `/public/fonts/AMORIA.otf`
+
+### Fonts (legacy `frontend`)
 
 ## Common Fixes
 
