@@ -1,6 +1,0 @@
-export { default as DataTable } from './DataTable'
-export { TanStackDataTable } from './TanStackDataTable'
-export { DataTableColumnHeader } from './DataTableColumnHeader'
-export { DataTablePagination } from './DataTablePagination'
-export { useDataTable } from './useDataTable'
-export { globalSearchFilter, equalsOrAllFilter } from './filter-fns'

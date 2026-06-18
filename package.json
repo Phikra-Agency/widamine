@@ -1,0 +1,29 @@
+{
+  "name": "widamine",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "api",
+    "admin",
+    "landing"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck --filter=widamine-admin",
+    "db:generate": "npm run generate --workspace=widamine-api",
+    "db:seed": "npm run seed --workspace=widamine-api",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "bootstrap": "npm install && npm run db:generate"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.13.0"
+}

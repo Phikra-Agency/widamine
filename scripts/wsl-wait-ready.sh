@@ -8,5 +8,5 @@ for i in $(seq 1 24); do
   echo "Attempt $i/24 — waiting 15s..."
   sleep 15
 done
-echo "Services not ready after 6 minutes. Check ~/widamine-backend.log"
+echo "Services not ready after 6 minutes. Check ~/widamine-api.log"
 exit 1

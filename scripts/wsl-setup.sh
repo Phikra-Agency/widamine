@@ -74,40 +74,30 @@ MONGOEOF
 chmod +x "$PROJECT_ROOT/start-mongodb.sh"
 
 # --- Env files ---
-if [[ ! -f "$PROJECT_ROOT/backend/.env" ]]; then
-  cp "$PROJECT_ROOT/backend/.env.example" "$PROJECT_ROOT/backend/.env"
-  sed -i 's/your-jwt-secret-here/widamine_jwt_secret_dev_alae_2026/' "$PROJECT_ROOT/backend/.env"
-fi
-
-if [[ ! -f "$PROJECT_ROOT/frontend/.env" ]]; then
-  echo 'VITE_PUBLIC_API_URL="/api"' > "$PROJECT_ROOT/frontend/.env"
+if [[ ! -f "$PROJECT_ROOT/api/.env" ]]; then
+  cp "$PROJECT_ROOT/api/.env.example" "$PROJECT_ROOT/api/.env"
+  sed -i 's/your-jwt-secret-here/widamine_jwt_secret_dev_alae_2026/' "$PROJECT_ROOT/api/.env"
 fi
 
 # --- MongoDB ---
 echo "==> Starting MongoDB replica set..."
 bash "$PROJECT_ROOT/start-mongodb.sh"
 
-# --- Backend ---
-echo "==> Backend: npm install + prisma + seed..."
-cd "$PROJECT_ROOT/backend"
+# --- Monorepo ---
+echo "==> npm install + prisma + seed..."
+cd "$PROJECT_ROOT"
 npm install
-npx prisma generate
-npm run seed
-
-# --- Frontend ---
-echo "==> Frontend: npm install..."
-cd "$PROJECT_ROOT/frontend"
-npm install
+npm run db:generate
+npm run db:seed
 
 echo ""
 echo "=============================================="
 echo "  Widamine WSL setup complete"
 echo "=============================================="
-echo "  Project:  $PROJECT_ROOT"
-echo "  MongoDB:  mongodb://127.0.0.1:27017/widamine"
-echo "  Login:    admin@widamine.com / admin123"
+echo "  Project:     $PROJECT_ROOT"
+echo "  MongoDB:     mongodb://127.0.0.1:27017/widamine"
+echo "  Login:       admin@widamine.com / admin123"
 echo ""
-echo "  Start backend:  cd backend && npm run start:dev"
-echo "  Start frontend: cd frontend && npm run dev"
-echo "  MongoDB:        ./start-mongodb.sh"
+echo "  Start stack: npm run dev"
+echo "  MongoDB:     ./start-mongodb.sh"
 echo "=============================================="

@@ -5,28 +5,33 @@ PR="$(cd "$(dirname "$0")/.." && pwd)"
 
 bash "$PR/start-mongodb.sh"
 
-# Kill stale dev processes if any
-pkill -f 'nest.js start --watch' 2>/dev/null || true
-pkill -f 'vite/bin/vite.js' 2>/dev/null || true
+pkill -f 'nest start --watch' 2>/dev/null || true
+pkill -f 'vite --port' 2>/dev/null || true
 sleep 1
 
+cd "$PR"
 if ! ss -tlnp 2>/dev/null | grep -q ':3000'; then
-  cd "$PR/backend"
-  setsid npm run start:dev > "$HOME/widamine-backend.log" 2>&1 < /dev/null &
-  echo "Backend starting (log: ~/widamine-backend.log) — first boot on /mnt/c can take 2–3 min"
+  setsid npm run dev --workspace=widamine-api > "$HOME/widamine-api.log" 2>&1 < /dev/null &
+  echo "API starting (log: ~/widamine-api.log)"
 else
-  echo "Backend already listening on :3000"
+  echo "API already listening on :3000"
+fi
+
+if ! ss -tlnp 2>/dev/null | grep -q ':5174'; then
+  setsid npm run dev --workspace=widamine-admin > "$HOME/widamine-admin.log" 2>&1 < /dev/null &
+  echo "Admin starting (log: ~/widamine-admin.log)"
+else
+  echo "Admin already listening on :5174"
 fi
 
 if ! ss -tlnp 2>/dev/null | grep -q ':5173'; then
-  cd "$PR/frontend"
-  setsid npm run dev > "$HOME/widamine-frontend.log" 2>&1 < /dev/null &
-  echo "Frontend starting (log: ~/widamine-frontend.log)"
+  setsid npm run dev --workspace=widamine-landing > "$HOME/widamine-landing.log" 2>&1 < /dev/null &
+  echo "Landing starting (log: ~/widamine-landing.log)"
 else
-  echo "Frontend already listening on :5173"
+  echo "Landing already listening on :5173"
 fi
 
 echo ""
-echo "URLs: http://localhost:5173  |  API http://localhost:3000"
+echo "URLs: landing http://localhost:5173 | admin http://localhost:5174 | API http://localhost:3000"
 echo "Login: admin@widamine.com / admin123"
 echo "Check: bash scripts/wsl-healthcheck.sh"

@@ -5,10 +5,10 @@ dist/
 .env.local
 .vscode/
 .idea/
-backend/dist/
-frontend/node_modules/
+api/dist/
+admin/dist/
+landing/dist/
 *.log
 mongodb_data/
-widamine-1/
-*.bak
 mongod.*
+.turbo/
