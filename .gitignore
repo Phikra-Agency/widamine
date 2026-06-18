@@ -8,6 +8,7 @@ dist/
 api/dist/
 admin/dist/
 landing/dist/
+backend/
 *.log
 mongodb_data/
 mongod.*
