@@ -36,8 +36,12 @@ export const useContactsStore = create<ContactStoreInterface>((set, get) => ({
     set({ filters })
   },
   fetchItems: async () => {
-    const res = await api.get(`contacts?read=${get().filters.read ? 'true' : 'false'}`)
-    set({ items: res.data })
+    try {
+      const res = await api.get(`contacts?read=${get().filters.read ? 'true' : 'false'}`)
+      set({ items: res.data })
+    } catch {
+      // Auth errors handled by AuthWrapper
+    }
   },
   readItem: async () => {
     await api.put('contacts/'+get().item.id+'/read')

@@ -25,6 +25,7 @@ interface EventCardProps {
   formatTime: (value?: string) => string
   isUnread?: boolean
   variant?: 'grid' | 'list'
+  expandable?: boolean
   onClick: () => void
 }
 
@@ -33,6 +34,7 @@ export default function EventCard({
   formatTime,
   isUnread,
   variant = 'grid',
+  expandable = true,
   onClick,
 }: EventCardProps) {
   const motif = schedule.appointment?.motif
@@ -72,16 +74,20 @@ export default function EventCard({
     )
   }
 
+  const practitionerName = schedule.appointment?.practitioner?.name
+  const resourceName = schedule.appointment?.resource?.name
+  const hasDetails = practitionerName || resourceName
+
   return (
-    <div className='group/sched relative'>
+    <div data-event-card className='group/sched relative'>
       <button
         type='button'
         onClick={onClick}
-        className='w-full shrink-0 cursor-pointer rounded-element bg-primary/10 text-left transition hover:bg-primary/15'
-        style={{ boxShadow: `inset 3px 0 0 ${accentColor}` }}
+        className='w-full cursor-pointer overflow-hidden rounded-element text-left transition-all duration-100 ease-out'
+        style={{ backgroundColor: `${accentColor}14` }}
       >
         <div className='flex items-center gap-2 px-2 py-1.5'>
-          <span className='shrink-0 text-[10px] font-semibold tabular-nums text-foreground/80'>
+          <span className='shrink-0 text-[10px] font-semibold tabular-nums' style={{ color: accentColor }}>
             {formatTime(schedule.datetime)}
           </span>
           <p className='min-w-0 flex-1 truncate text-[11px] font-medium text-foreground'>{motifName}</p>
@@ -89,26 +95,23 @@ export default function EventCard({
             <div className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: family.hue }} />
           )}
         </div>
-      </button>
 
-      <div className='pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 opacity-0 transition-opacity duration-200 group-hover/sched:opacity-100'>
-        <div
-          className='whitespace-nowrap rounded-element px-3 py-2 text-[11px] leading-snug text-white shadow-lg'
-          style={{ backgroundColor: accentColor }}
-        >
-          <p className='font-semibold'>{motifName}</p>
-          <p className='mt-0.5 text-white/75'>
-            {formatTime(schedule.datetime)} · {schedule.session.service.name}
-          </p>
-          {schedule.appointment?.practitioner && (
-            <p className='mt-0.5 text-white/60'>{schedule.appointment.practitioner.name}</p>
-          )}
-          {schedule.appointment?.resource && (
-            <p className='mt-0.5 text-white/60'>{schedule.appointment.resource.name}</p>
-          )}
-        </div>
-        <div className='mx-auto -mt-1 h-2 w-2 rotate-45' style={{ backgroundColor: accentColor }} />
-      </div>
+        {expandable && hasDetails ? (
+          <div className='grid transition-all duration-150 ease-out grid-rows-[0fr] group-hover/sched:grid-rows-[1fr]'>
+            <div className='overflow-hidden'>
+              <div className='border-t px-2 py-1.5 text-[11px] leading-snug' style={{ borderColor: `${accentColor}20` }}>
+                <p className='text-secondary'>{sublabel}</p>
+                {practitionerName && (
+                  <p className='text-secondary/80'>{practitionerName}</p>
+                )}
+                {resourceName && (
+                  <p className='text-secondary/80'>{resourceName}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </button>
     </div>
   )
 }

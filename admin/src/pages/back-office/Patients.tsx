@@ -144,12 +144,15 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
 
   const cityFilterValue = filters.city === 'null' || !filters.city ? 'all' : filters.city
 
+  const [extraColumnFilters, setExtraColumnFilters] = useState<ColumnFiltersState>([])
+
   const columnFilters = useMemo<ColumnFiltersState>(
     () => [
       { id: 'gender', value: filters.gender || 'all' },
       { id: 'city', value: cityFilterValue },
+      ...extraColumnFilters,
     ],
-    [filters.gender, cityFilterValue],
+    [filters.gender, cityFilterValue, extraColumnFilters],
   )
 
   const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
@@ -157,10 +160,14 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
       const next = typeof updater === 'function' ? updater(columnFilters) : updater
       const genderVal = String(next.find((f) => f.id === 'gender')?.value ?? 'all')
       const cityVal = String(next.find((f) => f.id === 'city')?.value ?? 'all')
+      const extras = next.filter(
+        (f) => f.id !== 'gender' && f.id !== 'city',
+      )
       setFilters({
         gender: genderVal === 'all' ? '' : genderVal,
         city: cityVal === 'all' ? 'all' : cityVal,
       })
+      setExtraColumnFilters(extras)
     },
     [columnFilters, setFilters],
   )

@@ -165,8 +165,12 @@ export const usePatientStore = create<PatientStoreInterface>()(
         const isFresh = items.length > 0 && lastFetchedAt && Date.now() - lastFetchedAt < PATIENTS_STALE_MS
         if (isFresh) return
 
-        const res = await api.get('patients')
-        set({ items: res.data, lastFetchedAt: Date.now() })
+        try {
+          const res = await api.get('patients')
+          set({ items: res.data, lastFetchedAt: Date.now() })
+        } catch {
+          // Auth errors are handled by AuthWrapper interceptor (logout + redirect)
+        }
       },
       saveItem: async () => {
         const raw = get().item as any

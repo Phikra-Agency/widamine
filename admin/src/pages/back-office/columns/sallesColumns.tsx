@@ -1,7 +1,7 @@
 import { EmptyRoomIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PencilSimple as Pen, Trash as Trash2, Door } from '@phosphor-icons/react'
-import { DataTable, DataTableColumnHeader } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
 import { Button } from '@/components/ui'
 import type { Resource } from '@/stores/resourcesStore'
 import { PriorityBadge } from './shared/priorityBadge'
@@ -17,7 +17,12 @@ export function createSallesColumns({ onEdit, onDelete }: SalleColumnsDeps): Col
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Salle' />,
+      header: ({ column }) => (
+        <div className='flex items-center justify-between gap-1'>
+          <DataTableColumnHeader column={column} title='Salle' />
+          <DataTableColumnSearch column={column} />
+        </div>
+      ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <div className='flex h-9 w-9 items-center justify-center rounded-control bg-secondary/4'>

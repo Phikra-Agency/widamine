@@ -14,5 +14,6 @@ declare module '@tanstack/react-table' {
     filterOptions?: ColumnFilterOption[]
     filterColumnId?: string
     filterPlaceholder?: string
+    searchable?: boolean
   }
 }

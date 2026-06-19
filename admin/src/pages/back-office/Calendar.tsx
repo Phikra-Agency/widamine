@@ -34,18 +34,15 @@ import {
   type CalendarDaySlots,
 } from '@/components/calendar/views/CalendarGridCells'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
-import { DataTableFilterPills, type FilterPillOption } from '@/components/data-table'
-import type { FilterPillColor } from '@/components/data-table/filter-pills'
+import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
+import { Funnel, User, Tag } from '@phosphor-icons/react'
 
-const CALENDAR_STATUS_PILLS: FilterPillOption[] = [
-  { value: 'all', label: 'Tous', color: 'mist' },
-  { value: 'PENDING', label: 'En attente', color: 'sand' },
-  { value: 'CONFIRMED', label: 'Confirmé', color: 'sea' },
-  { value: 'COMPLETED', label: 'Terminé', color: 'sage' },
-  { value: 'CANCELLED', label: 'Annulé', color: 'coral' },
+const STATUS_OPTIONS = [
+  { value: 'PENDING', label: 'En attente' },
+  { value: 'CONFIRMED', label: 'Confirmé' },
+  { value: 'COMPLETED', label: 'Terminé' },
+  { value: 'CANCELLED', label: 'Annulé' },
 ]
-
-const DYNAMIC_PILL_COLORS: FilterPillColor[] = ['sky', 'sea', 'aqua', 'sage']
 
 const OPENED_STORAGE_KEY = 'calendar-opened-keys-new'
 
@@ -303,52 +300,43 @@ function Planner() {
     })()
   }, [effectivePending, items, fetchedDate, fetchItems, openShowSchedule, searchParams, setSearchParams, clearPendingCalendarOpen])
 
-  const practitionerPills = useMemo<FilterPillOption[]>(
-    () => [
-      { value: 'all', label: 'Tous praticiens', color: 'mist' },
-      ...doctors.map((doctor, index) => ({
-        value: doctor.id,
-        label: doctor.name,
-        color: DYNAMIC_PILL_COLORS[index % DYNAMIC_PILL_COLORS.length],
-      })),
-    ],
+  const practitionerOptions = useMemo(
+    () => doctors.map((d) => ({ value: d.id, label: d.name })),
     [doctors],
   )
 
-  const motifPills = useMemo<FilterPillOption[]>(
-    () => [
-      { value: 'all', label: 'Tous motifs', color: 'mist' },
-      ...motifOptions.map((motif, index) => ({
-        value: motif.id,
-        label: motif.name,
-        color: DYNAMIC_PILL_COLORS[index % DYNAMIC_PILL_COLORS.length],
-      })),
-    ],
+  const motifSelectOptions = useMemo(
+    () => motifOptions.map((m) => ({ value: m.id, label: m.name })),
     [motifOptions],
   )
 
   const filterToolbar = (
-    <>
-      <DataTableFilterPills
-        options={CALENDAR_STATUS_PILLS}
-        value={filterStatus || 'all'}
-        onChange={(value) => setFilterStatus(value === 'all' ? '' : value)}
+    <div className='flex flex-wrap items-center gap-2'>
+      <CalendarFilterSelect
+        placeholder='Statut'
+        color='mist'
+        icon={Funnel}
+        options={STATUS_OPTIONS}
+        value={filterStatus}
+        onChange={setFilterStatus}
       />
-      {doctors.length > 0 && (
-        <DataTableFilterPills
-          options={practitionerPills}
-          value={filterPractitionerId || 'all'}
-          onChange={(value) => setFilterPractitionerId(value === 'all' ? '' : value)}
-        />
-      )}
-      {motifOptions.length > 0 && (
-        <DataTableFilterPills
-          options={motifPills}
-          value={filterMotifId || 'all'}
-          onChange={(value) => setFilterMotifId(value === 'all' ? '' : value)}
-        />
-      )}
-    </>
+      <CalendarFilterSelect
+        placeholder='Praticien'
+        color='sky'
+        icon={User}
+        options={practitionerOptions}
+        value={filterPractitionerId}
+        onChange={setFilterPractitionerId}
+      />
+      <CalendarFilterSelect
+        placeholder='Motif'
+        color='sea'
+        icon={Tag}
+        options={motifSelectOptions}
+        value={filterMotifId}
+        onChange={setFilterMotifId}
+      />
+    </div>
   )
 
   const openSchedule = (schedule: (typeof items)[0]['morning'][0]) => {

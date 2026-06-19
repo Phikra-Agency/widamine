@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import EventCard, { type EventCardSchedule } from '@/components/calendar/EventCard'
 import { formatLocalDate } from '@/lib/date'
@@ -82,33 +82,89 @@ export function ScheduleCell({
   isOpened,
   formatTime,
 }: ScheduleCellProps) {
+  const cellRef = useRef<HTMLDivElement>(null)
+  const [showAll, setShowAll] = useState(false)
+  const [maxCards, setMaxCards] = useState(schedules.length)
+
+  const measure = useCallback(() => {
+    if (showAll) return
+    const el = cellRef.current
+    if (!el || schedules.length === 0) {
+      setMaxCards(schedules.length)
+      return
+    }
+
+    const style = getComputedStyle(el)
+    const pt = parseFloat(style.paddingTop)
+    const pb = parseFloat(style.paddingBottom)
+    const gap = parseFloat(style.rowGap) || parseFloat(style.gap) || 0
+    const available = el.clientHeight - pt - pb
+
+    const sample = el.querySelector('[data-event-card]') as HTMLElement
+    const cardH = sample ? sample.offsetHeight : 26
+
+    if (cardH <= 0) return
+
+    const btnH = 26
+    const reserveButton = schedules.length > 1
+    const roomForCards = available - (reserveButton ? btnH + gap : 0)
+    const count = Math.max(1, Math.floor((roomForCards + gap) / (cardH + gap)))
+
+    setMaxCards(Math.min(count, schedules.length))
+  }, [schedules.length, showAll])
+
+  useEffect(() => {
+    const el = cellRef.current
+    if (!el) return
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    requestAnimationFrame(measure)
+    return () => ro.disconnect()
+  }, [measure])
+
+  const overflow = schedules.length - maxCards
+  const visible = overflow > 0 ? schedules.slice(0, maxCards) : schedules
+
   return (
     <div
+      ref={cellRef}
       className={clsx(
-        'flex min-h-0 flex-col gap-1 border-r border-border-subtle p-1.5 last:border-r-0',
+        'flex min-h-0 flex-col gap-1 overflow-hidden border-r border-border-subtle p-1.5 last:border-r-0',
         !isLastRow && 'border-b',
         isToday && 'bg-primary/[0.02]',
       )}
     >
-      {schedules.slice(0, 3).map((schedule) => (
-        <EventCard
-          key={schedule.id}
-          schedule={schedule}
-          formatTime={formatTime}
-          isUnread={!isOpened(schedule.id)}
-          variant='grid'
-          onClick={() => onOpenSchedule(schedule)}
-        />
-      ))}
-      {schedules.length > 3 && (
+      {showAll || overflow <= 0
+        ? schedules.map((schedule) => (
+            <EventCard
+              key={schedule.id}
+              schedule={schedule}
+              formatTime={formatTime}
+              isUnread={!isOpened(schedule.id)}
+              variant='grid'
+              onClick={() => onOpenSchedule(schedule)}
+            />
+          ))
+        : visible.map((schedule) => (
+            <EventCard
+              key={schedule.id}
+              schedule={schedule}
+              formatTime={formatTime}
+              isUnread={!isOpened(schedule.id)}
+              variant='grid'
+              onClick={() => onOpenSchedule(schedule)}
+            />
+          ))}
+      {overflow > 0 && (
         <Button
           type='button'
           variant='ghost'
           size='sm'
-          onClick={() => onOpenSchedule(schedules[3])}
-          className='h-auto px-2 py-1 text-[11px] text-muted-foreground hover:text-primary'
+          onClick={() => setShowAll(!showAll)}
+          className='h-auto shrink-0 px-2 py-1 text-[11px] text-muted-foreground hover:text-primary'
         >
-          +{schedules.length - 3}
+          {showAll ? `-${overflow}` : `+${overflow}`}
         </Button>
       )}
     </div>
@@ -314,6 +370,7 @@ export function CalendarDayGrid({
                     formatTime={formatTime}
                     isUnread={!isOpened(schedule.id)}
                     variant='grid'
+                    expandable={false}
                     onClick={() => onOpenSchedule(schedule)}
                   />
                 </div>
@@ -353,6 +410,19 @@ export function CalendarMonthGrid({
   formatTime: (value?: string) => string
 }) {
   const weekdayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+  const [popupDate, setPopupDate] = useState<string | null>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!popupDate) return
+    const close = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setPopupDate(null)
+      }
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [popupDate])
 
   return (
     <div className='flex h-full min-h-0 flex-col'>
@@ -377,6 +447,8 @@ export function CalendarMonthGrid({
                 a.datetime.localeCompare(b.datetime),
               )
             : []
+          const overflow = events.length - 2
+          const overflowItems = overflow > 0 ? events.slice(2) : []
 
           return (
             <button
@@ -397,30 +469,56 @@ export function CalendarMonthGrid({
               >
                 {date.getDate()}
               </span>
-              <div className='space-y-0.5 overflow-hidden'>
+              <div className='flex flex-col gap-0.5'>
                 {events.slice(0, 2).map((schedule) => (
-                  <div
+                  <EventCard
                     key={schedule.id}
-                    role='button'
-                    tabIndex={0}
+                    schedule={schedule}
+                    formatTime={formatTime}
+                    variant='grid'
+                    expandable
                     onClick={(e) => {
                       e.stopPropagation()
                       onOpenSchedule(schedule)
                     }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onOpenSchedule(schedule)
-                      }
-                    }}
-                    className='truncate rounded-element bg-primary/10 px-1.5 py-0.5 text-[10px] text-foreground cursor-pointer'
-                  >
-                    {formatTime(schedule.datetime)} {schedule.appointment?.motif?.name || schedule.session.service.name}
-                  </div>
+                  />
                 ))}
-                {events.length > 2 && (
-                  <span className='block px-1 text-[10px] text-muted-foreground'>+{events.length - 2}</span>
+                {overflow > 0 && (
+                  <div className='relative'>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPopupDate(popupDate === dateKey ? null : dateKey)
+                      }}
+                      className='block w-full px-1 text-left text-[10px] text-muted-foreground hover:text-primary'
+                    >
+                      +{overflow}
+                    </button>
+                    {popupDate === dateKey && (
+                      <div
+                        ref={popupRef}
+                        className='absolute bottom-full left-0 z-50 mb-1 min-w-40 rounded-lg border border-border bg-card p-1 shadow-lg'
+                      >
+                        <div className='flex flex-col gap-0.5'>
+                          {overflowItems.map((schedule) => (
+                            <EventCard
+                              key={schedule.id}
+                              schedule={schedule}
+                              formatTime={formatTime}
+                              variant='grid'
+                              expandable
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setPopupDate(null)
+                                onOpenSchedule(schedule)
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </button>

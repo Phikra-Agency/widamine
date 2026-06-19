@@ -90,8 +90,12 @@ export const useAppointmentsStore = create<AppointmentStoreInterface>()(
         const isFresh = items.length > 0 && lastFetchedAt && Date.now() - lastFetchedAt < APPOINTMENTS_STALE_MS
         if (isFresh) return
 
-        const res = await api.get('appointments')
-        set({ items: res.data, lastFetchedAt: Date.now() })
+        try {
+          const res = await api.get('appointments')
+          set({ items: res.data, lastFetchedAt: Date.now() })
+        } catch {
+          // Auth errors handled by AuthWrapper
+        }
       },
       fetchItem: async (id: number) => {
         set({ loadingItem: true })

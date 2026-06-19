@@ -22,7 +22,9 @@ export function DataTableColumnFilter<TData, TValue>({
   options,
   placeholder = 'Tous',
 }: DataTableColumnFilterProps<TData, TValue>) {
+  if (!column) return null
   const table = column.table
+  if (!table) return null
   const targetColumn = filterColumnId ? table.getColumn(filterColumnId) : column
   if (!targetColumn) return null
 

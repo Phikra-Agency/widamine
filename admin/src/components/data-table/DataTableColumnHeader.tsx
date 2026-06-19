@@ -3,6 +3,7 @@ import { CaretDown, CaretUp, CaretUpDown } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { DataTableColumnFilter } from './DataTableColumnFilter'
+import { DataTableColumnSearch } from './DataTableColumnSearch'
 
 interface DataTableColumnHeaderProps<TData, TValue> {
   column: Column<TData, TValue>
