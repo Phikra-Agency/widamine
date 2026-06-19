@@ -80,6 +80,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return this.mapPrismaError(exception);
     }
 
+    if (exception instanceof Prisma.PrismaClientInitializationError) {
+      return {
+        status: HttpStatus.SERVICE_UNAVAILABLE,
+        body: {
+          message: "Database unavailable",
+          code: "database_unavailable",
+        },
+      };
+    }
+
     if (exception instanceof Prisma.PrismaClientValidationError) {
       return {
         status: HttpStatus.BAD_REQUEST,
@@ -87,7 +97,32 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
+    if (exception instanceof Prisma.PrismaClientUnknownRequestError) {
+      return {
+        status: HttpStatus.SERVICE_UNAVAILABLE,
+        body: {
+          message: "Database unavailable",
+          code: "database_unavailable",
+        },
+      };
+    }
+
     if (exception instanceof Error) {
+      const isConnectionError =
+        exception.message.includes("connect") ||
+        exception.message.includes("ECONNREFUSED") ||
+        exception.message.includes("replica set");
+
+      if (isConnectionError) {
+        return {
+          status: HttpStatus.SERVICE_UNAVAILABLE,
+          body: {
+            message: "Database unavailable",
+            code: "database_unavailable",
+          },
+        };
+      }
+
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         body: {
@@ -140,7 +175,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           status: HttpStatus.BAD_REQUEST,
           body: {
             message: "Database error",
-            code: exception.code,
+            code: "database_error",
           },
         };
     }

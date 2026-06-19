@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -58,18 +59,20 @@ export const useCategoriesStore = create<CategoryStoreInterface>()(
         set({ items: res.data, lastFetchedAt: Date.now() })
       },
       saveItem: async () => {
-        if (get().operation === 'edit') {
+        const isEdit = get().operation === 'edit'
+        if (isEdit) {
           await api.put('categories/' + (get().item as Category).id, get().item)
         } else {
           await api.post('categories', get().item)
         }
+        notify.success(isEdit ? 'Catégorie modifiée.' : 'Catégorie créée.')
         set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       },
       deleteItem: async () => {
         await api.delete('categories/' + (get().item as Category).id)
-        set({ lastFetchedAt: null })
+        notify.success('Catégorie supprimée.')
         await get().fetchItems()
         get().closeModal()
       }

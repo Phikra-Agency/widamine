@@ -72,6 +72,8 @@
 	--color-text-muted: var(--color-text-muted);
 	--color-text-subtle: var(--color-text-subtle);
 	--color-destructive: var(--destructive);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
 	--color-border: var(--border);
 	--color-border-subtle: var(--border-subtle);
 	--color-border-strong: var(--border-strong);
@@ -136,6 +138,8 @@
 	--ring: color-mix(in srgb, var(--logo-sky) 55%, transparent);
 
 	--destructive: #c45a5a;
+	--success: #2d8a6e;
+	--warning: #b8860b;
 	--radius: 0.75rem;
 
 	/* Radius scale (base 12px): shell 22px → surface 17px → control 12px → element 10px. Nested: child one tier down. */

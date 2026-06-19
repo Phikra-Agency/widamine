@@ -1,6 +1,6 @@
 import axios from 'axios'
-import toast from 'react-hot-toast'
 import { getApiErrorMessage } from '@/lib/errors'
+import { notify } from '@/lib/notify'
 
 export const API_BASE_URL =
   import.meta.env.VITE_PUBLIC_API_URL || '/api'
@@ -23,7 +23,7 @@ export function setupApiErrorHandling() {
       const status = error.response?.status
 
       if (!config?.skipGlobalErrorHandler && status !== 401) {
-        toast.error(getApiErrorMessage(error))
+        notify.error(getApiErrorMessage(error))
       }
 
       return Promise.reject(error)

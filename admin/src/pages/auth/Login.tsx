@@ -1,11 +1,13 @@
 import { useAuthStore } from '@/stores/authStore'
-import { parseApiError } from '@/lib/errors'
+import { getFieldErrorForKey, parseApiError } from '@/lib/errors'
+import { loginEmailSchema, loginPasswordSchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { WarningCircle as AlertCircle, ArrowLeft, Eye, EyeSlash, User } from '@phosphor-icons/react'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 type LoginStep = 'email' | 'password'
@@ -21,44 +23,53 @@ export default function Login() {
   const [email, setEmail] = useState('admin@widamine.com')
   const [password, setPassword] = useState('')
   const [identifiedUser, setIdentifiedUser] = useState<IdentifiedAccount | null>(null)
-  const [errors, setErrors] = useState({ email: '', password: '', form: '' })
+  const [formError, setFormError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+
+  const emailValidation = useFormValidation(loginEmailSchema, { email })
+  const passwordValidation = useFormValidation(loginPasswordSchema, { password })
+
+  useEffect(() => {
+    if (step === 'email') {
+      passwordValidation.reset()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when step changes
+  }, [step])
 
   function resetToEmailStep() {
     setStep('email')
     setIdentifiedUser(null)
     setPassword('')
-    setErrors({ email: '', password: '', form: '' })
+    setFormError('')
     setShowPassword(false)
+    passwordValidation.reset()
   }
 
   async function handleIdentify(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (loading) return
 
-    const trimmedEmail = email.trim()
-    const nextErrors = { email: '', password: '', form: '' }
+    setFormError('')
+    if (!emailValidation.validateAll()) return
 
-    if (!trimmedEmail) {
-      setErrors({ ...nextErrors, email: "L'email est requis." })
-      return
-    }
+    const trimmedEmail = email.trim()
 
     try {
       setLoading(true)
-      setErrors(nextErrors)
       const user = await identify(trimmedEmail)
       setIdentifiedUser({ name: user.name, email: user.email })
       setEmail(user.email)
+      emailValidation.reset()
       setStep('password')
     } catch (error) {
       const parsed = parseApiError(error)
-      if (parsed.fieldErrors.email === 'email_not_found' || parsed.status === 404) {
-        setErrors({ ...nextErrors, email: 'Aucun compte ne correspond à cet email.' })
+      const emailError = getFieldErrorForKey(parsed, 'email')
+      if (emailError) {
+        emailValidation.setFieldError('email', emailError)
       } else {
-        setErrors({ ...nextErrors, form: parsed.message })
+        setFormError(parsed.message)
       }
     } finally {
       setLoading(false)
@@ -69,16 +80,11 @@ export default function Login() {
     e.preventDefault()
     if (loading || !identifiedUser) return
 
-    const nextErrors = { email: '', password: '', form: '' }
-
-    if (!password.trim()) {
-      setErrors({ ...nextErrors, password: 'Le mot de passe est requis.' })
-      return
-    }
+    setFormError('')
+    if (!passwordValidation.validateAll()) return
 
     try {
       setLoading(true)
-      setErrors(nextErrors)
       await login({
         email: identifiedUser.email,
         password,
@@ -86,15 +92,19 @@ export default function Login() {
       navigate('/calendar', { replace: true })
     } catch (error) {
       const parsed = parseApiError(error)
-      if (parsed.fieldErrors.password === 'wrong_password') {
-        setErrors({ ...nextErrors, password: 'Mot de passe incorrect.' })
+      const passwordError = getFieldErrorForKey(parsed, 'password')
+      if (passwordError) {
+        passwordValidation.setFieldError('password', passwordError)
       } else {
-        setErrors({ ...nextErrors, form: parsed.message })
+        setFormError(parsed.message)
       }
     } finally {
       setLoading(false)
     }
   }
+
+  const emailError = emailValidation.getError('email')
+  const passwordError = passwordValidation.getError('password')
 
   return (
     <div className='relative min-h-dvh overflow-hidden'>
@@ -144,14 +154,14 @@ export default function Login() {
 
             <CardContent>
               {step === 'email' ? (
-                <form onSubmit={handleIdentify} className='space-y-4'>
-                  {errors.form && (
+                <form onSubmit={handleIdentify} noValidate className='space-y-4'>
+                  {formError && (
                     <div
                       role='alert'
                       className='flex items-start gap-2 rounded-control border border-destructive/20 bg-destructive/8 px-3 py-2.5 text-sm text-destructive'
                     >
                       <AlertCircle size={16} className='mt-0.5 shrink-0' weight='fill' />
-                      <span className='text-xs leading-relaxed'>{errors.form}</span>
+                      <span className='text-xs leading-relaxed'>{formError}</span>
                     </div>
                   )}
 
@@ -161,14 +171,19 @@ export default function Login() {
                       id='login-email'
                       type='email'
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        const next = e.target.value
+                        setEmail(next)
+                        emailValidation.onFieldChange('email', { email: next })
+                      }}
+                      onBlur={() => emailValidation.onFieldBlur('email', { email })}
                       className='h-10 bg-muted/35'
                       placeholder='nom@cabinet.fr'
                       autoComplete='email'
                       autoFocus
-                      aria-invalid={!!errors.email}
+                      aria-invalid={!!emailError}
                     />
-                    {errors.email && <p className='text-xs text-destructive'>{errors.email}</p>}
+                    {emailError && <p className='text-xs text-destructive'>{emailError}</p>}
                   </div>
 
                   <Button type='submit' disabled={loading} size='lg' className='login-submit-btn mt-1 h-10 w-full'>
@@ -176,14 +191,14 @@ export default function Login() {
                   </Button>
                 </form>
               ) : (
-                <form onSubmit={handleLogin} className='space-y-4'>
-                  {errors.form && (
+                <form onSubmit={handleLogin} noValidate className='space-y-4'>
+                  {formError && (
                     <div
                       role='alert'
                       className='flex items-start gap-2 rounded-control border border-destructive/20 bg-destructive/8 px-3 py-2.5 text-sm text-destructive'
                     >
                       <AlertCircle size={16} className='mt-0.5 shrink-0' weight='fill' />
-                      <span className='text-xs leading-relaxed'>{errors.form}</span>
+                      <span className='text-xs leading-relaxed'>{formError}</span>
                     </div>
                   )}
 
@@ -206,12 +221,17 @@ export default function Login() {
                         id='login-password'
                         type={showPassword ? 'text' : 'password'}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          const next = e.target.value
+                          setPassword(next)
+                          passwordValidation.onFieldChange('password', { password: next })
+                        }}
+                        onBlur={() => passwordValidation.onFieldBlur('password', { password })}
                         className='h-10 bg-muted/35 pr-10'
                         placeholder='••••••••'
                         autoComplete='current-password'
                         autoFocus
-                        aria-invalid={!!errors.password}
+                        aria-invalid={!!passwordError}
                       />
                       <Button
                         type='button'
@@ -224,7 +244,7 @@ export default function Login() {
                         {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                       </Button>
                     </div>
-                    {errors.password && <p className='text-xs text-destructive'>{errors.password}</p>}
+                    {passwordError && <p className='text-xs text-destructive'>{passwordError}</p>}
                   </div>
 
                   <Button type='submit' disabled={loading} size='lg' className='login-submit-btn mt-1 h-10 w-full'>

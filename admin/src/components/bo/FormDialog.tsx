@@ -67,7 +67,7 @@ export default function FormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className={cn('gap-0 overflow-hidden p-0 sm:max-w-md', className)}>
         {onSubmit ? (
-          <form onSubmit={onSubmit}>{body}</form>
+          <form onSubmit={onSubmit} noValidate>{body}</form>
         ) : (
           body
         )}

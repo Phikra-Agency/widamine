@@ -54,7 +54,11 @@ export class PatientController {
   ) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
       const isOwn = await this.patientService.isPatientOfDoctor(id, req.user.id);
-      if (!isOwn) throw new ForbiddenException("Not your patient");
+      if (!isOwn)
+        throw new ForbiddenException({
+          message: "Not your patient",
+          code: "not_your_patient",
+        });
       return this.patientService.updateMedicalHistory(id, updatePatientDto.medicalHistory);
     }
     return this.patientService.update(id, updatePatientDto);

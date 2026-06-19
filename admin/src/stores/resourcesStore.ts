@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -89,18 +90,20 @@ export const useResourcesStore = create<ResourceStoreInterface>()(
       },
       saveItem: async () => {
         const { item, operation } = get()
-        if (operation === 'edit') {
+        const isEdit = operation === 'edit'
+        if (isEdit) {
           await api.put('resources/' + item.id, item)
         } else {
           await api.post('resources', item)
         }
+        notify.success(isEdit ? 'Ressource modifiée.' : 'Ressource créée.')
         set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       },
       deleteItem: async () => {
         await api.delete('resources/' + get().item.id)
-        set({ lastFetchedAt: null })
+        notify.success('Ressource supprimée.')
         await get().fetchItems()
         get().closeModal()
       }

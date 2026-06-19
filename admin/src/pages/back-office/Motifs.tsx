@@ -4,7 +4,9 @@ import { getFamilyForMotif, MOTIF_FAMILIES } from '@/lib/motifFamilies'
 import { PencilSimple as Pen, Plus, Trash as Trash2, Stethoscope, UserCircle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import FormDialog from '@/components/bo/FormDialog'
+import { FormDialog, FieldError } from '@/components/bo'
+import { motifSchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui'
 import { createSallesMotifsColumns, SALLES_MOTIFS_EMPTY_ILLUSTRATION } from './columns/sallesMotifsColumns'
@@ -181,17 +183,25 @@ function MotifModal() {
 
   const isEdit = operation === 'edit'
   const visible = ['create', 'edit'].includes(operation) && modalOpen
+  const validation = useFormValidation(motifSchema, item)
 
   useEffect(() => {
     if (visible) fetchUsers()
   }, [visible, fetchUsers])
+
+  useEffect(() => {
+    if (!visible) validation.reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible])
 
   const doctors = users.filter((u) => u.role === 'DOCTOR' || u.role === 'PRACTITIONER')
 
   const toggleDoctor = (docId: string) => {
     const cur = item.practitionerIds || []
     const next = cur.includes(docId) ? cur.filter((id) => id !== docId) : [...cur, docId]
-    setItem({ ...item, practitionerIds: next })
+    const nextItem = { ...item, practitionerIds: next }
+    setItem(nextItem)
+    validation.onFieldChange('practitionerIds', nextItem)
   }
 
   return (
@@ -201,6 +211,7 @@ function MotifModal() {
       title={`${isEdit ? 'Modifier' : 'Nouveau'} motif`}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveItem()
       }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer'}
@@ -209,7 +220,19 @@ function MotifModal() {
     >
       <div className='space-y-2'>
         <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du motif</Label>
-        <Input type='text' value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} placeholder='Nom du motif' />
+        <Input
+          type='text'
+          value={item.name}
+          onChange={(e) => {
+            const next = { ...item, name: e.target.value }
+            setItem(next)
+            validation.onFieldChange('name', next)
+          }}
+          onBlur={() => validation.onFieldBlur('name')}
+          placeholder='Nom du motif'
+          aria-invalid={!!validation.getError('name')}
+        />
+        <FieldError message={validation.getError('name')} />
       </div>
 
       <div className='space-y-2'>
@@ -219,19 +242,31 @@ function MotifModal() {
           min={5}
           step={5}
           value={item.duration ?? 30}
-          onChange={(e) =>
-            setItem({
+          onChange={(e) => {
+            const next = {
               ...item,
               duration: Math.max(5, Number.parseInt(e.target.value || '30', 10) || 30),
-            })
-          }
+            }
+            setItem(next)
+            validation.onFieldChange('duration', next)
+          }}
+          onBlur={() => validation.onFieldBlur('duration')}
           placeholder='30'
+          aria-invalid={!!validation.getError('duration')}
         />
+        <FieldError message={validation.getError('duration')} />
       </div>
 
       <div className='space-y-2'>
         <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Type / Famille</Label>
-        <Select value={item.bookingType || 'CONSULTATION'} onValueChange={(value) => setItem({ ...item, bookingType: value ?? 'CONSULTATION' })}>
+        <Select
+          value={item.bookingType || 'CONSULTATION'}
+          onValueChange={(value) => {
+            const next = { ...item, bookingType: value ?? 'CONSULTATION' }
+            setItem(next)
+            validation.onFieldChange('bookingType', next)
+          }}
+        >
           <SelectTrigger className='w-full'>
             <SelectValue />
           </SelectTrigger>

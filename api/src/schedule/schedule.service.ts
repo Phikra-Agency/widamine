@@ -226,7 +226,10 @@ export class ScheduleService {
     day: string,
   ) {
     if (!day)
-      throw new NotAcceptableException("can't select a non working day");
+      throw new NotAcceptableException({
+        message: "can't select a non working day",
+        code: "non_working_day",
+      });
 
     const daySchedule = this.SCHEDULE_OF_THE_WEEK[day];
 

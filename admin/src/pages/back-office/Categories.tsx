@@ -1,7 +1,9 @@
 import { useCategoriesStore } from '@/stores/categoriesStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, FolderOpen } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-import FormDialog from '@/components/bo/FormDialog'
+import { FormDialog, FieldError } from '@/components/bo'
+import { categorySchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { CATEGORIES_EMPTY_ILLUSTRATION, createCategoriesColumns } from './columns/categoriesColumns'
@@ -159,6 +161,12 @@ function Modal() {
   const { operation, modalOpen, closeModal, item, setItem, saveItem } = useCategoriesStore()
   const isEdit = operation === 'edit'
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
+  const validation = useFormValidation(categorySchema, item)
+
+  useEffect(() => {
+    if (!isOpen) validation.reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   return (
     <FormDialog
@@ -167,6 +175,7 @@ function Modal() {
       title={isEdit ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveItem()
       }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer la catégorie'}
@@ -184,9 +193,16 @@ function Modal() {
         <Input
           type='text'
           value={item.category}
-          onChange={(e) => setItem({ ...item, category: e.target.value })}
+          onChange={(e) => {
+            const next = { ...item, category: e.target.value }
+            setItem(next)
+            validation.onFieldChange('category', next)
+          }}
+          onBlur={() => validation.onFieldBlur('category', item)}
           placeholder='Cardiologie'
+          aria-invalid={!!validation.getError('category')}
         />
+        <FieldError message={validation.getError('category')} />
       </div>
     </FormDialog>
   )

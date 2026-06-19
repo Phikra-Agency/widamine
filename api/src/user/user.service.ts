@@ -23,9 +23,10 @@ export class UserService {
       });
     } catch (e) {
       if (e.code === "P2002")
-        throw new ConflictException(
-          "A user with the same email is already registered",
-        );
+        throw new ConflictException({
+          message: "A user with the same email is already registered",
+          code: "user_email_taken",
+        });
     }
   }
 
@@ -54,14 +55,19 @@ export class UserService {
       where: { id },
       select: { id: true, role: true },
     });
-    if (!targetUser) throw new BadRequestException("User not found");
+    if (!targetUser)
+      throw new BadRequestException({
+        message: "User not found",
+        code: "user_not_found",
+      });
 
     // Receptionist cannot change any user's role
     if (currentUser?.role === "RECEPTIONIST") {
       if (updateUserDto.role !== undefined) {
-        throw new ForbiddenException(
-          "Receptionists cannot change user roles",
-        );
+        throw new ForbiddenException({
+          message: "Receptionists cannot change user roles",
+          code: "receptionist_cannot_change_role",
+        });
       }
     }
 
@@ -75,9 +81,10 @@ export class UserService {
         where: { role: "ADMIN" },
       });
       if (adminCount <= 1) {
-        throw new BadRequestException(
-          "Cannot change the role of the last administrator",
-        );
+        throw new BadRequestException({
+          message: "Cannot change the role of the last administrator",
+          code: "cannot_change_last_admin_role",
+        });
       }
     }
 
@@ -95,9 +102,10 @@ export class UserService {
       });
     } catch (e) {
       if (e.code === "P2002")
-        throw new ConflictException(
-          "A user with the same email is already registered",
-        );
+        throw new ConflictException({
+          message: "A user with the same email is already registered",
+          code: "user_email_taken",
+        });
       throw e;
     }
   }
@@ -107,16 +115,21 @@ export class UserService {
       where: { id },
       select: { id: true, role: true },
     });
-    if (!user) throw new BadRequestException("User not found");
+    if (!user)
+      throw new BadRequestException({
+        message: "User not found",
+        code: "user_not_found",
+      });
 
     if (user.role === "ADMIN") {
       const adminCount = await this.prismaService.user.count({
         where: { role: "ADMIN" },
       });
       if (adminCount <= 1) {
-        throw new BadRequestException(
-          "Cannot delete the last administrator",
-        );
+        throw new BadRequestException({
+          message: "Cannot delete the last administrator",
+          code: "cannot_delete_last_admin",
+        });
       }
     }
 

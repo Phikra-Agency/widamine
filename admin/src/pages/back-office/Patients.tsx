@@ -24,7 +24,9 @@ import {
   Textarea,
 } from '@/components/ui'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
-import FormDialog from '@/components/bo/FormDialog'
+import { FormDialog, FieldError } from '@/components/bo'
+import { patientSchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import type { ColumnFiltersState, OnChangeFn } from '@tanstack/react-table'
 import {
@@ -307,6 +309,21 @@ function Modal() {
   const { operation, modalOpen, closeModal, item, setItem, saveItem } = usePatientStore()
   const isEdit = operation === 'edit'
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
+  const validation = useFormValidation(patientSchema, item)
+
+  useEffect(() => {
+    if (!isOpen) validation.reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
+
+  function patchItem(patch: Partial<typeof item>) {
+    const next = { ...item, ...patch }
+    setItem(next)
+    for (const key of Object.keys(patch) as (keyof typeof item)[]) {
+      validation.onFieldChange(key, next)
+    }
+    return next
+  }
 
   return (
     <FormDialog
@@ -315,6 +332,7 @@ function Modal() {
       title={isEdit ? 'Modifier le patient' : 'Nouveau patient'}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveItem()
       }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer le patient'}
@@ -330,26 +348,32 @@ function Modal() {
       <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
         <div className='space-y-2'>
           <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Prénom</Label>
-          <Input type='text' value={item.firstName} onChange={(e) => setItem({ ...item, firstName: e.target.value })}
+          <Input type='text' value={item.firstName} onChange={(e) => patchItem({ firstName: e.target.value })}
+            onBlur={() => validation.onFieldBlur('firstName')}
             placeholder='Ahmed' />
         </div>
 
         <div className='space-y-2'>
           <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom</Label>
-          <Input type='text' value={item.lastName} onChange={(e) => setItem({ ...item, lastName: e.target.value })}
+          <Input type='text' value={item.lastName} onChange={(e) => patchItem({ lastName: e.target.value })}
+            onBlur={() => validation.onFieldBlur('lastName')}
             placeholder='Benali' />
         </div>
 
         <div className='space-y-2'>
           <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Email</Label>
-          <Input type='email' value={item.email} onChange={(e) => setItem({ ...item, email: e.target.value })}
-            placeholder='ahmed@example.com' />
+          <Input type='email' value={item.email} onChange={(e) => patchItem({ email: e.target.value })}
+            onBlur={() => validation.onFieldBlur('email')}
+            placeholder='ahmed@example.com' aria-invalid={!!validation.getError('email')} />
+          <FieldError message={validation.getError('email')} />
         </div>
 
         <div className='space-y-2'>
           <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Téléphone</Label>
-          <Input type='text' value={item.phone} onChange={(e) => setItem({ ...item, phone: e.target.value })}
-            placeholder='+212600000000' />
+          <Input type='text' value={item.phone} onChange={(e) => patchItem({ phone: e.target.value })}
+            onBlur={() => validation.onFieldBlur('phone')}
+            placeholder='+212600000000' aria-invalid={!!validation.getError('phone')} />
+          <FieldError message={validation.getError('phone')} />
         </div>
 
         <div className='space-y-2'>

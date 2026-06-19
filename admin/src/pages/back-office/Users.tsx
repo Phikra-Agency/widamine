@@ -11,7 +11,9 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import type { Role } from '@/stores/authStore'
-import FormDialog from '@/components/bo/FormDialog'
+import { FormDialog, FieldError } from '@/components/bo'
+import { userCreateSchema, userEditSchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, DataTableFilterPills, globalSearchFilter, TanStackDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { createUsersColumns, RoleBadge, USERS_EMPTY_ILLUSTRATION, type UserRow } from './columns/usersColumns'
@@ -194,6 +196,12 @@ function Modal() {
   const roleConfig = ROLE_CONFIG[item.role] || ROLE_CONFIG.RECEPTIONIST
   const RoleIcon = roleConfig.icon
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
+  const validation = useFormValidation(isEdit ? userEditSchema : userCreateSchema, item)
+
+  useEffect(() => {
+    if (!isOpen) validation.reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   return (
     <FormDialog
@@ -202,6 +210,7 @@ function Modal() {
       title={isEdit ? "Modifier l'utilisateur" : 'Nouvel utilisateur'}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveItem()
       }}
       submitLabel={isEdit ? 'Enregistrer' : "Créer l'utilisateur"}
@@ -217,9 +226,16 @@ function Modal() {
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom complet</Label>
         <Input
           value={item.name}
-          onChange={(e) => setItem({ ...item, name: e.target.value })}
+          onChange={(e) => {
+            const next = { ...item, name: e.target.value }
+            setItem(next)
+            validation.onFieldChange('name', next)
+          }}
+          onBlur={() => validation.onFieldBlur('name')}
           placeholder='John Doe'
+          aria-invalid={!!validation.getError('name')}
         />
+        <FieldError message={validation.getError('name')} />
       </div>
 
       <div className='space-y-2'>
@@ -227,9 +243,16 @@ function Modal() {
         <Input
           type='email'
           value={item.email}
-          onChange={(e) => setItem({ ...item, email: e.target.value })}
+          onChange={(e) => {
+            const next = { ...item, email: e.target.value }
+            setItem(next)
+            validation.onFieldChange('email', next)
+          }}
+          onBlur={() => validation.onFieldBlur('email')}
           placeholder='john.doe@example.com'
+          aria-invalid={!!validation.getError('email')}
         />
+        <FieldError message={validation.getError('email')} />
       </div>
 
       <div className='space-y-2'>
@@ -245,7 +268,9 @@ function Modal() {
                 variant='outline'
                 onClick={() => {
                   if (!isReceptionist) {
-                    setItem({ ...item, role: role as typeof item.role })
+                    const next = { ...item, role: role as typeof item.role }
+                    setItem(next)
+                    validation.onFieldChange('role', next)
                   }
                 }}
                 className={clsx(
@@ -272,10 +297,17 @@ function Modal() {
         <Input
           type='password'
           value={item.password}
-          onChange={(e) => setItem({ ...item, password: e.target.value })}
+          onChange={(e) => {
+            const next = { ...item, password: e.target.value }
+            setItem(next)
+            validation.onFieldChange('password', next)
+          }}
+          onBlur={() => validation.onFieldBlur('password')}
           placeholder={isEdit ? 'Laisser vide pour ne pas changer' : '********'}
           autoComplete='new-password'
+          aria-invalid={!!validation.getError('password')}
         />
+        <FieldError message={validation.getError('password')} />
       </div>
     </FormDialog>
   )

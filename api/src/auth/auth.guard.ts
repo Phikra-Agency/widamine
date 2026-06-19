@@ -18,7 +18,11 @@ export class AuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const auth = req.headers.authorization;
 
-    if (!auth) throw new UnauthorizedException("No authorization header");
+    if (!auth)
+      throw new UnauthorizedException({
+        message: "No authorization header",
+        code: "no_auth_header",
+      });
 
     try {
       const token = auth.split(" ")[1];
@@ -39,13 +43,20 @@ export class AuthGuard implements CanActivate {
         },
       });
 
-      if (!user) throw new UnauthorizedException("User not found");
+      if (!user)
+        throw new UnauthorizedException({
+          message: "User not found",
+          code: "user_not_found",
+        });
 
       req.user = user;
       return true;
     } catch (e) {
       if (e instanceof UnauthorizedException) throw e;
-      throw new UnauthorizedException("Invalid or expired token");
+      throw new UnauthorizedException({
+        message: "Invalid or expired token",
+        code: "invalid_token",
+      });
     }
   }
 }

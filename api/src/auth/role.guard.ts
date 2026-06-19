@@ -14,9 +14,16 @@ export const RoleGuard = (...roles: string[]): Type<CanActivate> => {
       const req = context.switchToHttp().getRequest();
       const user = req.user;
 
-      if (!user) throw new ForbiddenException("Not authenticated");
+      if (!user)
+        throw new ForbiddenException({
+          message: "Not authenticated",
+          code: "not_authenticated",
+        });
       if (!roles.includes(user.role))
-        throw new ForbiddenException("Insufficient permissions");
+        throw new ForbiddenException({
+          message: "Insufficient permissions",
+          code: "insufficient_permissions",
+        });
 
       return true;
     }

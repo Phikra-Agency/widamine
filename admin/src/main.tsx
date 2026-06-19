@@ -12,7 +12,13 @@ setupApiErrorHandling()
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
-    <Toaster position='top-right' reverseOrder={false} />
+    <Toaster
+      position='top-right'
+      reverseOrder={false}
+      gutter={12}
+      containerStyle={{ top: 16, right: 16 }}
+      toastOptions={{ duration: 4000 }}
+    />
     <App />
   </ErrorBoundary>,
 )

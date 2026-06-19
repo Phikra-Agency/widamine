@@ -24,7 +24,11 @@ export class CategoryService {
   async remove(id: string) {
     const svcs = await this.prismaService.service.findMany({ where: { categoryId: id }, select: { id: true } });
     if (svcs.length) {
-      throw new BadRequestException("Cannot delete category with existing services. Delete or reassign services first.");
+      throw new BadRequestException({
+        message:
+          "Cannot delete category with existing services. Delete or reassign services first.",
+        code: "category_has_services",
+      });
     }
     return this.prismaService.category.delete({ where: { id } });
   }

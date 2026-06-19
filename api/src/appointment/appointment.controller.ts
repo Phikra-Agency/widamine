@@ -90,7 +90,10 @@ export class AppointmentController {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
       const appointment = await this.appointmentService.findOne(id);
       if (!appointment || appointment.practitionerId !== req.user.id) {
-        throw new ForbiddenException("Not your appointment");
+        throw new ForbiddenException({
+          message: "Not your appointment",
+          code: "not_your_appointment",
+        });
       }
       delete data.practitionerId;
       delete data.resourceId;

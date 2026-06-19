@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 
 interface Service {
@@ -94,22 +95,24 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   },
   saveItem: async () => {
     const item = get().item
+    const isEdit = get().operation === 'edit'
     const { doctorId, ...rest } = item as any
     const payload = {
       ...rest,
       primaryDoctorId: rest.primaryDoctorId || doctorId,
     }
-    if (get().operation === 'edit') {
+    if (isEdit) {
       await api.put('services/' + (get().item as Service).id, payload)
     } else {
       await api.post('services', payload)
     }
+    notify.success(isEdit ? 'Service modifié.' : 'Service créé.')
     get().fetchItems()
     get().closeModal()
   },
   deleteItem: async () => {
     await api.delete('services/' + (get().item as Service).id)
-    get().fetchItems()
+    notify.success('Service supprimé.')
     get().closeModal()
   },
   saveSession: async (session: { id?: string; session: number; duration: number }, editing: boolean) => {
@@ -118,13 +121,15 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
 
     if (editing) {
       await api.put(`sessions/${session.id}`, { duration: session.duration })
+      notify.success('Créneau modifié.')
     } else {
       await api.post(`sessions`, { duration: session.duration, serviceId })
+      notify.success('Créneau ajouté.')
     }
     get().fetchItem()
   },
   deleteSession: async (sessionId: string) => {
     await api.delete(`sessions/${sessionId}`)
-    get().fetchItem()
+    notify.success('Créneau supprimé.')
   }
 }))

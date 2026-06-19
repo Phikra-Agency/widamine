@@ -36,7 +36,14 @@ export class MotifService {
         name,
         slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         bookingType: bookingType || 'STANDARD',
-        serviceId: serviceId || (() => { throw new BadRequestException("serviceId is required"); })(),
+        serviceId:
+          serviceId ||
+          (() => {
+            throw new BadRequestException({
+              message: "serviceId is required",
+              code: "motif_service_required",
+            });
+          })(),
         duration: duration || 30,
         description,
         color: normalizeMotifColor(color) ?? getRandomMotifColor(),

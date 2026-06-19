@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 import type { Role } from '@/stores/authStore'
 
@@ -68,19 +69,21 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
   },
   saveItem: async () => {
     const item = get().item
-    if (get().operation === 'edit') {
+    const isEdit = get().operation === 'edit'
+    if (isEdit) {
       const payload = { ...item }
       if (!payload.password) delete (payload as any).password
       await api.put('users/' + (item as User).id, payload)
     } else {
       await api.post('users', item)
     }
+    notify.success(isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.')
     get().fetchItems()
     get().closeModal()
   },
   deleteItem: async () => {
     await api.delete('users/' + (get().item as User).id)
-    get().fetchItems()
+    notify.success('Utilisateur supprimé.')
     get().closeModal()
   }
 }))

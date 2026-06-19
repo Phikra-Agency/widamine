@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import FormDialog from '@/components/bo/FormDialog'
+import { FormDialog, FieldError } from '@/components/bo'
+import { resourceSchema } from '@/lib/formSchemas'
+import { useFormValidation } from '@/hooks/useFormValidation'
 import {
   Dialog,
   DialogContent,
@@ -154,15 +156,19 @@ function Modal() {
   const { items: motifs, fetchItems: fetchMotifs } = useMotifsStore()
   const isEdit = operation === 'edit'
   const open = ['create', 'edit'].includes(operation) && modalOpen
+  const validation = useFormValidation(resourceSchema, item)
 
   useEffect(() => { if (open) fetchMotifs() }, [open, fetchMotifs])
+  useEffect(() => { if (!open) validation.reset() /* eslint-disable-line react-hooks/exhaustive-deps */ }, [open])
 
   function toggleMotif(motifId: string) {
     const cur = item.motifIds || []
     const next = cur.includes(motifId)
       ? cur.filter((id: string) => id !== motifId)
       : [...cur, motifId]
-    setItem({ ...item, motifIds: next })
+    const nextItem = { ...item, motifIds: next }
+    setItem(nextItem)
+    validation.onFieldChange('motifIds', nextItem)
   }
 
   return (
@@ -170,7 +176,11 @@ function Modal() {
       open={open}
       onOpenChange={(nextOpen) => { if (!nextOpen) closeModal() }}
       title={`${isEdit ? 'Modifier' : 'Nouvelle'} salle`}
-      onSubmit={(e) => { e.preventDefault(); saveItem() }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (!validation.validateAll()) return
+        saveItem()
+      }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer la salle'}
       className='sm:max-w-lg'
     >
@@ -179,9 +189,16 @@ function Modal() {
         <Input
           type='text'
           value={item.name}
-          onChange={(e) => setItem({ ...item, name: e.target.value })}
+          onChange={(e) => {
+            const next = { ...item, name: e.target.value }
+            setItem(next)
+            validation.onFieldChange('name', next)
+          }}
+          onBlur={() => validation.onFieldBlur('name')}
           placeholder='Salle A'
+          aria-invalid={!!validation.getError('name')}
         />
+        <FieldError message={validation.getError('name')} />
       </div>
       <div className='space-y-2'>
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Priorité</Label>
@@ -193,7 +210,11 @@ function Modal() {
                 key={p}
                 type='button'
                 variant={item.priority === p ? 'default' : 'outline'}
-                onClick={() => setItem({ ...item, priority: p })}
+                onClick={() => {
+                  const next = { ...item, priority: p }
+                  setItem(next)
+                  validation.onFieldChange('priority', next)
+                }}
                 className={clsx(
                   'flex h-auto flex-col gap-1 p-2.5',
                   item.priority !== p && 'text-secondary/50',

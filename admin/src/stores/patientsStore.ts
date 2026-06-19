@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -169,23 +170,25 @@ export const usePatientStore = create<PatientStoreInterface>()(
       },
       saveItem: async () => {
         const raw = get().item as any
+        const isEdit = get().operation === 'edit'
         const payload = { ...raw }
         if (!payload.dateOfBirth) delete payload.dateOfBirth
         if (!payload.gender) delete payload.gender
         if (!payload.email) delete payload.email
         delete payload.id
-        if (get().operation === 'edit') {
+        if (isEdit) {
           await api.put('patients/' + (get().item as any).id, payload)
         } else {
           await api.post('patients', payload)
         }
+        notify.success(isEdit ? 'Patient modifié.' : 'Patient créé.')
         set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       },
       deleteItem: async () => {
         await api.delete('patients/' + (get().item as any).id)
-        set({ lastFetchedAt: null })
+        notify.success('Patient supprimé.')
         await get().fetchItems()
         get().closeModal()
       },

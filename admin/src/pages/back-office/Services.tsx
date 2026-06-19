@@ -2,7 +2,9 @@ import { useServicesStore } from "@/stores/servicesStore"
 import { Eye, PencilSimple as Pen, Plus, Trash as Trash2, FirstAid, CurrencyDollar, Stethoscope, Tag, Clock } from "@phosphor-icons/react"
 import { useEffect, useMemo, useState } from "react"
 import { useCategoriesStore } from "@/stores/categoriesStore"
-import FormDialog from "@/components/bo/FormDialog"
+import { FormDialog, FieldError } from "@/components/bo"
+import { serviceSchema, sessionSchema } from "@/lib/formSchemas"
+import { useFormValidation } from "@/hooks/useFormValidation"
 import { DataTable, TanStackDataTable, useDataTable } from "@/components/data-table"
 import { Button, Card, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"
 import { createServicesColumns, SERVICES_EMPTY_ILLUSTRATION } from "./columns/servicesColumns"
@@ -216,17 +218,25 @@ function Modal() {
 	const { items: categories } = useCategoriesStore()
 	const isEdit = operation === 'edit'
 	const isOpen = ['create', 'edit'].includes(operation) && modalOpen
+	const validation = useFormValidation(serviceSchema, item)
 
 	useEffect(() => {
 		;["create", "edit"].includes(operation) && modalOpen && (fetchDoctors(), fetchResources())
 	}, [modalOpen, operation])
+
+	useEffect(() => {
+		if (!isOpen) validation.reset()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isOpen])
 
 	const toggleDoctor = (doctorId: string) => {
 		const current = item.allowedDoctorIds || []
 		const updated = current.includes(doctorId)
 			? current.filter(id => id !== doctorId)
 			: [...current, doctorId]
-		setItem({ ...item, allowedDoctorIds: updated })
+		const next = { ...item, allowedDoctorIds: updated }
+		setItem(next)
+		validation.onFieldChange('allowedDoctorIds', next)
 	}
 
 	const toggleSalle = (salleId: string) => {
@@ -234,7 +244,9 @@ function Modal() {
 		const updated = current.includes(salleId)
 			? current.filter(id => id !== salleId)
 			: [...current, salleId]
-		setItem({ ...item, allowedSalleIds: updated })
+		const next = { ...item, allowedSalleIds: updated }
+		setItem(next)
+		validation.onFieldChange('allowedSalleIds', next)
 	}
 
 	const selectedDoctors = item.allowedDoctorIds || []
@@ -247,6 +259,7 @@ function Modal() {
       title={isEdit ? "Modifier le service" : "Nouveau service"}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveItem()
       }}
       submitLabel={isEdit ? "Enregistrer" : "Créer le service"}
@@ -261,21 +274,49 @@ function Modal() {
 
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Nom du service</Label>
-        <Input type="text" value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} placeholder="Consultation générale" />
+        <Input
+          type="text"
+          value={item.name}
+          onChange={(e) => {
+            const next = { ...item, name: e.target.value }
+            setItem(next)
+            validation.onFieldChange('name', next)
+          }}
+          onBlur={() => validation.onFieldBlur('name')}
+          placeholder="Consultation générale"
+          aria-invalid={!!validation.getError('name')}
+        />
+        <FieldError message={validation.getError('name')} />
       </div>
 
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Prix (DH)</Label>
-        <Input type="number" value={item.price || ""} onChange={(e) => setItem({ ...item, price: +e.target.value })} placeholder="500" />
+        <Input
+          type="number"
+          value={item.price || ""}
+          onChange={(e) => {
+            const next = { ...item, price: +e.target.value }
+            setItem(next)
+            validation.onFieldChange('price', next)
+          }}
+          onBlur={() => validation.onFieldBlur('price')}
+          placeholder="500"
+          aria-invalid={!!validation.getError('price')}
+        />
+        <FieldError message={validation.getError('price')} />
       </div>
 
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Catégorie</Label>
         <Select
           value={item.categoryId ?? ''}
-          onValueChange={(value) => setItem({ ...item, categoryId: value || undefined })}
+          onValueChange={(value) => {
+            const next = { ...item, categoryId: value || undefined }
+            setItem(next)
+            validation.onFieldChange('categoryId', next)
+          }}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" aria-invalid={!!validation.getError('categoryId')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -285,15 +326,20 @@ function Modal() {
             ))}
           </SelectContent>
         </Select>
+        <FieldError message={validation.getError('categoryId')} />
       </div>
 
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Médecin principal</Label>
         <Select
           value={item.primaryDoctorId ?? ''}
-          onValueChange={(value) => setItem({ ...item, primaryDoctorId: value || undefined })}
+          onValueChange={(value) => {
+            const next = { ...item, primaryDoctorId: value || undefined }
+            setItem(next)
+            validation.onFieldChange('primaryDoctorId', next)
+          }}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" aria-invalid={!!validation.getError('primaryDoctorId')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -303,6 +349,7 @@ function Modal() {
             ))}
           </SelectContent>
         </Select>
+        <FieldError message={validation.getError('primaryDoctorId')} />
       </div>
 
       <div className="space-y-2">
@@ -348,6 +395,12 @@ function Modal() {
 
 function SessionModal({ open, onClose, editing, session, setSession }: { open: boolean; onClose: () => void; editing: boolean; session: { id?: string; session: number; duration: number }; setSession: (session: { id?: string; session: number; duration: number }) => void }) {
 	const { saveSession } = useServicesStore()
+	const validation = useFormValidation(sessionSchema, session)
+
+	useEffect(() => {
+		if (!open) validation.reset()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open])
 
 	return (
     <FormDialog
@@ -356,6 +409,7 @@ function SessionModal({ open, onClose, editing, session, setSession }: { open: b
       title={editing ? "Modifier la séance" : "Nouvelle séance"}
       onSubmit={(e) => {
         e.preventDefault()
+        if (!validation.validateAll()) return
         saveSession(session, editing)
         onClose()
       }}
@@ -365,7 +419,19 @@ function SessionModal({ open, onClose, editing, session, setSession }: { open: b
     >
       <div className="space-y-2">
         <Label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Durée (minutes)</Label>
-        <Input type="number" value={session.duration || ""} onChange={(e) => setSession({ ...session, duration: +e.target.value })} placeholder="60" />
+        <Input
+          type="number"
+          value={session.duration || ""}
+          onChange={(e) => {
+            const next = { ...session, duration: +e.target.value }
+            setSession(next)
+            validation.onFieldChange('duration', next)
+          }}
+          onBlur={() => validation.onFieldBlur('duration')}
+          placeholder="60"
+          aria-invalid={!!validation.getError('duration')}
+        />
+        <FieldError message={validation.getError('duration')} />
       </div>
     </FormDialog>
   )

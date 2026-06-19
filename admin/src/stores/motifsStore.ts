@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -62,6 +63,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
       },
       saveItem: async () => {
         const { item, operation } = get();
+        const isEdit = operation === 'edit'
         const color = normalizeMotifColor(item.color) ?? getRandomMotifColor()
         const payload = {
           ...item,
@@ -69,18 +71,19 @@ export const useMotifsStore = create<MotifStoreInterface>()(
           practitionerIds: item.practitionerIds || [],
         };
 
-        if (operation === 'edit') {
+        if (isEdit) {
           await api.put('motifs/' + item.id, payload)
         } else {
           await api.post('motifs', payload)
         }
+        notify.success(isEdit ? 'Motif modifié.' : 'Motif créé.')
         set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       },
       deleteItem: async () => {
         await api.delete('motifs/' + (get().item as Motif).id)
-        set({ lastFetchedAt: null })
+        notify.success('Motif supprimé.')
         await get().fetchItems()
         get().closeModal()
       }

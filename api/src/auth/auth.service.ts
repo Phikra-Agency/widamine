@@ -74,6 +74,7 @@ export class AuthService {
       if (!refreshtoken)
         throw new UnauthorizedException({
           message: "No refresh token provided",
+          code: "no_refresh_token",
         });
 
       const refreshSecret =
@@ -89,7 +90,11 @@ export class AuthService {
         where: { id: payload.id },
       });
 
-      if (!user) throw new NotFoundException("user_not_found");
+      if (!user)
+        throw new NotFoundException({
+          message: "User not found",
+          code: "user_not_found",
+        });
 
       const { password: passwd, id, ...userData } = user;
 
@@ -102,7 +107,10 @@ export class AuthService {
       };
     } catch (err) {
       this.logout(res);
-      throw new UnauthorizedException("invalid_refresh_token");
+      throw new UnauthorizedException({
+        message: "Invalid refresh token",
+        code: "invalid_refresh_token",
+      });
     }
   }
 
