@@ -80,7 +80,6 @@ interface MotifItem {
   id: string
   name: string
   color: string
-  bookingType?: string
 }
 
 function formatTimeOnly(value?: string) {
@@ -160,8 +159,8 @@ function Planner() {
               : (a.name || '').toLowerCase()
             const motifName = (a.motif?.name || '').toLowerCase()
             const resourceName = (a.resource?.name || '').toLowerCase()
-            const serviceName = (s.session?.service?.name || '').toLowerCase()
-            const haystack = [patientName, motifName, resourceName, serviceName].join(' ')
+            const sessionMotifName = (s.session?.motif?.name || '').toLowerCase()
+            const haystack = [patientName, motifName, resourceName, sessionMotifName].join(' ')
             if (!haystack.includes(searchLower)) return false
           }
 

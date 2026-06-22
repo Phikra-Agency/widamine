@@ -1,6 +1,6 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import { saveCalendarReturnContext } from '@/lib/scheduleNavigation'
-import { getFamilyForMotif } from '@/lib/motifFamilies'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -84,8 +84,6 @@ export default function ScheduleShowModal() {
     : item.appointment?.name || 'Non renseigné'
 
   const motif = item.appointment?.motif
-  const motifMeta = motif ? { bookingType: (motif as { bookingType?: string }).bookingType } : null
-  const family = getFamilyForMotif(motifMeta)
 
   const navigateTo = (direction: 'next' | 'prev') => {
     const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
@@ -106,7 +104,7 @@ export default function ScheduleShowModal() {
     }
   }
 
-  const title = motif?.name || item.session?.service?.name || 'Créneau sélectionné'
+  const title = motif?.name || item.session?.motif?.name || 'Créneau sélectionné'
 
   return (
     <Dialog
@@ -125,9 +123,9 @@ export default function ScheduleShowModal() {
               <div className='flex items-center gap-2'>
                 <span
                   className='h-2 w-2 rounded-full'
-                  style={{ backgroundColor: family.hue }}
+                  style={{ backgroundColor: motif?.color || '#3b82f6' }}
                 />
-                <p className='text-[10px] uppercase tracking-[0.2em] text-secondary/40'>{family.label}</p>
+                <p className='text-[10px] uppercase tracking-[0.2em] text-secondary/40'>{motif?.name || 'Motif'}</p>
               </div>
               <DialogTitle className='mt-2 text-xl font-medium text-secondary'>{title}</DialogTitle>
               <DialogDescription className='mt-1 text-sm leading-6 text-secondary/50'>
@@ -170,7 +168,7 @@ export default function ScheduleShowModal() {
 
         <div className='mt-6 grid gap-3 sm:grid-cols-2'>
           <Info label='Patient' value={patientName} />
-          <Info label='Service' value={item.session?.service?.name || '-'} />
+          <Info label='Motif' value={item.session?.motif?.name || '-'} />
           <Info
             label='N° réservation (jour)'
             value={dayIndex >= 0 ? `${formatReservationOrder(dayIndex + 1)} réservation` : '-'}
@@ -191,7 +189,6 @@ export default function ScheduleShowModal() {
           <Info label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
           <Info label='Statut' value={item.appointment?.status || '-'} />
           <Info label='Motif' value={item.appointment?.motif?.name || '-'} />
-          <Info label='Famille' value={family.label} />
         </div>
 
         <div className='mt-6 flex items-center justify-between gap-4'>

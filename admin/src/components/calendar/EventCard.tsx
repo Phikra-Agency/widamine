@@ -1,4 +1,4 @@
-import { getEventColor, getFamilyForMotif } from '@/lib/motifFamilies'
+import { getEventColor } from '@/lib/motifFamilies'
 
 export interface EventCardSchedule {
   id: string
@@ -6,14 +6,14 @@ export interface EventCardSchedule {
   session: {
     id: number
     session: number
-    service: { name: string }
+    motif: { name: string }
   }
   appointment?: {
     motif?: {
       id: string
       name: string
       color?: string
-      bookingType?: string
+
     }
     practitioner?: { name: string }
     resource?: { name: string }
@@ -40,8 +40,8 @@ export default function EventCard({
   const motif = schedule.appointment?.motif
   const family = getFamilyForMotif(motif)
   const accentColor = getEventColor(motif)
-  const motifName = motif?.name || schedule.session.service.name
-  const sublabel = `${schedule.session.service.name} · S${schedule.session.session}`
+  const motifName = motif?.name || schedule.session.motif?.name || 'Session'
+  const sublabel = `${schedule.session.motif?.name || 'Session'} · S${schedule.session.session}`
 
   if (variant === 'list') {
     return (

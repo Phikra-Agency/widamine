@@ -1,6 +1,5 @@
 import { useMotifsStore } from '@/stores/motifsStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { getFamilyForMotif, MOTIF_FAMILIES } from '@/lib/motifFamilies'
 import { PencilSimple as Pen, Plus, Trash as Trash2, Stethoscope, UserCircle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
@@ -258,28 +257,69 @@ function MotifModal() {
       </div>
 
       <div className='space-y-2'>
-        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Type / Famille</Label>
-        <Select
-          value={item.bookingType || 'CONSULTATION'}
-          onValueChange={(value) => {
-            const next = { ...item, bookingType: value ?? 'CONSULTATION' }
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nombre de séances</Label>
+        <Input
+          type='number'
+          min={1}
+          value={item.numberOfSessions ?? 1}
+          onChange={(e) => {
+            const next = { ...item, numberOfSessions: Math.max(1, Number.parseInt(e.target.value || '1', 10) || 1) }
             setItem(next)
-            validation.onFieldChange('bookingType', next)
+            validation.onFieldChange('numberOfSessions', next)
           }}
-        >
-          <SelectTrigger className='w-full'>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MOTIF_FAMILIES.flatMap((f) =>
-              f.bookingTypes.map((bt) => (
-                <SelectItem key={bt} value={bt}>
-                  {f.label} ({bt})
-                </SelectItem>
-              )),
-            )}
-          </SelectContent>
-        </Select>
+          placeholder='1'
+        />
+      </div>
+
+      <div className='space-y-2'>
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Réservation en ligne</Label>
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={() => {
+              const next = { ...item, isOnlineBookable: !item.isOnlineBookable }
+              setItem(next)
+              validation.onFieldChange('isOnlineBookable', next)
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${item.isOnlineBookable ? 'bg-primary' : 'bg-secondary/20'}`}
+          >
+            <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${item.isOnlineBookable ? 'translate-x-5' : 'translate-x-0'}`} />
+          </button>
+          <span className='text-xs text-secondary/60'>{item.isOnlineBookable ? 'Activé' : 'Désactivé'}</span>
+        </div>
+      </div>
+
+      <div className='space-y-2'>
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Choix du praticien</Label>
+        <div className='flex items-center gap-3'>
+          <button
+            type='button'
+            onClick={() => {
+              const next = { ...item, requiresPractitionerChoice: !item.requiresPractitionerChoice }
+              setItem(next)
+              validation.onFieldChange('requiresPractitionerChoice', next)
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${item.requiresPractitionerChoice ? 'bg-primary' : 'bg-secondary/20'}`}
+          >
+            <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${item.requiresPractitionerChoice ? 'translate-x-5' : 'translate-x-0'}`} />
+          </button>
+          <span className='text-xs text-secondary/60'>{item.requiresPractitionerChoice ? 'Activé' : 'Désactivé'}</span>
+        </div>
+      </div>
+
+      <div className='space-y-2'>
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Durée expiration (heures)</Label>
+        <Input
+          type='number'
+          min={1}
+          value={item.pendingTtlHours ?? 24}
+          onChange={(e) => {
+            const next = { ...item, pendingTtlHours: Math.max(1, Number.parseInt(e.target.value || '24', 10) || 24) }
+            setItem(next)
+            validation.onFieldChange('pendingTtlHours', next)
+          }}
+          placeholder='24'
+        />
       </div>
 
       <div className='space-y-2'>
@@ -304,14 +344,11 @@ function MotifModal() {
           </div>
         </div>
         {(() => {
-          const family = getFamilyForMotif(item)
-          const color = normalizeMotifColor(item.color) || family.hue
+          const color = normalizeMotifColor(item.color) || '#3b82f6'
           return (
-            <div className='rounded-control border px-3 py-2.5' style={{ borderColor: `${family.hue}30`, backgroundColor: `${family.hue}10` }}>
+            <div className='rounded-control border px-3 py-2.5' style={{ borderColor: `${color}30`, backgroundColor: `${color}10` }}>
               <div className='mt-2 flex items-center gap-2'>
-                <span className='h-2 w-2 rounded-full' style={{ backgroundColor: family.hue }} />
-                <span className='text-xs font-medium text-secondary'>{family.label}</span>
-                <span className='text-[10px] text-secondary/40'>·</span>
+                <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
                 <span className='rounded-element px-2 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: color }}>
                   {item.name || 'Motif'}
                 </span>

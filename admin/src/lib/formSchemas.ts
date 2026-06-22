@@ -78,7 +78,10 @@ export const resourceSchema = z.object({
 export const motifSchema = z.object({
   name: z.string().trim().min(1, 'Le nom du motif est requis.'),
   duration: z.coerce.number().min(5, 'La durée minimale est de 5 minutes.'),
-  bookingType: z.string().min(1, required),
   color: z.string().optional(),
+  numberOfSessions: z.coerce.number().min(1, 'Minimum 1 séance').optional(),
+  isOnlineBookable: z.boolean().optional(),
+  requiresPractitionerChoice: z.boolean().optional(),
+  pendingTtlHours: z.coerce.number().min(1, 'Minimum 1 heure').optional(),
   practitionerIds: z.array(z.string()).optional(),
 })

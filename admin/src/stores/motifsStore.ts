@@ -8,7 +8,10 @@ interface Motif {
   name: string
   duration?: number
   color?: string
-  bookingType?: string
+  numberOfSessions?: number
+  isOnlineBookable?: boolean
+  requiresPractitionerChoice?: boolean
+  pendingTtlHours?: number
   practitionerIds?: string[]
   practitionerAssignments?: { practitionerId: string }[]
 }
@@ -35,7 +38,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
   persist(
     (set, get) => ({
       items: [],
-      item: { name: '', duration: 30, color: getRandomMotifColor(), bookingType: 'CONSULTATION', practitionerIds: [] },
+      item: { name: '', duration: 30, color: getRandomMotifColor(), numberOfSessions: 1, isOnlineBookable: false, requiresPractitionerChoice: false, pendingTtlHours: 24, practitionerIds: [] },
       lastFetchedAt: null,
       operation: 'create' as MotifStoreInterface['operation'],
       modalOpen: false,
@@ -47,7 +50,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
         const { practitionerAssignments, ...clean } = item;
         set({ item: { ...clean, practitionerIds } });
       },
-      clearItem: () => set({ item: { name: '', duration: 30, color: getRandomMotifColor(), bookingType: 'CONSULTATION', practitionerIds: [] } }),
+      clearItem: () => set({ item: { name: '', duration: 30, color: getRandomMotifColor(), numberOfSessions: 1, isOnlineBookable: false, requiresPractitionerChoice: false, pendingTtlHours: 24, practitionerIds: [] } }),
       openModal: () => set({ modalOpen: true }),
       closeModal: () => {
         set({ modalOpen: false })

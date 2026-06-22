@@ -119,7 +119,7 @@ export function EmptyFolderIllustration({ className }: IllustrationProps) {
   )
 }
 
-/** Care kit / service box. */
+/** Placeholder illustration. */
 export function EmptyServicesIllustration({ className }: IllustrationProps) {
   return (
     <Frame className={className}>

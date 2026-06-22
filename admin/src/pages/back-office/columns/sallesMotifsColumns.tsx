@@ -10,7 +10,6 @@ export type SallesMotifRow = {
   name: string
   duration?: number
   color?: string
-  bookingType?: string
 }
 
 type SallesMotifColumnsDeps = {

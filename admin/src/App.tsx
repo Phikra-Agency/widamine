@@ -9,8 +9,6 @@ const Users = lazy(() => import('@/pages/back-office/Users'))
 const Patients = lazy(() => import('@/pages/back-office/Patients'))
 const Calendar = lazy(() => import('@/pages/back-office/Calendar'))
 const Contacts = lazy(() => import('@/pages/back-office/Contacts'))
-const Categories = lazy(() => import('@/pages/back-office/Categories'))
-const Services = lazy(() => import('@/pages/back-office/Services'))
 const Resources = lazy(() => import('@/pages/back-office/Resources'))
 const Motifs = lazy(() => import('@/pages/back-office/Motifs'))
 const Settings = lazy(() => import('@/pages/back-office/Settings'))
@@ -29,8 +27,6 @@ function App() {
             <Route element={<BackOfficeLayout />}>
               <Route element={<RoleWrapper roles={['ADMIN', 'RECEPTIONIST']} />}>
                 <Route path='users' element={<Suspense fallback={null}><Users /></Suspense>} />
-                <Route path='categories' element={<Suspense fallback={null}><Categories /></Suspense>} />
-                <Route path='services' element={<Suspense fallback={null}><Services /></Suspense>} />
                 <Route path='motifs' element={<Suspense fallback={null}><Motifs /></Suspense>} />
                 <Route path='resources' element={<Suspense fallback={null}><Resources /></Suspense>} />
                 <Route path='settings' element={<Suspense fallback={null}><Settings /></Suspense>} />
