@@ -16,7 +16,6 @@ model User {
   role                 String
   admin                Boolean             @default(false)
   image                String?
-  services             Service[]           @relation("DoctorServices")
   motifAssignments     MotifPractitioner[]
   assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
   availabilityBlocks   AvailabilityBlock[]
@@ -25,42 +24,35 @@ model User {
   updatedAt            DateTime            @updatedAt
 }
 
-model Category {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  slug      String    @unique
-  services  Service[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Service {
-  id               String        @id @default(auto()) @map("_id") @db.ObjectId
-  name             String
-  slug             String?       @unique
-  price            Float
-  categoryId       String        @db.ObjectId
-  category         Category      @relation(fields: [categoryId], references: [id])
-  sessions         Session[]
-  appointments     Appointment[]
-  motifs           Motif[]
-  primaryDoctorId  String        @db.ObjectId
-  primaryDoctor    User          @relation("DoctorServices", fields: [primaryDoctorId], references: [id])
-  allowedDoctorIds String[]      @db.ObjectId
-  allowedSalleIds  String[]      @db.ObjectId
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+model Motif {
+  id                         String              @id @default(auto()) @map("_id") @db.ObjectId
+  name                       String              @unique
+  slug                       String              @unique
+  description                String?
+  duration                   Int                 @default(30)
+  numberOfSessions           Int                 @default(1)
+  isActive                   Boolean             @default(true)
+  isOnlineBookable           Boolean             @default(false)
+  requiresPractitionerChoice Boolean             @default(false)
+  pendingTtlHours            Int                 @default(24)
+  color                      String              @default("#3b82f6")
+  sessions                   Session[]
+  practitionerAssignments    MotifPractitioner[]
+  resourceAssignments        MotifResource[]
+  appointments               Appointment[]
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
 }
 
 model Session {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
-  number      Int
-  duration    Int        @default(30)
-  serviceId   String     @db.ObjectId
-  service     Service    @relation(fields: [serviceId], references: [id])
-  schedules   Schedule[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  number        Int
+  duration      Int         @default(30)
+  motifId       String      @db.ObjectId
+  motif         Motif       @relation(fields: [motifId], references: [id])
+  schedules     Schedule[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Patient {
@@ -91,14 +83,13 @@ model Appointment {
   context        String?
   status         String            @default("PENDING")
   timezone       String            @default("Africa/Casablanca")
+  sessionNumber  Int               @default(1)
   expiresAt      DateTime?
   confirmedAt    DateTime?
   cancelledAt    DateTime?
   completedAt    DateTime?
-  serviceId      String            @db.ObjectId
-  service        Service           @relation(fields: [serviceId], references: [id])
-  motifId        String?           @db.ObjectId
-  motif          Motif?            @relation(fields: [motifId], references: [id])
+  motifId        String            @db.ObjectId
+  motif          Motif             @relation(fields: [motifId], references: [id])
   practitionerId String?           @db.ObjectId
   practitioner   User?             @relation("AssignedPractitionerAppointments", fields: [practitionerId], references: [id])
   resourceId     String?           @db.ObjectId
@@ -109,7 +100,7 @@ model Appointment {
   updatedAt      DateTime          @updatedAt
 
   @@index([patientId])
-  @@index([serviceId])
+  @@index([motifId])
   @@index([status])
 }
 
@@ -135,26 +126,6 @@ model Contact {
   context   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-}
-
-model Motif {
-  id                         String              @id @default(auto()) @map("_id") @db.ObjectId
-  name                       String              @unique
-  slug                       String              @unique
-  bookingType                String
-  description                String?
-  duration                   Int                 @default(30)
-  isActive                   Boolean             @default(true)
-  requiresPractitionerChoice Boolean             @default(false)
-  pendingTtlHours            Int                 @default(24)
-  color                      String              @default("#3b82f6")
-  serviceId                  String              @db.ObjectId
-  service                    Service             @relation(fields: [serviceId], references: [id])
-  practitionerAssignments    MotifPractitioner[]
-  resourceAssignments        MotifResource[]
-  appointments               Appointment[]
-  createdAt                  DateTime            @default(now())
-  updatedAt                  DateTime            @updatedAt
 }
 
 model MotifPractitioner {
@@ -191,7 +162,6 @@ model Resource {
   @@index([isActive])
 }
 
-// New: Resource-Doctor many-to-many relation
 model ResourcePractitioner {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   resourceId     String   @db.ObjectId
