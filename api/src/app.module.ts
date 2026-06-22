@@ -3,8 +3,6 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { ContactModule } from "./contact/contact.module";
-import { CategoryModule } from "./category/category.module";
-import { ServiceModule } from "./service/service.module";
 import { AppointmentModule } from "./appointment/appointment.module";
 import { ScheduleModule } from "./schedule/schedule.module";
 import { SessionModule } from "./session/session.module";
@@ -23,8 +21,6 @@ console.log("[AppModule] Loading modules...");
     AuthModule,
     UserModule,
     ContactModule,
-    CategoryModule,
-    ServiceModule,
     AppointmentModule,
     ScheduleModule,
     SessionModule,

@@ -35,10 +35,6 @@ export class AppointmentNotificationService {
     return settings.emailEnabled;
   }
 
-  // ════════════════════════════════════════════════════════════════
-  //  NEW CLEAN THEME — Widamine Medical Emails
-  // ════════════════════════════════════════════════════════════════
-
   private readonly COLORS = {
     primary: '#2e90c0',
     secondary: '#1a3646',
@@ -144,10 +140,10 @@ export class AppointmentNotificationService {
       </div>`;
   }
 
-  private serviceBox(name: string): string {
+  private motifBox(name: string): string {
     return `
       <div style="background: linear-gradient(135deg, #f7fafc, #edf2f7); padding: 20px 24px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <p style="margin: 0 0 4px; font-size: 11px; color: ${this.COLORS.primary}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Service</p>
+        <p style="margin: 0 0 4px; font-size: 11px; color: ${this.COLORS.primary}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Motif</p>
         <p style="margin: 0; font-size: 18px; color: ${this.COLORS.secondary}; font-family: ${this.FONTS.serif};">${name}</p>
       </div>`;
   }
@@ -183,7 +179,7 @@ export class AppointmentNotificationService {
   async sendNewBookingAcknowledgment(appointmentId: string) {
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true },
+      include: { motif: true },
     });
     if (!appt || !appt.email) return;
 
@@ -191,7 +187,7 @@ export class AppointmentNotificationService {
       ${this.title('✓', 'Réservation reçue')}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph('Votre demande de rendez-vous a bien été enregistrée.')}
-      ${this.serviceBox(appt.service?.name || 'Consultation')}
+      ${this.motifBox(appt.motif?.name || 'Consultation')}
       ${this.note(`
         Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
         <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
@@ -212,16 +208,16 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true },
+      include: { motif: true, practitioner: true, schedules: true },
     });
     if (!appt || !appt.email) return;
 
     const html = this.wrap(`
       ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
-      ${this.paragraph(`Bonne nouvelle ! Votre rendez-vous pour <strong>${appt.service?.name || '—'}</strong> a été confirmé.`)}
+      ${this.paragraph(`Bonne nouvelle ! Votre rendez-vous pour <strong>${appt.motif?.name || '—'}</strong> a été confirmé.`)}
       ${this.detailsTable([
-        ['Service', appt.service?.name || '—'],
+        ['Motif', appt.motif?.name || '—'],
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
@@ -229,7 +225,7 @@ export class AppointmentNotificationService {
       ${this.closing()}
     `, this.COLORS.success);
 
-    await this.mailService.sendMail(appt.email, `Confirmation — ${appt.service?.name || 'Widamine'}`, html);
+    await this.mailService.sendMail(appt.email, `Confirmation — ${appt.motif?.name || 'Widamine'}`, html);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -241,7 +237,7 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true },
+      include: { motif: true, practitioner: true, schedules: true },
     });
     if (!appt || !appt.email) return;
 
@@ -250,7 +246,7 @@ export class AppointmentNotificationService {
     const html = this.wrap(`
       ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
-      ${this.paragraph(`Votre rendez-vous${date ? ` du <strong>${date}</strong>` : ''}${appt.service ? ` pour <strong>${appt.service.name}</strong>` : ''} a été annulé.`)}
+      ${this.paragraph(`Votre rendez-vous${date ? ` du <strong>${date}</strong>` : ''}${appt.motif ? ` pour <strong>${appt.motif.name}</strong>` : ''} a été annulé.`)}
       ${this.note('Si vous souhaitez reprendre rendez-vous, contactez-nous directement. Nous restons à votre disposition.')}
       ${this.closing()}
     `, this.COLORS.danger);
@@ -267,7 +263,7 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true },
+      include: { motif: true, practitioner: true, schedules: true },
     });
     if (!appt || !appt.email) return;
 
@@ -276,7 +272,7 @@ export class AppointmentNotificationService {
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph('Ceci est un rappel pour votre rendez-vous <strong>demain</strong>.')}
       ${this.detailsTable([
-        ['Service', appt.service?.name || '—'],
+        ['Motif', appt.motif?.name || '—'],
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
@@ -284,7 +280,7 @@ export class AppointmentNotificationService {
       ${this.closing()}
     `, this.COLORS.warning);
 
-    await this.mailService.sendMail(appt.email, `Rappel — ${appt.service?.name || 'Widamine'}`, html);
+    await this.mailService.sendMail(appt.email, `Rappel — ${appt.motif?.name || 'Widamine'}`, html);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -296,7 +292,7 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true, patient: true },
+      include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
     if (!appt?.practitionerId) return;
 
@@ -312,14 +308,14 @@ export class AppointmentNotificationService {
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
         ['Téléphone', appt.phone || '—'],
-        ['Service', appt.service?.name || '—'],
+        ['Motif', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
         ['Note', appt.context || '—'],
       ])}
       ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
     `);
 
-    await this.mailService.sendMail(to, `Nouvelle réservation — ${appt.service?.name || 'Widamine'}`, html);
+    await this.mailService.sendMail(to, `Nouvelle réservation — ${appt.motif?.name || 'Widamine'}`, html);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -331,7 +327,7 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true, patient: true },
+      include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
     if (!appt?.practitionerId) return;
 
@@ -346,13 +342,13 @@ export class AppointmentNotificationService {
       ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
-        ['Service', appt.service?.name || '—'],
+        ['Motif', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
       ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
     `, this.COLORS.success);
 
-    await this.mailService.sendMail(to, `Confirmé — ${appt.service?.name || 'Widamine'}`, html);
+    await this.mailService.sendMail(to, `Confirmé — ${appt.motif?.name || 'Widamine'}`, html);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -364,7 +360,7 @@ export class AppointmentNotificationService {
 
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { service: true, practitioner: true, schedules: true, patient: true },
+      include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
     if (!appt?.practitionerId) return;
 
@@ -379,12 +375,12 @@ export class AppointmentNotificationService {
       ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
-        ['Service', appt.service?.name || '—'],
+        ['Motif', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
       ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
     `, this.COLORS.danger);
 
-    await this.mailService.sendMail(to, `Annulé — ${appt.service?.name || 'Widamine'}`, html);
+    await this.mailService.sendMail(to, `Annulé — ${appt.motif?.name || 'Widamine'}`, html);
   }
 }
