@@ -33,13 +33,16 @@ export class MotifController {
     @Body()
     data: {
       name: string;
-      slug: string;
-      bookingType: string;
-      serviceId: string;
+      slug?: string;
       duration?: number;
+      numberOfSessions?: number;
+      isOnlineBookable?: boolean;
+      requiresPractitionerChoice?: boolean;
+      pendingTtlHours?: number;
       description?: string;
       color?: string;
       practitionerIds?: string[];
+      resourceIds?: string[];
     },
   ) {
     return this.motifService.create(data);

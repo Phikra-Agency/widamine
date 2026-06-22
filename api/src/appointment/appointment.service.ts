@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { PatientService } from "@/patient/patient.service";
 
@@ -9,38 +9,36 @@ export class AppointmentService {
     private patientService: PatientService,
   ) {}
 
-  private async findAvailableResource(serviceId: string, datetime: string): Promise<string | undefined> {
-    const [service, firstSession] = await Promise.all([
-      this.prisma.service.findUnique({
-        where: { id: serviceId },
-        select: { allowedSalleIds: true },
-      }),
-      this.prisma.session.findFirst({
-        where: { serviceId },
-        orderBy: { number: 'asc' },
-      }),
-    ])
+  private async findAvailableResource(motifId: string, datetime: string): Promise<string | undefined> {
+    const motifResources = await this.prisma.motifResource.findMany({
+      where: { motifId },
+      include: { resource: true },
+      orderBy: [{ isPreferred: "desc" }, { priority: "asc" }, { resource: { priority: "asc" } }],
+    });
 
-    // If service has no allowed salles, fallback to any active resource
-    let salleIds = service?.allowedSalleIds
-    if (!salleIds?.length) {
+    let resourceIds = motifResources.map(mr => mr.resourceId);
+
+    if (!resourceIds.length) {
       const fallbackResources = await this.prisma.resource.findMany({
         where: { isActive: true },
-        select: { id: true },
-        orderBy: { priority: 'asc' },
-      })
-      salleIds = fallbackResources.map(r => r.id)
-      if (!salleIds.length) return undefined
+        orderBy: { priority: "asc" },
+      });
+      resourceIds = fallbackResources.map(r => r.id);
+      if (!resourceIds.length) return undefined;
     }
 
-    const duration = firstSession?.duration || 30
-    const slotStart = new Date(datetime)
-    const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000)
+    const motif = await this.prisma.motif.findUnique({
+      where: { id: motifId },
+      select: { duration: true },
+    });
+    const duration = motif?.duration || 30;
+    const slotStart = new Date(datetime);
+    const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
 
     const bookedResources = await this.prisma.appointment.findMany({
       where: {
-        resourceId: { in: salleIds },
-        status: { notIn: ['CANCELLED', 'COMPLETED'] },
+        resourceId: { in: resourceIds },
+        status: { notIn: ["CANCELLED", "COMPLETED"] },
         schedules: {
           some: {
             datetime: { gte: slotStart, lt: slotEnd },
@@ -48,21 +46,41 @@ export class AppointmentService {
         },
       },
       select: { resourceId: true },
-    })
+    });
 
-    const bookedIds = new Set(bookedResources.map(r => r.resourceId).filter(Boolean))
-    const availableIds = salleIds.filter(id => !bookedIds.has(id))
-    if (!availableIds.length) return undefined
+    const bookedIds = new Set(bookedResources.map(r => r.resourceId).filter(Boolean));
+    const availableIds = resourceIds.filter(id => !bookedIds.has(id));
+    if (!availableIds.length) return undefined;
 
-    if (availableIds.length === 1) return availableIds[0]
+    if (availableIds.length === 1) return availableIds[0];
 
     const resources = await this.prisma.resource.findMany({
       where: { id: { in: availableIds } },
+      orderBy: { priority: "asc" },
       select: { id: true, priority: true },
-      orderBy: { priority: 'asc' },
-    })
+    });
 
-    return resources[0]?.id
+    return resources[0]?.id;
+  }
+
+  private async validateSessionSequence(motifId: string, sessionNumber: number): Promise<void> {
+    if (sessionNumber <= 1) return;
+
+    const previousAppointment = await this.prisma.appointment.findFirst({
+      where: {
+        motifId,
+        sessionNumber: sessionNumber - 1,
+        status: "COMPLETED",
+      },
+    });
+
+    if (!previousAppointment) {
+      throw new BadRequestException({
+        message: `Session ${sessionNumber} requires session ${sessionNumber - 1} to be completed first`,
+        code: "session_sequence_error",
+        previousSessionNumber: sessionNumber - 1,
+      });
+    }
   }
 
   async create(data: {
@@ -70,42 +88,31 @@ export class AppointmentService {
     email: string;
     phone: string;
     context?: string;
-    serviceId: string;
-    motifId?: string;
+    motifId: string;
     practitionerId?: string;
     resourceId?: string;
     datetime?: string;
+    sessionNumber?: number;
   }) {
-    // Find or create patient by phone
+    const motif = await this.prisma.motif.findUnique({ where: { id: data.motifId } });
+    if (!motif) throw new NotFoundException("Motif not found");
+
+    const sessionNumber = data.sessionNumber ?? 1;
+    await this.validateSessionSequence(data.motifId, sessionNumber);
+
     const patient = await this.patientService.findOrCreateByPhone({
-      firstName: data.name.split(' ')[0] || data.name,
-      lastName: data.name.split(' ').slice(1).join(' ') || '',
+      firstName: data.name.split(" ")[0] || data.name,
+      lastName: data.name.split(" ").slice(1).join(" ") || "",
       email: data.email,
       phone: data.phone,
     });
 
-    // Find the first session for this service, or create a default one
-    let session = await this.prisma.session.findFirst({
-      where: { serviceId: data.serviceId },
-      orderBy: { number: 'asc' },
+    const session = await this.prisma.session.findFirst({
+      where: { motifId: data.motifId, number: sessionNumber },
     });
 
-    if (!session) {
-      const sessionCount = await this.prisma.session.count({
-        where: { serviceId: data.serviceId },
-      });
-      session = await this.prisma.session.create({
-        data: {
-          serviceId: data.serviceId,
-          number: sessionCount + 1,
-          duration: 30,
-        },
-      });
-    }
-
-    // Auto-assign resource if not provided and datetime is given
     if (!data.resourceId && data.datetime) {
-      data.resourceId = await this.findAvailableResource(data.serviceId, data.datetime)
+      data.resourceId = await this.findAvailableResource(data.motifId, data.datetime);
     }
 
     const appointment = await this.prisma.appointment.create({
@@ -115,22 +122,21 @@ export class AppointmentService {
         phone: data.phone,
         context: data.context,
         patientId: patient.id,
-        serviceId: data.serviceId,
         motifId: data.motifId,
+        sessionNumber,
         practitionerId: data.practitionerId,
         resourceId: data.resourceId,
         status: "PENDING",
       },
       include: {
-        service: true,
         motif: true,
         practitioner: true,
         patient: true,
+        resource: true,
       },
     });
 
-    // Create schedule if datetime is provided
-    if (data.datetime) {
+    if (data.datetime && session) {
       await this.prisma.schedule.create({
         data: {
           datetime: new Date(data.datetime),
@@ -146,7 +152,6 @@ export class AppointmentService {
   async findAll() {
     return this.prisma.appointment.findMany({
       include: {
-        service: true,
         motif: true,
         practitioner: true,
         patient: true,
@@ -162,7 +167,6 @@ export class AppointmentService {
     return this.prisma.appointment.findMany({
       where: { practitionerId },
       include: {
-        service: true,
         motif: true,
         practitioner: true,
         patient: true,
@@ -177,9 +181,8 @@ export class AppointmentService {
   async findOne(id: string) {
     return this.prisma.appointment.findUnique({
       where: { id },
-      include: { 
-        service: true, 
-        motif: true, 
+      include: {
+        motif: true,
         practitioner: true,
         patient: true,
         resource: true,
@@ -196,8 +199,8 @@ export class AppointmentService {
       phone: string;
       context: string;
       status: string;
-      serviceId: string;
       motifId: string;
+      sessionNumber: number;
       practitionerId: string;
       resourceId: string;
       expiresAt: Date;
@@ -214,11 +217,11 @@ export class AppointmentService {
     return this.prisma.appointment.update({
       where: { id },
       data,
-      include: { 
-        service: true, 
-        motif: true, 
+      include: {
+        motif: true,
         practitioner: true,
         patient: true,
+        resource: true,
       },
     });
   }
@@ -229,93 +232,75 @@ export class AppointmentService {
     return this.prisma.appointment.delete({ where: { id } });
   }
 
-  async getAvailability(serviceId: string, date: string) {
+  async getAvailability(motifId: string, date: string, practitionerId?: string) {
+    const motif = await this.prisma.motif.findUnique({
+      where: { id: motifId },
+      include: {
+        practitionerAssignments: {
+          include: { practitioner: { select: { id: true, name: true, image: true } } },
+        },
+        resourceAssignments: {
+          include: { resource: { select: { id: true } } },
+        },
+      },
+    });
+    if (!motif) throw new NotFoundException("Motif not found");
+
+    const assignedPractitioners = motif.practitionerAssignments.map(pa => pa.practitioner);
+    const practitionerIds = practitionerId
+      ? [practitionerId]
+      : assignedPractitioners.map(p => p.id);
+
+    if (!practitionerIds.length) return [];
+
+    const assignedResourceIds = motif.resourceAssignments.map(ra => ra.resource.id);
+
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Get the service and its allowed doctors/salles
-    const service = await this.prisma.service.findUnique({
-      where: { id: serviceId },
-      include: { sessions: true },
-    });
-
-    if (!service || !service.sessions.length) return [];
-
-    // Use allowedDoctorIds from service (now stored as String[] in MongoDB)
-    const allowedDoctorIds = service.allowedDoctorIds?.length 
-      ? service.allowedDoctorIds 
-      : [service.primaryDoctorId];
-    const allowedSalleIds = service.allowedSalleIds || [];
-
-    // If no doctors configured, return empty
-    if (!allowedDoctorIds.length) return [];
-
-    // Get all existing appointments that conflict with this service's allowed doctors/salles
-    const conflictingAppointments = await this.prisma.appointment.findMany({
+    const existingAppointments = await this.prisma.appointment.findMany({
       where: {
         OR: [
-          { practitionerId: { in: allowedDoctorIds } },
-          { resourceId: { in: allowedSalleIds } },
+          { practitionerId: { in: practitionerIds } },
+          ...(assignedResourceIds.length ? [{ resourceId: { in: assignedResourceIds } }] : []),
         ],
-        status: { notIn: ['CANCELLED', 'COMPLETED'] },
+        status: { notIn: ["CANCELLED", "COMPLETED"] },
       },
-      select: {
-        id: true,
-        practitionerId: true,
-        resourceId: true,
-      },
+      select: { id: true, practitionerId: true, resourceId: true },
     });
 
-    // Get scheduled times for these appointments
-    const appointmentIds = conflictingAppointments.map(a => a.id);
+    const appointmentIds = existingAppointments.map(a => a.id);
     const schedules = await this.prisma.schedule.findMany({
       where: {
         appointmentId: { in: appointmentIds },
         datetime: { gte: startOfDay, lte: endOfDay },
       },
-      select: {
-        datetime: true,
-        appointmentId: true,
-      },
+      select: { datetime: true, appointmentId: true },
     });
 
-    // Map appointmentId -> practitionerId, resourceId
     const appointmentMap = new Map(
-      conflictingAppointments.map(a => [a.id, { doctorId: a.practitionerId, salleId: a.resourceId }])
+      existingAppointments.map(a => [a.id, { practitionerId: a.practitionerId, resourceId: a.resourceId }])
     );
 
-    // Build conflict set: Set of "doctorId_timestamp" and "salleId_timestamp"
     const conflicts = new Set<string>();
     for (const s of schedules) {
       const timeKey = new Date(s.datetime).getTime();
       const appt = appointmentMap.get(s.appointmentId);
-      if (appt?.doctorId) conflicts.add(`${appt.doctorId}_${timeKey}`);
-      if (appt?.salleId) conflicts.add(`${appt.salleId}_${timeKey}`);
+      if (appt?.practitionerId) conflicts.add(`practitioner_${appt.practitionerId}_${timeKey}`);
+      if (appt?.resourceId) conflicts.add(`resource_${appt.resourceId}_${timeKey}`);
     }
 
-    // Get doctors for display
-    const doctors = await this.prisma.user.findMany({
-      where: { id: { in: allowedDoctorIds } },
-      select: { id: true, name: true, image: true },
-    });
-    const doctorMap = new Map(doctors.map(d => [d.id, { name: d.name, image: d.image }]));
-
-    // Generate avatar URL from initials when no image
+    const slots: { time: string; practitionerId: string; practitionerName: string; practitionerImage: string | null }[] = [];
+    const duration = motif.duration || 30;
     const initialsAvatar = (name: string) => {
-      const initials = name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      const initials = name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2e90c0&color=fff&size=128`;
     };
 
-    // Generate slots: for each doctor, check if they have conflicts
-    const slots: { time: string; doctorId: string; doctorName: string; doctorImage: string | null }[] = [];
-    const duration = service.sessions[0]?.duration || 30;
-
-    for (const doctorId of allowedDoctorIds) {
-      const doctor = doctorMap.get(doctorId) ?? { name: 'Unknown', image: null };
-      const doctorName = typeof doctor === 'string' ? doctor : doctor.name;
-      const doctorImage = typeof doctor === 'string' ? null : doctor.image;
+    for (const practitioner of assignedPractitioners) {
+      if (practitionerId && practitioner.id !== practitionerId) continue;
 
       for (let hour = 9; hour < 18; hour++) {
         for (let min = 0; min < 60; min += duration) {
@@ -323,32 +308,28 @@ export class AppointmentService {
           slotTime.setHours(hour, min, 0, 0);
           const timeKey = slotTime.getTime();
 
-          // Check if this doctor is booked at this time
-          const doctorConflict = conflicts.has(`${doctorId}_${timeKey}`);
-          // Check if at least one salle is free at this time
-          let hasFreeSalle = allowedSalleIds.length === 0;
-          for (const salleId of allowedSalleIds) {
-            if (!conflicts.has(`${salleId}_${timeKey}`)) {
-              hasFreeSalle = true;
+          const practitionerConflict = conflicts.has(`practitioner_${practitioner.id}_${timeKey}`);
+          let hasFreeResource = assignedResourceIds.length === 0;
+          for (const rid of assignedResourceIds) {
+            if (!conflicts.has(`resource_${rid}_${timeKey}`)) {
+              hasFreeResource = true;
               break;
             }
           }
 
-          if (!doctorConflict && hasFreeSalle) {
+          if (!practitionerConflict && hasFreeResource) {
             slots.push({
               time: slotTime.toISOString(),
-              doctorId,
-              doctorName,
-              doctorImage: doctorImage || initialsAvatar(doctorName),
+              practitionerId: practitioner.id,
+              practitionerName: practitioner.name,
+              practitionerImage: practitioner.image || initialsAvatar(practitioner.name),
             });
           }
         }
       }
     }
 
-    // Sort by time
     slots.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-
     return slots;
   }
 }

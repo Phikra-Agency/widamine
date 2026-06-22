@@ -27,10 +27,11 @@ export class AppointmentController {
 
   @Get("availability")
   getAvailability(
-    @Query("serviceId") serviceId: string,
+    @Query("motifId") motifId: string,
     @Query("date") date: string,
+    @Query("practitionerId") practitionerId?: string,
   ) {
-    return this.appointmentService.getAvailability(serviceId, date);
+    return this.appointmentService.getAvailability(motifId, date, practitionerId);
   }
 
   @Post()
@@ -41,21 +42,19 @@ export class AppointmentController {
       email: string;
       phone: string;
       context?: string;
-      serviceId: string;
-      motifId?: string;
+      motifId: string;
       practitionerId?: string;
       resourceId?: string;
       datetime?: string;
+      sessionNumber?: number;
     },
   ) {
     const result = await this.appointmentService.create(data);
 
-    // Send acknowledgment email to the patient
     this.notificationService.sendNewBookingAcknowledgment(result.id).catch((err) =>
       console.error("Failed to send booking acknowledgment:", err.message),
     );
 
-    // Notify the assigned doctor about the new reservation
     if (result.practitionerId) {
       this.notificationService.notifyDoctorNewAppointment(result.id).catch((err) =>
         console.error("Failed to notify doctor:", err.message),
@@ -101,7 +100,6 @@ export class AppointmentController {
 
     const result = await this.appointmentService.update(id, data);
 
-    // Send email notifications on status changes
     if (data.status === "CONFIRMED") {
       this.notificationService.sendConfirmation(id).catch((err) =>
         console.error("Failed to send confirmation email:", err.message),
@@ -110,7 +108,6 @@ export class AppointmentController {
         console.error("Failed to notify doctor of confirmation:", err.message),
       );
     } else if (data.status === "CANCELLED") {
-      // Notify both patient and doctor about cancellation
       this.notificationService.sendCancellation(id).catch((err) =>
         console.error("Failed to send cancellation email:", err.message),
       );
@@ -118,7 +115,6 @@ export class AppointmentController {
         console.error("Failed to notify doctor of cancellation:", err.message),
       );
 
-      // Clean up patient if this was their only appointment
       this.patientService.deleteIfNoAppointments(result.patientId).catch((err) =>
         console.error("Failed to clean up patient:", err.message),
       );

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 const DEFAULT_MOTIF_COLORS = [
@@ -19,32 +19,31 @@ export class MotifService {
   async create(data: {
     name: string;
     slug?: string;
-    bookingType?: string;
-    serviceId?: string;
     duration?: number;
+    numberOfSessions?: number;
+    isOnlineBookable?: boolean;
+    requiresPractitionerChoice?: boolean;
+    pendingTtlHours?: number;
     description?: string;
     color?: string;
     practitionerIds?: string[];
+    resourceIds?: string[];
   }) {
     const { 
-      name, slug, bookingType, serviceId, duration, 
-      description, color, practitionerIds 
+      name, slug, duration, numberOfSessions, 
+      isOnlineBookable, requiresPractitionerChoice, pendingTtlHours,
+      description, color, practitionerIds, resourceIds 
     } = data;
 
     const motif = await this.prisma.motif.create({
       data: {
         name,
         slug: slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        bookingType: bookingType || 'STANDARD',
-        serviceId:
-          serviceId ||
-          (() => {
-            throw new BadRequestException({
-              message: "serviceId is required",
-              code: "motif_service_required",
-            });
-          })(),
         duration: duration || 30,
+        numberOfSessions: numberOfSessions ?? 1,
+        isOnlineBookable: isOnlineBookable ?? false,
+        requiresPractitionerChoice: requiresPractitionerChoice ?? false,
+        pendingTtlHours: pendingTtlHours ?? 24,
         description,
         color: normalizeMotifColor(color) ?? getRandomMotifColor(),
       },
@@ -58,33 +57,37 @@ export class MotifService {
       }
     }
 
+    if (resourceIds?.length) {
+      for (const rid of resourceIds) {
+        await this.prisma.motifResource.create({
+          data: { motifId: motif.id, resourceId: rid },
+        });
+      }
+    }
+
     return this.prisma.motif.findUnique({
       where: { id: motif.id },
-      include: { service: true, practitionerAssignments: true },
+      include: { practitionerAssignments: true, resourceAssignments: true, sessions: true },
     });
   }
 
   async findAll() {
-    try {
-      return await this.prisma.motif.findMany({
-        include: { 
-          service: true,
-          practitionerAssignments: true
-        },
-      });
-    } catch {
-      return this.prisma.motif.findMany({
-        include: { practitionerAssignments: true },
-      });
-    }
+    return this.prisma.motif.findMany({
+      include: { 
+        practitionerAssignments: true,
+        resourceAssignments: true,
+        sessions: { orderBy: { number: "asc" } },
+      },
+    });
   }
 
   async findOne(id: string) {
     return this.prisma.motif.findUnique({
       where: { id },
       include: { 
-        service: true,
-        practitionerAssignments: true
+        practitionerAssignments: true,
+        resourceAssignments: true,
+        sessions: { orderBy: { number: "asc" } },
       },
     });
   }
@@ -94,18 +97,22 @@ export class MotifService {
     data: {
       name?: string;
       slug?: string;
-      bookingType?: string;
-      serviceId?: string;
       duration?: number;
+      numberOfSessions?: number;
+      isOnlineBookable?: boolean;
+      requiresPractitionerChoice?: boolean;
+      pendingTtlHours?: number;
       description?: string;
       isActive?: boolean;
       color?: string;
       practitionerIds?: string[];
+      resourceIds?: string[];
     },
   ) {
     const { 
-      name, slug, bookingType, serviceId, duration, 
-      description, isActive, color, practitionerIds 
+      name, slug, duration, numberOfSessions, 
+      isOnlineBookable, requiresPractitionerChoice, pendingTtlHours,
+      description, isActive, color, practitionerIds, resourceIds 
     } = data;
     const normalizedColor = color === undefined ? undefined : normalizeMotifColor(color) ?? undefined;
 
@@ -114,9 +121,11 @@ export class MotifService {
       data: {
         name,
         slug,
-        bookingType,
-        serviceId,
         duration,
+        numberOfSessions,
+        isOnlineBookable,
+        requiresPractitionerChoice,
+        pendingTtlHours,
         description,
         isActive,
         color: normalizedColor,
@@ -132,16 +141,28 @@ export class MotifService {
       }
     }
 
+    if (resourceIds !== undefined) {
+      await this.prisma.motifResource.deleteMany({ where: { motifId: id } });
+      for (const rid of resourceIds) {
+        await this.prisma.motifResource.create({
+          data: { motifId: id, resourceId: rid },
+        });
+      }
+    }
+
     return this.prisma.motif.findUnique({
       where: { id },
-      include: { service: true, practitionerAssignments: true },
+      include: { practitionerAssignments: true, resourceAssignments: true, sessions: true },
     });
   }
 
   async remove(id: string) {
     await this.prisma.motifPractitioner.deleteMany({ where: { motifId: id } });
     await this.prisma.motifResource.deleteMany({ where: { motifId: id } });
-    await this.prisma.appointment.updateMany({ where: { motifId: id }, data: { motifId: null } });
+    await this.prisma.session.deleteMany({ where: { motifId: id } });
+    await this.prisma.schedule.deleteMany({ where: { appointment: { motifId: id } } });
+    await this.prisma.notificationLog.deleteMany({ where: { appointment: { motifId: id } } });
+    await this.prisma.appointment.deleteMany({ where: { motifId: id } });
     return this.prisma.motif.delete({ where: { id } });
   }
 }

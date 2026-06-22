@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, Matches } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, IsBoolean, Matches } from "class-validator";
 
 export class CreateMotifDto {
   @IsString()
@@ -9,17 +9,25 @@ export class CreateMotifDto {
   @IsNotEmpty()
   slug: string;
 
-  @IsString()
-  @IsNotEmpty()
-  bookingType: string;
-
-  @IsString()
-  @IsNotEmpty()
-  serviceId: string;
-
   @IsOptional()
   @IsNumber()
   duration?: number;
+
+  @IsOptional()
+  @IsNumber()
+  numberOfSessions?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isOnlineBookable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  requiresPractitionerChoice?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  pendingTtlHours?: number;
 
   @IsOptional()
   @IsString()
@@ -34,6 +42,11 @@ export class CreateMotifDto {
   @IsArray()
   @IsString({ each: true })
   practitionerIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  resourceIds?: string[];
 }
 
 export class UpdateMotifDto {
@@ -46,16 +59,24 @@ export class UpdateMotifDto {
   slug?: string;
 
   @IsOptional()
-  @IsString()
-  bookingType?: string;
-
-  @IsOptional()
-  @IsString()
-  serviceId?: string;
+  @IsNumber()
+  duration?: number;
 
   @IsOptional()
   @IsNumber()
-  duration?: number;
+  numberOfSessions?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isOnlineBookable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  requiresPractitionerChoice?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  pendingTtlHours?: number;
 
   @IsOptional()
   @IsString()
@@ -73,4 +94,9 @@ export class UpdateMotifDto {
   @IsArray()
   @IsString({ each: true })
   practitionerIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  resourceIds?: string[];
 }

@@ -54,17 +54,7 @@ export class ScheduleService {
     const { start, end } = this.getDateRange(date, 6);
     const appointmentFilter =
       ["DOCTOR", "PRACTITIONER"].includes(user.role)
-        ? {
-            OR: [
-              { practitionerId: user.id },
-              {
-                practitionerId: null,
-                service: {
-                  primaryDoctorId: user.id,
-                },
-              },
-            ],
-          }
+        ? { practitionerId: user.id }
         : {};
 
     const schedules = await this.prismaService.schedule.findMany({
@@ -85,7 +75,7 @@ export class ScheduleService {
             id: true,
             number: true,
             duration: true,
-            service: {
+            motif: {
               select: {
                 id: true,
                 name: true,

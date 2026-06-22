@@ -1,9 +1,15 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString, IsOptional } from "class-validator";
 
 export class CreateSessionDto {
+  @IsString()
+  motifId: string;
+
   @IsNumber()
   duration: number;
+}
 
-  @IsString()
-  serviceId: string;
+export class UpdateSessionDto {
+  @IsOptional()
+  @IsNumber()
+  duration?: number;
 }

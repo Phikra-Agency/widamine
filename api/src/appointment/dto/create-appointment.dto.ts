@@ -1,5 +1,5 @@
+import { IsString, IsOptional, IsNumber } from "class-validator";
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateAppointmentDto {
   @IsString()
@@ -15,21 +15,19 @@ export class CreateAppointmentDto {
   @IsString()
   context?: string;
 
+  @IsOptional()
   @IsString()
-  datetime: string;
+  datetime?: string;
+
+  @IsString()
+  motifId: string;
+
+  @IsOptional()
+  @IsString()
+  practitionerId?: string;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  serviceId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  motifId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  practitionerId?: number;
+  sessionNumber?: number;
 }

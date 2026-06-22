@@ -8,8 +8,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { SessionService } from "./session.service";
-import { CreateSessionDto } from "./dto/create-session.dto";
-import { UpdateSessionDto } from "./dto/update-session.dto";
+import { CreateSessionDto, UpdateSessionDto } from "./dto/create-session.dto";
 import { RoleGuard } from "@/auth/role.guard";
 import { AuthGuard } from "@/auth/auth.guard";
 
