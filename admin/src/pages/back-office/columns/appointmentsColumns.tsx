@@ -20,7 +20,7 @@ export function createAppointmentsColumns({
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Patient' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Patient' />,
       cell: ({ row }) => <div className='font-medium'>{row.original.name}</div>,
       meta: { width: 'wide' },
     },
@@ -43,18 +43,18 @@ export function createAppointmentsColumns({
     },
     {
       id: 'motif',
-      accessorFn: (row) => row.motif?.name || row.service?.name || '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Motif' />,
+      accessorFn: (row) => row.motif?.name || '',
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Motif' />,
       cell: ({ row }) => (
         <span className='text-muted-foreground'>
-          {row.original.motif?.name || row.original.service?.name}
+          {row.original.motif?.name}
         </span>
       ),
     },
     {
       id: 'status',
       accessorKey: 'status',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Statut' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Statut' />,
       cell: ({ row }) => (
         <StatusSelect appointmentId={row.original.id!} status={row.original.status || 'PENDING'} />
       ),
@@ -64,7 +64,7 @@ export function createAppointmentsColumns({
     {
       id: 'practitioner',
       accessorFn: (row) => row.practitioner?.name ?? 'Auto',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Praticien' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Praticien' />,
       cell: ({ row }) => (
         <div className='flex items-center gap-1.5 text-muted-foreground'>
           <Stethoscope size={14} className='text-muted-foreground/60' />

@@ -33,7 +33,7 @@ export function createReservationsColumns({
   return [
     {
       id: 'reservation',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Réservation' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Réservation' />,
       cell: ({ row }) => {
         const appt = row.original
         const firstSchedule = appt.schedules?.[0]
@@ -57,7 +57,7 @@ export function createReservationsColumns({
     },
     {
       id: 'patient',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Patient' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Patient' />,
       cell: ({ row }) => (
         <div className='space-y-0.5'>
           <div className='flex items-center gap-1.5'>
@@ -73,27 +73,19 @@ export function createReservationsColumns({
       meta: { width: 'wide' },
     },
     {
-      id: 'service',
-      accessorFn: (row) => row.service?.name || '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Service' />,
-      cell: ({ row }) => (
-        <span className='text-muted-foreground text-sm'>{row.original.service?.name || '—'}</span>
-      ),
-    },
-    {
       id: 'motif',
-      accessorFn: (row) => row.motif?.name || row.service?.name || '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Motif' />,
+      accessorFn: (row) => row.motif?.name || '',
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Motif' />,
       cell: ({ row }) => (
         <span className='text-muted-foreground text-sm'>
-          {row.original.motif?.name || row.original.service?.name || '—'}
+          {row.original.motif?.name || '—'}
         </span>
       ),
     },
     {
       id: 'practitioner',
       accessorFn: (row) => row.practitioner?.name ?? 'Auto',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Praticien' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Praticien' />,
       cell: ({ row }) => (
         <div className='flex items-center gap-1.5 text-muted-foreground text-sm'>
           <Stethoscope size={14} className='text-muted-foreground/60' />
@@ -104,7 +96,7 @@ export function createReservationsColumns({
     {
       id: 'resource',
       accessorFn: (row) => row.resource?.name ?? '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Ressource' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Ressource' />,
       cell: ({ row }) => {
         const name = row.original.resource?.name
         if (!name) return <span className='text-muted-foreground/40 text-sm'>—</span>
@@ -119,7 +111,7 @@ export function createReservationsColumns({
     {
       id: 'status',
       accessorKey: 'status',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Statut' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Statut' />,
       cell: ({ row }) => (
         <StatusSelect appointmentId={row.original.id!} status={row.original.status || 'PENDING'} />
       ),

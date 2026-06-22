@@ -27,8 +27,8 @@ export function createContactsColumns({
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Expéditeur' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Expéditeur' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-2.5'>
@@ -43,7 +43,7 @@ export function createContactsColumns({
     {
       id: 'email',
       accessorKey: 'email',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Email' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Email' />,
       cell: ({ row }) => (
         <div className='flex items-center gap-1.5 text-muted-foreground'>
           <EnvelopeSimple size={14} className='text-muted-foreground/60' />
@@ -55,7 +55,7 @@ export function createContactsColumns({
     {
       id: 'phone',
       accessorKey: 'phone',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Téléphone' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Téléphone' />,
       cell: ({ row }) => (
         <div className='flex items-center gap-1.5 text-muted-foreground'>
           <Phone size={14} className='text-muted-foreground/60' />

@@ -1,5 +1,4 @@
 import api from '@/lib/api'
-import { notify } from '@/lib/notify'
 import { create } from 'zustand'
 
 interface Service {
@@ -33,6 +32,8 @@ interface ServiceStoreInterface {
   resources: Resource[]
   operation: 'create' | 'edit' | 'show' | 'delete'
   modalOpen: boolean
+  filters: { term: string; categoryId: string }
+  setFilters: (filters: ServiceStoreInterface['filters']) => void
   setItem: (item: ServiceStoreInterface['item']) => void
   clearItem: () => void
   openModal: () => void
@@ -44,8 +45,8 @@ interface ServiceStoreInterface {
   fetchItem: () => Promise<void>
   saveItem: () => Promise<void>
   deleteItem: () => Promise<void>
-  saveSession: (session: { id?: string; session: number; duration: number }, editing: boolean) => Promise<void>
-  deleteSession: (sessionId: string) => Promise<void>
+  saveSession: (session: { id?: number; session: number; duration: number }, editing: boolean) => Promise<void>
+  deleteSession: (sessionId: number) => Promise<void>
 }
 
 export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
@@ -55,6 +56,10 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   resources: [],
   operation: 'create' as ServiceStoreInterface['operation'],
   modalOpen: false,
+  filters: { term: '', categoryId: '' },
+  setFilters(filters) {
+    set({ filters })
+  },
   setItem: (item) => {
     // Parse JSON strings to arrays when setting item
     const updated = {
@@ -95,24 +100,22 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
   },
   saveItem: async () => {
     const item = get().item
-    const isEdit = get().operation === 'edit'
     const { doctorId, ...rest } = item as any
     const payload = {
       ...rest,
       primaryDoctorId: rest.primaryDoctorId || doctorId,
     }
-    if (isEdit) {
+    if (get().operation === 'edit') {
       await api.put('services/' + (get().item as Service).id, payload)
     } else {
       await api.post('services', payload)
     }
-    notify.success(isEdit ? 'Service modifié.' : 'Service créé.')
     get().fetchItems()
     get().closeModal()
   },
   deleteItem: async () => {
     await api.delete('services/' + (get().item as Service).id)
-    notify.success('Service supprimé.')
+    get().fetchItems()
     get().closeModal()
   },
   saveSession: async (session: { id?: string; session: number; duration: number }, editing: boolean) => {
@@ -121,15 +124,13 @@ export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({
 
     if (editing) {
       await api.put(`sessions/${session.id}`, { duration: session.duration })
-      notify.success('Créneau modifié.')
     } else {
       await api.post(`sessions`, { duration: session.duration, serviceId })
-      notify.success('Créneau ajouté.')
     }
     get().fetchItem()
   },
   deleteSession: async (sessionId: string) => {
     await api.delete(`sessions/${sessionId}`)
-    notify.success('Créneau supprimé.')
+    get().fetchItem()
   }
 }))

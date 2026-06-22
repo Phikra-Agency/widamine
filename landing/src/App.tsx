@@ -1,22 +1,33 @@
-const adminUrl = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+import { MantineProvider } from '@mantine/core'
+import { DatesProvider } from '@mantine/dates'
+
+import '@mantine/core/styles.css'
+import '@mantine/dates/styles.css'
+
+import { Layout } from '@/components/layouts'
+import { Home, Contact, Appointment, ServiceDetail } from '@/pages'
+
+gsap.registerPlugin(useGSAP)
 
 export default function App() {
   return (
-    <div className="landing-page">
-      <header className="landing-header">
-        <p className="landing-eyebrow">Widamine</p>
-        <h1>Cabinet médical-esthétique</h1>
-        <p className="landing-lead">
-          Site public en cours de construction. La prise de rendez-vous et le contenu marketing
-          seront portés ici.
-        </p>
-      </header>
-
-      <section className="landing-actions">
-        <a className="landing-btn landing-btn-primary" href={adminUrl}>
-          Espace staff
-        </a>
-      </section>
-    </div>
+    <MantineProvider>
+      <DatesProvider settings={{ locale: 'fr' }}>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path='contact' element={<Contact />} />
+              <Route path='appointment' element={<Appointment />} />
+              <Route path='services/:slug' element={<ServiceDetail />} />
+              <Route path='*' element={<>404</>} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DatesProvider>
+    </MantineProvider>
   )
 }

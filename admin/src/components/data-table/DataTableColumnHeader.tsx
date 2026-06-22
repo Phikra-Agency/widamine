@@ -1,4 +1,4 @@
-import type { Column } from '@tanstack/react-table'
+import type { Column, Table } from '@tanstack/react-table'
 import { CaretDown, CaretUp, CaretUpDown } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { DataTableColumnSearch } from './DataTableColumnSearch'
 
 interface DataTableColumnHeaderProps<TData, TValue> {
   column: Column<TData, TValue>
+  table: Table<TData>
   title: string
   searchColumn?: Column<TData, TValue>
   className?: string
@@ -14,6 +15,7 @@ interface DataTableColumnHeaderProps<TData, TValue> {
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
+  table,
   title,
   searchColumn,
   className,
@@ -61,6 +63,7 @@ export function DataTableColumnHeader<TData, TValue>({
       {titleRow}
       <DataTableColumnFilter
         column={column}
+        table={table}
         filterColumnId={filterColumnId}
         options={filterMeta}
         placeholder={column.columnDef.meta?.filterPlaceholder}

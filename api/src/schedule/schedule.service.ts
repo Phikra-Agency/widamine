@@ -75,12 +75,6 @@ export class ScheduleService {
             id: true,
             number: true,
             duration: true,
-            motif: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
           },
         },
         appointment: {

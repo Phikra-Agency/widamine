@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { CaretLeft, CaretRight, X } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, X, CalendarBlank, User, Clock, MapPin, Tag } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 
 function formatDateTimeLabel(value?: string) {
@@ -37,10 +37,13 @@ function getPeriodFromHour(hour: number): 'morning' | 'afternoon' | 'evening' {
   return 'evening'
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({ icon: Icon, label, value }: { icon?: React.ElementType; label: string; value: React.ReactNode }) {
   return (
     <div className='rounded-surface border border-border-subtle bg-secondary/[0.01] p-4'>
-      <div className='mb-1 text-[10px] uppercase tracking-[0.16em] text-secondary/40'>{label}</div>
+      <div className='mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-secondary/40'>
+        {Icon && <Icon size={10} />}
+        {label}
+      </div>
       <div className='text-sm leading-6 text-secondary'>{value}</div>
     </div>
   )
@@ -57,7 +60,6 @@ export default function ScheduleShowModal() {
   const itemDate = new Date(item.datetime).toDateString()
   const itemHour = new Date(item.datetime).getHours()
   const itemPeriod = getPeriodFromHour(itemHour)
-  const itemSessionId = item.session?.id ?? 0
 
   const periodSchedules = allWeekSchedules.filter(s => {
     if (!s.datetime) return false
@@ -72,10 +74,10 @@ export default function ScheduleShowModal() {
     .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
 
   const currentIndex = periodSchedules.findIndex(
-    s => s.datetime === item.datetime && (s.session?.id ?? 0) === itemSessionId,
+    s => s.datetime === item.datetime && (s.session?.id ?? 0) === (item.session?.id ?? 0),
   )
   const dayIndex = daySchedules.findIndex(
-    s => s.datetime === item.datetime && (s.session?.id ?? 0) === itemSessionId,
+    s => s.datetime === item.datetime && (s.session?.id ?? 0) === (item.session?.id ?? 0),
   )
   const hasNext = currentIndex < periodSchedules.length - 1
   const hasPrev = currentIndex > 0
@@ -104,7 +106,7 @@ export default function ScheduleShowModal() {
     }
   }
 
-  const title = motif?.name || item.session?.motif?.name || 'Créneau sélectionné'
+  const title = motif?.name || 'Créneau sélectionné'
 
   return (
     <Dialog
@@ -115,7 +117,7 @@ export default function ScheduleShowModal() {
     >
       <DialogContent
         showCloseButton={false}
-        className='max-h-[85vh] overflow-y-auto p-4 sm:p-6'
+        className='max-h-[85vh] w-[95vw] overflow-y-auto p-4 shadow-bo-elevated sm:max-w-xl sm:p-6'
       >
         <DialogHeader className='gap-0 text-left'>
           <div className='flex items-start justify-between gap-3'>
@@ -167,14 +169,16 @@ export default function ScheduleShowModal() {
         </DialogHeader>
 
         <div className='mt-6 grid gap-3 sm:grid-cols-2'>
-          <Info label='Patient' value={patientName} />
-          <Info label='Motif' value={item.session?.motif?.name || '-'} />
+          <Info icon={User} label='Patient' value={patientName} />
+          <Info icon={Tag} label='Motif' value={motif?.name || '-'} />
           <Info
-            label='N° réservation (jour)'
+            icon={CalendarBlank}
+            label='Réservation (jour)'
             value={dayIndex >= 0 ? `${formatReservationOrder(dayIndex + 1)} réservation` : '-'}
           />
           <Info label='Session' value={item.session?.session ? `Séance ${item.session.session}` : '-'} />
           <Info
+            icon={Clock}
             label='Durée'
             value={
               item.appointment?.motif?.duration
@@ -184,11 +188,10 @@ export default function ScheduleShowModal() {
                   : '-'
             }
           />
-          <Info label='Date & Heure' value={formatDateTimeLabel(item.datetime)} />
-          <Info label='Praticien' value={item.appointment?.practitioner?.name || 'Non assigné'} />
-          <Info label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
+          <Info icon={CalendarBlank} label='Date & Heure' value={formatDateTimeLabel(item.datetime)} />
+          <Info icon={User} label='Praticien' value={item.appointment?.practitioner?.name || 'Non assigné'} />
+          <Info icon={MapPin} label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
           <Info label='Statut' value={item.appointment?.status || '-'} />
-          <Info label='Motif' value={item.appointment?.motif?.name || '-'} />
         </div>
 
         <div className='mt-6 flex items-center justify-between gap-4'>

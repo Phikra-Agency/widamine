@@ -159,8 +159,7 @@ function Planner() {
               : (a.name || '').toLowerCase()
             const motifName = (a.motif?.name || '').toLowerCase()
             const resourceName = (a.resource?.name || '').toLowerCase()
-            const sessionMotifName = (s.session?.motif?.name || '').toLowerCase()
-            const haystack = [patientName, motifName, resourceName, sessionMotifName].join(' ')
+            const haystack = [patientName, motifName, resourceName].join(' ')
             if (!haystack.includes(searchLower)) return false
           }
 
@@ -338,8 +337,8 @@ function Planner() {
     </div>
   )
 
-  const openSchedule = (schedule: (typeof items)[0]['morning'][0]) => {
-    setItem(schedule)
+  const openSchedule = (schedule: import('@/components/calendar/EventCard').EventCardSchedule) => {
+    setItem(schedule as any)
     toggleOpenShowModal()
     markOpened(schedule.id)
   }
@@ -365,7 +364,7 @@ function Planner() {
   const mobileDayData = displayItems[viewMode === 'day' ? activeDayIdx : mobileDayIdx]
   const showMobileDayStrip = viewMode === 'week'
 
-  const renderMobileEvents = (schedules: (typeof items)[0]['morning']) => {
+  const renderMobileEvents = (schedules: import('@/components/calendar/EventCard').EventCardSchedule[]) => {
     if (schedules.length === 0) return null
     return (
       <div className='space-y-1.5'>

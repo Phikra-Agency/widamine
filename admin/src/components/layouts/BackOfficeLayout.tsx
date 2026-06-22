@@ -53,7 +53,7 @@ type NavGroup = {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'service',
+    id: 'cabinet',
     label: 'Cabinet',
     links: [
       { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },

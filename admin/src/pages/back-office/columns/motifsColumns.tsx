@@ -20,8 +20,8 @@ export function createMotifsColumns({ onEdit, onDelete }: MotifColumnsDeps): Col
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Motif' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Motif' searchColumn={column} />
       ),
       cell: ({ row }) => <span className='font-medium'>{row.original.name}</span>,
       meta: { width: 'wide' },
@@ -29,7 +29,7 @@ export function createMotifsColumns({ onEdit, onDelete }: MotifColumnsDeps): Col
     {
       id: 'duration',
       accessorFn: (row) => row.duration ?? 30,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Durée' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Durée' />,
       cell: ({ row }) => (
         <span className='text-muted-foreground'>{row.original.duration || 30} min</span>
       ),

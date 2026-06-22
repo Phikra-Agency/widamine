@@ -43,8 +43,8 @@ export function createUsersColumns({ isReceptionist, onEdit, onDelete }: UserCol
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Utilisateur' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Utilisateur' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-2.5'>
@@ -59,14 +59,14 @@ export function createUsersColumns({ isReceptionist, onEdit, onDelete }: UserCol
     {
       id: 'email',
       accessorKey: 'email',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Email' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Email' />,
       cell: ({ row }) => <span className='text-muted-foreground'>{row.original.email}</span>,
       meta: { truncate: true },
     },
     {
       id: 'role',
       accessorKey: 'role',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Rôle' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Rôle' />,
       cell: ({ row }) => <RoleBadge role={row.original.role} />,
       filterFn: (row, _columnId, value) => equalsOrAllFilter(value, row.original.role),
       meta: { width: 'narrow' },

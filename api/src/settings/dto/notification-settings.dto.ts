@@ -30,6 +30,10 @@ export class UpdateNotificationSettingsDto {
   inAppEnabled?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  whatsappEnabled?: boolean;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => NotificationTypesDto)
   smsTypes?: NotificationTypesDto;
@@ -43,4 +47,9 @@ export class UpdateNotificationSettingsDto {
   @ValidateNested()
   @Type(() => NotificationTypesDto)
   inAppTypes?: NotificationTypesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => NotificationTypesDto)
+  whatsappTypes?: NotificationTypesDto;
 }

@@ -1,4 +1,5 @@
-import { getEventColor } from '@/lib/motifFamilies'
+import { type MouseEvent } from 'react'
+import { getEventColor, getFamilyForMotif } from '@/lib/motifFamilies'
 
 export interface EventCardSchedule {
   id: string
@@ -6,14 +7,14 @@ export interface EventCardSchedule {
   session: {
     id: number
     session: number
-    motif: { name: string }
+    duration: number
+    motif: { id: string; name: string }
   }
   appointment?: {
     motif?: {
       id: string
       name: string
       color?: string
-
     }
     practitioner?: { name: string }
     resource?: { name: string }
@@ -26,7 +27,7 @@ interface EventCardProps {
   isUnread?: boolean
   variant?: 'grid' | 'list'
   expandable?: boolean
-  onClick: () => void
+  onClick: (e: MouseEvent) => void
 }
 
 export default function EventCard({
@@ -40,8 +41,8 @@ export default function EventCard({
   const motif = schedule.appointment?.motif
   const family = getFamilyForMotif(motif)
   const accentColor = getEventColor(motif)
-  const motifName = motif?.name || schedule.session.motif?.name || 'Session'
-  const sublabel = `${schedule.session.motif?.name || 'Session'} · S${schedule.session.session}`
+  const motifName = motif?.name || 'Session'
+  const sublabel = `${motif?.name || 'Session'} · S${schedule.session.session}`
 
   if (variant === 'list') {
     return (
@@ -62,11 +63,11 @@ export default function EventCard({
         </div>
         <div className='flex shrink-0 items-center gap-1.5'>
           {isUnread && (
-            <div className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: family.hue }} />
+            <div className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: family.color }} />
           )}
           <div
             className='h-5 w-1 rounded-full'
-            style={{ backgroundColor: family.hue }}
+            style={{ backgroundColor: family.color }}
             title={family.label}
           />
         </div>
@@ -92,7 +93,7 @@ export default function EventCard({
           </span>
           <p className='min-w-0 flex-1 truncate text-[11px] font-medium text-foreground'>{motifName}</p>
           {isUnread && (
-            <div className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: family.hue }} />
+            <div className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: family.color }} />
           )}
         </div>
 

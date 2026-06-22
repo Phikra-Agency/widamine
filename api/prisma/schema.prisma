@@ -228,20 +228,24 @@ model NotificationLog {
 }
 
 model AppSettings {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  singletonKey       String   @unique @default("default")
-  smsEnabled         Boolean  @default(false)
-  emailEnabled       Boolean  @default(true)
-  inAppEnabled       Boolean  @default(true)
-  smsConfirmation    Boolean  @default(true)
-  smsReminder        Boolean  @default(true)
-  smsCancellation    Boolean  @default(false)
-  emailConfirmation  Boolean  @default(true)
-  emailReminder      Boolean  @default(true)
-  emailCancellation  Boolean  @default(true)
-  inAppConfirmation  Boolean  @default(true)
-  inAppReminder      Boolean  @default(true)
-  inAppCancellation  Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  singletonKey        String   @unique @default("default")
+  smsEnabled          Boolean  @default(false)
+  emailEnabled        Boolean  @default(true)
+  inAppEnabled        Boolean  @default(true)
+  whatsappEnabled     Boolean  @default(false)
+  smsConfirmation     Boolean  @default(true)
+  smsReminder         Boolean  @default(true)
+  smsCancellation     Boolean  @default(false)
+  emailConfirmation   Boolean  @default(true)
+  emailReminder       Boolean  @default(true)
+  emailCancellation   Boolean  @default(true)
+  inAppConfirmation   Boolean  @default(true)
+  inAppReminder       Boolean  @default(true)
+  inAppCancellation   Boolean  @default(false)
+  whatsappConfirmation Boolean @default(false)
+  whatsappReminder     Boolean @default(false)
+  whatsappCancellation Boolean @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

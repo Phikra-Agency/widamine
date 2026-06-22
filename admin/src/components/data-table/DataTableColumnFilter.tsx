@@ -1,4 +1,4 @@
-import type { Column } from '@tanstack/react-table'
+import type { Column, Table } from '@tanstack/react-table'
 import { Funnel } from '@phosphor-icons/react'
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import type { ColumnFilterOption } from './column-meta'
 
 interface DataTableColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>
+  table: Table<TData>
   filterColumnId?: string
   options: ColumnFilterOption[]
   placeholder?: string
@@ -18,13 +19,12 @@ interface DataTableColumnFilterProps<TData, TValue> {
 
 export function DataTableColumnFilter<TData, TValue>({
   column,
+  table,
   filterColumnId,
   options,
   placeholder = 'Tous',
 }: DataTableColumnFilterProps<TData, TValue>) {
   if (!column) return null
-  const table = column.table
-  if (!table) return null
   const targetColumn = filterColumnId ? table.getColumn(filterColumnId) : column
   if (!targetColumn) return null
 

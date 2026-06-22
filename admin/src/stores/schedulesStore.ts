@@ -16,10 +16,6 @@ interface Schedule {
     id: number
     session: number
     duration: number
-    service: {
-      id: number
-      name: string
-    }
   }
   appointment?: {
     id: string

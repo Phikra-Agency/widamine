@@ -162,7 +162,7 @@ function AppointmentsTable() {
                   <div className='flex items-start justify-between gap-3'>
                     <div className='min-w-0'>
                       <p className='text-sm font-semibold'>{item.name}</p>
-                      <p className='mt-1 text-xs text-secondary/50'>{item.motif?.name || item.service?.name}</p>
+                      <p className='mt-1 text-xs text-secondary/50'>{item.motif?.name || '-'}</p>
                     </div>
                     <StatusBadge status={item.status || 'PENDING'} />
                   </div>
@@ -298,8 +298,8 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
 
 function ShowModal() {
   const { openShowModal, setOpenShowModal, item, fetchItem, loadingItem, saveScheduleDate, savingScheduleSessionId } = useAppointmentsStore()
-  const [sessionDates, setSessionDates] = useState<Record<number, string>>({})
-  const [editingSessions, setEditingSessions] = useState<Record<number, boolean>>({})
+  const [sessionDates, setSessionDates] = useState<Record<string, string>>({})
+  const [editingSessions, setEditingSessions] = useState<Record<string, boolean>>({})
 
   function toDateTimeLocal(value?: string) {
     if (!value) return ''
@@ -321,11 +321,11 @@ function ShowModal() {
   }, [openShowModal])
 
   useEffect(() => {
-    const dates = (item.service?.sessions || []).reduce((acc: Record<number, string>, session) => {
+    const dates = (item.motif?.sessions || []).reduce((acc: Record<string, string>, session) => {
       const schedule = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)
       acc[session.id] = toDateTimeLocal(schedule?.datetime)
       return acc
-    }, {} as Record<number, string>)
+    }, {} as Record<string, string>)
 
     setSessionDates(dates)
     setEditingSessions({})
@@ -351,7 +351,7 @@ function ShowModal() {
                 </div>
                 <div className='min-w-0'>
                   <h3 className='text-lg font-semibold text-secondary'>{item.name}</h3>
-                  <p className='text-sm text-secondary/50'>{item.motif?.name || item.service?.name}</p>
+                  <p className='text-sm text-secondary/50'>{item.motif?.name || '-'}</p>
                 </div>
                 <div className='sm:ml-auto'>
                   <StatusBadge status={item.status || 'PENDING'} />
@@ -385,10 +385,10 @@ function ShowModal() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Service</Label>
+                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</Label>
                     <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
                       <CalendarBlank size={15} className='text-secondary/30' />
-                      {item.service?.name || '—'}
+                      {item.motif?.name || '—'}
                     </div>
                   </div>
 
@@ -443,15 +443,15 @@ function ShowModal() {
                 </div>
 
                 <div className='space-y-4'>
-                  <h3 className='font-medium text-secondary'>Séances du service</h3>
+                  <h3 className='font-medium text-secondary'>Séances du motif</h3>
                   <div className='space-y-3'>
-                    {(item.service?.sessions || []).length === 0 && (
+                    {(item.motif?.sessions || []).length === 0 && (
                       <div className='rounded-control border border-border bg-background p-4 text-center text-sm text-secondary/40'>
                         Aucune séance trouvée
                       </div>
                     )}
 
-                    {(item.service?.sessions || []).map((session) => (
+                    {(item.motif?.sessions || []).map((session) => (
                       <div key={session.id} className='space-y-3 rounded-control border border-border bg-background p-4'>
                         <div className='flex items-center justify-between'>
                           <div className='flex items-center gap-2'>

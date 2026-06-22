@@ -65,7 +65,7 @@ export default function PractitionerStatusBar() {
         id: 0,
         session: 1,
         duration: 30,
-        service: { id: 0, name: appt.service?.name || '-' },
+        motif: { id: '0', name: appt.motif?.name || '-' },
       },
       appointment: {
         id: appt.id,
@@ -121,7 +121,7 @@ export default function PractitionerStatusBar() {
           {current && (
             <div className='pointer-events-none absolute -top-2 left-5 opacity-0 group-hover:-top-[52px] group-hover:opacity-100 transition-all duration-200 z-50'>
               <div className='rounded-control px-3 py-2 text-white text-[11px] leading-snug whitespace-nowrap shadow-md' style={{ backgroundColor: current.motif?.color || '#3b82f6' }}>
-                <p className='font-semibold'>{current.motif?.name || current.service?.name || 'Rendez-vous'}</p>
+                <p className='font-semibold'>{current.motif?.name || 'Rendez-vous'}</p>
                 <p className='text-white/70 mt-0.5'>{current.resource?.name || '—'} · {current.practitioner?.name || '—'}</p>
               </div>
               <div className='mx-auto h-1.5 w-1.5 rotate-45 -mt-0.5' style={{ backgroundColor: current.motif?.color || '#3b82f6' }} />
@@ -151,7 +151,7 @@ export default function PractitionerStatusBar() {
           {next && (
             <div className='pointer-events-none absolute -top-2 left-5 opacity-0 group-hover:-top-[52px] group-hover:opacity-100 transition-all duration-200 z-50'>
               <div className='rounded-control px-3 py-2 text-white text-[11px] leading-snug whitespace-nowrap shadow-md' style={{ backgroundColor: next.motif?.color || '#3b82f6' }}>
-                <p className='font-semibold'>{next.motif?.name || next.service?.name || 'Rendez-vous'}</p>
+                <p className='font-semibold'>{next.motif?.name || 'Rendez-vous'}</p>
                 <p className='text-white/70 mt-0.5'>{next.resource?.name || '—'} · {next.practitioner?.name || '—'}</p>
               </div>
               <div className='mx-auto h-1.5 w-1.5 rotate-45 -mt-0.5' style={{ backgroundColor: next.motif?.color || '#3b82f6' }} />

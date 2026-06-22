@@ -39,50 +39,48 @@ export function CalendarFilterSelect({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <div
-          data-active={hasFilter}
-          className={cn(
-            'bo-filter-pill gap-1.5',
-            hasFilter && FILTER_PILL_COLOR_CLASS[color],
-            className,
-          )}
-        >
-          {Icon && (
-            <Icon
-              size={11}
-              weight={hasFilter ? 'fill' : 'regular'}
-              className={cn(
-                'shrink-0',
-                hasFilter ? 'text-current/70' : 'text-muted-foreground/50',
-              )}
-            />
-          )}
-          <span className='truncate max-w-28'>
-            {hasFilter ? activeOption?.label || placeholder : placeholder}
-          </span>
-          {hasFilter && (
-            <span
-              role='button'
-              tabIndex={0}
-              onClick={(e) => {
+      <DropdownMenuTrigger
+        data-active={hasFilter}
+        className={cn(
+          'bo-filter-pill gap-1.5',
+          hasFilter && FILTER_PILL_COLOR_CLASS[color],
+          className,
+        )}
+      >
+        {Icon && (
+          <Icon
+            size={11}
+            weight={hasFilter ? 'fill' : 'regular'}
+            className={cn(
+              'shrink-0',
+              hasFilter ? 'text-current/70' : 'text-muted-foreground/50',
+            )}
+          />
+        )}
+        <span className='truncate max-w-28'>
+          {hasFilter ? activeOption?.label || placeholder : placeholder}
+        </span>
+        {hasFilter && (
+          <span
+            role='button'
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation()
+              onChange('')
+              setOpen(false)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
                 onChange('')
                 setOpen(false)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation()
-                  onChange('')
-                  setOpen(false)
-                }
-              }}
-              className='flex size-4 shrink-0 items-center justify-center rounded-full text-current/40 hover:bg-black/10 hover:text-current'
-            >
-              <X size={10} weight='bold' />
-            </span>
-          )}
-        </div>
+              }
+            }}
+            className='flex size-4 shrink-0 items-center justify-center rounded-full text-current/40 hover:bg-black/10 hover:text-current'
+          >
+            <X size={10} weight='bold' />
+          </span>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start' sideOffset={4} className='min-w-56'>
         {options.map((option) => (

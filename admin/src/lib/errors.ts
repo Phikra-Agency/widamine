@@ -54,11 +54,8 @@ export const ERROR_CATALOG: Record<string, string> = {
   receptionist_cannot_change_role:
     'Les réceptionnistes ne peuvent pas modifier les rôles.',
 
-  // Domain
-  category_has_services:
-    'Impossible de supprimer une catégorie qui contient encore des services.',
-  motif_service_required: 'Un service est requis pour ce motif.',
-  non_working_day: 'Ce jour n’est pas un jour ouvré.',
+	// Domain
+	non_working_day: 'Ce jour n’est pas un jour ouvré.',
   not_your_appointment: 'Ce rendez-vous ne vous appartient pas.',
   not_your_patient: 'Ce patient ne vous est pas attribué.',
 }

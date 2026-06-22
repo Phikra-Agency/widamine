@@ -11,10 +11,6 @@ export const loginPasswordSchema = z.object({
   password: z.string().trim().min(1, 'Le mot de passe est requis.'),
 })
 
-export const categorySchema = z.object({
-  category: z.string().trim().min(1, 'Le nom de la catégorie est requis.'),
-})
-
 export const userCreateSchema = z.object({
   name: z.string().trim().min(1, 'Le nom est requis.'),
   email: z.string().trim().min(1, "L'e-mail est requis.").email(invalidEmail),
@@ -51,24 +47,6 @@ export const patientSchema = z.object({
   medicalHistory: z.string().optional(),
 })
 
-export const serviceSchema = z.object({
-  name: z.string().trim().min(1, 'Le nom du service est requis.'),
-  price: z.coerce.number().min(0, 'Le prix doit être positif ou nul.'),
-  categoryId: z
-    .union([z.string(), z.undefined()])
-    .refine((v) => !!v && String(v).length > 0, { message: 'La catégorie est requise.' }),
-  primaryDoctorId: z
-    .union([z.string(), z.undefined()])
-    .refine((v) => !!v && String(v).length > 0, { message: 'Le médecin principal est requis.' }),
-  allowedDoctorIds: z.array(z.string()).optional(),
-  allowedSalleIds: z.array(z.string()).optional(),
-})
-
-export const sessionSchema = z.object({
-  duration: z.coerce.number().min(5, 'La durée minimale est de 5 minutes.'),
-  session: z.number().optional(),
-})
-
 export const resourceSchema = z.object({
   name: z.string().trim().min(1, 'Le nom de la salle est requis.'),
   priority: z.number().min(1).max(4),
@@ -77,7 +55,7 @@ export const resourceSchema = z.object({
 
 export const motifSchema = z.object({
   name: z.string().trim().min(1, 'Le nom du motif est requis.'),
-  duration: z.coerce.number().min(5, 'La durée minimale est de 5 minutes.'),
+  duration: z.coerce.number().min(5, 'La durée minimale est de 5 minutes.').optional(),
   color: z.string().optional(),
   numberOfSessions: z.coerce.number().min(1, 'Minimum 1 séance').optional(),
   isOnlineBookable: z.boolean().optional(),

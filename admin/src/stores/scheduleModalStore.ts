@@ -62,11 +62,11 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   loadMotifs: async () => {
     set({ isLoadingMotifs: true, motifsError: null })
     try {
-      const res = await api.get('services') 
+      const res = await api.get('motifs')
       let data = res.data.map((item: any) => ({
          ...item,
-         practitioners: item.primaryDoctor ? [{ ...item.primaryDoctor, id: item.primaryDoctorId || item.primaryDoctor.name || 'doctor-1' }] : [],
-         requiresPractitionerChoice: !!item.primaryDoctor
+         practitioners: item.practitionerIds?.length ? item.practitionerIds.map((id: string) => ({ id })) : [],
+         requiresPractitionerChoice: !!item.requiresPractitionerChoice
       }))
       set({ motifs: data })
     } catch (e: any) {
@@ -191,7 +191,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         email: userData.email,
         phone: userData.phone,
         context: userData.note,
-        serviceId: selectedMotif.id,
+        motifId: selectedMotif.id,
         practitionerId: selectedPractitionerId || undefined,
         datetime: selectedHour 
       })

@@ -52,8 +52,8 @@ export function createPatientsColumns({
     {
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Patient' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Patient' searchColumn={column} />
       ),
       cell: ({ row }) => {
         const genderConf = GENDER_CONFIG[row.original.gender] || GENDER_CONFIG.OTHER
@@ -103,7 +103,7 @@ export function createPatientsColumns({
     {
       id: 'reservations',
       accessorFn: (row) => getAppointmentStats(row).count,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Réservations' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Réservations' />,
       cell: ({ row }) => {
         const stats = getAppointmentStats(row.original)
         return (
@@ -119,7 +119,7 @@ export function createPatientsColumns({
     {
       id: 'nextDate',
       accessorFn: (row) => getAppointmentStats(row).nextDate?.getTime() ?? 0,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Prochain RDV' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Prochain RDV' />,
       cell: ({ row }) => {
         const stats = getAppointmentStats(row.original)
         if (!stats.nextDate) return <span className='text-xs font-medium text-secondary/20'>—</span>
@@ -143,7 +143,7 @@ export function createPatientsColumns({
     {
       id: 'lastDate',
       accessorFn: (row) => getAppointmentStats(row).lastDate?.getTime() ?? 0,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Dernier RDV' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Dernier RDV' />,
       cell: ({ row }) => {
         const stats = getAppointmentStats(row.original)
         if (!stats.lastDate) return <span className='text-xs font-medium text-secondary/20'>—</span>

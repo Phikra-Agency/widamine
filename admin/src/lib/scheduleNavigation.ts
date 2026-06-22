@@ -22,7 +22,7 @@ export type DaySchedules = {
 export type ScheduleLike = {
   id?: string
   datetime: string
-  session: { id: number; session: number; duration: number; service: { id: number; name: string } }
+  session: { id: number; session: number; duration: number }
   appointment?: {
     id?: string
     status?: string
@@ -63,11 +63,10 @@ export function appointmentToScheduleLike(appt: {
   _id?: string
   status?: string
   name?: string
-  service?: { id?: number; name?: string }
+  motif?: { id?: string; name?: string; color?: string; duration?: number }
   patient?: { id: string; firstName: string; lastName: string }
   practitioner?: { id: string; name: string }
   resource?: { id: string; name: string }
-  motif?: { id: string; name: string; color: string; duration?: number }
   schedules?: { id?: string; datetime?: string; session?: { id?: number; number?: number; duration?: number } }[]
   _dt?: number
 }): ScheduleLike | null {
@@ -85,7 +84,6 @@ export function appointmentToScheduleLike(appt: {
       id: slot.session?.id ?? 0,
       session: sessionNumber,
       duration: appt.motif?.duration ?? slot.session?.duration ?? 30,
-      service: { id: appt.service?.id ?? 0, name: appt.service?.name || '-' },
     },
     appointment: {
       id: appointmentId,
@@ -94,7 +92,7 @@ export function appointmentToScheduleLike(appt: {
       patient: appt.patient,
       practitioner: appt.practitioner,
       resource: appt.resource,
-      motif: appt.motif,
+      motif: appt.motif as { id: string; name: string; color: string; duration?: number } | undefined,
     },
   }
 }

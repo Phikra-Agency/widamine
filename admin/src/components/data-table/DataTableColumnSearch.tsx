@@ -13,7 +13,7 @@ export function DataTableColumnSearch<TData, TValue>({
 }: DataTableColumnSearchProps<TData, TValue>) {
   const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState((column.getFilterValue() as string) ?? '')
-  const commitRef = useRef<() => void>()
+  const commitRef = useRef<() => void>(undefined)
 
   const syncFilter = useCallback((value: string) => {
     column.setFilterValue(value || undefined)

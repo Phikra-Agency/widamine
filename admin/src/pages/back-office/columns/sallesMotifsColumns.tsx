@@ -25,8 +25,8 @@ export function createSallesMotifsColumns({
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Motif' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Motif' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
@@ -41,19 +41,19 @@ export function createSallesMotifsColumns({
     {
       id: 'family',
       accessorFn: (row) => getFamilyForMotif(row).label,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Famille' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Famille' />,
       cell: ({ row }) => {
         const family = getFamilyForMotif(row.original)
         return (
           <span
             className='inline-flex items-center gap-1.5 rounded-element border px-2 py-0.5 text-[10px] font-semibold'
             style={{
-              borderColor: `${family.hue}35`,
-              backgroundColor: `${family.hue}12`,
-              color: family.hue,
+              borderColor: `${family.color}35`,
+              backgroundColor: `${family.color}12`,
+              color: family.color,
             }}
           >
-            <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: family.hue }} />
+            <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: family.color }} />
             {family.label}
           </span>
         )
@@ -79,7 +79,7 @@ export function createSallesMotifsColumns({
     {
       id: 'duration',
       accessorFn: (row) => row.duration ?? 30,
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Durée' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Durée' />,
       cell: ({ row }) => (
         <span className='inline-flex items-center rounded-element border border-border-subtle bg-secondary/1 px-2.5 py-1 text-xs font-semibold text-secondary/70'>
           {row.original.duration || 30} min

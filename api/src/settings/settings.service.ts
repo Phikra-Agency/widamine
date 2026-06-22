@@ -16,6 +16,7 @@ export class SettingsService {
       ...(dto.smsEnabled !== undefined && { smsEnabled: dto.smsEnabled }),
       ...(dto.emailEnabled !== undefined && { emailEnabled: dto.emailEnabled }),
       ...(dto.inAppEnabled !== undefined && { inAppEnabled: dto.inAppEnabled }),
+      ...(dto.whatsappEnabled !== undefined && { whatsappEnabled: dto.whatsappEnabled }),
       ...(dto.smsTypes && {
         smsConfirmation: dto.smsTypes.confirmation,
         smsReminder: dto.smsTypes.reminder,
@@ -31,6 +32,11 @@ export class SettingsService {
         inAppReminder: dto.inAppTypes.reminder,
         inAppCancellation: dto.inAppTypes.cancellation,
       }),
+      ...(dto.whatsappTypes && {
+        whatsappConfirmation: dto.whatsappTypes.confirmation,
+        whatsappReminder: dto.whatsappTypes.reminder,
+        whatsappCancellation: dto.whatsappTypes.cancellation,
+      }),
     };
   }
 
@@ -39,6 +45,7 @@ export class SettingsService {
       smsEnabled: settings.smsEnabled,
       emailEnabled: settings.emailEnabled,
       inAppEnabled: settings.inAppEnabled,
+      whatsappEnabled: settings.whatsappEnabled ?? false,
       smsTypes: {
         confirmation: settings.smsConfirmation,
         reminder: settings.smsReminder,
@@ -53,6 +60,11 @@ export class SettingsService {
         confirmation: settings.inAppConfirmation,
         reminder: settings.inAppReminder,
         cancellation: settings.inAppCancellation,
+      },
+      whatsappTypes: {
+        confirmation: settings.whatsappConfirmation ?? false,
+        reminder: settings.whatsappReminder ?? false,
+        cancellation: settings.whatsappCancellation ?? false,
       },
     };
   }

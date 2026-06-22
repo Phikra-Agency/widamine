@@ -17,7 +17,7 @@ export function createResourcesColumns({ onEdit, onDelete }: ResourceColumnsDeps
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Salle' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Salle' />,
       cell: ({ row }) => (
         <div className='flex items-center gap-2.5'>
           <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-element bg-muted'>
@@ -31,7 +31,7 @@ export function createResourcesColumns({ onEdit, onDelete }: ResourceColumnsDeps
     {
       id: 'priority',
       accessorKey: 'priority',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Priorité' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Priorité' />,
       cell: ({ row }) => <PriorityBadge priority={row.original.priority} />,
       meta: { width: 'narrow' },
     },

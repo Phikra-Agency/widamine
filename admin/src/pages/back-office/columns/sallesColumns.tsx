@@ -17,8 +17,8 @@ export function createSallesColumns({ onEdit, onDelete }: SalleColumnsDeps): Col
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Salle' searchColumn={column} />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Salle' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
@@ -33,7 +33,7 @@ export function createSallesColumns({ onEdit, onDelete }: SalleColumnsDeps): Col
     {
       id: 'priority',
       accessorKey: 'priority',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Priorité' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Priorité' />,
       cell: ({ row }) => <PriorityBadge priority={row.original.priority} variant='salles' />,
       meta: { width: 'narrow' },
     },

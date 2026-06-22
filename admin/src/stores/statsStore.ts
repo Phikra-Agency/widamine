@@ -7,7 +7,6 @@ export interface AppointmentItem {
   name: string
   status: string
   patient?: { firstName: string; lastName: string; phone: string }
-  service?: { name: string }
   practitioner?: { id?: string; name: string }
   resource?: { name: string }
   motif?: { name: string; color: string }

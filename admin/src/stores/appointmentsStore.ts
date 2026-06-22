@@ -8,14 +8,17 @@ export interface Appointment {
   email: string
   phone: string
   context: string
-  serviceId: number
+  motifId?: string
+  sessionNumber?: number
   status?: string
   timezone?: string
   expiresAt?: string | null
   confirmedAt?: string | null
   motif?: {
+    id?: string
     name: string
-    bookingType?: string
+    color?: string
+    sessions?: { id: string; session: number; duration: number }[]
   }
   practitioner?: {
     id: number
@@ -25,15 +28,11 @@ export interface Appointment {
     id: number
     name: string
   } | null
-  service?: {
-    name: string
-    sessions?: { id: number; session: number; duration: number }[]
-  }
   schedules?: {
-    id: number
+    id: string
     datetime: string
-    sessionId: number
-    session?: { id: number; session: number }
+    sessionId: string
+    session?: { id: string; session: number }
   }[]
   notifications?: {
     id: number
@@ -51,14 +50,14 @@ interface AppointmentStoreInterface {
   lastFetchedAt: number | null
   openShowModal: boolean
   loadingItem: boolean
-  savingScheduleSessionId: number | null
+  savingScheduleSessionId: string | null
   setItem: (item: Appointment) => void
   toggleOpenShowModal: () => void
   setOpenShowModal: (open: boolean) => void
   setFilters: (filters: AppointmentStoreInterface['filters']) => void
   fetchItems: () => Promise<void>
   fetchItem: (id: number) => Promise<void>
-  saveScheduleDate: (payload: { sessionId: number; datetime: string }) => Promise<void>
+  saveScheduleDate: (payload: { sessionId: string; datetime: string }) => Promise<void>
 }
 
 const APPOINTMENTS_STALE_MS = 60 * 1000

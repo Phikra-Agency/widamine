@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "@/prisma/prisma.service";
 import { MailService } from "@/mail/mail.service";
+import { SmsService } from "@/sms/sms.service";
 
 @Injectable()
 export class CronService {
@@ -10,6 +11,7 @@ export class CronService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly smsService: SmsService,
   ) {}
 
   @Cron(CronExpression.EVERY_30_MINUTES)
@@ -60,8 +62,10 @@ export class CronService {
         schedules: true,
         notifications: {
           where: {
-            channel: "EMAIL",
-            sentAt: { not: null },
+            OR: [
+              { channel: "EMAIL", sentAt: { not: null } },
+              { channel: "WHATSAPP", sentAt: { not: null } },
+            ],
           },
         },
       },
@@ -87,6 +91,20 @@ export class CronService {
           sentAt: new Date(),
         },
       }).catch(() => {});
+
+      if (appt.phone) {
+        await this.smsService.sendWhatsApp(appt.phone, "Rappel de rendez-vous demain.").catch(() => {});
+        await this.prisma.notificationLog.create({
+          data: {
+            appointmentId: appt.id,
+            channel: "WHATSAPP",
+            recipientType: "PATIENT",
+            recipient: appt.phone,
+            status: "SENT",
+            sentAt: new Date(),
+          },
+        }).catch(() => {});
+      }
     }
 
     this.logger.log(`Sent reminders for ${upcoming.length} appointments`);

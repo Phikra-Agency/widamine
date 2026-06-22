@@ -23,7 +23,6 @@ import {
   SelectValue,
   Textarea,
 } from '@/components/ui'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { FormDialog, FieldError } from '@/components/bo'
 import { patientSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
@@ -326,8 +325,11 @@ function Modal() {
   function patchItem(patch: Partial<typeof item>) {
     const next = { ...item, ...patch }
     setItem(next)
+    const validKeys = ['firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender', 'address', 'city', 'postalCode', 'country', 'medicalHistory'] as const
     for (const key of Object.keys(patch) as (keyof typeof item)[]) {
-      validation.onFieldChange(key, next)
+      if (validKeys.includes(key as never)) {
+        validation.onFieldChange(key as never, next)
+      }
     }
     return next
   }
@@ -480,7 +482,7 @@ function UpcomingAppointmentRow({
   const appointmentId = normalizeAppointmentId(appt)
   const isClickable = hasSlot && appointmentId
 
-  const motifName = appt.motif?.name || appt.service?.name || ''
+  const motifName = appt.motif?.name || ''
 
   if (!isClickable) {
     return (
@@ -587,11 +589,11 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
   if (typeof document === 'undefined') return null
 
   return (
-    <Sheet open={open && !!patient} onOpenChange={(next) => { if (!next) onClose() }}>
-      <SheetContent side='right' showCloseButton={false} className='w-full max-w-[520px] gap-0 p-0 shadow-[-8px_0_32px_rgba(26,54,70,0.08)]'>
+    <Dialog open={open && !!patient} onOpenChange={(next) => { if (!next) onClose() }}>
+      <DialogContent showCloseButton={false} className='max-h-[90vh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
         {patient && (
           <>
-            <div className='shrink-0 px-5 py-4 border-b border-border flex items-start justify-between gap-3'>
+            <div className='flex items-start justify-between gap-3 border-b border-border px-5 py-4 shrink-0'>
               <div className='min-w-0'>
                 <p className='text-[11px] uppercase tracking-[0.22em] text-secondary/40'>Dossier patient</p>
                 <p className='text-base font-medium text-secondary truncate'>
@@ -710,7 +712,7 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
             </div>
           </>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
