@@ -8,12 +8,14 @@ import { DataTableColumnSearch } from './DataTableColumnSearch'
 interface DataTableColumnHeaderProps<TData, TValue> {
   column: Column<TData, TValue>
   title: string
+  searchColumn?: Column<TData, TValue>
   className?: string
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
+  searchColumn,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const sorted = column.getCanSort() ? column.getIsSorted() : false
@@ -41,13 +43,22 @@ export function DataTableColumnHeader<TData, TValue>({
     <span className={cn('text-xs font-medium', className)}>{title}</span>
   )
 
+  const titleRow = searchColumn ? (
+    <div className='flex items-center gap-1'>
+      <div className='min-w-0 flex-1'>{titleNode}</div>
+      <DataTableColumnSearch column={searchColumn} />
+    </div>
+  ) : (
+    titleNode
+  )
+
   if (!filterMeta?.length) {
-    return <div className={cn('min-w-0', className)}>{titleNode}</div>
+    return <div className={cn('min-w-0', className)}>{titleRow}</div>
   }
 
   return (
     <div className={cn('flex min-w-0 flex-col gap-1', className)}>
-      {titleNode}
+      {titleRow}
       <DataTableColumnFilter
         column={column}
         filterColumnId={filterColumnId}

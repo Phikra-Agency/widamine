@@ -1,7 +1,7 @@
 import { EmptyInboxIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Eye, ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
-import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { Button } from '@/components/ui'
 
 export type ContactRow = {
@@ -28,10 +28,7 @@ export function createContactsColumns({
       id: 'name',
       accessorKey: 'name',
       header: ({ column }) => (
-        <div className='flex items-center justify-between gap-1'>
-          <DataTableColumnHeader column={column} title='Expéditeur' />
-          <DataTableColumnSearch column={column} />
-        </div>
+        <DataTableColumnHeader column={column} title='Expéditeur' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-2.5'>

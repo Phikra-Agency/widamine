@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import {
+  CalendarBlank,
   CalendarDots as CalendarDays,
   CaretDoubleLeft,
   CaretDoubleRight,
@@ -58,6 +59,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST'] },
+      { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST'] },
     ],
   },
   {

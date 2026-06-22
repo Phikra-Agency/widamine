@@ -2,7 +2,7 @@ import { EmptyPatientsIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PencilSimple as Pen, Trash as Trash2, User, CalendarBlank, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import clsx from 'clsx'
-import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { equalsOrAllFilter } from '@/components/data-table'
 import { Button } from '@/components/ui'
 import type { Patient } from '@/stores/patientsStore'
@@ -53,10 +53,7 @@ export function createPatientsColumns({
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => (
-        <div className='flex items-center justify-between gap-1'>
-          <DataTableColumnHeader column={column} title='Patient' />
-          <DataTableColumnSearch column={column} />
-        </div>
+        <DataTableColumnHeader column={column} title='Patient' searchColumn={column} />
       ),
       cell: ({ row }) => {
         const genderConf = GENDER_CONFIG[row.original.gender] || GENDER_CONFIG.OTHER

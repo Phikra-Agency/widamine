@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { PencilSimple as Pen, Trash as Trash2, User, Crown, Stethoscope, UserCircle } from '@phosphor-icons/react'
 import clsx from 'clsx'
 import type { Role } from '@/stores/authStore'
-import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { Badge, Button } from '@/components/ui'
 import { equalsOrAllFilter } from '@/components/data-table'
 
@@ -44,10 +44,7 @@ export function createUsersColumns({ isReceptionist, onEdit, onDelete }: UserCol
       id: 'name',
       accessorKey: 'name',
       header: ({ column }) => (
-        <div className='flex items-center justify-between gap-1'>
-          <DataTableColumnHeader column={column} title='Utilisateur' />
-          <DataTableColumnSearch column={column} />
-        </div>
+        <DataTableColumnHeader column={column} title='Utilisateur' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-2.5'>

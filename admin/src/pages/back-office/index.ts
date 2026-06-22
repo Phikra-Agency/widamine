@@ -8,5 +8,6 @@ import Patients from './Patients'
 import Resources from './Resources'
 import Motifs from './Motifs'
 import Settings from './Settings'
+import Reservations from './Reservations'
 
-export { Users, Calendar, Contacts, Services, Appointments, Categories, Patients, Motifs, Resources, Settings }
+export { Users, Calendar, Contacts, Services, Appointments, Categories, Patients, Motifs, Resources, Settings, Reservations }

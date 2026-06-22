@@ -14,6 +14,7 @@ const Services = lazy(() => import('@/pages/back-office/Services'))
 const Resources = lazy(() => import('@/pages/back-office/Resources'))
 const Motifs = lazy(() => import('@/pages/back-office/Motifs'))
 const Settings = lazy(() => import('@/pages/back-office/Settings'))
+const Reservations = lazy(() => import('@/pages/back-office/Reservations'))
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 <Route path='resources' element={<Suspense fallback={null}><Resources /></Suspense>} />
                 <Route path='settings' element={<Suspense fallback={null}><Settings /></Suspense>} />
                 <Route path='contacts' element={<Suspense fallback={null}><Contacts /></Suspense>} />
+                <Route path='reservations' element={<Suspense fallback={null}><Reservations /></Suspense>} />
               </Route>
 
               <Route element={<RoleWrapper roles={['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER']} />}>

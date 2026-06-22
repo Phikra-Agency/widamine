@@ -40,8 +40,7 @@ export function CalendarFilterSelect({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button
-          type='button'
+        <div
           data-active={hasFilter}
           className={cn(
             'bo-filter-pill gap-1.5',
@@ -83,7 +82,7 @@ export function CalendarFilterSelect({
               <X size={10} weight='bold' />
             </span>
           )}
-        </button>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start' sideOffset={4} className='min-w-56'>
         {options.map((option) => (

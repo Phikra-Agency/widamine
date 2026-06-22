@@ -1,7 +1,7 @@
 import { EmptyMotifIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PencilSimple as Pen, Trash as Trash2, Stethoscope } from '@phosphor-icons/react'
-import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { Button } from '@/components/ui'
 
 export type MotifRow = {
@@ -21,10 +21,7 @@ export function createMotifsColumns({ onEdit, onDelete }: MotifColumnsDeps): Col
       id: 'name',
       accessorKey: 'name',
       header: ({ column }) => (
-        <div className='flex items-center justify-between gap-1'>
-          <DataTableColumnHeader column={column} title='Motif' />
-          <DataTableColumnSearch column={column} />
-        </div>
+        <DataTableColumnHeader column={column} title='Motif' searchColumn={column} />
       ),
       cell: ({ row }) => <span className='font-medium'>{row.original.name}</span>,
       meta: { width: 'wide' },

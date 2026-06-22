@@ -2,7 +2,7 @@ import { EmptyMotifIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PencilSimple as Pen, Trash as Trash2, Stethoscope } from '@phosphor-icons/react'
 import { getFamilyForMotif } from '@/lib/motifFamilies'
-import { DataTable, DataTableColumnHeader, DataTableColumnSearch } from '@/components/data-table'
+import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { Button } from '@/components/ui'
 
 export type SallesMotifRow = {
@@ -27,10 +27,7 @@ export function createSallesMotifsColumns({
       id: 'name',
       accessorKey: 'name',
       header: ({ column }) => (
-        <div className='flex items-center justify-between gap-1'>
-          <DataTableColumnHeader column={column} title='Motif' />
-          <DataTableColumnSearch column={column} />
-        </div>
+        <DataTableColumnHeader column={column} title='Motif' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>

@@ -451,10 +451,17 @@ export function CalendarMonthGrid({
           const overflowItems = overflow > 0 ? events.slice(2) : []
 
           return (
-            <button
+            <div
               key={dateKey}
-              type='button'
+              role='button'
+              tabIndex={0}
               onClick={() => onSelectDate(dateKey)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelectDate(dateKey)
+                }
+              }}
               className={clsx(
                 'flex min-h-[5.5rem] cursor-pointer flex-col border-b border-r border-border-subtle p-1.5 text-left transition hover:bg-muted/20',
                 !inMonth && 'bg-muted/10 text-muted-foreground/50',
@@ -521,7 +528,7 @@ export function CalendarMonthGrid({
                   </div>
                 )}
               </div>
-            </button>
+            </div>
           )
         })}
       </div>
