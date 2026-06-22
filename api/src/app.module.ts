@@ -12,6 +12,7 @@ import { MotifModule } from "./motif/motif.module";
 import { ResourceModule } from "./resource/resource.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { SettingsModule } from "./settings/settings.module";
+import { CronModule } from "./cron/cron.module";
 
 console.log("[AppModule] Loading modules...");
 
@@ -30,6 +31,7 @@ console.log("[AppModule] Loading modules...");
     ResourceModule,
     DashboardModule,
     SettingsModule,
+    CronModule,
   ],
 })
 export class AppModule {}

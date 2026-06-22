@@ -163,6 +163,20 @@ export class AppointmentService {
     });
   }
 
+  async findByStatus(status: string) {
+    return this.prisma.appointment.findMany({
+      where: { status },
+      include: {
+        motif: true,
+        practitioner: true,
+        patient: true,
+        resource: true,
+        schedules: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async findByPractitioner(practitionerId: string) {
     return this.prisma.appointment.findMany({
       where: { practitionerId },

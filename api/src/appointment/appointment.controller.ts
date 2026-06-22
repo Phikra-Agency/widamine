@@ -10,6 +10,7 @@ import {
   Req,
   UseGuards,
   ForbiddenException,
+  NotFoundException,
 } from "@nestjs/common";
 import { AppointmentService } from "./appointment.service";
 import { AppointmentNotificationService } from "./appointment-notification.service";
@@ -24,6 +25,40 @@ export class AppointmentController {
     private readonly notificationService: AppointmentNotificationService,
     private readonly patientService: PatientService,
   ) {}
+
+  @Get("queue")
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  getVerificationQueue() {
+    return this.appointmentService.findByStatus("PENDING");
+  }
+
+  @Put(":id/confirm")
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  async confirmAppointment(@Param("id") id: string) {
+    const appt = await this.appointmentService.findOne(id);
+    if (!appt) throw new NotFoundException("Appointment not found");
+    if (appt.status !== "PENDING") {
+      throw new ForbiddenException("Only PENDING appointments can be confirmed");
+    }
+    const result = await this.appointmentService.update(id, { status: "CONFIRMED" });
+    this.notificationService.sendConfirmation(id).catch(() => {});
+    this.notificationService.notifyDoctorConfirmation(id).catch(() => {});
+    return result;
+  }
+
+  @Put(":id/reject")
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  async rejectAppointment(@Param("id") id: string) {
+    const appt = await this.appointmentService.findOne(id);
+    if (!appt) throw new NotFoundException("Appointment not found");
+    if (appt.status !== "PENDING") {
+      throw new ForbiddenException("Only PENDING appointments can be rejected");
+    }
+    const result = await this.appointmentService.update(id, { status: "REJECTED" });
+    this.notificationService.sendCancellation(id).catch(() => {});
+    this.patientService.deleteIfNoAppointments(result.patientId).catch(() => {});
+    return result;
+  }
 
   @Get("availability")
   getAvailability(
