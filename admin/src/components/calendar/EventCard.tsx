@@ -167,10 +167,16 @@ function EventCardWithHover({
       if (cardRef.current) {
         const rect = cardRef.current.getBoundingClientRect()
         const POPUP_HEIGHT = 220
+        const POPUP_WIDTH = 320
         const GAP = 8
         const spaceBelow = window.innerHeight - rect.bottom
         const flipAbove = spaceBelow < POPUP_HEIGHT + GAP
-        setPopupRect({ top: rect.top, left: rect.left, height: rect.height, flipAbove })
+        let left = rect.left + rect.width / 2 - POPUP_WIDTH / 2
+        if (left + POPUP_WIDTH > window.innerWidth - GAP) {
+          left = window.innerWidth - POPUP_WIDTH - GAP
+        }
+        if (left < GAP) left = GAP
+        setPopupRect({ top: rect.top, left, height: rect.height, flipAbove })
       }
       setShowDetail(true)
     }, 300)

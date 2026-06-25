@@ -255,6 +255,12 @@
 		width: var(--sidebar-collapsed-width);
 	}
 
+	[data-slot="sheet-content"] .bo-sidebar-brand {
+		width: auto;
+		justify-content: flex-start;
+		padding-left: 0.9rem;
+	}
+
 	.bo-sidebar-brand-mark {
 		@apply flex h-auto w-auto shrink-0 items-center justify-center;
 	}
