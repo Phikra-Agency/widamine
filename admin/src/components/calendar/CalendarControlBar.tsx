@@ -134,23 +134,37 @@ export default function CalendarControlBar({
         {viewSwitcher}
       </div>
 
-      {/* Desktop layout */}
-      <div className='hidden grid-cols-[1fr_auto_1fr] items-center gap-x-3 sm:grid'>
-        <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-3 gap-y-2'>
-          {filters}
+      {/* Desktop layout — nav + today button centered together, filters left, view switcher right */}
+      <div className='relative hidden items-center sm:flex'>
+        {/* Left wing: filters */}
+        <div className='flex min-w-0 flex-1 items-center'>
+          <div className='flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2'>
+            {filters}
+          </div>
         </div>
 
-        <div className='grid grid-cols-[1fr_auto_1fr] items-center gap-x-2'>
-          <div className='flex h-11 items-center justify-end'>
-            {todayButtonSide === 'left' && todayLink}
-          </div>
+        {/* Nav — absolutely fixed at center, never moves */}
+        <div className='absolute left-1/2 -translate-x-1/2'>
           {navGroup}
-          <div className='flex h-11 items-center justify-start'>
-            {todayButtonSide === 'right' && todayLink}
-          </div>
         </div>
 
-        {viewSwitcher}
+        {/* Today button — absolutely positioned next to nav, doesn't affect nav */}
+        {showTodayButton && (
+          <div
+            className='absolute top-1/2 -translate-y-1/2'
+            style={todayButtonSide === 'left'
+              ? { right: 'calc(50% + 115px)' }
+              : { left: 'calc(50% + 115px)' }
+            }
+          >
+            {todayLink}
+          </div>
+        )}
+
+        {/* Right wing: view switcher */}
+        <div className='flex shrink-0 items-center'>
+          {viewSwitcher}
+        </div>
       </div>
     </div>
   )

@@ -10,16 +10,16 @@ export const CALENDAR_VIEW_OPTIONS: {
   hintTitle: string
 }[] = [
   {
-    value: 'week',
-    label: 'Semaine',
-    hint: '7j',
-    hintTitle: 'Six jours ouvrés de la semaine',
-  },
-  {
     value: 'day',
     label: 'Jour',
     hint: '24h',
     hintTitle: 'Une journée complète',
+  },
+  {
+    value: 'week',
+    label: 'Semaine',
+    hint: '7j',
+    hintTitle: 'Six jours ouvrés de la semaine',
   },
   {
     value: 'month',
@@ -95,7 +95,7 @@ export function shouldShowTodayButton(viewMode: CalendarViewMode, date: string) 
   }
 }
 
-/** Past view → today btn left of nav; future view → right. */
+/** Past view → today btn left; future view → right. */
 export function getTodayButtonPlacement(viewMode: CalendarViewMode, date: string): 'left' | 'right' {
   const today = formatLocalDate(new Date())
   const parsed = parseLocalDate(date)
