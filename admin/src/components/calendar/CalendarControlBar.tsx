@@ -48,23 +48,24 @@ export default function CalendarControlBar({
       type='button'
       variant='link'
       onClick={onToday}
-      className='inline-flex h-11 items-center px-0 text-[13px] font-medium whitespace-nowrap'
+      className='hidden items-center px-0 text-[13px] font-medium whitespace-nowrap sm:inline-flex sm:h-11'
     >
       {getTodayLinkLabel(todayButtonSide)}
     </Button>
   ) : null
 
   const navGroup = (
-    <div className='bo-segment inline-flex h-11 items-center'>
+    <div className='bo-segment inline-flex items-center'>
       <Button
         type='button'
         variant='ghost'
         size='icon-sm'
         onClick={onPrev}
-        className='h-9 w-9 shrink-0 rounded-[calc(var(--radius)-2px)]'
+        className='h-8 w-8 shrink-0 rounded-[calc(var(--radius)-2px)] sm:h-9 sm:w-9'
         aria-label='Période précédente'
       >
-        <CaretLeft size={18} />
+        <CaretLeft size={16} className='sm:hidden' />
+        <CaretLeft size={18} className='hidden sm:block' />
       </Button>
 
       {!compact && (
@@ -80,16 +81,17 @@ export default function CalendarControlBar({
         variant='ghost'
         size='icon-sm'
         onClick={onNext}
-        className='h-9 w-9 shrink-0 rounded-[calc(var(--radius)-2px)]'
+        className='h-8 w-8 shrink-0 rounded-[calc(var(--radius)-2px)] sm:h-9 sm:w-9'
         aria-label='Période suivante'
       >
-        <CaretRight size={18} />
+        <CaretRight size={16} className='sm:hidden' />
+        <CaretRight size={18} className='hidden sm:block' />
       </Button>
     </div>
   )
 
   const viewSwitcher = (
-    <div className='flex min-w-0 items-center justify-end'>
+    <div className='flex min-w-0 items-center'>
       <div className='bo-segment'>
         {CALENDAR_VIEW_OPTIONS.map((option) => (
           <button
@@ -98,7 +100,7 @@ export default function CalendarControlBar({
             onClick={() => onViewModeChange(option.value)}
             title={option.hintTitle}
             className={cn(
-              'inline-flex cursor-pointer items-center gap-1.5 rounded-[calc(var(--radius)-2px)] px-2.5 py-1.5 text-[11px] font-medium leading-none transition-colors',
+              'inline-flex cursor-pointer items-center gap-1 rounded-[calc(var(--radius)-2px)] px-2 py-1 text-[10px] font-medium leading-none transition-colors sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-[11px]',
               viewMode === option.value
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
@@ -107,7 +109,7 @@ export default function CalendarControlBar({
             <span>{option.label}</span>
             <span
               className={cn(
-                'bo-view-hint',
+                'hidden sm:inline bo-view-hint',
                 viewMode === option.value && 'bo-view-hint-active',
               )}
               aria-hidden
@@ -121,18 +123,15 @@ export default function CalendarControlBar({
   )
 
   return (
-    <div className='shrink-0 border-b border-border bg-muted/35 px-4 py-2 sm:px-5'>
+    <div className='shrink-0 border-b border-border bg-muted/35 px-3 py-1.5 sm:px-5 sm:py-2'>
       {/* Mobile layout */}
-      <div className='flex flex-col gap-2 sm:hidden'>
-        <div className='flex items-center justify-between gap-2'>
-          <div className='flex items-center gap-2'>
-            {todayButtonSide === 'left' && todayLink}
-            {navGroup}
-            {todayButtonSide === 'right' && todayLink}
-          </div>
-          {viewSwitcher}
+      <div className='flex items-center justify-between gap-2 sm:hidden'>
+        <div className='flex items-center gap-1.5'>
+          {todayButtonSide === 'left' && todayLink}
+          {navGroup}
+          {todayButtonSide === 'right' && todayLink}
         </div>
-        <div className='flex flex-wrap items-center gap-2'>{filters}</div>
+        {viewSwitcher}
       </div>
 
       {/* Desktop layout */}

@@ -7,6 +7,7 @@ import {
   shouldShowTodayButton,
   getMonthFetchMondays,
   getMonthGridDates,
+  isSameMonth,
   type CalendarViewMode,
 } from '@/lib/calendarView'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -359,21 +360,39 @@ function Planner() {
 
   const mobileDayData = displayItems[viewMode === 'day' ? activeDayIdx : mobileDayIdx]
   const showMobileDayStrip = viewMode === 'week'
+  const showMobileMonthView = viewMode === 'month'
 
-  const renderMobileEvents = (schedules: import('@/components/calendar/EventCard').EventCardSchedule[]) => {
-    if (schedules.length === 0) return null
+  const [mobileMonthSelectedDate, setMobileMonthSelectedDate] = useState(filters.date)
+
+  useEffect(() => {
+    setMobileMonthSelectedDate(filters.date)
+  }, [filters.date])
+
+  const mobileMonthData = useMemo(() => {
+    if (viewMode !== 'month') return null
+    return monthItemsByDate.get(mobileMonthSelectedDate) || null
+  }, [viewMode, mobileMonthSelectedDate, monthItemsByDate])
+
+  const renderMobileEvents = (schedules: import('@/components/calendar/EventCard').EventCardSchedule[], periodLabel?: string) => {
     return (
-      <div className='space-y-1.5'>
-        {schedules.map((schedule) => (
-          <EventCard
-            key={schedule.id}
-            schedule={schedule}
-            formatTime={formatTimeOnly}
-            isUnread={!isOpened(schedule.id)}
-            variant='list'
-            onClick={() => openSchedule(schedule)}
-          />
-        ))}
+      <div className='space-y-1.5 py-1'>
+        {periodLabel && (
+          <p className='text-[10px] font-semibold uppercase tracking-wider text-secondary/40'>{periodLabel}</p>
+        )}
+        {schedules.length === 0 ? (
+          <p className='py-2 text-[11px] text-secondary/30 italic'>Aucune réservation</p>
+        ) : (
+          schedules.map((schedule) => (
+            <EventCard
+              key={schedule.id}
+              schedule={schedule}
+              formatTime={formatTimeOnly}
+              isUnread={!isOpened(schedule.id)}
+              variant='list'
+              onClick={() => openSchedule(schedule)}
+            />
+          ))
+        )}
       </div>
     )
   }
@@ -394,7 +413,7 @@ function Planner() {
       />
 
       {showMobileDayStrip && (
-      <div className='flex gap-1 overflow-x-auto border-b border-border-subtle bg-transparent px-4 py-2 lg:hidden'>
+      <div className='flex gap-1 overflow-x-auto border-b border-border-subtle bg-background px-3 py-2 lg:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
         {weekDates.map((date, idx) => {
           const isToday = formatLocalDate(date) === formatLocalDate(new Date())
           const isActive = idx === mobileDayIdx
@@ -402,14 +421,14 @@ function Planner() {
             <button
               key={idx}
               onClick={() => setMobileDayIdx(idx)}
-              className='flex min-w-[38px] shrink-0 cursor-pointer flex-col items-center gap-0.5 py-1'
+              className='flex min-w-[44px] shrink-0 cursor-pointer flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors'
             >
               <span className={clsx('text-[9px] font-semibold uppercase tracking-[0.1em]', isActive ? 'text-primary' : 'text-secondary/35')}>
                 {DAY_LABELS[idx].slice(0, 3)}
               </span>
               <div
                 className={clsx(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition',
+                  'flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition',
                   isActive && 'bg-primary text-white shadow-sm',
                   !isActive && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
                   !isActive && !isToday && 'text-secondary/45',
@@ -420,7 +439,7 @@ function Planner() {
             </button>
           )
         })}
-        <div className='ml-auto flex items-center'>
+        <div className='ml-auto flex shrink-0 items-center'>
           <CalendarDatePicker
             compact
             value={filters.date}
@@ -434,31 +453,42 @@ function Planner() {
       )}
 
       <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
-        {viewMode === 'month' && (
-          <div className='min-h-0 flex-1 overflow-auto'>
-            <CalendarMonthGrid
-              anchorDate={filters.date}
-              itemsByDate={monthItemsByDate}
-              onOpenSchedule={openSchedule}
-              isOpened={isOpened}
-              formatTime={formatTimeOnly}
-            />
-          </div>
-        )}
-
         {viewMode === 'day' && mobileDayData && (
           <div className='divide-y divide-border-subtle/70 px-4 py-3'>
-            {renderMobileEvents(mobileDayData.morning)}
-            {renderMobileEvents(mobileDayData.afternoon)}
-            {renderMobileEvents(mobileDayData.evening)}
+            {renderMobileEvents(mobileDayData.morning, 'Matin')}
+            {renderMobileEvents(mobileDayData.afternoon, 'Après-midi')}
+            {renderMobileEvents(mobileDayData.evening, 'Soir')}
           </div>
         )}
 
         {viewMode === 'week' && mobileDayData && (
           <div className='divide-y divide-border-subtle/70 px-4 py-3'>
-            {renderMobileEvents(mobileDayData.morning)}
-            {renderMobileEvents(mobileDayData.afternoon)}
-            {renderMobileEvents(mobileDayData.evening)}
+            {renderMobileEvents(mobileDayData.morning, 'Matin')}
+            {renderMobileEvents(mobileDayData.afternoon, 'Après-midi')}
+            {renderMobileEvents(mobileDayData.evening, 'Soir')}
+          </div>
+        )}
+
+        {showMobileMonthView && (
+          <div className='px-3 py-2'>
+            <MobileMonthGrid
+              anchorDate={filters.date}
+              selectedDate={mobileMonthSelectedDate}
+              onSelectDate={setMobileMonthSelectedDate}
+              itemsByDate={monthItemsByDate}
+            />
+            <div className='mt-3 divide-y divide-border-subtle/70'>
+              {mobileMonthData && (
+                <>
+                  {renderMobileEvents(mobileMonthData.morning, 'Matin')}
+                  {renderMobileEvents(mobileMonthData.afternoon, 'Après-midi')}
+                  {renderMobileEvents(mobileMonthData.evening, 'Soir')}
+                </>
+              )}
+              {!mobileMonthData && (
+                <p className='py-4 text-center text-[11px] text-secondary/30 italic'>Aucune réservation</p>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -492,6 +522,76 @@ function Planner() {
             formatTime={formatTimeOnly}
           />
         )}
+      </div>
+    </div>
+  )
+}
+
+function MobileMonthGrid({
+  anchorDate,
+  selectedDate,
+  onSelectDate,
+  itemsByDate,
+}: {
+  anchorDate: string
+  selectedDate: string
+  onSelectDate: (date: string) => void
+  itemsByDate: Map<string, { morning: any[]; afternoon: any[]; evening: any[] }>
+}) {
+  const gridDates = useMemo(() => getMonthGridDates(anchorDate), [anchorDate])
+  const today = formatLocalDate(new Date())
+  const dayLabels = ['L', 'M', 'M', 'J', 'V', 'S']
+
+  return (
+    <div>
+      <div className='grid grid-cols-7'>
+        {dayLabels.map((label, i) => (
+          <div key={i} className='py-1 text-center text-[9px] font-semibold uppercase text-secondary/40'>
+            {label}
+          </div>
+        ))}
+      </div>
+      <div className='grid grid-cols-7'>
+        {gridDates.map((date, idx) => {
+          const dateKey = formatLocalDate(date)
+          const inMonth = isSameMonth(date, anchorDate)
+          const isToday = dateKey === today
+          const isSelected = dateKey === selectedDate
+          const dayData = itemsByDate.get(dateKey)
+          const count = dayData
+            ? dayData.morning.length + dayData.afternoon.length + dayData.evening.length
+            : 0
+
+          return (
+            <button
+              key={idx}
+              type='button'
+              onClick={() => onSelectDate(dateKey)}
+              className={clsx(
+                'flex flex-col items-center py-1.5 transition-colors',
+                !inMonth && 'opacity-30',
+              )}
+            >
+              <span
+                className={clsx(
+                  'flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-medium transition',
+                  isSelected && 'bg-primary text-white shadow-sm',
+                  !isSelected && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
+                  !isSelected && !isToday && 'text-secondary/70',
+                )}
+              >
+                {date.getDate()}
+              </span>
+              {count > 0 && !isSelected && (
+                <div className='mt-0.5 flex gap-0.5'>
+                  {dayData!.morning.length > 0 && <span className='h-1 w-1 rounded-full bg-primary' />}
+                  {dayData!.afternoon.length > 0 && <span className='h-1 w-1 rounded-full bg-amber-400' />}
+                  {dayData!.evening.length > 0 && <span className='h-1 w-1 rounded-full bg-purple-400' />}
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
