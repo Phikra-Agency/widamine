@@ -1,13 +1,14 @@
 import { useMotifsStore } from '@/stores/motifsStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, Stethoscope, UserCircle } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import { FormDialog, FieldError } from '@/components/bo'
 import { motifSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
-import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui'
+import { DataTable, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
+import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { createSallesMotifsColumns, SALLES_MOTIFS_EMPTY_ILLUSTRATION } from './columns/sallesMotifsColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
@@ -42,7 +43,7 @@ export default function Motifs() {
 function Heading() {
   const { openModal, setOperation, clearItem } = useMotifsStore()
   return (
-    <div className='flex items-center justify-between'>
+    <div className='bo-page-heading'>
       <h3 className='bo-title'>Motifs</h3>
       <Button
         onClick={() => {
@@ -67,26 +68,13 @@ function MotifsTable() {
     void fetchItems().finally(() => setLoading(false))
   }, [fetchItems])
 
-  const columns = useMemo(
-    () =>
-      createSallesMotifsColumns({
-        onEdit: (item) => {
-          setItem(item)
-          setOperation('edit')
-          openModal()
-        },
-        onDelete: (item) => {
-          setItem(item)
-          setOperation('delete')
-          openModal()
-        },
-      }),
-    [openModal, setItem, setOperation],
-  )
+  const columns = useMemo(() => createSallesMotifsColumns(), [])
 
   const table = useDataTable({
     data: items,
     columns,
+    enablePagination: true,
+    pageSize: 10,
     globalFilter: debouncedSearch,
     globalFilterFn: (row, columnId, filterValue) =>
       globalSearchFilter(row, columnId, filterValue, ['name']),
@@ -107,6 +95,7 @@ function MotifsTable() {
         loading={loading}
         emptyIllustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION}
         emptyTitle='Aucun motif trouvé'
+        stopClickOnColumns={[]}
         onRowClick={openEdit}
       />
 
@@ -120,39 +109,17 @@ function MotifsTable() {
               return (
                 <DataTable.MobileCard key={row.id} onClick={() => openEdit(item)}>
                   <div className='flex items-center gap-3'>
-                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-secondary/4'>
-                      <Stethoscope size={16} className='text-secondary/40' />
-                    </div>
+                    <span
+                      className='h-3 w-3 shrink-0 rounded-full'
+                      style={{ backgroundColor: item.color || '#2E90C0' }}
+                    />
                     <div className='min-w-0 flex-1'>
                       <div className='flex items-center gap-2'>
                         <p className='break-words text-sm font-semibold leading-tight'>{item.name}</p>
-                        <span className='mt-0.5 inline-flex shrink-0 items-center self-start rounded-element border border-border-subtle bg-secondary/3 px-1.5 py-0.5 text-[10px] font-medium text-secondary/50'>
+                        <span className='inline-flex shrink-0 items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground'>
                           {item.duration || 30} min
                         </span>
                       </div>
-                      <div className='mt-1 flex items-center gap-2'>
-                        <span className='h-3.5 w-3.5 rounded-full border border-border-subtle' style={{ backgroundColor: item.color || '#2E90C0' }} />
-                        <span className='text-[11px] text-secondary/45'>{item.color || '#2E90C0'}</span>
-                      </div>
-                    </div>
-                    <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
-                      <Button type='button' variant='ghost' size='icon-sm' onClick={() => openEdit(item)} className='text-secondary/30 hover:bg-amber-50 hover:text-amber-600' aria-label='Modifier'>
-                        <Pen size={14} />
-                      </Button>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon-sm'
-                        onClick={() => {
-                          setItem(item)
-                          setOperation('delete')
-                          openModal()
-                        }}
-                        className='text-secondary/30 hover:bg-red-50 hover:text-red-600'
-                        aria-label='Supprimer'
-                      >
-                        <Trash2 size={14} />
-                      </Button>
                     </div>
                   </div>
                 </DataTable.MobileCard>
@@ -172,6 +139,10 @@ function MotifsTable() {
           <Plus size={24} weight='bold' />
         </Button>
       </DataTable.Mobile>
+
+      <div className='flex justify-end px-4 py-3'>
+        <DataTablePagination table={table} />
+      </div>
     </DataTable.Root>
   )
 }
@@ -349,7 +320,7 @@ function MotifModal() {
             <div className='rounded-control border px-3 py-2.5' style={{ borderColor: `${color}30`, backgroundColor: `${color}10` }}>
               <div className='mt-2 flex items-center gap-2'>
                 <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
-                <span className='rounded-element px-2 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: color }}>
+                <span className='rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: color }}>
                   {item.name || 'Motif'}
                 </span>
               </div>
@@ -367,17 +338,19 @@ function MotifModal() {
             doctors.map((doc) => {
               const isSelected = (item.practitionerIds || []).includes(doc.id.toString())
               return (
-                <Button
+                <button
                   key={doc.id}
                   type='button'
-                  variant='outline'
-                  size='sm'
                   onClick={() => toggleDoctor(doc.id.toString())}
-                  className={clsx('text-xs font-bold', isSelected ? 'border-primary bg-primary/10 text-primary shadow-sm' : 'text-secondary/50')}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-control border px-3 py-1.5 text-xs font-medium transition-all',
+                    isSelected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background text-muted-foreground hover:border-border-strong',
+                  )}
                 >
-                  <UserCircle size={14} weight={isSelected ? 'fill' : 'regular'} />
                   {doc.name}
-                </Button>
+                </button>
               )
             })
           )}

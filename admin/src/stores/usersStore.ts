@@ -15,6 +15,7 @@ interface UserStoreInterface {
   item: (User & { password: string }) | (Omit<User, 'id'> & { password: string })
   operation: 'create' | 'edit' | 'delete'
   modalOpen: boolean
+  lastFetchedAt: number
   setItem: (item: UserStoreInterface['item']) => void
   clearItem: () => void
   openModal: () => void
@@ -35,6 +36,7 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
   item: { name: '', email: '', password: '', role: 'RECEPTIONIST' },
   operation: 'create' as UserStoreInterface['operation'],
   modalOpen: false,
+  lastFetchedAt: 0,
   setItem: (item) => {
     set({ item: item })
   },
@@ -64,8 +66,10 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
     set({ operation: 'delete', modalOpen: true, item: { ...user, password: '' } })
   },
   fetchItems: async () => {
+    const { items, lastFetchedAt } = get()
+    if (items.length > 0 && lastFetchedAt && Date.now() - lastFetchedAt < 60_000) return
     const res = await api.get('users')
-    set({ items: res.data })
+    set({ items: res.data, lastFetchedAt: Date.now() })
   },
   saveItem: async () => {
     const item = get().item
@@ -78,12 +82,15 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
       await api.post('users', item)
     }
     notify.success(isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.')
+    set({ lastFetchedAt: 0 })
     get().fetchItems()
     get().closeModal()
   },
   deleteItem: async () => {
     await api.delete('users/' + (get().item as User).id)
     notify.success('Utilisateur supprimé.')
+    set({ lastFetchedAt: 0 })
+    get().fetchItems()
     get().closeModal()
   }
 }))

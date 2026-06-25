@@ -1,6 +1,6 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { useAuthStore } from '@/stores/authStore'
-import { Eye, CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, Clock, CheckCircle, XCircle, Timer } from '@phosphor-icons/react'
+import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, Clock, CheckCircle, XCircle, Timer } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
@@ -97,12 +97,8 @@ function ReservationsTable() {
     () =>
       createReservationsColumns({
         StatusSelect,
-        onView: (item) => {
-          setItem(item)
-          toggleOpenShowModal()
-        },
       }),
-    [setItem, toggleOpenShowModal],
+    [],
   )
 
   const table = useDataTable({
@@ -135,6 +131,10 @@ function ReservationsTable() {
         emptyIllustration={RESERVATIONS_EMPTY_ILLUSTRATION}
         emptyTitle='Aucune réservation trouvée'
         emptyDescription='Les réservations apparaîtront ici'
+        stopClickOnColumns={['status']}
+        onRowClick={(appointment) => {
+          useAppointmentsStore.setState({ item: appointment, openShowModal: true })
+        }}
       />
 
       <DataTable.Mobile>
@@ -158,24 +158,24 @@ function ReservationsTable() {
                 <DataTable.MobileCard
                   key={row.id}
                   onClick={() => {
-                    setItem(item)
-                    toggleOpenShowModal()
+                    useAppointmentsStore.setState({ item, openShowModal: true })
                   }}
                 >
                   <div className='flex items-start justify-between gap-3'>
                     <div className='min-w-0'>
-                      <p className='text-sm font-semibold'>Réservation #{item.id}</p>
-                      <p className='mt-1 text-xs text-secondary/50'>
+                      <div className='flex items-center gap-2'>
+                        <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
+                          <User size={14} className='text-primary' />
+                        </div>
+                        <p className='text-sm font-semibold'>{item.name}</p>
+                      </div>
+                      <p className='mt-1 text-xs text-secondary/50 ml-9'>
                         {scheduledDate || 'Non programmé'} · {item.motif?.name || '-'}
                       </p>
                     </div>
                     <StatusBadge status={item.status || 'PENDING'} />
                   </div>
                   <div className='mt-3 space-y-2 text-sm text-secondary/65'>
-                    <div className='flex items-center gap-2'>
-                      <User size={14} className='text-secondary/30' />
-                      <span className='min-w-0 truncate'>{item.name}</span>
-                    </div>
                     <div className='flex items-center gap-2'>
                       <EnvelopeSimple size={14} className='text-secondary/30' />
                       <span className='min-w-0 truncate'>{item.email}</span>
@@ -195,17 +195,8 @@ function ReservationsTable() {
                       </div>
                     )}
                   </div>
-                  <div className='mt-4 flex items-center justify-between gap-3'>
-                    <div className='min-w-0'>
-                      <p className='text-[10px] uppercase tracking-[0.16em] text-secondary/35'>Statut</p>
-                      <div className='mt-1'>
-                        <StatusSelect appointmentId={item.id!} status={item.status || 'PENDING'} />
-                      </div>
-                    </div>
-                    <span className='inline-flex items-center gap-1 rounded-full bg-primary/8 px-3 py-1.5 text-xs font-medium text-primary'>
-                      <Eye size={14} />
-                      Voir
-                    </span>
+                  <div className='mt-3'>
+                    <StatusSelect appointmentId={item.id!} status={item.status || 'PENDING'} />
                   </div>
                 </DataTable.MobileCard>
                 )
@@ -213,7 +204,7 @@ function ReservationsTable() {
           </DataTable.MobileList>
       </DataTable.Mobile>
 
-      <div className='border-t border-border-subtle px-4 py-3'>
+      <div className='flex justify-end px-4 py-3'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -293,7 +284,7 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
       onChange={(e) => handleChange(e.target.value)}
       disabled={saving}
       className={clsx(
-        'inline-flex items-center pl-5 pr-2 py-1 rounded-control text-xs font-medium border cursor-pointer appearance-none bg-no-repeat focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60',
+        'min-w-[140px] py-1 rounded-control text-xs font-medium border cursor-pointer appearance-none bg-no-repeat focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60',
         current === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
         current === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
         current === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border-rose-100' :
@@ -302,7 +293,7 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
         current === 'NO_SHOW' ? 'bg-violet-50 text-violet-700 border-violet-100' :
         'bg-secondary/5 text-secondary/70 border-secondary/20'
       )}
-      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23043f50' opacity='0.4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 8px center', backgroundSize: '10px', paddingLeft: '22px' }}
+      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23043f50' opacity='0.4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 10px center', backgroundSize: '10px', paddingLeft: '16px', paddingRight: '34px' }}
     >
       {Object.entries(labels).map(([key, label]) => (
         <option key={key} value={key}>{label}</option>
@@ -331,34 +322,7 @@ function Pill({ status }: { status: string }) {
   )
 }
 
-function DetailCard({ icon: Icon, label, children, color }: { icon?: React.ElementType; label: string; children: React.ReactNode; color?: string }) {
-  return (
-    <div className='group relative overflow-hidden rounded-surface bg-card shadow-bo-card transition-all duration-200 hover:shadow-bo-elevated hover:-translate-y-0.5'>
-      {color && <div className='absolute left-0 top-0 h-full w-0.5 rounded-l-sm' style={{ backgroundColor: color }} />}
-      <div className='px-4 py-3.5'>
-        <div className='mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>
-          {Icon && <Icon size={11} />}
-          {label}
-        </div>
-        <div className='text-sm font-medium text-foreground'>{children}</div>
-      </div>
-    </div>
-  )
-}
 
-function SectionCard({ icon: Icon, label, children }: { icon?: React.ElementType; label: string; children: React.ReactNode }) {
-  return (
-    <div className='rounded-surface bg-card shadow-bo-card'>
-      <div className='flex items-center gap-2.5 border-b border-border-subtle px-4 py-3'>
-        <div className='flex h-7 w-7 items-center justify-center rounded-element bg-primary/8 text-primary'>
-          {Icon && <Icon size={14} />}
-        </div>
-        <span className='text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>{label}</span>
-      </div>
-      <div className='p-4'>{children}</div>
-    </div>
-  )
-}
 
 function SessionTimeline({ sessions, schedules, onEdit, onSave, editingSessions, sessionDates, onDateChange, savingId, onCancel }: {
   sessions: { id: string; session: number; duration: number }[]
@@ -458,13 +422,11 @@ function ShowModal() {
     if (!value) return ''
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) return ''
-
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     const hours = String(date.getHours()).padStart(2, '0')
     const minutes = String(date.getMinutes()).padStart(2, '0')
-
     return `${year}-${month}-${day}T${hours}:${minutes}`
   }
 
@@ -479,143 +441,129 @@ function ShowModal() {
       acc[session.id] = toDateTimeLocal(schedule?.datetime)
       return acc
     }, {} as Record<string, string>)
-
     setSessionDates(dates)
     setEditingSessions({})
   }, [item])
 
   const motifColor = item.motif?.color || '#009fd6'
-  const initials = (item.name || 'N/A').slice(0, 2).toUpperCase()
+  const initials = (item.name || 'N/A').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
+
+  function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
+    return (
+      <div className='space-y-1.5'>
+        <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>{label}</span>
+        <div className='flex items-center gap-2.5 rounded-control border border-border-subtle bg-background px-3.5 py-2.5 text-sm text-foreground/85'>
+          <Icon size={14} className='shrink-0 text-muted-foreground/35' />
+          <span className='min-w-0 truncate'>{children}</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-4xl'>
+      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-3xl rounded-2xl'>
         {loadingItem ? (
           <div className='flex items-center justify-center p-14 text-sm text-muted-foreground'>
             <div className='flex items-center gap-2.5'>
               <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary/25 border-t-primary' />
-              <span>Chargement des détails…</span>
+              <span>Chargement…</span>
             </div>
           </div>
         ) : (
           <>
-            <div className='relative overflow-hidden bg-card/60 px-6 pb-4 pt-5 shadow-[0_1px_0_0] shadow-border-subtle'>
-              <div className='absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none' />
-              <div className='relative flex items-start gap-4'>
-                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-white shadow-bo-card' style={{ backgroundColor: motifColor }}>
+            {/* Header */}
+            <div className='flex items-center justify-between px-6 py-4'>
+              <div className='flex items-center gap-3.5'>
+                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white' style={{ backgroundColor: motifColor }}>
                   {initials}
                 </div>
-                <div className='min-w-0 flex-1'>
-                  <div className='flex items-start justify-between gap-4'>
-                    <div className='space-y-1'>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-[11px] font-medium text-muted-foreground/60'>Réservation</span>
-                        <span className='rounded-element bg-muted/70 px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground/50'>#{item.id}</span>
-                      </div>
-                      <h2 className='text-lg font-semibold leading-6 text-foreground'>{item.motif?.name || 'Sans motif'}</h2>
-                      <p className='text-sm text-muted-foreground/70'>{item.name}</p>
-                    </div>
-                    <Pill status={item.status || 'PENDING'} />
-                  </div>
+                <div>
+                  <h2 className='text-base font-semibold text-foreground'>{item.name}</h2>
+                  <p className='text-xs text-muted-foreground/60'>{item.motif?.name || 'Sans motif'}</p>
                 </div>
-                <Button
-                  onClick={() => setOpenShowModal(false)}
-                  type='button'
-                  variant='ghost'
-                  size='icon-sm'
-                  className='absolute right-1 top-0 text-muted-foreground/30 hover:text-foreground hover:bg-transparent'
-                >
+              </div>
+              <div className='flex items-center gap-2'>
+                <Pill status={item.status || 'PENDING'} />
+                <button onClick={() => setOpenShowModal(false)} className='flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground'>
                   <XCircle size={18} />
-                </Button>
+                </button>
               </div>
             </div>
 
-            <ScrollArea className='max-h-[calc(100dvh-16rem)] sm:max-h-[calc(100vh-18rem)]'>
-              <div className='grid grid-cols-1 gap-5 p-5 xl:grid-cols-5'>
-                <div className='space-y-5 xl:col-span-3'>
-                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                    <DetailCard icon={Clock} label='Date & Heure' color={motifColor}>
+            <div className='mx-6 h-px bg-border-subtle/50' />
+
+            {/* Body */}
+            <ScrollArea className='max-h-[calc(100dvh-14rem)]'>
+              <div className='p-6'>
+                <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
+                  <div className='space-y-3.5'>
+                    <Field icon={Clock} label='Date & Heure'>
                       {(() => {
                         const s = item.schedules?.[0]?.datetime
-                        if (!s) return <span className='text-muted-foreground/50'>Non programmé</span>
-                        return new Date(s).toLocaleString('fr-FR', {
-                          day: '2-digit', month: 'long', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit',
-                        })
+                        if (!s) return <span className='text-muted-foreground/40'>Non programmé</span>
+                        return new Date(s).toLocaleString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                       })()}
-                    </DetailCard>
-                    <DetailCard icon={CalendarBlank} label='Session' color={motifColor}>
-                      {item.sessionNumber ? `Séance ${item.sessionNumber}` : <span className='text-muted-foreground/50'>—</span>}
-                    </DetailCard>
-                    <DetailCard icon={Stethoscope} label='Praticien' color={motifColor}>
-                      {item.practitioner?.name || <span className='text-muted-foreground/50'>Affectation automatique</span>}
-                    </DetailCard>
-                    <DetailCard icon={Door} label='Ressource' color={motifColor}>
-                      {item.resource?.name || <span className='text-muted-foreground/50'>Non assignée</span>}
-                    </DetailCard>
+                    </Field>
+                    <Field icon={CalendarBlank} label='Session'>
+                      {item.sessionNumber ? `Séance ${item.sessionNumber}` : <span className='text-muted-foreground/40'>—</span>}
+                    </Field>
+                    <Field icon={Stethoscope} label='Praticien'>
+                      {item.practitioner?.name || <span className='text-muted-foreground/40'>Affectation automatique</span>}
+                    </Field>
+                    <Field icon={Door} label='Ressource'>
+                      {item.resource?.name || <span className='text-muted-foreground/40'>Non assignée</span>}
+                    </Field>
                   </div>
 
-                  {item.context && (
-                    <div className='rounded-surface bg-card shadow-bo-card'>
-                      <div className='flex items-center gap-2.5 border-b border-border-subtle px-4 py-3'>
-                        <div className='flex h-7 w-7 items-center justify-center rounded-element bg-primary/8 text-primary'>
-                          <EnvelopeSimple size={14} />
-                        </div>
-                        <span className='text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>Message</span>
-                      </div>
-                      <div className='px-4 py-3.5'>
-                        <p className='text-sm leading-relaxed text-muted-foreground/75'>{item.context}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <SectionCard icon={User} label='Patient'>
-                    <div className='flex items-center gap-3'>
-                      <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60 ring-2 ring-card'>
-                        {initials}
-                      </div>
-                      <div className='min-w-0 flex-1'>
-                        <p className='text-sm font-medium text-foreground'>{item.name}</p>
-                        <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/60'>
-                          <span className='inline-flex items-center gap-1'>
-                            <EnvelopeSimple size={11} /> {item.email}
-                          </span>
-                          <span className='inline-flex items-center gap-1'>
-                            <Phone size={11} /> {item.phone}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </SectionCard>
-
-                  <SectionCard icon={EnvelopeSimple} label='Notifications'>
-                    {(item.notifications || []).length === 0 ? (
-                      <p className='text-sm text-muted-foreground/50'>Aucune notification envoyée</p>
-                    ) : (
-                      <div className='space-y-1.5'>
-                        {(item.notifications || []).map((n) => {
-                          const nStatus = n.status === 'SENT' ? 'Envoyé' : n.status === 'FAILED' ? 'Échoué' : n.status
-                          const nColor = n.status === 'SENT' ? 'bg-emerald-50 text-emerald-600' : n.status === 'FAILED' ? 'bg-red-50 text-red-600' : 'bg-muted text-muted-foreground'
-                          return (
-                            <div key={n.id} className='flex items-center justify-between rounded-element bg-card px-3 py-2 shadow-sm ring-1 ring-border-subtle'>
-                              <div className='flex items-center gap-2 text-xs'>
-                                <span className='font-medium text-muted-foreground/70'>{n.channel}</span>
-                                <span className='text-muted-foreground/30'>·</span>
-                                <span className='text-muted-foreground/55'>{n.recipientType}</span>
-                              </div>
-                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ring-transparent ${nColor}`}>
-                                {nStatus}
-                              </span>
+                  <div className='space-y-3.5'>
+                    <div className='space-y-1.5'>
+                      <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Patient</span>
+                      <div className='rounded-control border border-border-subtle bg-background p-3.5'>
+                        <div className='flex items-center gap-3'>
+                          <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60'>
+                            {initials}
+                          </div>
+                          <div className='min-w-0'>
+                            <p className='text-sm font-medium text-foreground/85'>{item.name}</p>
+                            <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/55'>
+                              {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}
+                              {item.phone && <span className='inline-flex items-center gap-1'><Phone size={10} />{item.phone}</span>}
                             </div>
-                          )
-                        })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {item.notifications && item.notifications.length > 0 && (
+                      <div className='space-y-1.5'>
+                        <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Notifications</span>
+                        <div className='space-y-1.5'>
+                          {item.notifications.map((n) => (
+                            <div key={n.id} className='flex items-center justify-between rounded-control border border-border-subtle bg-background px-3 py-2'>
+                              <span className='text-xs text-muted-foreground/60'>{n.channel} · {n.recipientType}</span>
+                              <StatusBadge status={n.status} />
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
-                  </SectionCard>
+                  </div>
                 </div>
 
-                <div className='xl:col-span-2'>
-                  <SectionCard icon={CalendarBlank} label='Séances'>
+                {item.context && (
+                  <div className='mt-5 space-y-1.5'>
+                    <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Message</span>
+                    <div className='rounded-control border border-border-subtle bg-background px-3.5 py-3 text-sm leading-relaxed text-foreground/70'>
+                      {item.context}
+                    </div>
+                  </div>
+                )}
+
+                {/* Séances timeline */}
+                <div className='mt-5 space-y-1.5'>
+                  <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Séances</span>
+                  <div className='rounded-control border border-border-subtle bg-background p-4'>
                     <SessionTimeline
                       sessions={item.motif?.sessions || []}
                       schedules={item.schedules}
@@ -640,14 +588,14 @@ function ShowModal() {
                       }}
                       savingId={savingScheduleSessionId}
                     />
-                  </SectionCard>
+                  </div>
                 </div>
               </div>
             </ScrollArea>
 
-            <div className='flex items-center justify-between border-t border-border-subtle bg-muted/20 px-5 py-3'>
-              <span className='text-xs text-muted-foreground/40'>Détails de la réservation</span>
-              <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)}>
+            {/* Footer */}
+            <div className='flex items-center justify-end border-t border-border-subtle/50 px-6 py-3.5'>
+              <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)} className='text-xs text-muted-foreground/50 hover:text-foreground'>
                 Fermer
               </Button>
             </div>

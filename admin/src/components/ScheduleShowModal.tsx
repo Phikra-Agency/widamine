@@ -12,60 +12,65 @@ import {
   X,
   ArrowRight,
   User,
+  Door,
 } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 
-function fmt(v?: string) {
+function fmtDate(v?: string) {
   if (!v) return 'Date non définie'
   const d = new Date(v)
   if (Number.isNaN(d.getTime())) return 'Date non définie'
-  return d.toLocaleString('fr-FR', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
-  })
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function ord(n: number) {
-  if (n <= 0) return '-'
-  return n === 1 ? '1er' : `${n}e`
+function fmtTime(v?: string) {
+  if (!v) return ''
+  const d = new Date(v)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
-function periodFromHour(h: number): 'morning' | 'afternoon' | 'evening' {
-  if (h < 12) return 'morning'
-  if (h < 16) return 'afternoon'
-  return 'evening'
+function periodFromHour(h: number) {
+  if (h < 12) return 'Matin'
+  if (h < 16) return 'Après-midi'
+  return 'Soir'
 }
 
-function periodLabel(p: string) {
-  return p === 'morning' ? 'Matin' : p === 'afternoon' ? 'Après-midi' : 'Soir'
+const STATUS_STYLE: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+  PENDING: { label: 'En attente', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  CONFIRMED: { label: 'Confirmée', bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  CANCELLED: { label: 'Annulée', bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+  COMPLETED: { label: 'Terminée', bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
+  EXPIRED: { label: 'Expirée', bg: 'bg-gray-50', text: 'text-gray-700', dot: 'bg-gray-400' },
 }
 
-const STATUS_DOT: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'En attente', color: '#d97706' },
-  CONFIRMED: { label: 'Confirmée', color: '#059669' },
-  CANCELLED: { label: 'Annulée', color: '#dc2626' },
-  COMPLETED: { label: 'Terminée', color: '#0284c7' },
-  EXPIRED: { label: 'Expirée', color: '#6b7280' },
-}
-
-function StatusDot({ status }: { status: string }) {
-  const m = STATUS_DOT[status] || STATUS_DOT.PENDING
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_STYLE[status] || STATUS_STYLE.PENDING
   return (
-    <span className='inline-flex items-center gap-1.5 text-xs'>
-      <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: m.color }} />
-      {m.label}
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+      {s.label}
     </span>
   )
 }
 
-function Row({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: React.ReactNode }) {
+function initials(name: string) {
+  return name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
+
+function InfoCard({ icon: Icon, label, children, color }: { icon: React.ElementType; label: string; children: React.ReactNode; color?: string }) {
   return (
-    <div className='flex items-center justify-between gap-4 py-2.5'>
-      <div className='flex min-w-0 items-center gap-2'>
-        <Icon size={13} className='shrink-0 text-muted-foreground/30' />
-        <span className='truncate text-xs font-medium text-muted-foreground/60'>{label}</span>
+    <div className='relative overflow-hidden rounded-surface bg-card shadow-bo-card'>
+      <div className='px-4 py-3'>
+        <div className='mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>
+          <Icon size={11} />
+          {label}
+        </div>
+        <div className='flex items-center gap-2 text-sm font-medium text-foreground'>
+          {children}
+          {color && <span className='h-2.5 w-2.5 shrink-0 rounded-full' style={{ backgroundColor: color }} />}
+        </div>
       </div>
-      <div className='truncate text-right text-sm text-foreground/85'>{value}</div>
     </div>
   )
 }
@@ -80,7 +85,7 @@ export default function ScheduleShowModal() {
 
   const itemDate = new Date(item.datetime).toDateString()
   const itemHour = new Date(item.datetime).getHours()
-  const itemPeriod = periodFromHour(itemHour)
+  const period = periodFromHour(itemHour)
 
   const schedulesForDay = allWeek
     .filter(s => s.datetime && new Date(s.datetime).toDateString() === itemDate)
@@ -95,6 +100,7 @@ export default function ScheduleShowModal() {
   const motif = apt?.motif
   const status = apt?.status || 'PENDING'
   const color = motif?.color || '#009fd6'
+  const duration = apt?.motif?.duration || item.session?.duration
 
   const nav = (dir: 'next' | 'prev') => {
     const n = schedulesForDay.length
@@ -117,79 +123,73 @@ export default function ScheduleShowModal() {
     <Dialog open={openShowModal} onOpenChange={(o) => { if (!o) toggleOpenShowModal() }}>
       <DialogContent
         showCloseButton={false}
-        className='max-h-[85vh] overflow-hidden p-0 shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl ring-1 ring-black/[0.02]'
+        className='max-h-[85vh] overflow-hidden p-0 shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl'
       >
-        <div className='px-5 pt-4 pb-2'>
-          <div className='flex items-start justify-between gap-3'>
-            <div className='min-w-0'>
-              <h2 className='text-lg font-semibold leading-6 tracking-tight text-foreground'>{name}</h2>
-              <div className='mt-0.5 inline-flex items-center gap-x-2 whitespace-nowrap'>
-                <StatusDot status={status} />
-                <span className='text-muted-foreground/20'>·</span>
-                <span className='inline-flex items-center gap-1 text-xs text-muted-foreground/45'>
-                  <CalendarBlank size={10} />
-                  {fmt(item.datetime)}
-                </span>
-              </div>
+        {/* Header */}
+        <div className='flex items-start justify-between px-5 pt-5 pb-3'>
+          <div className='flex items-start gap-3'>
+            <div
+              className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white'
+              style={{ backgroundColor: color }}
+            >
+              {initials(name)}
             </div>
-            <div className='flex shrink-0 items-center gap-0.5'>
-              <div className='inline-flex items-center rounded-lg border border-border-subtle/40 bg-muted/10 px-0.5 py-0.5'>
-                  <button
-                    onClick={() => nav('prev')}
-                    className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted/20 hover:text-foreground'
-                    aria-label='Précédent'
-                  >
-                    <CaretLeft size={13} />
-                  </button>
-                <span className='flex h-7 min-w-[1.5rem] select-none items-center justify-center px-1 text-xs font-medium tabular-nums text-muted-foreground/60'>
-                  {curIdx >= 0 ? curIdx + 1 : 1}/{schedulesForDay.length}
-                </span>
-                  <button
-                    onClick={() => nav('next')}
-                    className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted/20 hover:text-foreground'
-                    aria-label='Suivant'
-                  >
-                    <CaretRight size={13} />
-                  </button>
+            <div className='min-w-0 pt-0.5'>
+              <h2 className='text-base font-semibold leading-5 text-foreground'>{name}</h2>
+              <div className='mt-1.5 flex items-center gap-2'>
+                <StatusBadge status={status} />
               </div>
-              <button
-                onClick={toggleOpenShowModal}
-                className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/20 hover:text-foreground'
-                aria-label='Fermer'
-              >
-                <X size={14} />
+              <p className='mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/60'>
+                <CalendarBlank size={11} />
+                {fmtDate(item.datetime)}
+                {fmtTime(item.datetime) && <><span className='text-muted-foreground/30'>·</span>{fmtTime(item.datetime)}</>}
+              </p>
+            </div>
+          </div>
+
+          <div className='flex shrink-0 items-center gap-1'>
+            <div className='inline-flex items-center rounded-lg bg-muted/40 px-0.5 py-0.5'>
+              <button onClick={() => nav('prev')} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-background hover:text-foreground' aria-label='Précédent'>
+                <CaretLeft size={13} />
+              </button>
+              <span className='flex h-7 min-w-[1.5rem] select-none items-center justify-center px-1 text-xs font-medium tabular-nums text-muted-foreground/60'>
+                {curIdx >= 0 ? curIdx + 1 : 1}/{schedulesForDay.length}
+              </span>
+              <button onClick={() => nav('next')} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-background hover:text-foreground' aria-label='Suivant'>
+                <CaretRight size={13} />
               </button>
             </div>
+            <button onClick={toggleOpenShowModal} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground' aria-label='Fermer'>
+              <X size={14} />
+            </button>
           </div>
         </div>
 
-        <div className='mx-5 border-b border-border-subtle' />
+        <div className='mx-5 h-px bg-border-subtle/40' />
 
-        <div className='px-5 py-1'>
-          <Row icon={Tag} label='Motif' value={
-            <span className='inline-flex items-center gap-2'>
-              {motif?.name || '-'}
-              <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
-            </span>
-          } />
-          <Row
-            icon={Clock}
-            label='Durée'
-            value={apt?.motif?.duration ? `${apt.motif.duration} min` : item.session?.duration ? `${item.session.duration} min` : '-'}
-          />
-          <Row icon={CalendarBlank} label='Session' value={item.session?.session ? `Séance ${item.session.session}` : '-'} />
-          <Row icon={CalendarBlank} label='Ordre du jour' value={curIdx >= 0 ? ord(curIdx + 1) : '-'} />
-          <Row icon={User} label='Praticien' value={apt?.practitioner?.name || 'Non assigné'} />
-          <Row icon={MapPin} label='Salle' value={apt?.resource?.name || 'Non assignée'} />
+        {/* Info cards grid */}
+        <div className='grid grid-cols-2 gap-2.5 px-5 py-4'>
+          <InfoCard icon={Tag} label='Motif' color={color}>{motif?.name || '-'}</InfoCard>
+          <InfoCard icon={Clock} label='Durée'>{duration ? `${duration} min` : '-'}</InfoCard>
+          <InfoCard icon={CalendarBlank} label='Séance'>{item.session?.session ? `Séance ${item.session.session}` : '-'}</InfoCard>
+          <InfoCard icon={User} label='Praticien'>{apt?.practitioner?.name || 'Non assigné'}</InfoCard>
         </div>
 
-        <div className='flex items-center justify-between border-t border-border-subtle px-5 py-3'>
-          <span className='text-xs text-muted-foreground/40'>
-            {periodLabel(itemPeriod)}
+        <div className='mx-5 h-px bg-border-subtle/40' />
+
+        {/* Salle full width */}
+        <div className='px-5 py-3'>
+          <InfoCard icon={Door} label='Salle'>{apt?.resource?.name || 'Non assignée'}</InfoCard>
+        </div>
+
+        {/* Footer */}
+        <div className='flex items-center justify-between border-t border-border-subtle/40 px-5 py-3.5'>
+          <span className='text-xs font-medium text-muted-foreground/40'>
+            {period}{curIdx >= 0 && <span className='ml-1 text-muted-foreground/25'>· {curIdx + 1}{curIdx === 0 ? 'er' : 'e'} du jour</span>}
           </span>
           {apt?.id && (
-            <Button onClick={goDetails} variant='ghost' size='sm' className='gap-1.5 text-xs font-medium h-8'>
-              Détails patient <ArrowRight size={12} />
+            <Button onClick={goDetails} variant='ghost' size='sm' className='gap-1.5 text-xs font-medium h-8 text-primary/80 hover:text-primary hover:bg-primary/[0.06]'>
+              Voir le patient <ArrowRight size={12} />
             </Button>
           )}
         </div>

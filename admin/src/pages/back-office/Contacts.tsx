@@ -1,7 +1,7 @@
 import { useContactsStore } from '@/stores/contactsStore'
 import { ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
-import { DataTable, DataTableFilterPills, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
+import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Label } from '@/components/ui'
 import { CONTACTS_EMPTY_ILLUSTRATION, createContactsColumns } from './columns/contactsColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
@@ -61,6 +61,8 @@ function ContactsTable() {
   const table = useDataTable({
     data: items,
     columns,
+    enablePagination: true,
+    pageSize: 10,
     globalFilter: debouncedSearch,
     globalFilterFn: (row, columnId, filterValue) =>
       globalSearchFilter(row, columnId, filterValue, ['name', 'email', 'phone']),
@@ -147,6 +149,10 @@ function ContactsTable() {
             })}
         </DataTable.MobileList>
       </DataTable.Mobile>
+
+      <div className='flex justify-end px-4 py-3'>
+        <DataTablePagination table={table} />
+      </div>
     </DataTable.Root>
   )
 }

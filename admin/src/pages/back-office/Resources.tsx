@@ -1,9 +1,10 @@
 import { useResourcesStore } from '@/stores/resourcesStore'
 import { useMotifsStore } from '@/stores/motifsStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, Door, Star, Link } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2, Door, Link } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { DataTable, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
+import { cn } from '@/lib/utils'
+import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -19,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { createSallesColumns, SALLES_EMPTY_ILLUSTRATION } from './columns/sallesColumns'
-import { SALLES_PRIORITY_CONFIG } from './columns/shared/priorityBadge'
+import { PRIORITY_CONFIG } from './columns/shared/priorityBadge'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
@@ -53,11 +54,11 @@ export default function Resources() {
 function Heading() {
   const { openCreateModal } = useResourcesStore()
   return (
-    <div className='flex items-center justify-between'>
+    <div className='bo-page-heading'>
       <div>
         <h3 className='bo-title'>Salles</h3>
       </div>
-      <Button onClick={openCreateModal}>
+      <Button onClick={openCreateModal} className='hidden h-10 px-5 lg:inline-flex'>
         <Plus weight='bold' /> Ajouter Une Salle
       </Button>
     </div>
@@ -73,18 +74,13 @@ function ResourcesTable() {
     void fetchItems().finally(() => setLoading(false))
   }, [fetchItems])
 
-  const columns = useMemo(
-    () =>
-      createSallesColumns({
-        onEdit: openEditModal,
-        onDelete: openDeleteModal,
-      }),
-    [openDeleteModal, openEditModal],
-  )
+  const columns = useMemo(() => createSallesColumns(), [])
 
   const table = useDataTable({
     data: items,
     columns,
+    enablePagination: true,
+    pageSize: 10,
     globalFilter: debouncedSearch,
     globalFilterFn: (row, columnId, filterValue) =>
       globalSearchFilter(row, columnId, filterValue, ['name']),
@@ -99,6 +95,7 @@ function ResourcesTable() {
         loading={loading}
         emptyIllustration={SALLES_EMPTY_ILLUSTRATION}
         emptyTitle='Aucune salle trouvée'
+        stopClickOnColumns={[]}
         onRowClick={openEditModal}
       />
 
@@ -109,35 +106,25 @@ function ResourcesTable() {
           {!loading &&
             rows.map((row) => {
               const item = row.original
-              const p = SALLES_PRIORITY_CONFIG[item.priority] || SALLES_PRIORITY_CONFIG[1]
+              const p = PRIORITY_CONFIG[item.priority] || PRIORITY_CONFIG[1]
               return (
                 <DataTable.MobileCard key={row.id} onClick={() => openEditModal(item)}>
                   <div className='flex items-center gap-3'>
-                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-secondary/4'>
-                      <Door size={16} className='text-secondary/40' />
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10'>
+                      <Door size={16} className='text-primary' />
                     </div>
                     <div className='min-w-0 flex-1'>
-                      <div className='flex items-center gap-2'>
-                        <p className='break-words text-sm font-semibold leading-tight'>{item.name}</p>
-                        <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1 self-start rounded-element border px-1.5 py-0.5 text-[10px] font-medium ${p.color}`}>
-                          <Star size={9} weight={item.priority >= 3 ? 'fill' : 'regular'} />
-                          {p.label}
-                        </span>
-                      </div>
+                      <p className='break-words text-sm font-semibold leading-tight'>{item.name}</p>
                       {(item.motifs || []).length > 0 && (
-                        <p className='mt-0.5 truncate text-[11px] text-secondary/50'>
+                        <p className='mt-0.5 truncate text-[11px] text-muted-foreground'>
                           {(item.motifs || []).length} motif{(item.motifs || []).length > 1 ? 's' : ''}
                         </p>
                       )}
                     </div>
-                    <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
-                      <Button type='button' variant='ghost' size='icon-sm' onClick={() => openEditModal(item)} className='text-secondary/30 hover:bg-amber-50 hover:text-amber-600' aria-label='Modifier'>
-                        <Pen size={14} />
-                      </Button>
-                      <Button type='button' variant='ghost' size='icon-sm' onClick={() => openDeleteModal(item)} className='text-secondary/30 hover:bg-red-50 hover:text-red-600' aria-label='Supprimer'>
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
+                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-medium ${p.bg} ${p.text}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} />
+                      {p.label}
+                    </span>
                   </div>
                 </DataTable.MobileCard>
               )
@@ -147,6 +134,10 @@ function ResourcesTable() {
           <Plus size={24} weight='bold' />
         </Button>
       </DataTable.Mobile>
+
+      <div className='flex justify-end px-4 py-3'>
+        <DataTablePagination table={table} />
+      </div>
     </DataTable.Root>
   )
 }
@@ -204,25 +195,26 @@ function Modal() {
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Priorité</Label>
         <div className='grid grid-cols-4 gap-2'>
           {[1, 2, 3, 4].map((p) => {
-            const conf = SALLES_PRIORITY_CONFIG[p]
+            const conf = PRIORITY_CONFIG[p]
             return (
-              <Button
+              <button
                 key={p}
                 type='button'
-                variant={item.priority === p ? 'default' : 'outline'}
                 onClick={() => {
                   const next = { ...item, priority: p }
                   setItem(next)
                   validation.onFieldChange('priority', next)
                 }}
-                className={clsx(
-                  'flex h-auto flex-col gap-1 p-2.5',
-                  item.priority !== p && 'text-secondary/50',
+                className={cn(
+                  'flex flex-col items-center gap-1.5 rounded-control border px-3 py-2.5 text-center transition-all',
+                  item.priority === p
+                    ? cn(conf.bg, conf.text, 'border-current ring-1 ring-current/20')
+                    : 'border-border bg-background text-muted-foreground hover:border-border-strong',
                 )}
               >
-                <Star size={16} weight={p >= 3 ? 'fill' : 'regular'} />
+                <span className={cn('h-2 w-2 rounded-full', item.priority === p ? conf.dot : 'bg-muted-foreground/30')} />
                 <span className='text-[10px] font-medium'>{conf.label}</span>
-              </Button>
+              </button>
             )
           })}
         </div>
@@ -236,17 +228,20 @@ function Modal() {
             motifs.map((motif) => {
               const selected = (item.motifIds || []).includes(motif.id!)
               return (
-                <Button
+                <button
                   key={motif.id}
                   type='button'
-                  size='sm'
-                  variant={selected ? 'default' : 'outline'}
                   onClick={() => toggleMotif(motif.id!)}
-                  className={clsx(!selected && 'text-secondary/50')}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-control border px-3 py-1.5 text-xs font-medium transition-all',
+                    selected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background text-muted-foreground hover:border-border-strong',
+                  )}
                 >
                   <Link size={10} />
                   {motif.name}
-                </Button>
+                </button>
               )
             })
           )}

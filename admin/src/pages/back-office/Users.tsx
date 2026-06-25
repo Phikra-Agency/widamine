@@ -1,8 +1,9 @@
 import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore } from '@/stores/authStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, User, Crown, Stethoscope, UserCircle } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import type { ColumnFiltersState, SortingState } from '@tanstack/react-table'
 import {
   getCoreRowModel,
@@ -14,9 +15,9 @@ import type { Role } from '@/stores/authStore'
 import { FormDialog, FieldError } from '@/components/bo'
 import { userCreateSchema, userEditSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTableFilterPills, globalSearchFilter, TanStackDataTable, type FilterPillOption } from '@/components/data-table'
+import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
-import { createUsersColumns, RoleBadge, USERS_EMPTY_ILLUSTRATION, type UserRow } from './columns/usersColumns'
+import { createUsersColumns, RoleBadge, USERS_EMPTY_ILLUSTRATION } from './columns/usersColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
@@ -29,11 +30,11 @@ const ROLE_FILTER_PILLS: FilterPillOption[] = [
   { value: 'PRACTITIONER', label: 'Praticien', color: 'aqua' },
 ]
 
-const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  ADMIN: { label: 'Administrateur', color: 'bg-violet-500/10 text-violet-700 dark:text-violet-400', icon: Crown },
-  DOCTOR: { label: 'Médecin', color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400', icon: Stethoscope },
-  RECEPTIONIST: { label: 'Réceptionniste', color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400', icon: UserCircle },
-  PRACTITIONER: { label: 'Praticien', color: 'bg-sky-500/10 text-sky-700 dark:text-sky-400', icon: Stethoscope },
+const ROLE_OPTIONS: Record<string, { label: string; bg: string; text: string; activeBg: string; activeBorder: string; activeText: string }> = {
+  ADMIN: { label: 'Administrateur', bg: 'bg-violet-50', text: 'text-violet-600', activeBg: 'bg-violet-50', activeBorder: 'border-violet-300', activeText: 'text-violet-700' },
+  DOCTOR: { label: 'Médecin', bg: 'bg-emerald-50', text: 'text-emerald-600', activeBg: 'bg-emerald-50', activeBorder: 'border-emerald-300', activeText: 'text-emerald-700' },
+  RECEPTIONIST: { label: 'Réceptionniste', bg: 'bg-blue-50', text: 'text-blue-600', activeBg: 'bg-blue-50', activeBorder: 'border-blue-300', activeText: 'text-blue-700' },
+  PRACTITIONER: { label: 'Praticien', bg: 'bg-sky-50', text: 'text-sky-600', activeBg: 'bg-sky-50', activeBorder: 'border-sky-300', activeText: 'text-sky-700' },
 }
 
 export default function Users() {
@@ -89,14 +90,12 @@ function UsersTable() {
     () =>
       createUsersColumns({
         isReceptionist,
-        onEdit: openEditModal,
-        onDelete: openDeleteModal,
       }),
-    [isReceptionist, openDeleteModal, openEditModal],
+    [isReceptionist],
   )
 
   const table = useReactTable({
-    data: items as UserRow[],
+    data: items,
     columns,
     state: {
       sorting,
@@ -129,7 +128,8 @@ function UsersTable() {
         loading={loading}
         emptyIllustration={USERS_EMPTY_ILLUSTRATION}
         emptyTitle='Aucun utilisateur trouvé'
-        onRowClick={openEditModal}
+        stopClickOnColumns={[]}
+        onRowClick={(user) => openEditModal(user)}
       />
 
       <DataTable.Mobile>
@@ -139,51 +139,47 @@ function UsersTable() {
           )}
           {isEmpty && <DataTable.Empty illustration={USERS_EMPTY_ILLUSTRATION} title='Aucun utilisateur trouvé' />}
           {!loading &&
-            rows.map((row) => (
-              <DataTable.MobileCard key={row.id} onClick={() => openEditModal(row.original)}>
-                <div className='flex items-center gap-3'>
-                  <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-element bg-muted'>
-                    <User size={16} className='text-muted-foreground' />
-                  </div>
-                  <div className='min-w-0 flex-1'>
-                    <div className='flex items-center gap-2'>
-                      <p className='truncate text-sm font-semibold'>{row.original.name}</p>
-                      <RoleBadge role={row.original.role} />
+            rows.map((row) => {
+              const item = row.original
+              const initials = (item.name || '?').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+              return (
+                <DataTable.MobileCard key={row.id} onClick={() => openEditModal(item)}>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10'>
+                      <span className='text-sm font-semibold text-primary'>{initials}</span>
                     </div>
-                    <p className='mt-0.5 truncate text-xs text-muted-foreground'>{row.original.email}</p>
+                    <div className='min-w-0 flex-1'>
+                      <p className='truncate text-sm font-semibold'>{item.name}</p>
+                      <p className='mt-0.5 truncate text-xs text-muted-foreground'>{item.email}</p>
+                    </div>
+                    <RoleBadge role={item.role} />
                   </div>
-                  <div className='flex shrink-0 items-center gap-0.5' onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='icon-sm'
-                      onClick={() => openEditModal(row.original)}
-                      className='text-muted-foreground hover:bg-amber-50 hover:text-amber-600'
-                      aria-label='Modifier'
-                    >
-                      <Pen size={14} />
-                    </Button>
-                    {!isReceptionist && (
+                  {!isReceptionist && (
+                    <div className='mt-3 flex justify-end'>
                       <Button
                         type='button'
                         variant='ghost'
-                        size='icon-sm'
-                        onClick={() => openDeleteModal(row.original)}
-                        className='text-muted-foreground hover:bg-red-50 hover:text-red-600'
-                        aria-label='Supprimer'
+                        size='sm'
+                        onClick={(e) => { e.stopPropagation(); openDeleteModal(item) }}
+                        className='gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700'
                       >
                         <Trash2 size={14} />
+                        Supprimer
                       </Button>
-                    )}
-                  </div>
-                </div>
-              </DataTable.MobileCard>
-            ))}
+                    </div>
+                  )}
+                </DataTable.MobileCard>
+              )
+            })}
         </DataTable.MobileList>
         <Button type='button' onClick={openCreateModal} className={FAB_CLASSES} aria-label='Ajouter un utilisateur'>
           <Plus size={22} weight='bold' />
         </Button>
       </DataTable.Mobile>
+
+      <div className='flex justify-end px-4 py-3'>
+        <DataTablePagination table={table} />
+      </div>
     </DataTable.Root>
   )
 }
@@ -193,8 +189,6 @@ function Modal() {
   const { user: currentUser } = useAuthStore()
   const isEdit = operation === 'edit'
   const isReceptionist = currentUser?.role === 'RECEPTIONIST'
-  const roleConfig = ROLE_CONFIG[item.role] || ROLE_CONFIG.RECEPTIONIST
-  const RoleIcon = roleConfig.icon
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
   const validation = useFormValidation(isEdit ? userEditSchema : userCreateSchema, item)
 
@@ -202,6 +196,9 @@ function Modal() {
     if (!isOpen) validation.reset()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
+
+  const initials = (item.name || '?').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  const selectedRole = ROLE_OPTIONS[item.role] || ROLE_OPTIONS.RECEPTIONIST
 
   return (
     <FormDialog
@@ -217,8 +214,8 @@ function Modal() {
       onCancel={closeModal}
     >
       <div className='mb-4 flex items-center justify-center'>
-        <div className='flex h-14 w-14 items-center justify-center rounded-control bg-secondary/[0.04]'>
-          <RoleIcon size={28} className='text-secondary/50' />
+        <div className='flex h-16 w-16 items-center justify-center rounded-full bg-primary/10'>
+          <span className='text-lg font-bold text-primary'>{initials}</span>
         </div>
       </div>
 
@@ -257,15 +254,13 @@ function Modal() {
 
       <div className='space-y-2'>
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Rôle</Label>
-        <div className='grid grid-cols-2 gap-2 sm:gap-3'>
-          {Object.entries(ROLE_CONFIG).map(([role, config]) => {
-            const RIcon = config.icon
+        <div className='grid grid-cols-2 gap-2'>
+          {Object.entries(ROLE_OPTIONS).map(([role, config]) => {
             const isActive = item.role === role
             return (
-              <Button
+              <button
                 key={role}
                 type='button'
-                variant='outline'
                 onClick={() => {
                   if (!isReceptionist) {
                     const next = { ...item, role: role as typeof item.role }
@@ -273,17 +268,17 @@ function Modal() {
                     validation.onFieldChange('role', next)
                   }
                 }}
-                className={clsx(
-                  'flex h-auto flex-col items-center gap-2 p-3',
+                className={cn(
+                  'flex items-center gap-2 rounded-control border px-3 py-2.5 text-left text-sm font-medium transition-all',
                   isActive
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'text-secondary/50',
+                    ? cn(config.activeBg, config.activeBorder, config.activeText, 'ring-1 ring-current/20')
+                    : 'border-border bg-background text-muted-foreground hover:border-border-strong hover:bg-muted/30',
                   isReceptionist && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <RIcon size={20} weight={isActive ? 'fill' : 'regular'} />
-                <span className='text-center text-xs font-medium leading-tight'>{config.label}</span>
-              </Button>
+                <span className={cn('h-2 w-2 rounded-full', isActive ? 'bg-current' : 'bg-muted-foreground/30')} />
+                {config.label}
+              </button>
             )
           })}
         </div>
