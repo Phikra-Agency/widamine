@@ -1,6 +1,6 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { useAuthStore } from '@/stores/authStore'
-import { Eye, CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, Clock } from '@phosphor-icons/react'
+import { Eye, CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, Clock, CheckCircle, XCircle, Timer } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
@@ -11,13 +11,10 @@ import api from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RESERVATIONS_EMPTY_ILLUSTRATION, createReservationsColumns } from './columns/reservationsColumns'
@@ -314,6 +311,144 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
   )
 }
 
+const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+  PENDING: { label: 'En attente', color: 'text-amber-700', bg: 'bg-amber-50', icon: Timer },
+  CONFIRMED: { label: 'Confirmée', color: 'text-emerald-700', bg: 'bg-emerald-50', icon: CheckCircle },
+  CANCELLED: { label: 'Annulée', color: 'text-red-700', bg: 'bg-red-50', icon: XCircle },
+  COMPLETED: { label: 'Terminée', color: 'text-sky-700', bg: 'bg-sky-50', icon: CheckCircle },
+  EXPIRED: { label: 'Expirée', color: 'text-gray-700', bg: 'bg-gray-50', icon: Timer },
+  NO_SHOW: { label: 'Absent', color: 'text-violet-700', bg: 'bg-violet-50', icon: XCircle },
+}
+
+function Pill({ status }: { status: string }) {
+  const m = STATUS_META[status] || STATUS_META.PENDING
+  const I = m.icon
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full ${m.bg} ${m.color} px-3 py-1 text-xs font-medium ring-1 ring-inset ring-transparent`}>
+      <I size={12} weight='fill' />
+      {m.label}
+    </span>
+  )
+}
+
+function DetailCard({ icon: Icon, label, children, color }: { icon?: React.ElementType; label: string; children: React.ReactNode; color?: string }) {
+  return (
+    <div className='group relative overflow-hidden rounded-surface bg-card shadow-bo-card transition-all duration-200 hover:shadow-bo-elevated hover:-translate-y-0.5'>
+      {color && <div className='absolute left-0 top-0 h-full w-0.5 rounded-l-sm' style={{ backgroundColor: color }} />}
+      <div className='px-4 py-3.5'>
+        <div className='mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>
+          {Icon && <Icon size={11} />}
+          {label}
+        </div>
+        <div className='text-sm font-medium text-foreground'>{children}</div>
+      </div>
+    </div>
+  )
+}
+
+function SectionCard({ icon: Icon, label, children }: { icon?: React.ElementType; label: string; children: React.ReactNode }) {
+  return (
+    <div className='rounded-surface bg-card shadow-bo-card'>
+      <div className='flex items-center gap-2.5 border-b border-border-subtle px-4 py-3'>
+        <div className='flex h-7 w-7 items-center justify-center rounded-element bg-primary/8 text-primary'>
+          {Icon && <Icon size={14} />}
+        </div>
+        <span className='text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>{label}</span>
+      </div>
+      <div className='p-4'>{children}</div>
+    </div>
+  )
+}
+
+function SessionTimeline({ sessions, schedules, onEdit, onSave, editingSessions, sessionDates, onDateChange, savingId, onCancel }: {
+  sessions: { id: string; session: number; duration: number }[]
+  schedules?: { id: string; datetime: string; sessionId: string }[]
+  onEdit: (id: string) => void
+  onSave: (id: string) => Promise<void>
+  editingSessions: Record<string, boolean>
+  sessionDates: Record<string, string>
+  onDateChange: (id: string, value: string) => void
+  savingId: string | null
+  onCancel: (id: string) => void
+}) {
+  if (sessions.length === 0) {
+    return (
+      <div className='rounded-element border border-dashed border-border bg-card/40 px-4 py-8 text-center text-sm text-muted-foreground'>
+        Aucune séance configurée
+      </div>
+    )
+  }
+
+  return (
+    <div className='relative'>
+      {sessions.map((session, idx) => {
+        const schedule = schedules?.find((s) => s.sessionId === session.id)
+        const isEditing = editingSessions[session.id]
+        const isLast = idx === sessions.length - 1
+        const hasDate = !!schedule?.datetime
+
+        return (
+          <div key={session.id} className='relative flex gap-4 pb-5 last:pb-0'>
+            <div className='flex flex-col items-center'>
+              <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-4 ring-card transition-colors duration-200 ${
+                hasDate ? 'bg-primary/12 text-primary' : 'bg-muted text-muted-foreground'
+              }`}>
+                {session.session}
+              </div>
+              {!isLast && <div className='mt-0.5 h-full w-px bg-border-subtle' />}
+            </div>
+            <div className='min-w-0 flex-1 pt-0.5'>
+              <div className='flex items-center justify-between gap-2'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-sm font-medium text-foreground'>Séance {session.session}</span>
+                  <span className='rounded-element bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground'>{session.duration} min</span>
+                </div>
+                {!isEditing && (
+                  <Button onClick={() => onEdit(session.id)} type='button' variant='ghost' size='icon-xs' className='text-muted-foreground/40 hover:text-primary hover:bg-primary/8'>
+                    <Pen size={12} />
+                  </Button>
+                )}
+              </div>
+              {isEditing ? (
+                <div className='mt-2.5 space-y-2.5 rounded-element border border-border bg-muted/30 p-3'>
+                  <Input
+                    type='datetime-local'
+                    value={sessionDates[session.id] || ''}
+                    onChange={(e) => onDateChange(session.id, e.target.value)}
+                    className='h-8 text-xs'
+                  />
+                  <div className='flex gap-2'>
+                    <Button onClick={() => onCancel(session.id)} type='button' variant='ghost' size='xs'>
+                      Annuler
+                    </Button>
+                    <Button
+                      onClick={() => onSave(session.id)}
+                      type='button'
+                      size='xs'
+                      disabled={!sessionDates[session.id] || savingId === session.id}
+                    >
+                      {savingId === session.id ? 'Enregistrement…' : 'Enregistrer'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className='mt-0.5 text-xs text-muted-foreground/70'>
+                  {hasDate
+                    ? new Date(schedule.datetime).toLocaleString('fr-FR', {
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit',
+                      })
+                    : <span className='italic text-muted-foreground/40'>Date non programmée</span>}
+                </p>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function ShowModal() {
   const { openShowModal, setOpenShowModal, item, fetchItem, loadingItem, saveScheduleDate, savingScheduleSessionId } = useAppointmentsStore()
   const [sessionDates, setSessionDates] = useState<Record<string, string>>({})
@@ -349,225 +484,175 @@ function ShowModal() {
     setEditingSessions({})
   }, [item])
 
+  const motifColor = item.motif?.color || '#009fd6'
+  const initials = (item.name || 'N/A').slice(0, 2).toUpperCase()
+
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
       <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-4xl'>
-        <DialogHeader className='border-b border-border px-4 py-4 text-left sm:px-6'>
-          <DialogTitle className='text-lg font-semibold text-secondary'>Détails de la réservation</DialogTitle>
-        </DialogHeader>
-
         {loadingItem ? (
-          <div className='flex items-center justify-center p-6 text-secondary/60'>
-            Chargement...
+          <div className='flex items-center justify-center p-14 text-sm text-muted-foreground'>
+            <div className='flex items-center gap-2.5'>
+              <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary/25 border-t-primary' />
+              <span>Chargement des détails…</span>
+            </div>
           </div>
         ) : (
-          <ScrollArea className='max-h-[calc(100dvh-12rem)] sm:max-h-[calc(100vh-14rem)]'>
-            <div className='p-4 sm:p-6'>
-              <div className='mb-6 flex flex-col gap-4 border-b border-border-subtle pb-6 sm:flex-row sm:items-center'>
-                <div className='flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-control bg-secondary/[0.04]'>
-                  <CalendarBlank size={26} className='text-secondary/50' />
+          <>
+            <div className='relative overflow-hidden bg-card/60 px-6 pb-4 pt-5 shadow-[0_1px_0_0] shadow-border-subtle'>
+              <div className='absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent pointer-events-none' />
+              <div className='relative flex items-start gap-4'>
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-white shadow-bo-card' style={{ backgroundColor: motifColor }}>
+                  {initials}
                 </div>
-                <div className='min-w-0'>
-                  <h3 className='text-lg font-semibold text-secondary'>Réservation #{item.id}</h3>
-                  <p className='text-sm text-secondary/50'>{item.motif?.name || '-'}</p>
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-start justify-between gap-4'>
+                    <div className='space-y-1'>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-[11px] font-medium text-muted-foreground/60'>Réservation</span>
+                        <span className='rounded-element bg-muted/70 px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground/50'>#{item.id}</span>
+                      </div>
+                      <h2 className='text-lg font-semibold leading-6 text-foreground'>{item.motif?.name || 'Sans motif'}</h2>
+                      <p className='text-sm text-muted-foreground/70'>{item.name}</p>
+                    </div>
+                    <Pill status={item.status || 'PENDING'} />
+                  </div>
                 </div>
-                <div className='sm:ml-auto'>
-                  <StatusBadge status={item.status || 'PENDING'} />
-                </div>
+                <Button
+                  onClick={() => setOpenShowModal(false)}
+                  type='button'
+                  variant='ghost'
+                  size='icon-sm'
+                  className='absolute right-1 top-0 text-muted-foreground/30 hover:text-foreground hover:bg-transparent'
+                >
+                  <XCircle size={18} />
+                </Button>
               </div>
+            </div>
 
-              <div className='grid grid-cols-1 gap-6 xl:grid-cols-2'>
-                <div className='space-y-5'>
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Date & Heure</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Clock size={15} className='text-secondary/30' />
+            <ScrollArea className='max-h-[calc(100dvh-16rem)] sm:max-h-[calc(100vh-18rem)]'>
+              <div className='grid grid-cols-1 gap-5 p-5 xl:grid-cols-5'>
+                <div className='space-y-5 xl:col-span-3'>
+                  <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                    <DetailCard icon={Clock} label='Date & Heure' color={motifColor}>
                       {(() => {
                         const s = item.schedules?.[0]?.datetime
-                        if (!s) return 'Non programmé'
+                        if (!s) return <span className='text-muted-foreground/50'>Non programmé</span>
                         return new Date(s).toLocaleString('fr-FR', {
                           day: '2-digit', month: 'long', year: 'numeric',
                           hour: '2-digit', minute: '2-digit',
                         })
                       })()}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <CalendarBlank size={15} className='text-secondary/30' />
-                      {item.motif?.name || '—'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Stethoscope size={15} className='text-secondary/30' />
-                      {item.motif?.name || 'Service direct'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Praticien</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Stethoscope size={15} className='text-secondary/30' />
-                      {item.practitioner?.name || 'Affectation automatique'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Ressource</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Door size={15} className='text-secondary/30' />
-                      {item.resource?.name || 'Aucune ressource dédiée'}
-                    </div>
+                    </DetailCard>
+                    <DetailCard icon={CalendarBlank} label='Session' color={motifColor}>
+                      {item.sessionNumber ? `Séance ${item.sessionNumber}` : <span className='text-muted-foreground/50'>—</span>}
+                    </DetailCard>
+                    <DetailCard icon={Stethoscope} label='Praticien' color={motifColor}>
+                      {item.practitioner?.name || <span className='text-muted-foreground/50'>Affectation automatique</span>}
+                    </DetailCard>
+                    <DetailCard icon={Door} label='Ressource' color={motifColor}>
+                      {item.resource?.name || <span className='text-muted-foreground/50'>Non assignée</span>}
+                    </DetailCard>
                   </div>
 
                   {item.context && (
-                    <div className='space-y-2'>
-                      <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Message</Label>
-                      <div className='max-h-32 overflow-y-auto rounded-control border border-border bg-background px-4 py-3 text-sm text-secondary/70'>
-                        {item.context}
+                    <div className='rounded-surface bg-card shadow-bo-card'>
+                      <div className='flex items-center gap-2.5 border-b border-border-subtle px-4 py-3'>
+                        <div className='flex h-7 w-7 items-center justify-center rounded-element bg-primary/8 text-primary'>
+                          <EnvelopeSimple size={14} />
+                        </div>
+                        <span className='text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>Message</span>
+                      </div>
+                      <div className='px-4 py-3.5'>
+                        <p className='text-sm leading-relaxed text-muted-foreground/75'>{item.context}</p>
                       </div>
                     </div>
                   )}
 
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Patient</Label>
-                    <div className='rounded-control border border-border bg-background p-3 space-y-2'>
-                      <div className='flex items-center gap-2 text-sm text-secondary'>
-                        <User size={15} className='text-secondary/30' />
-                        {item.name}
+                  <SectionCard icon={User} label='Patient'>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60 ring-2 ring-card'>
+                        {initials}
                       </div>
-                      <div className='flex items-center gap-2 text-sm text-secondary/65'>
-                        <EnvelopeSimple size={15} className='text-secondary/30' />
-                        {item.email}
-                      </div>
-                      <div className='flex items-center gap-2 text-sm text-secondary/65'>
-                        <Phone size={15} className='text-secondary/30' />
-                        {item.phone}
+                      <div className='min-w-0 flex-1'>
+                        <p className='text-sm font-medium text-foreground'>{item.name}</p>
+                        <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/60'>
+                          <span className='inline-flex items-center gap-1'>
+                            <EnvelopeSimple size={11} /> {item.email}
+                          </span>
+                          <span className='inline-flex items-center gap-1'>
+                            <Phone size={11} /> {item.phone}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </SectionCard>
 
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Notifications</Label>
-                    <div className='max-h-32 space-y-2 overflow-y-auto rounded-control border border-border bg-background p-3'>
-                      {(item.notifications || []).length === 0 ? (
-                        <p className='text-sm text-secondary/40'>Aucune notification</p>
-                      ) : (
-                        (item.notifications || []).map((notification) => (
-                          <div key={notification.id} className='flex items-center justify-between gap-3 border-b border-border-subtle pb-2 last:border-0 last:pb-0'>
-                            <span className='text-sm text-secondary/60'>{notification.channel} · {notification.recipientType}</span>
-                            <StatusBadge status={notification.status} />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className='space-y-4'>
-                  <h3 className='font-medium text-secondary'>Séances du motif</h3>
-                  <div className='space-y-3'>
-                    {(item.motif?.sessions || []).length === 0 && (
-                      <div className='rounded-control border border-border bg-background p-4 text-center text-sm text-secondary/40'>
-                        Aucune séance trouvée
+                  <SectionCard icon={EnvelopeSimple} label='Notifications'>
+                    {(item.notifications || []).length === 0 ? (
+                      <p className='text-sm text-muted-foreground/50'>Aucune notification envoyée</p>
+                    ) : (
+                      <div className='space-y-1.5'>
+                        {(item.notifications || []).map((n) => {
+                          const nStatus = n.status === 'SENT' ? 'Envoyé' : n.status === 'FAILED' ? 'Échoué' : n.status
+                          const nColor = n.status === 'SENT' ? 'bg-emerald-50 text-emerald-600' : n.status === 'FAILED' ? 'bg-red-50 text-red-600' : 'bg-muted text-muted-foreground'
+                          return (
+                            <div key={n.id} className='flex items-center justify-between rounded-element bg-card px-3 py-2 shadow-sm ring-1 ring-border-subtle'>
+                              <div className='flex items-center gap-2 text-xs'>
+                                <span className='font-medium text-muted-foreground/70'>{n.channel}</span>
+                                <span className='text-muted-foreground/30'>·</span>
+                                <span className='text-muted-foreground/55'>{n.recipientType}</span>
+                              </div>
+                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ring-transparent ${nColor}`}>
+                                {nStatus}
+                              </span>
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
+                  </SectionCard>
+                </div>
 
-                    {(item.motif?.sessions || []).map((session) => (
-                      <div key={session.id} className='space-y-3 rounded-control border border-border bg-background p-4'>
-                        <div className='flex items-center justify-between'>
-                          <div className='flex items-center gap-2'>
-                            <div className='flex h-6 w-6 items-center justify-center rounded-full bg-secondary/[0.04] text-sm font-medium text-secondary'>{session.session}</div>
-                            <span className='text-sm font-medium text-secondary'>{session.duration} min</span>
-                          </div>
-                        </div>
-
-                        {editingSessions[session.id] ? (
-                          <div className='space-y-3'>
-                            <Input
-                              type='datetime-local'
-                              value={sessionDates[session.id] || ''}
-                              onChange={(e) => setSessionDates({ ...sessionDates, [session.id]: e.target.value })}
-                            />
-                            <div className='flex justify-end gap-2'>
-                              <Button
-                                onClick={() => {
-                                  setEditingSessions({})
-                                  const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
-                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
-                                }}
-                                type='button'
-                                variant='ghost'
-                              >
-                                Annuler
-                              </Button>
-                              <Button
-                                onClick={async () => {
-                                  const value = sessionDates[session.id]
-                                  if (!value) return
-                                  await saveScheduleDate({ sessionId: session.id, datetime: new Date(value).toISOString() })
-                                  setEditingSessions({})
-                                }}
-                                type='button'
-                                disabled={!sessionDates[session.id] || savingScheduleSessionId === session.id}
-                              >
-                                {savingScheduleSessionId === session.id ? 'Enregistrement...' : 'Enregistrer'}
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-                            <span className='text-sm text-secondary/60'>
-                              {(() => {
-                                const schedule = item.schedules?.find((s) => s.sessionId === session.id)
-                                if (schedule?.datetime) {
-                                  return new Date(schedule.datetime).toLocaleString('fr-FR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })
-                                }
-                                return 'Date non programmée'
-                              })()}
-                            </span>
-                            <div className='flex justify-end sm:block'>
-                              <Button
-                                onClick={() => {
-                                  setEditingSessions({ [session.id]: true })
-                                  const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
-                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
-                                }}
-                                type='button'
-                                variant='ghost'
-                                size='icon-sm'
-                                className='text-secondary/40 hover:text-primary hover:bg-primary/10'
-                              >
-                                <Pen size={14} />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                <div className='xl:col-span-2'>
+                  <SectionCard icon={CalendarBlank} label='Séances'>
+                    <SessionTimeline
+                      sessions={item.motif?.sessions || []}
+                      schedules={item.schedules}
+                      editingSessions={editingSessions}
+                      sessionDates={sessionDates}
+                      onEdit={(id) => {
+                        setEditingSessions({ [id]: true })
+                        const currentDate = item.schedules?.find((s) => s.sessionId === id)?.datetime
+                        setSessionDates({ ...sessionDates, [id]: toDateTimeLocal(currentDate) })
+                      }}
+                      onCancel={(id) => {
+                        setEditingSessions({})
+                        const currentDate = item.schedules?.find((s) => s.sessionId === id)?.datetime
+                        setSessionDates({ ...sessionDates, [id]: toDateTimeLocal(currentDate) })
+                      }}
+                      onDateChange={(id, value) => setSessionDates({ ...sessionDates, [id]: value })}
+                      onSave={async (id) => {
+                        const value = sessionDates[id]
+                        if (!value) return
+                        await saveScheduleDate({ sessionId: id, datetime: new Date(value).toISOString() })
+                        setEditingSessions({})
+                      }}
+                      savingId={savingScheduleSessionId}
+                    />
+                  </SectionCard>
                 </div>
               </div>
-            </div>
-          </ScrollArea>
-        )}
+            </ScrollArea>
 
-        <DialogFooter className='border-t border-border px-4 py-4 sm:px-6'>
-          <Button type='button' variant='ghost' onClick={() => setOpenShowModal(false)}>
-            Fermer
-          </Button>
-        </DialogFooter>
+            <div className='flex items-center justify-between border-t border-border-subtle bg-muted/20 px-5 py-3'>
+              <span className='text-xs text-muted-foreground/40'>Détails de la réservation</span>
+              <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)}>
+                Fermer
+              </Button>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

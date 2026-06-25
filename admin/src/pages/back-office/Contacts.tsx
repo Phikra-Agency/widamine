@@ -1,5 +1,5 @@
 import { useContactsStore } from '@/stores/contactsStore'
-import { Eye, ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
+import { ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { DataTable, DataTableFilterPills, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Label } from '@/components/ui'
@@ -37,7 +37,7 @@ function Heading() {
 }
 
 function ContactsTable() {
-  const { items, filters, fetchItems, setItem, toggleOpenShowModal, readItem, setFilters } = useContactsStore()
+  const { items, filters, fetchItems, setItem, readItem, setFilters } = useContactsStore()
   const [loading, setLoading] = useState(true)
   const debouncedSearch = useDebouncedGlobalSearch()
 
@@ -50,16 +50,12 @@ function ContactsTable() {
     () =>
       createContactsColumns({
         showReadAction: !filters.read,
-        onView: (item) => {
-          setItem(item)
-          toggleOpenShowModal()
-        },
         onMarkRead: (item) => {
           setItem(item)
           void readItem()
         },
       }),
-    [filters.read, readItem, setItem, toggleOpenShowModal],
+    [filters.read, readItem, setItem],
   )
 
   const table = useDataTable({
@@ -89,6 +85,10 @@ function ContactsTable() {
         emptyIllustration={CONTACTS_EMPTY_ILLUSTRATION}
         emptyTitle="Aucun message trouvé"
         emptyDescription="Les messages reçus apparaîtront ici"
+        stopClickOnColumns={[]}
+        onRowClick={(contact) => {
+          useContactsStore.setState({ item: contact, openShowModal: true })
+        }}
       />
 
       <DataTable.Mobile>
@@ -128,28 +128,17 @@ function ContactsTable() {
                     </div>
                   </div>
                   <div className='mt-3 flex items-center gap-2'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className='flex-1'
-                      onClick={() => {
-                        setItem(item)
-                        toggleOpenShowModal()
-                      }}
-                    >
-                      <Eye size={14} /> Voir
-                    </Button>
                     {!filters.read && (
                       <Button
                         variant='outline'
                         size='sm'
-                        className='flex-1 text-emerald-600 hover:bg-emerald-50'
+                        className='flex-1 gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50'
                         onClick={() => {
                           setItem(item)
                           void readItem()
                         }}
                       >
-                        <CheckCircle size={14} /> Lu
+                        <CheckCircle size={14} /> Marquer comme lu
                       </Button>
                     )}
                   </div>
@@ -163,10 +152,14 @@ function ContactsTable() {
 }
 
 function ShowModal() {
-  const { openShowModal, toggleOpenShowModal, item } = useContactsStore()
+  const openShowModal = useContactsStore((s) => s.openShowModal)
+  const toggleOpenShowModal = useContactsStore((s) => s.toggleOpenShowModal)
+  const item = useContactsStore((s) => s.item)
+
+  if (!openShowModal || !item?.name) return null
 
   return (
-    <Dialog open={openShowModal} onOpenChange={(open) => !open && toggleOpenShowModal()}>
+    <Dialog open onOpenChange={(open) => !open && toggleOpenShowModal()}>
       <DialogContent showCloseButton={false} className="gap-0 overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader className="border-b border-border px-6 py-4 text-left">
           <DialogTitle className="text-lg font-semibold text-secondary">Message reçu</DialogTitle>
@@ -209,7 +202,7 @@ function ShowModal() {
           </div>
         </div>
 
-        <DialogFooter className="border-t border-border px-6 py-4">
+        <DialogFooter className="border-t border-border px-5 py-5 sm:px-6 sm:py-6">
           <Button variant="ghost" onClick={toggleOpenShowModal} type="button">
             Fermer
           </Button>

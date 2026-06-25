@@ -61,12 +61,7 @@ export function DataTableColumnSearch<TData, TValue>({
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value)
-            }}
-            onBlur={() => syncFilter(inputValue)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                syncFilter(inputValue)
-              }
+              syncFilter(e.target.value)
             }}
             placeholder='Rechercher...'
             autoFocus

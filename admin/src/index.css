@@ -147,7 +147,7 @@
 	--destructive: #6d0024;
 	--success: #2d8a6e;
 	--warning: #b8860b;
-	--radius: 0.75rem;
+	--radius: 0.5rem;
 
 	/* Radius scale (base 12px): shell 22px → surface 17px → control 12px → element 10px. Nested: child one tier down. */
 
@@ -315,11 +315,11 @@
 	}
 
 	.bo-sidebar-search-field {
-		@apply flex h-8 items-center gap-2 rounded-control border border-border-subtle bg-white/80 px-2.5;
+		@apply flex h-8 items-center gap-2 rounded-control border border-border-subtle bg-white/80 px-2.5 focus-within:border-border-subtle focus-within:ring-0;
 	}
 
 	.bo-sidebar-search-input {
-		@apply h-full min-h-0 flex-1 border-0 bg-transparent p-0 text-xs shadow-none placeholder:text-muted-foreground/35 focus-visible:border-transparent focus-visible:ring-0;
+		@apply h-full min-h-0 flex-1 border-0 bg-transparent p-0 text-xs shadow-none placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0;
 	}
 
 	.bo-sidebar-group-label {

@@ -1,6 +1,6 @@
 import { EmptyInboxIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
+import { ChatCircleDots, EnvelopeSimple, Phone, User, CheckCircle } from '@phosphor-icons/react'
 import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { Button } from '@/components/ui'
 
@@ -14,13 +14,11 @@ export type ContactRow = {
 
 type ContactColumnsDeps = {
   showReadAction: boolean
-  onView: (item: ContactRow) => void
   onMarkRead: (item: ContactRow) => void
 }
 
 export function createContactsColumns({
   showReadAction,
-  onView,
   onMarkRead,
 }: ContactColumnsDeps): ColumnDef<ContactRow>[] {
   return [
@@ -74,36 +72,32 @@ export function createContactsColumns({
         </span>
       ),
     },
-    {
-      id: 'actions',
-      header: () => <span className='sr-only'>Actions</span>,
-      enableSorting: false,
-      cell: ({ row }) => (
-        <DataTable.RowActions>
-          <Button
-            variant='ghost'
-            size='icon-sm'
-            onClick={() => onView(row.original)}
-            className='text-muted-foreground hover:bg-primary/8 hover:text-primary'
-            title='Voir le message'
-          >
-            <Eye size={18} />
-          </Button>
-          {showReadAction && (
-            <Button
-              variant='ghost'
-              size='icon-sm'
-              onClick={() => onMarkRead(row.original)}
-              className='text-muted-foreground hover:bg-emerald-50 hover:text-emerald-600'
-              title='Marquer comme lu'
-            >
-              <CheckCircle size={18} />
-            </Button>
-          )}
-        </DataTable.RowActions>
-      ),
-      meta: { align: 'right', width: 'actions' },
-    },
+    ...(showReadAction
+      ? [
+          {
+            id: 'actions' as const,
+            header: () => <span className='sr-only'>Actions</span>,
+            enableSorting: false,
+            cell: ({ row }: { row: any }) => (
+              <DataTable.RowActions>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    onMarkRead(row.original)
+                  }}
+                  className='gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700'
+                >
+                  <CheckCircle size={14} />
+                  Marquer comme lu
+                </Button>
+              </DataTable.RowActions>
+            ),
+            meta: { align: 'right' as const, width: 'actions' as const },
+          },
+        ]
+      : []),
   ]
 }
 

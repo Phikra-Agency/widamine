@@ -4,6 +4,7 @@ import { useSchedulesStore } from '@/stores/schedulesStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, CalendarBlank, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Badge,
@@ -26,7 +27,7 @@ import {
 import { FormDialog, FieldError } from '@/components/bo'
 import { patientSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
+import { DataTable, DataTablePagination, TanStackDataTable, useDataTable } from '@/components/data-table'
 import type { ColumnFiltersState, OnChangeFn } from '@tanstack/react-table'
 import {
   createPatientsColumns,
@@ -42,14 +43,7 @@ import {
   readCalendarReturnContext,
   stashAppointmentForCalendarOpen,
 } from '@/lib/scheduleNavigation'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
-const GENDER_FILTER_PILLS: FilterPillOption[] = [
-  { value: 'all', label: 'Tous', color: 'mist' },
-  { value: 'MALE', label: 'Homme', color: 'sky' },
-  { value: 'FEMALE', label: 'Femme', color: 'coral' },
-  { value: 'OTHER', label: 'Autre', color: 'sand' },
-]
 
 export default function Patients() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -57,6 +51,7 @@ export default function Patients() {
   const items = usePatientStore(state => state.items)
   const [searchParams] = useSearchParams()
   const hasOpenedFromUrl = useRef(false)
+  const drawerReturnRef = useRef<any>(null)
 
   const openDrawer = useCallback((patient: any) => {
     setDrawerPatient(patient)
@@ -67,6 +62,21 @@ export default function Patients() {
     setDrawerOpen(false)
     setDrawerPatient(null)
   }, [])
+
+  const editFromDrawer = useCallback((patient: any) => {
+    drawerReturnRef.current = patient
+    setDrawerOpen(false)
+  }, [])
+
+  const reopenDrawerIfNeeded = useCallback(() => {
+    const p = drawerReturnRef.current
+    if (p) {
+      drawerReturnRef.current = null
+      const fresh = items.find(i => i.id === p.id) ?? p
+      setDrawerPatient(fresh)
+      setDrawerOpen(true)
+    }
+  }, [items])
 
   useEffect(() => {
     const patientId = searchParams.get('patientId')
@@ -89,9 +99,9 @@ export default function Patients() {
           <PatientsTable openDrawer={openDrawer} />
         </Card>
       </div>
-      <Modal />
+      <Modal onAfterSave={reopenDrawerIfNeeded} />
       <DeleteModal />
-      <PatientDrawer open={drawerOpen} patient={drawerPatient} onClose={closeDrawer} />
+      <PatientDrawer open={drawerOpen} patient={drawerPatient} onClose={closeDrawer} onEdit={editFromDrawer} />
     </div>
   )
 }
@@ -99,11 +109,13 @@ export default function Patients() {
 function Heading() {
   const { openCreateModal } = usePatientStore()
   const { user } = useAuthStore()
+  const items = usePatientStore(state => state.items)
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   return (
     <div className='bo-page-heading'>
       <div>
         <h3 className='bo-title'>Gestion Des Patients</h3>
+        <p className='mt-0.5 text-xs text-secondary/40'>{items.length} patient{items.length !== 1 ? 's' : ''}</p>
       </div>
       {!isPractitioner && (
         <Button onClick={openCreateModal} className='hidden lg:inline-flex'>
@@ -119,7 +131,6 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [loading, setLoading] = useState(true)
-  const debouncedSearch = useDebouncedGlobalSearch()
 
   const cities = useMemo(() => {
     const norm = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
@@ -187,20 +198,9 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
     columns,
     enablePagination: true,
     pageSize: 10,
-    globalFilter: debouncedSearch,
     columnFilters,
     onColumnFiltersChange: handleColumnFiltersChange,
     initialColumnVisibility: { gender: false, city: false },
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const term = String(filterValue).trim().toLowerCase()
-      if (!term) return true
-      const p = row.original
-      return (
-        p.firstName.toLowerCase().includes(term) ||
-        p.lastName.toLowerCase().includes(term) ||
-        p.email.toLowerCase().includes(term)
-      )
-    },
   })
 
   const rows = table.getRowModel().rows
@@ -208,14 +208,6 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar>
-        <DataTableFilterPills
-          options={GENDER_FILTER_PILLS}
-          value={filters.gender || 'all'}
-          onChange={(value) => setFilters({ ...filters, gender: value === 'all' ? '' : value })}
-        />
-      </DataTable.Toolbar>
-
       <TanStackDataTable
         table={table}
         loading={loading}
@@ -239,23 +231,24 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
                   key={row.id}
                   onClick={() => openDrawer(item)}
                 >
-                    <div className='flex items-center gap-2'>
-                      <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary/5'>
-                        <User size={15} className='text-secondary/40' />
+                    <div className='flex items-center gap-3'>
+                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary/40'>
+                        <User size={18} />
                       </div>
                       <div className='min-w-0 flex-1'>
-                        <p className='truncate text-sm font-medium'>{item.firstName} {item.lastName}</p>
-                        <div className='mt-0.5 flex items-center gap-2'>
-                          {item.phone && (
-                            <span className='truncate text-[11px] text-secondary/50'>{item.phone}</span>
-                          )}
+                        <p className='truncate text-sm font-semibold'>{item.firstName} {item.lastName}</p>
+                        <div className='mt-0.5 flex items-center gap-1.5 text-[11px] text-secondary/50'>
+                          {item.phone && <span className='truncate'>{item.phone}</span>}
+                          {item.phone && stats.count > 0 && <span className='text-secondary/20'>·</span>}
+                          {stats.count > 0 && <span className='shrink-0'>{stats.count} RDV</span>}
+                        </div>
+                        <div className='mt-0.5 flex items-center gap-1.5 text-[10px] text-secondary/35'>
+                          {item.email && <span className='truncate'>{item.email}</span>}
+                          {item.email && stats.nextDate && <span className='text-secondary/20'>·</span>}
                           {stats.nextDate && (
-                            <>
-                              {item.phone && <span className='text-[9px] text-secondary/30'>·</span>}
-                              <span className='shrink-0 text-[11px] text-primary/70'>
-                                {stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                              </span>
-                            </>
+                            <span className='shrink-0 text-primary/60'>
+                              {stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -304,14 +297,14 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
         )}
       </DataTable.Mobile>
 
-      <div className='border-t border-border-subtle px-4 py-3'>
+      <div className='flex justify-end px-4 py-3'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
   )
 }
 
-function Modal() {
+function Modal({ onAfterSave }: { onAfterSave?: () => void }) {
   const { operation, modalOpen, closeModal, item, setItem, saveItem } = usePatientStore()
   const isEdit = operation === 'edit'
   const isOpen = ['create', 'edit'].includes(operation) && modalOpen
@@ -337,12 +330,13 @@ function Modal() {
   return (
     <FormDialog
       open={isOpen}
-      onOpenChange={(open) => { if (!open) closeModal() }}
+      onOpenChange={(open) => { if (!open) { closeModal(); onAfterSave?.() } }}
       title={isEdit ? 'Modifier le patient' : 'Nouveau patient'}
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault()
         if (!validation.validateAll()) return
-        saveItem()
+        await saveItem()
+        onAfterSave?.()
       }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer le patient'}
       className='sm:max-w-2xl'
@@ -495,9 +489,9 @@ function UpcomingAppointmentRow({
           </div>
         </div>
         <span className='shrink-0 text-xs font-medium text-secondary/40'>—</span>
-      </div>
-    )
-  }
+    </div>
+  )
+}
 
   return (
     <button
@@ -546,7 +540,7 @@ function StatusBadge({ status }: { status?: string }) {
   return <Badge variant='outline' className={className}>{label}</Badge>
 }
 
-function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any; onClose: () => void }) {
+function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; patient: any; onClose: () => void; onEdit: (patient: any) => void }) {
   const { openEditModal } = usePatientStore()
   const { user } = useAuthStore()
   const navigate = useNavigate()
@@ -594,48 +588,84 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
         {patient && (
           <>
             <div className='flex items-start justify-between gap-3 border-b border-border px-5 py-4 shrink-0'>
-              <div className='min-w-0'>
-                <p className='text-[11px] uppercase tracking-[0.22em] text-secondary/40'>Dossier patient</p>
-                <p className='text-base font-medium text-secondary truncate'>
-                  {patient.firstName} {patient.lastName}
-                </p>
-                <div className='flex items-center gap-2 mt-0.5'>
-                  <Badge variant='outline' className={clsx('text-[10px] font-medium', (GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).color)}>
-                    {(GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).label}
-                  </Badge>
-                  {patient.dateOfBirth && (
-                    <span className='text-xs text-secondary/50'>
-                      Né(e) le {new Date(patient.dateOfBirth).toLocaleDateString('fr-FR')}
-                    </span>
-                  )}
+              <div className='flex items-center gap-3 min-w-0'>
+                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/[0.08]'>
+                  <User size={18} className='text-primary/60' />
+                </div>
+                <div className='min-w-0'>
+                  <p className='text-[11px] uppercase tracking-[0.22em] text-secondary/40'>Dossier patient</p>
+                  <p className='text-sm font-semibold text-secondary truncate'>
+                    {patient.firstName} {patient.lastName}
+                  </p>
+                  <div className='flex items-center gap-2 mt-0.5'>
+                    <Badge variant='outline' className={clsx('text-[10px] font-medium', (GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).color)}>
+                      {(GENDER_CONFIG[patient.gender] || GENDER_CONFIG.OTHER).label}
+                    </Badge>
+                    {patient.dateOfBirth && (
+                      <span className='text-[10px] text-secondary/40'>
+                        {new Date(patient.dateOfBirth).toLocaleDateString('fr-FR')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <Button
                 type='button'
-                variant='outline'
+                variant='ghost'
                 size='icon-sm'
                 onClick={onClose}
-                className='shrink-0'
+                className='shrink-0 text-secondary/30 hover:text-secondary/60'
               >
-                <X size={16} className='text-secondary/60' />
+                <X size={16} />
               </Button>
             </div>
 
             <div className='flex-1 min-h-0 overflow-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
               {/* Contact */}
-              <div className='rounded-surface border border-border p-4 space-y-2'>
-                <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Contact</p>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><EnvelopeSimple size={12} /> Email</span>
-                  <span className='text-xs text-secondary/70'>{patient.email || '—'}</span>
+              <div className='rounded-surface border border-border p-4'>
+                <div className='flex items-center justify-between mb-3'>
+                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>Contact</p>
+                  {!isPractitioner && (
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='icon-xs'
+                      onClick={() => { onEdit(patient); openEditModal(patient); }}
+                      className='text-secondary/30 hover:text-primary'
+                      title='Modifier les informations'
+                    >
+                      <Pen size={12} />
+                    </Button>
+                  )}
                 </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><Phone size={12} /> Téléphone</span>
-                  <span className='text-xs text-secondary/70'>{patient.phone || '—'}</span>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs text-secondary/40 flex items-center gap-1.5'><MapPin size={12} /> Adresse</span>
-                  <span className='text-xs text-secondary/70 text-right truncate max-w-[55%]'>{[patient.address, patient.city, patient.postalCode, patient.country].filter(Boolean).join(', ') || '—'}</span>
+                <div className='space-y-2.5'>
+                  <div className='flex items-center gap-2.5'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-primary/[0.06]'>
+                      <EnvelopeSimple size={12} className='text-primary/50' />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-[10px] text-secondary/35'>Email</p>
+                      <p className='text-xs text-secondary/70 truncate'>{patient.email || '—'}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-2.5'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-primary/[0.06]'>
+                      <Phone size={12} className='text-primary/50' />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-[10px] text-secondary/35'>Téléphone</p>
+                      <p className='text-xs text-secondary/70 truncate'>{patient.phone || '—'}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-2.5'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-primary/[0.06]'>
+                      <MapPin size={12} className='text-primary/50' />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-[10px] text-secondary/35'>Adresse</p>
+                      <p className='text-xs text-secondary/70 truncate'>{[patient.address, patient.city, patient.postalCode, patient.country].filter(Boolean).join(', ') || '—'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -643,14 +673,17 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
               {patient.medicalHistory && (
                 <div className='rounded-surface border border-border p-4'>
                   <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Antécédents médicaux</p>
-                  <p className='text-sm text-secondary/70 leading-relaxed'>{patient.medicalHistory}</p>
+                  <p className='text-xs text-secondary/60 leading-relaxed'>{patient.medicalHistory}</p>
                 </div>
               )}
 
               {/* Upcoming appointments */}
               {appts.upcoming.length > 0 && (
                 <div className='rounded-surface border border-border p-4'>
-                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Rendez-vous à venir ({appts.upcoming.length})</p>
+                  <div className='flex items-center gap-2 mb-3'>
+                    <CalendarClock size={13} className='text-primary/50' />
+                    <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>À venir ({appts.upcoming.length})</p>
+                  </div>
                   <div className='space-y-2'>
                     {appts.upcoming.map((a: any) => (
                       <UpcomingAppointmentRow
@@ -666,7 +699,10 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
               {/* Past appointments */}
               {appts.past.length > 0 && (
                 <div className='rounded-surface border border-border p-4'>
-                  <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40 mb-2'>Historique ({appts.past.length})</p>
+                  <div className='flex items-center gap-2 mb-3'>
+                    <CalendarBlank size={13} className='text-secondary/30' />
+                    <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>Historique ({appts.past.length})</p>
+                  </div>
                   <div className='space-y-2'>
                     {appts.past.slice(0, 8).map((a: any) => (
                       <UpcomingAppointmentRow
@@ -676,30 +712,33 @@ function PatientDrawer({ open, patient, onClose }: { open: boolean; patient: any
                       />
                     ))}
                     {appts.past.length > 8 && (
-                      <p className='text-xs text-secondary/40 text-center pt-1'>+ {appts.past.length - 8} résultats précédents</p>
+                      <p className='text-xs text-secondary/30 text-center pt-1'>+ {appts.past.length - 8} précédents</p>
                     )}
                   </div>
                 </div>
               )}
 
               {appts.upcoming.length === 0 && appts.past.length === 0 && (
-                <div className='rounded-surface border border-border p-6 text-center'>
-                  <p className='text-sm text-secondary/40'>Aucun rendez-vous lié à ce patient</p>
+                <div className='rounded-surface border border-dashed border-border p-6 text-center'>
+                  <CalendarBlank size={20} className='mx-auto text-secondary/20 mb-2' />
+                  <p className='text-xs text-secondary/35'>Aucun rendez-vous lié à ce patient</p>
                 </div>
               )}
 
               {/* Actions */}
-              <div className='pt-2 flex items-center gap-2'>
+              <div className='pt-1 pb-1 flex items-center gap-2'>
                 {!isPractitioner && (
                   <Button
-                    onClick={() => { onClose(); openEditModal(patient); }}
+                    onClick={() => { onEdit(patient); openEditModal(patient); }}
+                    variant='outline'
                     className='flex-1'
                   >
-                    Modifier
+                    <Pen size={13} /> Modifier
                   </Button>
                 )}
                 <Button
                   variant='outline'
+                  nativeButton={false}
                   className={clsx(
                     'flex-1',
                     calendarReturn && 'border-primary/20 bg-primary/[0.04] text-primary hover:bg-primary/[0.08]',

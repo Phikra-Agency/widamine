@@ -108,7 +108,6 @@ function Planner() {
     fetchedDate,
     setItem,
     openShowSchedule,
-    toggleOpenShowModal,
     setFilters,
     pendingCalendarOpen,
     clearPendingCalendarOpen,
@@ -222,23 +221,20 @@ function Planner() {
     const map = new Map<string, CalendarDaySlots>()
     let cancelled = false
 
-    Promise.all(mondays.map((m) => api.get('schedule/' + m).then((r) => r.data as CalendarDaySlots[])))
-      .then((weeks) => {
+    mondays.forEach((m) => {
+      api.get('schedule/' + m).then((r) => {
         if (cancelled) return
-        const gridDates = getMonthGridDates(filters.date)
-        for (const weekData of weeks) {
-          const weekMondays = mondays[weeks.indexOf(weekData)]
-          const mondayDate = parseLocalDate(weekMondays)
-          for (let i = 0; i < weekData.length && i < 6; i++) {
-            const d = new Date(mondayDate)
-            d.setDate(mondayDate.getDate() + i)
-            const key = formatLocalDate(d)
-            map.set(key, applyFiltersToDay(weekData[i]))
-          }
+        const weekData = r.data as CalendarDaySlots[]
+        const mondayDate = parseLocalDate(m)
+        for (let i = 0; i < weekData.length && i < 6; i++) {
+          const d = new Date(mondayDate)
+          d.setDate(mondayDate.getDate() + i)
+          const key = formatLocalDate(d)
+          map.set(key, applyFiltersToDay(weekData[i]))
         }
-        setMonthItemsByDate(map)
-      })
-      .catch(() => {})
+        setMonthItemsByDate(new Map(map))
+      }).catch(() => {})
+    })
 
     return () => { cancelled = true }
   }, [viewMode, filters.date, applyFiltersToDay])
@@ -340,8 +336,7 @@ function Planner() {
   )
 
   const openSchedule = (schedule: import('@/components/calendar/EventCard').EventCardSchedule) => {
-    setItem(schedule as any)
-    toggleOpenShowModal()
+    openShowSchedule(schedule as any)
     markOpened(schedule.id)
   }
 

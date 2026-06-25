@@ -1,10 +1,12 @@
 import { EmptyPatientsIllustration } from '@/components/illustrations'
-import type { ColumnDef } from '@tanstack/react-table'
-import { PencilSimple as Pen, Trash as Trash2, User, CalendarBlank, CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import type { ColumnDef, Table } from '@tanstack/react-table'
+import { PencilSimple as Pen, Trash as Trash2, User, CalendarBlank, CalendarDots as CalendarClock, Phone, Funnel } from '@phosphor-icons/react'
 import clsx from 'clsx'
 import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { equalsOrAllFilter } from '@/components/data-table'
 import { Button } from '@/components/ui'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import type { Patient } from '@/stores/patientsStore'
 
 export const GENDER_CONFIG: Record<string, { label: string; color: string }> = {
@@ -42,6 +44,35 @@ type PatientColumnsDeps = {
   cityOptions?: { value: string; label: string }[]
 }
 
+function HeaderCityFilter({ table, cityOptions }: { table: Table<any>; cityOptions: { value: string; label: string }[] }) {
+  const cityCol = table.getColumn('city')
+  const raw = (cityCol?.getFilterValue() as string | undefined) ?? 'all'
+  const value = raw === 'null' || !raw ? 'all' : raw
+  const active = value !== 'all'
+  const label = active ? cityOptions.find((o) => o.value === value)?.label ?? value : 'Toutes les villes'
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          'inline-flex h-6 cursor-pointer items-center gap-1 rounded-element border px-1.5 text-[10px] font-medium transition-colors',
+          active ? 'border-border-strong bg-card/80 text-foreground' : 'border-transparent text-muted-foreground hover:border-border-subtle hover:bg-muted/40 hover:text-foreground',
+        )}
+      >
+        <Funnel size={11} className={cn('shrink-0', active && 'text-primary/80')} />
+        <span className='truncate'>{label}</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='start' className='max-h-64 min-w-[10rem] overflow-y-auto'>
+        <DropdownMenuItem onClick={() => cityCol?.setFilterValue('all')}>Toutes les villes</DropdownMenuItem>
+        {cityOptions.map((option) => (
+          <DropdownMenuItem key={option.value} onClick={() => cityCol?.setFilterValue(option.value)}>
+            {option.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export function createPatientsColumns({
   isPractitioner,
   onEdit,
@@ -53,7 +84,13 @@ export function createPatientsColumns({
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column, table }) => (
-        <DataTableColumnHeader column={column} table={table} title='Patient' searchColumn={column} />
+        <DataTableColumnHeader
+          column={column}
+          table={table}
+          title='Patient'
+          searchColumn={column}
+          headerRight={<HeaderCityFilter table={table} cityOptions={cityOptions} />}
+        />
       ),
       cell: ({ row }) => {
         const genderConf = GENDER_CONFIG[row.original.gender] || GENDER_CONFIG.OTHER
@@ -83,9 +120,6 @@ export function createPatientsColumns({
       },
       meta: {
         width: 'wide',
-        filterColumnId: 'city',
-        filterPlaceholder: 'Toutes les villes',
-        filterOptions: cityOptions,
       },
     },
     {
@@ -93,6 +127,14 @@ export function createPatientsColumns({
       accessorKey: 'gender',
       enableHiding: true,
       filterFn: (row, _columnId, value) => equalsOrAllFilter(value, row.original.gender),
+    },
+    {
+      id: 'phone',
+      accessorKey: 'phone',
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Téléphone' />,
+      cell: ({ row }) => (
+        <span className='text-xs text-secondary/60'>{row.original.phone || '—'}</span>
+      ),
     },
     {
       id: 'city',

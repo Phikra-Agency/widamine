@@ -10,6 +10,7 @@ interface DataTableColumnHeaderProps<TData, TValue> {
   table: Table<TData>
   title: string
   searchColumn?: Column<TData, TValue>
+  headerRight?: React.ReactNode
   className?: string
 }
 
@@ -18,6 +19,7 @@ export function DataTableColumnHeader<TData, TValue>({
   table,
   title,
   searchColumn,
+  headerRight,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const sorted = column.getCanSort() ? column.getIsSorted() : false
@@ -45,10 +47,11 @@ export function DataTableColumnHeader<TData, TValue>({
     <span className={cn('text-xs font-medium', className)}>{title}</span>
   )
 
-  const titleRow = searchColumn ? (
+  const titleRow = (searchColumn || headerRight) ? (
     <div className='flex items-center gap-1'>
       <div className='min-w-0 flex-1'>{titleNode}</div>
-      <DataTableColumnSearch column={searchColumn} />
+      {searchColumn && <DataTableColumnSearch column={searchColumn} />}
+      {headerRight}
     </div>
   ) : (
     titleNode

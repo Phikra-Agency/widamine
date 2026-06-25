@@ -51,7 +51,7 @@ export default function FormDialog({
         <div className='space-y-5 p-5 sm:p-6'>{children}</div>
       </ScrollArea>
       {footer ?? (
-        <DialogFooter className='border-t border-border px-5 py-4 sm:px-6'>
+        <DialogFooter className='border-t border-border px-5 py-5 sm:px-6 sm:py-6'>
           <Button type='button' variant='ghost' onClick={handleCancel}>
             {cancelLabel}
           </Button>

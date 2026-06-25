@@ -190,8 +190,13 @@ export const usePatientStore = create<PatientStoreInterface>()(
         get().closeModal()
       },
       deleteItem: async () => {
-        await api.delete('patients/' + (get().item as any).id)
-        notify.success('Patient supprimé.')
+        try {
+          await api.delete('patients/' + (get().item as any).id)
+          notify.success('Patient supprimé.')
+        } catch {
+          // silently fail — 404 etc.
+        }
+        set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       },

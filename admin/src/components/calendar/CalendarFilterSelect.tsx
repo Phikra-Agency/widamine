@@ -17,8 +17,8 @@ interface FilterOption {
 interface CalendarFilterSelectProps {
   placeholder: string
   options: FilterOption[]
-  value: string
-  onChange: (value: string) => void
+  value: string[]
+  onChange: (value: string[]) => void
   color?: FilterPillColor
   icon?: ElementType
   className?: string
@@ -34,8 +34,20 @@ export function CalendarFilterSelect({
   className,
 }: CalendarFilterSelectProps) {
   const [open, setOpen] = useState(false)
-  const activeOption = options.find((o) => o.value === value)
-  const hasFilter = !!value
+  const hasFilter = value.length > 0
+
+  const toggleOption = (optionValue: string) => {
+    if (value.includes(optionValue)) {
+      onChange(value.filter((v) => v !== optionValue))
+    } else {
+      onChange([...value, optionValue])
+    }
+  }
+
+  const clearAll = () => {
+    onChange([])
+    setOpen(false)
+  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -58,7 +70,9 @@ export function CalendarFilterSelect({
           />
         )}
         <span className='truncate max-w-28'>
-          {hasFilter ? activeOption?.label || placeholder : placeholder}
+          {hasFilter
+            ? `${placeholder} (${value.length})`
+            : placeholder}
         </span>
         {hasFilter && (
           <span
@@ -66,14 +80,12 @@ export function CalendarFilterSelect({
             tabIndex={0}
             onClick={(e) => {
               e.stopPropagation()
-              onChange('')
-              setOpen(false)
+              clearAll()
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
-                onChange('')
-                setOpen(false)
+                clearAll()
               }
             }}
             className='flex size-4 shrink-0 items-center justify-center rounded-full text-current/40 hover:bg-black/10 hover:text-current'
@@ -86,16 +98,15 @@ export function CalendarFilterSelect({
         {options.map((option) => (
           <DropdownMenuItem
             key={option.value}
-            onClick={() => {
-              onChange(option.value)
-              setOpen(false)
-            }}
+            onClick={() => toggleOption(option.value)}
             className={cn(
-              option.value === value && 'bg-muted/60 font-medium',
+              value.includes(option.value) && 'bg-muted/60 font-medium',
             )}
           >
             <span className='flex size-4 shrink-0 items-center justify-center'>
-              {option.value === value && <Check size={13} weight='bold' className='text-primary' />}
+              {value.includes(option.value) && (
+                <Check size={13} weight='bold' className='text-primary' />
+              )}
             </span>
             <span>{option.label}</span>
           </DropdownMenuItem>
@@ -104,10 +115,7 @@ export function CalendarFilterSelect({
           <>
             <div className='-mx-1 my-1 h-px bg-border' />
             <DropdownMenuItem
-              onClick={() => {
-                onChange('')
-                setOpen(false)
-              }}
+              onClick={clearAll}
               className='text-muted-foreground'
             >
               <X size={13} />
