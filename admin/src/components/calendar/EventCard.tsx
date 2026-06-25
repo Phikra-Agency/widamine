@@ -217,7 +217,7 @@ function EventCardWithHover({
       {/* Hover detail card — portaled above everything */}
       {showDetail && popupRect && createPortal(
         <div
-          className='fixed z-[999] w-72 pointer-events-none'
+          className='fixed z-[999] w-80 pointer-events-none'
           style={{
             top: popupRect.flipAbove ? popupRect.top - 8 : popupRect.top + popupRect.height + 8,
             left: popupRect.left,
