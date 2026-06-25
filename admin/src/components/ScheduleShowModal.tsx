@@ -1,50 +1,71 @@
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import { saveCalendarReturnContext } from '@/lib/scheduleNavigation'
-
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { CaretLeft, CaretRight, X, CalendarBlank, User, Clock, MapPin, Tag } from '@phosphor-icons/react'
+  CaretLeft,
+  CaretRight,
+  CalendarBlank,
+  Clock,
+  MapPin,
+  Tag,
+  X,
+  ArrowRight,
+  User,
+} from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 
-function formatDateTimeLabel(value?: string) {
-  if (!value) return 'Date non définie'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Date non définie'
-  return date.toLocaleString('fr-FR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
+function fmt(v?: string) {
+  if (!v) return 'Date non définie'
+  const d = new Date(v)
+  if (Number.isNaN(d.getTime())) return 'Date non définie'
+  return d.toLocaleString('fr-FR', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
   })
 }
 
-function formatReservationOrder(value: number) {
-  if (value <= 0) return '-'
-  if (value === 1) return '1ère'
-  return `${value}e`
+function ord(n: number) {
+  if (n <= 0) return '-'
+  return n === 1 ? '1er' : `${n}e`
 }
 
-function getPeriodFromHour(hour: number): 'morning' | 'afternoon' | 'evening' {
-  if (hour < 12) return 'morning'
-  if (hour < 16) return 'afternoon'
+function periodFromHour(h: number): 'morning' | 'afternoon' | 'evening' {
+  if (h < 12) return 'morning'
+  if (h < 16) return 'afternoon'
   return 'evening'
 }
 
-function Info({ icon: Icon, label, value }: { icon?: React.ElementType; label: string; value: React.ReactNode }) {
+function periodLabel(p: string) {
+  return p === 'morning' ? 'Matin' : p === 'afternoon' ? 'Après-midi' : 'Soir'
+}
+
+const STATUS_DOT: Record<string, { label: string; color: string }> = {
+  PENDING: { label: 'En attente', color: '#d97706' },
+  CONFIRMED: { label: 'Confirmée', color: '#059669' },
+  CANCELLED: { label: 'Annulée', color: '#dc2626' },
+  COMPLETED: { label: 'Terminée', color: '#0284c7' },
+  EXPIRED: { label: 'Expirée', color: '#6b7280' },
+}
+
+function StatusDot({ status }: { status: string }) {
+  const m = STATUS_DOT[status] || STATUS_DOT.PENDING
   return (
-    <div className='rounded-surface border border-border-subtle bg-secondary/[0.01] p-4'>
-      <div className='mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-secondary/40'>
-        {Icon && <Icon size={10} />}
-        {label}
+    <span className='inline-flex items-center gap-1.5 text-xs'>
+      <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: m.color }} />
+      {m.label}
+    </span>
+  )
+}
+
+function Row({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: React.ReactNode }) {
+  return (
+    <div className='flex items-center justify-between gap-4 py-2.5'>
+      <div className='flex min-w-0 items-center gap-2'>
+        <Icon size={13} className='shrink-0 text-muted-foreground/30' />
+        <span className='truncate text-xs font-medium text-muted-foreground/60'>{label}</span>
       </div>
-      <div className='text-sm leading-6 text-secondary'>{value}</div>
+      <div className='truncate text-right text-sm text-foreground/85'>{value}</div>
     </div>
   )
 }
@@ -55,153 +76,120 @@ export default function ScheduleShowModal() {
 
   if (!item?.datetime) return null
 
-  const allWeekSchedules = items.flatMap(day => [...day.morning, ...day.afternoon, ...day.evening])
+  const allWeek = items.flatMap(d => [...d.morning, ...d.afternoon, ...d.evening])
 
   const itemDate = new Date(item.datetime).toDateString()
   const itemHour = new Date(item.datetime).getHours()
-  const itemPeriod = getPeriodFromHour(itemHour)
+  const itemPeriod = periodFromHour(itemHour)
 
-  const periodSchedules = allWeekSchedules.filter(s => {
-    if (!s.datetime) return false
-    const sDate = new Date(s.datetime).toDateString()
-    const sHour = new Date(s.datetime).getHours()
-    const sPeriod = getPeriodFromHour(sHour)
-    return sDate === itemDate && sPeriod === itemPeriod
-  }).sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
-
-  const daySchedules = allWeekSchedules
-    .filter((s) => s.datetime && new Date(s.datetime).toDateString() === itemDate)
+  const schedulesForDay = allWeek
+    .filter(s => s.datetime && new Date(s.datetime).toDateString() === itemDate)
     .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
 
-  const currentIndex = periodSchedules.findIndex(
-    s => s.datetime === item.datetime && (s.session?.id ?? 0) === (item.session?.id ?? 0),
+  const curIdx = schedulesForDay.findIndex(s =>
+    item.id ? s.id === item.id : new Date(s.datetime).getTime() === new Date(item.datetime).getTime()
   )
-  const dayIndex = daySchedules.findIndex(
-    s => s.datetime === item.datetime && (s.session?.id ?? 0) === (item.session?.id ?? 0),
-  )
-  const hasNext = currentIndex < periodSchedules.length - 1
-  const hasPrev = currentIndex > 0
-  const patientName = item.appointment?.patient
-    ? `${item.appointment.patient.firstName} ${item.appointment.patient.lastName}`.trim()
-    : item.appointment?.name || 'Non renseigné'
 
-  const motif = item.appointment?.motif
+  const apt = item.appointment
+  const name = apt?.patient ? `${apt.patient.firstName} ${apt.patient.lastName}`.trim() : apt?.name || 'Non renseigné'
+  const motif = apt?.motif
+  const status = apt?.status || 'PENDING'
+  const color = motif?.color || '#009fd6'
 
-  const navigateTo = (direction: 'next' | 'prev') => {
-    const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
-    if (newIndex >= 0 && newIndex < periodSchedules.length) {
-      const { setItem } = useSchedulesStore.getState()
-      setItem(periodSchedules[newIndex])
+  const nav = (dir: 'next' | 'prev') => {
+    const n = schedulesForDay.length
+    if (n === 0) return
+    if (curIdx < 0) {
+      useSchedulesStore.getState().setItem(schedulesForDay[dir === 'next' ? 0 : n - 1])
+      return
     }
+    const i = dir === 'next' ? (curIdx + 1) % n : (curIdx - 1 + n) % n
+    useSchedulesStore.getState().setItem(schedulesForDay[i])
   }
 
-  const goToDetails = () => {
-    if (item.datetime && item.appointment?.id) {
-      saveCalendarReturnContext(item)
-    }
+  const goDetails = () => {
+    if (item.datetime && apt?.id) saveCalendarReturnContext(item)
     toggleOpenShowModal()
-    if (!item.appointment?.id) return
-    if (item.appointment?.patient?.id) {
-      navigate(`/patients?patientId=${item.appointment.patient.id}`)
-    }
+    if (apt?.id && apt?.patient?.id) navigate(`/patients?patientId=${apt.patient.id}`)
   }
-
-  const title = motif?.name || 'Créneau sélectionné'
 
   return (
-    <Dialog
-      open={openShowModal}
-      onOpenChange={(open) => {
-        if (!open) toggleOpenShowModal()
-      }}
-    >
+    <Dialog open={openShowModal} onOpenChange={(o) => { if (!o) toggleOpenShowModal() }}>
       <DialogContent
         showCloseButton={false}
-        className='max-h-[85vh] w-[95vw] overflow-y-auto p-4 shadow-bo-elevated sm:max-w-xl sm:p-6'
+        className='max-h-[85vh] overflow-hidden p-0 shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl ring-1 ring-black/[0.02]'
       >
-        <DialogHeader className='gap-0 text-left'>
+        <div className='px-5 pt-4 pb-2'>
           <div className='flex items-start justify-between gap-3'>
-            <div className='flex-1'>
-              <div className='flex items-center gap-2'>
-                <span
-                  className='h-2 w-2 rounded-full'
-                  style={{ backgroundColor: motif?.color || '#3b82f6' }}
-                />
-                <p className='text-[10px] uppercase tracking-[0.2em] text-secondary/40'>{motif?.name || 'Motif'}</p>
+            <div className='min-w-0'>
+              <h2 className='text-lg font-semibold leading-6 tracking-tight text-foreground'>{name}</h2>
+              <div className='mt-0.5 inline-flex items-center gap-x-2 whitespace-nowrap'>
+                <StatusDot status={status} />
+                <span className='text-muted-foreground/20'>·</span>
+                <span className='inline-flex items-center gap-1 text-xs text-muted-foreground/45'>
+                  <CalendarBlank size={10} />
+                  {fmt(item.datetime)}
+                </span>
               </div>
-              <DialogTitle className='mt-2 text-xl font-medium text-secondary'>{title}</DialogTitle>
-              <DialogDescription className='mt-1 text-sm leading-6 text-secondary/50'>
-                {formatDateTimeLabel(item.datetime)}
-              </DialogDescription>
             </div>
-            <div className='flex items-center gap-2'>
-              <Button
-                onClick={() => navigateTo('prev')}
-                disabled={!hasPrev}
-                type='button'
-                variant='outline'
-                size='icon'
-                className='rounded-full'
-              >
-                <CaretLeft size={16} />
-              </Button>
-              <Button
-                onClick={() => navigateTo('next')}
-                disabled={!hasNext}
-                type='button'
-                variant='outline'
-                size='icon'
-                className='rounded-full'
-              >
-                <CaretRight size={16} />
-              </Button>
-              <Button
+            <div className='flex shrink-0 items-center gap-0.5'>
+              <div className='inline-flex items-center rounded-lg border border-border-subtle/40 bg-muted/10 px-0.5 py-0.5'>
+                  <button
+                    onClick={() => nav('prev')}
+                    className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted/20 hover:text-foreground'
+                    aria-label='Précédent'
+                  >
+                    <CaretLeft size={13} />
+                  </button>
+                <span className='flex h-7 min-w-[1.5rem] select-none items-center justify-center px-1 text-xs font-medium tabular-nums text-muted-foreground/60'>
+                  {curIdx >= 0 ? curIdx + 1 : 1}/{schedulesForDay.length}
+                </span>
+                  <button
+                    onClick={() => nav('next')}
+                    className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-muted/20 hover:text-foreground'
+                    aria-label='Suivant'
+                  >
+                    <CaretRight size={13} />
+                  </button>
+              </div>
+              <button
                 onClick={toggleOpenShowModal}
-                type='button'
-                variant='outline'
-                size='icon'
-                className='rounded-full'
+                className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/20 hover:text-foreground'
+                aria-label='Fermer'
               >
-                <X size={16} />
-              </Button>
+                <X size={14} />
+              </button>
             </div>
           </div>
-        </DialogHeader>
-
-        <div className='mt-6 grid gap-3 sm:grid-cols-2'>
-          <Info icon={User} label='Patient' value={patientName} />
-          <Info icon={Tag} label='Motif' value={motif?.name || '-'} />
-          <Info
-            icon={CalendarBlank}
-            label='Réservation (jour)'
-            value={dayIndex >= 0 ? `${formatReservationOrder(dayIndex + 1)} réservation` : '-'}
-          />
-          <Info label='Session' value={item.session?.session ? `Séance ${item.session.session}` : '-'} />
-          <Info
-            icon={Clock}
-            label='Durée'
-            value={
-              item.appointment?.motif?.duration
-                ? `${item.appointment.motif.duration} min`
-                : item.session?.duration
-                  ? `${item.session.duration} min`
-                  : '-'
-            }
-          />
-          <Info icon={CalendarBlank} label='Date & Heure' value={formatDateTimeLabel(item.datetime)} />
-          <Info icon={User} label='Praticien' value={item.appointment?.practitioner?.name || 'Non assigné'} />
-          <Info icon={MapPin} label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
-          <Info label='Statut' value={item.appointment?.status || '-'} />
         </div>
 
-        <div className='mt-6 flex items-center justify-between gap-4'>
-          <div className='text-sm text-secondary/40'>
-            {currentIndex >= 0 ? currentIndex + 1 : '-'} / {periodSchedules.length}
-          </div>
-          {item.appointment?.id && (
-            <Button onClick={goToDetails} type='button' className='rounded-full'>
-              <span>Voir détails</span>
-              <CaretRight size={14} />
+        <div className='mx-5 border-b border-border-subtle' />
+
+        <div className='px-5 py-1'>
+          <Row icon={Tag} label='Motif' value={
+            <span className='inline-flex items-center gap-2'>
+              {motif?.name || '-'}
+              <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
+            </span>
+          } />
+          <Row
+            icon={Clock}
+            label='Durée'
+            value={apt?.motif?.duration ? `${apt.motif.duration} min` : item.session?.duration ? `${item.session.duration} min` : '-'}
+          />
+          <Row icon={CalendarBlank} label='Session' value={item.session?.session ? `Séance ${item.session.session}` : '-'} />
+          <Row icon={CalendarBlank} label='Ordre du jour' value={curIdx >= 0 ? ord(curIdx + 1) : '-'} />
+          <Row icon={User} label='Praticien' value={apt?.practitioner?.name || 'Non assigné'} />
+          <Row icon={MapPin} label='Salle' value={apt?.resource?.name || 'Non assignée'} />
+        </div>
+
+        <div className='flex items-center justify-between border-t border-border-subtle px-5 py-3'>
+          <span className='text-xs text-muted-foreground/40'>
+            {periodLabel(itemPeriod)}
+          </span>
+          {apt?.id && (
+            <Button onClick={goDetails} variant='ghost' size='sm' className='gap-1.5 text-xs font-medium h-8'>
+              Détails patient <ArrowRight size={12} />
             </Button>
           )}
         </div>

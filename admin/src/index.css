@@ -16,33 +16,40 @@
 	--color-logo-sea: #009fd6;
 	--color-logo-deep: #087391;
 
-	/* Neutral scale (60%) — cream + mist whisper */
-	--color-neutral-50: #fafcfb;
-	--color-neutral-100: #f4f7f6;
-	--color-neutral-200: #e8eeed;
-	--color-neutral-300: #d5dedc;
-	--color-neutral-400: #b8c5c2;
+	/* Brand colors */
+	--color-brand-blue: #009fd6;
+	--color-brand-yellow: #f7a269;
+	--color-brand-rose: #6d0024;
+	--color-brand-cream: #fbf7ef;
+	--color-brand-dark: #1e1e1e;
 
-	/* Secondary scale (30%) — Deep family, dark → light */
-	--color-secondary-950: #032e3a;
-	--color-secondary-900: #043f50;
-	--color-secondary-800: #054a5c;
-	--color-secondary-700: #065a72;
-	--color-secondary-600: #076682;
-	--color-secondary-500: #009fd6;
-	--color-secondary-300: #5eb8d9;
-	--color-secondary-100: #d4eef7;
+	/* Neutral scale (60%) — Attractive White family */
+	--color-neutral-50: #fbf7ef;
+	--color-neutral-100: #f5f0e8;
+	--color-neutral-200: #ebe4d8;
+	--color-neutral-300: #d9cfc0;
+	--color-neutral-400: #c0b5a5;
+
+	/* Secondary scale (30%) — Yellow Sea family */
+	--color-secondary-950: #3d2008;
+	--color-secondary-900: #5a2f0c;
+	--color-secondary-800: #7a4010;
+	--color-secondary-700: #9a5215;
+	--color-secondary-600: #b86319;
+	--color-secondary-500: #f7a269;
+	--color-secondary-300: #f9c49e;
+	--color-secondary-100: #fce8d8;
 
 	/* Text roles */
-	--color-text: var(--color-secondary-900);
-	--color-text-muted: #6d8794;
-	--color-text-subtle: #8aa0ab;
+	--color-text: #1e1e1e;
+	--color-text-muted: #6b6b6b;
+	--color-text-subtle: #999999;
 
 	/* Border / stroke roles — mapped from :root */
 	--color-custom-white: var(--color-neutral-50);
-	--color-primary: var(--color-logo-sea);
+	--color-primary: var(--color-brand-blue);
 	--color-secondary: var(--color-text);
-	--color-accent: var(--color-logo-aqua);
+	--color-accent: var(--color-brand-yellow);
 	--color-muted: var(--color-neutral-200);
 	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 	--default-font-family: var(--font-sans);
@@ -54,10 +61,10 @@
 	--shadow-bo-fab: 0 8px 20px -3px color-mix(in srgb, var(--color-logo-sea) 26%, transparent);
 
 	/* Motif family hues */
-	--color-fam-consultation: var(--color-logo-sea);
+	--color-fam-consultation: var(--color-brand-blue);
 	--color-fam-followup: #4a9e94;
-	--color-fam-treatment: #c4925a;
-	--color-fam-urgent: #c45a5a;
+	--color-fam-treatment: var(--color-brand-yellow);
+	--color-fam-urgent: var(--color-brand-rose);
 	--color-fam-other: var(--color-neutral-400);
 
 	/* shadcn semantic tokens */
@@ -114,44 +121,44 @@
 	--sidebar-collapsed-width: 4.5rem;
 	--sidebar-expanded-width: 15.5rem;
 
-	/* 60% — creamy neutrals */
-	--background: #f4f7f6;
-	--card: #fafcfb;
-	--popover: #fafcfb;
-	--muted: #e8eeed;
+	/* 60% — Attractive White */
+	--background: #fbf7ef;
+	--card: #ffffff;
+	--popover: #ffffff;
+	--muted: #ebe4d8;
 
-	/* 30% — structure (dark blue text) */
-	--foreground: #043f50;
-	--card-foreground: #043f50;
-	--popover-foreground: #043f50;
-	--muted-foreground: #6d8794;
-	--border-subtle: color-mix(in srgb, var(--logo-deep) 8%, #f4f7f6);
-	--border: color-mix(in srgb, var(--logo-deep) 12%, #f4f7f6);
-	--border-strong: color-mix(in srgb, var(--logo-deep) 16%, #f4f7f6);
-	--border-emphasis: color-mix(in srgb, var(--logo-deep) 20%, #f4f7f6);
-	--input: color-mix(in srgb, var(--logo-deep) 12%, #f4f7f6);
+	/* 30% — Blackout structure */
+	--foreground: #1e1e1e;
+	--card-foreground: #1e1e1e;
+	--popover-foreground: #1e1e1e;
+	--muted-foreground: #6b6b6b;
+	--border-subtle: color-mix(in srgb, #1e1e1e 8%, #fbf7ef);
+	--border: color-mix(in srgb, #1e1e1e 12%, #fbf7ef);
+	--border-strong: color-mix(in srgb, #1e1e1e 16%, #fbf7ef);
+	--border-emphasis: color-mix(in srgb, #1e1e1e 20%, #fbf7ef);
+	--input: color-mix(in srgb, #1e1e1e 12%, #fbf7ef);
 
-	/* 10% — action + sparkle */
+	/* 10% — Blue Ball primary + Yellow Sea accent */
 	--primary: #009fd6;
 	--primary-foreground: #ffffff;
-	--accent: #3dcdf5;
-	--ring: color-mix(in srgb, var(--logo-sky) 55%, transparent);
+	--accent: #f7a269;
+	--ring: color-mix(in srgb, #009fd6 55%, transparent);
 
-	--destructive: #c45a5a;
+	--destructive: #6d0024;
 	--success: #2d8a6e;
 	--warning: #b8860b;
 	--radius: 0.75rem;
 
 	/* Radius scale (base 12px): shell 22px → surface 17px → control 12px → element 10px. Nested: child one tier down. */
 
-	--sidebar: #f4f7f6;
-	--sidebar-foreground: #043f50;
+	--sidebar: #fbf7ef;
+	--sidebar-foreground: #1e1e1e;
 	--sidebar-primary: #009fd6;
 	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: color-mix(in srgb, var(--logo-sea) 8%, #f4f7f6);
-	--sidebar-accent-foreground: #043f50;
-	--sidebar-border: color-mix(in srgb, var(--logo-deep) 8%, #f4f7f6);
-	--sidebar-ring: color-mix(in srgb, var(--logo-sky) 55%, transparent);
+	--sidebar-accent: color-mix(in srgb, #009fd6 8%, #fbf7ef);
+	--sidebar-accent-foreground: #1e1e1e;
+	--sidebar-border: color-mix(in srgb, #1e1e1e 8%, #fbf7ef);
+	--sidebar-ring: color-mix(in srgb, #009fd6 55%, transparent);
 }
 
 @layer base {
@@ -250,6 +257,16 @@
 
 	.bo-sidebar-brand-mark {
 		@apply flex h-10 w-10 shrink-0 items-center justify-center;
+	}
+
+	.bo-desktop-shell[data-sidebar-collapsed='false'] .bo-sidebar-brand {
+		width: auto;
+		justify-content: flex-start;
+		padding-left: 0.9rem;
+	}
+
+	.bo-desktop-shell[data-sidebar-collapsed='false'] .bo-sidebar-brand-mark {
+		@apply h-auto w-auto;
 	}
 
 	.bo-desktop-shell[data-sidebar-transitioning='true'] {

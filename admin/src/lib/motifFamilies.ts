@@ -7,13 +7,13 @@ export interface MotifFamily {
 }
 
 export const MOTIF_FAMILIES: MotifFamily[] = [
-  { key: "default", label: "Consultation", color: "#3b82f6" },
+  { key: "default", label: "Consultation", color: "#009fd6" },
 ];
 
 export function getFamilyForMotif(motif?: { color?: string | null } | null): MotifFamily {
-  return { key: "default", label: "Consultation", color: motif?.color || "#3b82f6" };
+  return { key: "default", label: "Consultation", color: motif?.color || "#009fd6" };
 }
 
 export function getEventColor(motif?: { color?: string | null } | null): string {
-  return motif?.color || "#3b82f6";
+  return motif?.color || "#009fd6";
 }

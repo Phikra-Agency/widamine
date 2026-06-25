@@ -132,11 +132,11 @@ function SidebarContent({
         <div className='bo-sidebar-brand-row'>
           <div className='bo-sidebar-brand'>
             <Link to='/calendar' onClick={onNavigate} aria-label='Widamine' className='bo-sidebar-brand-mark'>
-              <img
-                src='/assets/icon.svg'
-                alt=''
-                className='h-10 w-10 object-contain'
-              />
+              {collapsed ? (
+                <img src='/logo.svg' alt='' className='h-10 w-10 object-contain' />
+              ) : (
+                <img src='/logo-long.svg' alt='' className='h-10 w-auto object-contain object-left' />
+              )}
             </Link>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function BackOfficeLayout() {
     <main className='flex h-dvh flex-col overflow-hidden bg-sidebar text-foreground'>
       <div className='flex items-center justify-between border-b border-border-subtle bg-sidebar px-4 py-3 xl:hidden'>
         <Link to='/calendar' aria-label='Widamine'>
-          <img src='/logo.svg' alt='Widamine' className='h-7 w-auto object-contain' />
+          <img src='/logo-long.svg' alt='Widamine' className='h-7 w-auto object-contain' />
         </Link>
         <Button
           type='button'

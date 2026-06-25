@@ -2,11 +2,11 @@ import { useSchedulesStore } from '@/stores/schedulesStore'
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
 import {
   getDayIndexInWeek,
-  getMonthFetchMondays,
-  getMonthGridDates,
   getWeekDates,
   navigateCalendarDate,
   shouldShowTodayButton,
+  getMonthFetchMondays,
+  getMonthGridDates,
   type CalendarViewMode,
 } from '@/lib/calendarView'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -29,12 +29,13 @@ import CalendarDatePicker from '@/components/calendar/CalendarDatePicker'
 import EventCard from '@/components/calendar/EventCard'
 import {
   CalendarDayGrid,
-  CalendarMonthGrid,
   CalendarWeekGrid,
   type CalendarDaySlots,
 } from '@/components/calendar/views/CalendarGridCells'
+import CalendarMonthGrid from '@/components/calendar/views/CalendarMonthGrid'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
+
 import { Funnel, User, Tag } from '@phosphor-icons/react'
 
 const STATUS_OPTIONS = [
@@ -118,20 +119,19 @@ function Planner() {
   const processedOpenRef = useRef<string | null>(null)
   const effectivePending = pendingOpen ?? pendingCalendarOpen
   const weekDates = useMemo(() => getWeekDates(filters.date), [filters.date])
-  const monthDates = useMemo(() => getMonthGridDates(filters.date), [filters.date])
   const activeDayIdx = useMemo(() => getDayIndexInWeek(filters.date), [filters.date])
-  const [viewMode, setViewMode] = useState<CalendarViewMode>('week')
-  const [monthItemsByDate, setMonthItemsByDate] = useState<Map<string, CalendarDaySlots>>(new Map())
+  const [viewMode, setViewMode] = useState<CalendarViewMode>('day')
   const showTodayButton = useMemo(
     () => shouldShowTodayButton(viewMode, filters.date),
     [viewMode, filters.date],
   )
   const [mobileDayIdx, setMobileDayIdx] = useState(0)
-  const [filterPractitionerId, setFilterPractitionerId] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
-  const [filterMotifId, setFilterMotifId] = useState('')
+  const [filterPractitionerIds, setFilterPractitionerIds] = useState<string[]>([])
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([])
+  const [filterMotifIds, setFilterMotifIds] = useState<string[]>([])
   const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([])
   const [motifOptions, setMotifOptions] = useState<MotifItem[]>([])
+  const [monthItemsByDate, setMonthItemsByDate] = useState<Map<string, CalendarDaySlots>>(new Map())
 
   useEffect(() => {
     api.get('users/doctors').then((res) => setDoctors(res.data || [])).catch(() => {})
@@ -143,15 +143,15 @@ function Planner() {
 
   const applyFiltersToDay = useCallback(
     (day: (typeof items)[0]): CalendarDaySlots => {
-      const hasFilter = filterPractitionerId || filterStatus || filterMotifId || searchLower
+      const hasFilter = filterPractitionerIds.length > 0 || filterStatuses.length > 0 || filterMotifIds.length > 0 || searchLower
       const filterPeriod = (schedules: typeof day.morning) =>
         schedules.filter((s) => {
           const a = s.appointment
           if (!a) return false
           if (!hasFilter && (a.status === 'CANCELLED' || a.status === 'COMPLETED')) return false
-          if (filterPractitionerId && a.practitionerId !== filterPractitionerId) return false
-          if (filterStatus && a.status !== filterStatus) return false
-          if (filterMotifId && a.motif?.id !== filterMotifId) return false
+          if (filterPractitionerIds.length > 0 && !filterPractitionerIds.includes(a.practitionerId)) return false
+          if (filterStatuses.length > 0 && !filterStatuses.includes(a.status)) return false
+          if (filterMotifIds.length > 0 && !filterMotifIds.includes(a.motif?.id || '')) return false
 
           if (searchLower) {
             const patientName = a.patient
@@ -172,7 +172,7 @@ function Planner() {
         evening: filterPeriod(day.evening),
       }
     },
-    [filterMotifId, filterPractitionerId, filterStatus, searchLower],
+    [filterMotifIds, filterPractitionerIds, filterStatuses, searchLower],
   )
 
   const filteredItems = useMemo(
@@ -185,34 +185,6 @@ function Planner() {
   useEffect(() => {
     setMobileDayIdx(activeDayIdx)
   }, [activeDayIdx])
-
-  useEffect(() => {
-    if (viewMode !== 'month') return
-
-    let cancelled = false
-    void (async () => {
-      const mondays = getMonthFetchMondays(filters.date)
-      const map = new Map<string, CalendarDaySlots>()
-
-      await Promise.all(
-        mondays.map(async (monday) => {
-          const res = await api.get(`schedule/${monday}`)
-          const weekStart = parseLocalDate(monday)
-          ;(res.data as typeof items).forEach((day, idx) => {
-            const cellDate = new Date(weekStart)
-            cellDate.setDate(weekStart.getDate() + idx)
-            map.set(formatLocalDate(cellDate), applyFiltersToDay(day))
-          })
-        }),
-      )
-
-      if (!cancelled) setMonthItemsByDate(map)
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [viewMode, filters.date, applyFiltersToDay, items.length])
 
   const { markOpened, isOpened } = useOpenedKeys()
 
@@ -242,6 +214,33 @@ function Planner() {
       setFetchedDate(date)
     }
   }, [fetchItems, fetchedDate, filters.date, setFetchedDate])
+
+  useEffect(() => {
+    if (viewMode !== 'month') return
+    const mondays = getMonthFetchMondays(filters.date)
+    const map = new Map<string, CalendarDaySlots>()
+    let cancelled = false
+
+    Promise.all(mondays.map((m) => api.get('schedule/' + m).then((r) => r.data as CalendarDaySlots[])))
+      .then((weeks) => {
+        if (cancelled) return
+        const gridDates = getMonthGridDates(filters.date)
+        for (const weekData of weeks) {
+          const weekMondays = mondays[weeks.indexOf(weekData)]
+          const mondayDate = parseLocalDate(weekMondays)
+          for (let i = 0; i < weekData.length && i < 6; i++) {
+            const d = new Date(mondayDate)
+            d.setDate(mondayDate.getDate() + i)
+            const key = formatLocalDate(d)
+            map.set(key, applyFiltersToDay(weekData[i]))
+          }
+        }
+        setMonthItemsByDate(map)
+      })
+      .catch(() => {})
+
+    return () => { cancelled = true }
+  }, [viewMode, filters.date, applyFiltersToDay])
 
   useEffect(() => {
     const fromUrl = parsePendingCalendarOpen(searchParams)
@@ -309,31 +308,33 @@ function Planner() {
   )
 
   const filterToolbar = (
-    <div className='flex flex-wrap items-center gap-2'>
-      <CalendarFilterSelect
-        placeholder='Statut'
-        color='mist'
-        icon={Funnel}
-        options={STATUS_OPTIONS}
-        value={filterStatus}
-        onChange={setFilterStatus}
-      />
-      <CalendarFilterSelect
-        placeholder='Praticien'
-        color='sky'
-        icon={User}
-        options={practitionerOptions}
-        value={filterPractitionerId}
-        onChange={setFilterPractitionerId}
-      />
-      <CalendarFilterSelect
-        placeholder='Motif'
-        color='sea'
-        icon={Tag}
-        options={motifSelectOptions}
-        value={filterMotifId}
-        onChange={setFilterMotifId}
-      />
+    <div className='flex flex-col gap-1.5'>
+      <div className='flex flex-wrap items-center gap-2'>
+        <CalendarFilterSelect
+          placeholder='Statut'
+          color='mist'
+          icon={Funnel}
+          options={STATUS_OPTIONS}
+          value={filterStatuses}
+          onChange={setFilterStatuses}
+        />
+        <CalendarFilterSelect
+          placeholder='Praticien'
+          color='sky'
+          icon={User}
+          options={practitionerOptions}
+          value={filterPractitionerIds}
+          onChange={setFilterPractitionerIds}
+        />
+        <CalendarFilterSelect
+          placeholder='Motif'
+          color='sea'
+          icon={Tag}
+          options={motifSelectOptions}
+          value={filterMotifIds}
+          onChange={setFilterMotifIds}
+        />
+      </div>
     </div>
   )
 
@@ -354,11 +355,6 @@ function Planner() {
 
   const handleToday = () => {
     handleDateChange(formatLocalDate(new Date()))
-  }
-
-  const handleMonthSelect = (date: string) => {
-    setFilters({ ...filters, date })
-    setViewMode('day')
   }
 
   const mobileDayData = displayItems[viewMode === 'day' ? activeDayIdx : mobileDayIdx]
@@ -383,7 +379,7 @@ function Planner() {
   }
 
   return (
-    <>
+    <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
       <CalendarControlBar
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -439,14 +435,15 @@ function Planner() {
 
       <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
         {viewMode === 'month' && (
-          <CalendarMonthGrid
-            monthDates={monthDates}
-            anchorDate={filters.date}
-            itemsByDate={monthItemsByDate}
-            onOpenSchedule={openSchedule}
-            onSelectDate={handleMonthSelect}
-            formatTime={formatTimeOnly}
-          />
+          <div className='min-h-0 flex-1 overflow-auto'>
+            <CalendarMonthGrid
+              anchorDate={filters.date}
+              itemsByDate={monthItemsByDate}
+              onOpenSchedule={openSchedule}
+              isOpened={isOpened}
+              formatTime={formatTimeOnly}
+            />
+          </div>
         )}
 
         {viewMode === 'day' && mobileDayData && (
@@ -488,15 +485,14 @@ function Planner() {
         )}
         {viewMode === 'month' && (
           <CalendarMonthGrid
-            monthDates={monthDates}
             anchorDate={filters.date}
             itemsByDate={monthItemsByDate}
             onOpenSchedule={openSchedule}
-            onSelectDate={handleMonthSelect}
+            isOpened={isOpened}
             formatTime={formatTimeOnly}
           />
         )}
       </div>
-    </>
+    </div>
   )
 }

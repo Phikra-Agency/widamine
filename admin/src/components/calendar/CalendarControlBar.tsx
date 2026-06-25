@@ -121,22 +121,38 @@ export default function CalendarControlBar({
   )
 
   return (
-    <div className='grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-x-3 border-b border-border bg-muted/35 px-4 py-2 sm:px-5'>
-      <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-3 gap-y-2'>
-        {filters}
+    <div className='shrink-0 border-b border-border bg-muted/35 px-4 py-2 sm:px-5'>
+      {/* Mobile layout */}
+      <div className='flex flex-col gap-2 sm:hidden'>
+        <div className='flex items-center justify-between gap-2'>
+          <div className='flex items-center gap-2'>
+            {todayButtonSide === 'left' && todayLink}
+            {navGroup}
+            {todayButtonSide === 'right' && todayLink}
+          </div>
+          {viewSwitcher}
+        </div>
+        <div className='flex flex-wrap items-center gap-2'>{filters}</div>
       </div>
 
-      <div className='grid grid-cols-[1fr_auto_1fr] items-center gap-x-2'>
-        <div className='flex h-11 items-center justify-end'>
-          {todayButtonSide === 'left' && todayLink}
+      {/* Desktop layout */}
+      <div className='hidden grid-cols-[1fr_auto_1fr] items-center gap-x-3 sm:grid'>
+        <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-3 gap-y-2'>
+          {filters}
         </div>
-        {navGroup}
-        <div className='flex h-11 items-center justify-start'>
-          {todayButtonSide === 'right' && todayLink}
-        </div>
-      </div>
 
-      {viewSwitcher}
+        <div className='grid grid-cols-[1fr_auto_1fr] items-center gap-x-2'>
+          <div className='flex h-11 items-center justify-end'>
+            {todayButtonSide === 'left' && todayLink}
+          </div>
+          {navGroup}
+          <div className='flex h-11 items-center justify-start'>
+            {todayButtonSide === 'right' && todayLink}
+          </div>
+        </div>
+
+        {viewSwitcher}
+      </div>
     </div>
   )
 }
