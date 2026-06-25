@@ -256,7 +256,7 @@
 	}
 
 	.bo-sidebar-brand-mark {
-		@apply flex h-10 w-10 shrink-0 items-center justify-center;
+		@apply flex h-auto w-auto shrink-0 items-center justify-center;
 	}
 
 	.bo-desktop-shell[data-sidebar-collapsed='false'] .bo-sidebar-brand {
