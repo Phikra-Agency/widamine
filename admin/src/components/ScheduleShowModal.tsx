@@ -159,9 +159,6 @@ export default function ScheduleShowModal() {
                 <CaretRight size={13} />
               </button>
             </div>
-            <button onClick={toggleOpenShowModal} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground' aria-label='Fermer'>
-              <X size={14} />
-            </button>
           </div>
         </div>
 

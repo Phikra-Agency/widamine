@@ -181,12 +181,6 @@ function ShowModal() {
               <p className='mt-0.5 text-xs text-muted-foreground/55'>{item.email}</p>
             </div>
           </div>
-          <button
-            onClick={toggleOpenShowModal}
-            className='flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground'
-          >
-            <X size={14} />
-          </button>
         </div>
 
         <div className='mx-5 h-px bg-border-subtle/40' />

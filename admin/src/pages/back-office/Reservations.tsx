@@ -407,9 +407,6 @@ function ShowModal() {
                     <ArrowRight size={14} />
                   </button>
                 )}
-                <button onClick={() => setOpenShowModal(false)} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground'>
-                  <XCircle size={16} />
-                </button>
               </div>
             </div>
 
