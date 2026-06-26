@@ -448,21 +448,14 @@ function ShowModal() {
   const motifColor = item.motif?.color || '#009fd6'
   const initials = (item.name || 'N/A').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
-  function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
-    return (
-      <div className='space-y-1.5'>
-        <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>{label}</span>
-        <div className='flex items-center gap-2.5 rounded-control border border-border-subtle bg-background px-3.5 py-2.5 text-sm text-foreground/85'>
-          <Icon size={14} className='shrink-0 text-muted-foreground/35' />
-          <span className='min-w-0 truncate'>{children}</span>
-        </div>
-      </div>
-    )
-  }
+  const schedDate = item.schedules?.[0]?.datetime
+  const schedFormatted = schedDate
+    ? new Date(schedDate).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : null
 
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-3xl rounded-2xl'>
+      <DialogContent showCloseButton={false} className='sm:max-w-lg rounded-2xl overflow-hidden p-0 gap-0'>
         {loadingItem ? (
           <div className='flex items-center justify-center p-14 text-sm text-muted-foreground'>
             <div className='flex items-center gap-2.5'>
@@ -473,97 +466,97 @@ function ShowModal() {
         ) : (
           <>
             {/* Header */}
-            <div className='flex items-center justify-between px-6 py-4'>
-              <div className='flex items-center gap-3.5'>
-                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white' style={{ backgroundColor: motifColor }}>
+            <div className='flex items-start justify-between px-5 pt-5 pb-3'>
+              <div className='flex items-start gap-3'>
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white' style={{ backgroundColor: motifColor }}>
                   {initials}
                 </div>
-                <div>
-                  <h2 className='text-base font-semibold text-foreground'>{item.name}</h2>
-                  <p className='text-xs text-muted-foreground/60'>{item.motif?.name || 'Sans motif'}</p>
+                <div className='min-w-0 pt-0.5'>
+                  <h2 className='text-base font-semibold text-foreground leading-5'>{item.name}</h2>
+                  <div className='mt-1.5 flex items-center gap-2'>
+                    <Pill status={item.status || 'PENDING'} />
+                  </div>
+                  {schedFormatted && (
+                    <p className='mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/55'>
+                      <Clock size={11} />
+                      {schedFormatted}
+                    </p>
+                  )}
                 </div>
               </div>
-              <div className='flex items-center gap-2'>
-                <Pill status={item.status || 'PENDING'} />
-                <button onClick={() => setOpenShowModal(false)} className='flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground'>
-                  <XCircle size={18} />
-                </button>
-              </div>
+              <button onClick={() => setOpenShowModal(false)} className='flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground -mt-0.5 -mr-0.5'>
+                <XCircle size={16} />
+              </button>
             </div>
 
-            <div className='mx-6 h-px bg-border-subtle/50' />
+            <div className='mx-5 h-px bg-border-subtle/40' />
 
-            {/* Body */}
-            <ScrollArea className='max-h-[calc(100dvh-14rem)]'>
-              <div className='p-6'>
-                <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
-                  <div className='space-y-3.5'>
-                    <Field icon={Clock} label='Date & Heure'>
-                      {(() => {
-                        const s = item.schedules?.[0]?.datetime
-                        if (!s) return <span className='text-muted-foreground/40'>Non programmé</span>
-                        return new Date(s).toLocaleString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                      })()}
-                    </Field>
-                    <Field icon={CalendarBlank} label='Session'>
-                      {item.sessionNumber ? `Séance ${item.sessionNumber}` : <span className='text-muted-foreground/40'>—</span>}
-                    </Field>
-                    <Field icon={Stethoscope} label='Praticien'>
-                      {item.practitioner?.name || <span className='text-muted-foreground/40'>Affectation automatique</span>}
-                    </Field>
-                    <Field icon={Door} label='Ressource'>
-                      {item.resource?.name || <span className='text-muted-foreground/40'>Non assignée</span>}
-                    </Field>
-                  </div>
-
-                  <div className='space-y-3.5'>
-                    <div className='space-y-1.5'>
-                      <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Patient</span>
-                      <div className='rounded-control border border-border-subtle bg-background p-3.5'>
-                        <div className='flex items-center gap-3'>
-                          <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60'>
-                            {initials}
-                          </div>
-                          <div className='min-w-0'>
-                            <p className='text-sm font-medium text-foreground/85'>{item.name}</p>
-                            <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/55'>
-                              {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}
-                              {item.phone && <span className='inline-flex items-center gap-1'><Phone size={10} />{item.phone}</span>}
-                            </div>
-                          </div>
-                        </div>
+            {/* Content */}
+            <ScrollArea className='max-h-[calc(100dvh-12rem)]'>
+              <div className='px-5 py-4 space-y-4'>
+                {/* Info grid */}
+                <div className='grid grid-cols-2 gap-x-6 gap-y-3'>
+                  {[
+                    { icon: CalendarBlank, label: 'Motif', value: item.motif?.name || '—' },
+                    { icon: Stethoscope, label: 'Praticien', value: item.practitioner?.name || 'Auto' },
+                    { icon: Door, label: 'Salle', value: item.resource?.name || '—' },
+                    { icon: Timer, label: 'Durée', value: item.motif?.duration ? `${item.motif.duration} min` : '—' },
+                  ].map(({ icon: I, label, value }) => (
+                    <div key={label} className='flex items-center gap-2.5'>
+                      <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06]'>
+                        <I size={13} className='text-primary/60' />
+                      </div>
+                      <div className='min-w-0'>
+                        <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>{label}</p>
+                        <p className='text-sm font-medium text-foreground/85 truncate'>{value}</p>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    {item.notifications && item.notifications.length > 0 && (
-                      <div className='space-y-1.5'>
-                        <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Notifications</span>
-                        <div className='space-y-1.5'>
-                          {item.notifications.map((n) => (
-                            <div key={n.id} className='flex items-center justify-between rounded-control border border-border-subtle bg-background px-3 py-2'>
-                              <span className='text-xs text-muted-foreground/60'>{n.channel} · {n.recipientType}</span>
-                              <StatusBadge status={n.status} />
-                            </div>
-                          ))}
-                        </div>
+                {/* Patient */}
+                <div className='rounded-xl bg-muted/30 p-3.5'>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60'>
+                      {initials}
+                    </div>
+                    <div className='min-w-0'>
+                      <p className='text-sm font-medium text-foreground/85'>{item.name}</p>
+                      <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/50'>
+                        {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}
+                        {item.phone && <span className='inline-flex items-center gap-1'><Phone size={10} />{item.phone}</span>}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 
+                {/* Context */}
                 {item.context && (
-                  <div className='mt-5 space-y-1.5'>
-                    <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Message</span>
-                    <div className='rounded-control border border-border-subtle bg-background px-3.5 py-3 text-sm leading-relaxed text-foreground/70'>
-                      {item.context}
+                  <div className='space-y-1.5'>
+                    <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Message</p>
+                    <p className='text-sm leading-relaxed text-foreground/65 rounded-xl bg-muted/30 p-3.5'>{item.context}</p>
+                  </div>
+                )}
+
+                {/* Notifications */}
+                {item.notifications && item.notifications.length > 0 && (
+                  <div className='space-y-1.5'>
+                    <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Notifications</p>
+                    <div className='space-y-1.5'>
+                      {item.notifications.map((n) => (
+                        <div key={n.id} className='flex items-center justify-between rounded-xl bg-muted/30 px-3 py-2.5'>
+                          <span className='text-xs text-muted-foreground/55'>{n.channel} · {n.recipientType}</span>
+                          <StatusBadge status={n.status} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
 
-                {/* Séances timeline */}
-                <div className='mt-5 space-y-1.5'>
-                  <span className='text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/50'>Séances</span>
-                  <div className='rounded-control border border-border-subtle bg-background p-4'>
+                {/* Séances */}
+                <div className='space-y-1.5'>
+                  <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Séances</p>
+                  <div className='rounded-xl bg-muted/30 p-3.5'>
                     <SessionTimeline
                       sessions={item.motif?.sessions || []}
                       schedules={item.schedules}
@@ -594,8 +587,8 @@ function ShowModal() {
             </ScrollArea>
 
             {/* Footer */}
-            <div className='flex items-center justify-end border-t border-border-subtle/50 px-6 py-3.5'>
-              <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)} className='text-xs text-muted-foreground/50 hover:text-foreground'>
+            <div className='flex items-center justify-end border-t border-border-subtle/40 px-5 py-3'>
+              <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)} className='text-xs font-medium text-muted-foreground/45 hover:text-foreground'>
                 Fermer
               </Button>
             </div>

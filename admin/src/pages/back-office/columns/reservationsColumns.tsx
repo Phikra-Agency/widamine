@@ -23,7 +23,8 @@ export function createReservationsColumns({
   return [
     {
       id: 'patient',
-      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Patient' />,
+      accessorFn: (row) => row.name || '',
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Patient' searchColumn={column} />,
       cell: ({ row }) => {
         const appt = row.original
         const firstSchedule = appt.schedules?.[0]
