@@ -31,7 +31,7 @@ export class PatientController {
   @Get()
   findAll(@Req() req: { user: { id: string; role: string } }) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
-      return this.patientService.findByPractitioner(req.user.id);
+      return this.patientService.findByPractitioner(String(req.user.id));
     }
     return this.patientService.findAll();
   }
@@ -53,7 +53,7 @@ export class PatientController {
     @Body() updatePatientDto: UpdatePatientDto,
   ) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
-      const isOwn = await this.patientService.isPatientOfDoctor(id, req.user.id);
+      const isOwn = await this.patientService.isPatientOfDoctor(id, String(req.user.id));
       if (!isOwn)
         throw new ForbiddenException({
           message: "Not your patient",

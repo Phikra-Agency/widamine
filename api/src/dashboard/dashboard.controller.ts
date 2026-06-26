@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, InternalServerErrorException, Req, UseGuards } from "@nestjs/common";
 import { DashboardService } from "./dashboard.service";
 import { AuthGuard } from "@/auth/auth.guard";
 
@@ -8,7 +8,12 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get("stats")
-  getStats(@Req() req: { user: { id: string; role: string } }) {
-    return this.dashboardService.getStats(req.user);
+  async getStats(@Req() req: { user: { id: string; role: string } }) {
+    try {
+      return await this.dashboardService.getStats(req.user);
+    } catch (e) {
+      console.error("Dashboard stats error:", e);
+      throw new InternalServerErrorException("Failed to load stats");
+    }
   }
 }

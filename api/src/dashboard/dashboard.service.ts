@@ -3,7 +3,6 @@ import { PrismaService } from "@/prisma/prisma.service";
 
 const apptInclude = {
   patient: { select: { id: true, firstName: true, lastName: true, phone: true } },
-  service: { select: { name: true } },
   practitioner: { select: { name: true } },
   motif: { select: { name: true, color: true } },
   resource: { select: { name: true } },
@@ -32,105 +31,85 @@ export class DashboardService {
     tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
 
     const isAdmin = !["DOCTOR", "PRACTITIONER"].includes(user.role);
-    const whereDoctor = !isAdmin ? { practitionerId: user.id } : {};
+    const practitionerId = String(user.id);
 
-    // Counts
-    const [todayTotal, todayConfirmed, todayPending, todayCompleted, todayCancelled] =
-      await Promise.all([
-        this.prisma.appointment.count({
-          where: {
-            ...whereDoctor,
-            status: { not: "CANCELLED" },
-            schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
-          },
-        }),
-        this.prisma.appointment.count({
-          where: {
-            ...whereDoctor,
-            status: "CONFIRMED",
-            schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
-          },
-        }),
-        this.prisma.appointment.count({
-          where: {
-            ...whereDoctor,
-            status: "PENDING",
-            schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
-          },
-        }),
-        this.prisma.appointment.count({
-          where: {
-            ...whereDoctor,
-            status: "COMPLETED",
-            schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
-          },
-        }),
-        this.prisma.appointment.count({
-          where: {
-            ...whereDoctor,
-            status: "CANCELLED",
-            schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
-          },
-        }),
-      ]);
-
-    // Currently running: CONFIRMED appointments that started in the last 90min (truly in progress)
-    const currentlyRunning = await this.prisma.appointment.findMany({
+    // Use schedule.findMany with appointment relation (same pattern as schedule service which works)
+    const todaySchedules = await this.prisma.schedule.findMany({
       where: {
-        ...whereDoctor,
-        status: "CONFIRMED",
-        schedules: { some: { datetime: { gte: recentWindow, lte: now } } },
+        datetime: { gte: todayStart, lte: todayEnd },
+        appointment: isAdmin ? {} : { practitionerId },
       },
-      include: apptInclude,
-      orderBy: { createdAt: "desc" },
-    });
+      include: {
+        appointment: { include: apptInclude },
+      },
+    })
 
-    // Next upcoming: remaining confirmed/pending appointments for today
-    const nextHour = await this.prisma.appointment.findMany({
+    // Group by status
+    const todayAppointments = todaySchedules
+      .map(s => s.appointment)
+      .filter(Boolean) as any[]
+
+    const uniqueIds = new Set<string>()
+    const unique = todayAppointments.filter((a: any) => {
+      if (uniqueIds.has(a.id)) return false
+      uniqueIds.add(a.id)
+      return true
+    })
+
+    const todayTotal = unique.filter((a: any) => a.status !== "CANCELLED").length
+    const todayConfirmed = unique.filter((a: any) => a.status === "CONFIRMED").length
+    const todayPending = unique.filter((a: any) => a.status === "PENDING").length
+    const todayCompleted = unique.filter((a: any) => a.status === "COMPLETED").length
+    const todayCancelled = unique.filter((a: any) => a.status === "CANCELLED").length
+
+    // Currently running (confirmed in last 90min)
+    const runningSchedules = await this.prisma.schedule.findMany({
       where: {
-        ...whereDoctor,
-        status: { in: ["CONFIRMED", "PENDING"] },
-        schedules: {
-          some: { datetime: { gt: now, lte: todayEnd } },
+        datetime: { gte: recentWindow, lte: now },
+        appointment: {
+          ...(isAdmin ? {} : { practitionerId }),
+          status: "CONFIRMED",
         },
       },
-      include: apptInclude,
-      orderBy: { createdAt: "asc" },
-    });
+      include: { appointment: { include: apptInclude } },
+      orderBy: { datetime: "desc" },
+    })
+    const currentlyRunning = runningSchedules
+      .map(s => s.appointment)
+      .filter((a, i, arr) => a && arr.findIndex(x => x?.id === a?.id) === i)
 
-    // All confirmed today (full day agenda)
-    const confirmedToday = await this.prisma.appointment.findMany({
+    // Next upcoming
+    const upcomingSchedules = await this.prisma.schedule.findMany({
       where: {
-        ...whereDoctor,
-        status: "CONFIRMED",
-        schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
+        datetime: { gt: now, lte: todayEnd },
+        appointment: {
+          ...(isAdmin ? {} : { practitionerId }),
+          status: { in: ["CONFIRMED", "PENDING"] },
+        },
       },
-      include: apptInclude,
-      orderBy: { createdAt: "desc" },
-    });
+      include: { appointment: { include: apptInclude } },
+      orderBy: { datetime: "asc" },
+    })
+    const nextHour = upcomingSchedules
+      .map(s => s.appointment)
+      .filter((a, i, arr) => a && arr.findIndex(x => x?.id === a?.id) === i)
 
-    // Pending confirmations needing action
-    const pendingConfirmations = await this.prisma.appointment.findMany({
+    // Tomorrow preview
+    const tomorrowSchedules = await this.prisma.schedule.findMany({
       where: {
-        ...whereDoctor,
-        status: "PENDING",
-        schedules: { some: { datetime: { gte: todayStart, lte: todayEnd } } },
+        datetime: { gte: tomorrowStart, lte: tomorrowEnd },
+        appointment: {
+          ...(isAdmin ? {} : { practitionerId }),
+          status: { in: ["CONFIRMED", "PENDING"] },
+        },
       },
-      include: apptInclude,
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Tomorrow preview (first 5)
-    const tomorrowPreview = await this.prisma.appointment.findMany({
-      where: {
-        ...whereDoctor,
-        status: { in: ["CONFIRMED", "PENDING"] },
-        schedules: { some: { datetime: { gte: tomorrowStart, lte: tomorrowEnd } } },
-      },
-      include: apptInclude,
-      orderBy: { createdAt: "asc" },
+      include: { appointment: { include: apptInclude } },
+      orderBy: { datetime: "asc" },
       take: 5,
-    });
+    })
+    const tomorrowPreview = tomorrowSchedules
+      .map(s => s.appointment)
+      .filter((a, i, arr) => a && arr.findIndex(x => x?.id === a?.id) === i)
 
     return {
       todayTotal,
@@ -140,8 +119,8 @@ export class DashboardService {
       todayCancelled,
       currentlyRunning,
       nextHour,
-      confirmedToday,
-      pendingConfirmations,
+      confirmedToday: unique.filter((a: any) => a.status === "CONFIRMED"),
+      pendingConfirmations: unique.filter((a: any) => a.status === "PENDING"),
       tomorrowPreview,
     };
   }

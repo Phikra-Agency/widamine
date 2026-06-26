@@ -16,6 +16,7 @@ model User {
   role                 String
   admin                Boolean             @default(false)
   image                String?
+  gender               String?
   motifAssignments     MotifPractitioner[]
   assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
   availabilityBlocks   AvailabilityBlock[]

@@ -30,13 +30,13 @@ function App() {
                 <Route path='motifs' element={<Suspense fallback={null}><Motifs /></Suspense>} />
                 <Route path='resources' element={<Suspense fallback={null}><Resources /></Suspense>} />
                 <Route path='settings' element={<Suspense fallback={null}><Settings /></Suspense>} />
-                <Route path='contacts' element={<Suspense fallback={null}><Contacts /></Suspense>} />
-                <Route path='reservations' element={<Suspense fallback={null}><Reservations /></Suspense>} />
               </Route>
 
               <Route element={<RoleWrapper roles={['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER']} />}>
                 <Route path='patients' element={<Suspense fallback={null}><Patients /></Suspense>} />
                 <Route path='calendar' element={<Suspense fallback={null}><Calendar /></Suspense>} />
+                <Route path='contacts' element={<Suspense fallback={null}><Contacts /></Suspense>} />
+                <Route path='reservations' element={<Suspense fallback={null}><Reservations /></Suspense>} />
                 <Route path='dashboard' element={<Navigate to='/calendar' replace />} />
               </Route>
 

@@ -37,7 +37,7 @@ import CalendarMonthGrid from '@/components/calendar/views/CalendarMonthGrid'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
 
-import { Funnel, User, Tag } from '@phosphor-icons/react'
+import { Funnel, User, Tag, CaretDown } from '@phosphor-icons/react'
 
 const STATUS_OPTIONS = [
   { value: 'PENDING', label: 'En attente' },
@@ -358,6 +358,15 @@ function Planner() {
   const showMobileMonthView = viewMode === 'month'
 
   const [mobileMonthSelectedDate, setMobileMonthSelectedDate] = useState(filters.date)
+  const [collapsedPeriods, setCollapsedPeriods] = useState<Set<string>>(new Set())
+
+  function togglePeriod(period: string) {
+    setCollapsedPeriods(prev => {
+      const next = new Set(prev)
+      if (next.has(period)) next.delete(period); else next.add(period)
+      return next
+    })
+  }
 
   useEffect(() => {
     setMobileMonthSelectedDate(filters.date)
@@ -368,25 +377,38 @@ function Planner() {
     return monthItemsByDate.get(mobileMonthSelectedDate) || null
   }, [viewMode, mobileMonthSelectedDate, monthItemsByDate])
 
-  const renderMobileEvents = (schedules: import('@/components/calendar/EventCard').EventCardSchedule[], periodLabel?: string) => {
+  function MobilePeriod({ period, label, schedules }: {
+    period: string; label: string; schedules: import('@/components/calendar/EventCard').EventCardSchedule[]
+  }) {
+    const open = !collapsedPeriods.has(period)
     return (
-      <div className='space-y-1.5 py-1'>
-        {periodLabel && (
-          <p className='text-[10px] font-semibold uppercase tracking-wider text-secondary/40'>{periodLabel}</p>
-        )}
-        {schedules.length === 0 ? (
-          <p className='py-2 text-[11px] text-secondary/30 italic'>Aucune réservation</p>
-        ) : (
-          schedules.map((schedule) => (
-            <EventCard
-              key={schedule.id}
-              schedule={schedule}
-              formatTime={formatTimeOnly}
-              isUnread={!isOpened(schedule.id)}
-              variant='list'
-              onClick={() => openSchedule(schedule)}
-            />
-          ))
+      <div className='py-1'>
+        <button
+          type='button'
+          onClick={() => togglePeriod(period)}
+          className='flex w-full items-center gap-1.5 py-1'
+        >
+          <CaretDown size={10} className={`shrink-0 text-secondary/40 transition-transform ${open ? '' : '-rotate-90'}`} />
+          <p className='text-[10px] font-semibold uppercase tracking-wider text-secondary/40'>{label}</p>
+          <span className='text-[9px] text-secondary/25'>({schedules.length})</span>
+        </button>
+        {open && (
+          <div className='space-y-1.5 pt-0.5'>
+            {schedules.length === 0 ? (
+              <p className='py-2 text-[11px] text-secondary/30 italic px-0.5'>Aucune réservation</p>
+            ) : (
+              schedules.map((schedule) => (
+                <EventCard
+                  key={schedule.id}
+                  schedule={schedule}
+                  formatTime={formatTimeOnly}
+                  isUnread={!isOpened(schedule.id)}
+                  variant='list'
+                  onClick={() => openSchedule(schedule)}
+                />
+              ))
+            )}
+          </div>
         )}
       </div>
     )
@@ -449,18 +471,18 @@ function Planner() {
 
       <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
         {viewMode === 'day' && mobileDayData && (
-          <div className='divide-y divide-border-subtle/70 px-4 py-3'>
-            {renderMobileEvents(mobileDayData.morning, 'Matin')}
-            {renderMobileEvents(mobileDayData.afternoon, 'Après-midi')}
-            {renderMobileEvents(mobileDayData.evening, 'Soir')}
+          <div className='px-4 py-3'>
+            <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+            <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+            <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
           </div>
         )}
 
         {viewMode === 'week' && mobileDayData && (
-          <div className='divide-y divide-border-subtle/70 px-4 py-3'>
-            {renderMobileEvents(mobileDayData.morning, 'Matin')}
-            {renderMobileEvents(mobileDayData.afternoon, 'Après-midi')}
-            {renderMobileEvents(mobileDayData.evening, 'Soir')}
+          <div className='px-4 py-3'>
+            <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+            <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+            <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
           </div>
         )}
 
@@ -472,12 +494,12 @@ function Planner() {
               onSelectDate={setMobileMonthSelectedDate}
               itemsByDate={monthItemsByDate}
             />
-            <div className='mt-3 divide-y divide-border-subtle/70'>
+            <div className='mt-3'>
               {mobileMonthData && (
                 <>
-                  {renderMobileEvents(mobileMonthData.morning, 'Matin')}
-                  {renderMobileEvents(mobileMonthData.afternoon, 'Après-midi')}
-                  {renderMobileEvents(mobileMonthData.evening, 'Soir')}
+                  <MobilePeriod period='morning' label='Matin' schedules={mobileMonthData.morning} />
+                  <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileMonthData.afternoon} />
+                  <MobilePeriod period='evening' label='Soir' schedules={mobileMonthData.evening} />
                 </>
               )}
               {!mobileMonthData && (

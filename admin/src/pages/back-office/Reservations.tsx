@@ -1,8 +1,8 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { useAuthStore } from '@/stores/authStore'
-import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, Clock, CheckCircle, XCircle, Timer } from '@phosphor-icons/react'
+import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, Clock, CheckCircle, XCircle, Timer, ArrowRight, UserPlus } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { useDebounce } from 'use-debounce'
 import type { ColumnFiltersState } from '@tanstack/react-table'
@@ -59,10 +59,18 @@ function Heading() {
 function ReservationsTable() {
   const { items, filters, setFilters, fetchItems, setItem, toggleOpenShowModal, setOpenShowModal } = useAppointmentsStore()
   const [loading, setLoading] = useState(true)
-  const [debouncedStatus] = useDebounce(filters.status, 300)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const { 0: debouncedStatus } = useDebounce(filters.status, 300)
   const debouncedSearch = useDebouncedGlobalSearch()
   const [searchParams] = useSearchParams()
   const hasOpenedFromUrl = useRef(false)
+
+  useEffect(() => {
+    setColumnFilters(prev => {
+      const other = prev.filter(f => f.id !== 'status')
+      return debouncedStatus ? [...other, { id: 'status', value: debouncedStatus }] : other
+    })
+  }, [debouncedStatus])
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -88,11 +96,6 @@ function ReservationsTable() {
     }
   }, [items, searchParams, setItem, setOpenShowModal])
 
-  const columnFilters = useMemo<ColumnFiltersState>(
-    () => [{ id: 'status', value: debouncedStatus || 'all' }],
-    [debouncedStatus],
-  )
-
   const columns = useMemo(
     () =>
       createReservationsColumns({
@@ -108,6 +111,7 @@ function ReservationsTable() {
     pageSize: 10,
     globalFilter: debouncedSearch,
     columnFilters,
+    onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, columnId, filterValue) =>
       globalSearchFilter(row, columnId, filterValue, ['name', 'email', 'phone']),
   })
@@ -324,126 +328,16 @@ function Pill({ status }: { status: string }) {
 
 
 
-function SessionTimeline({ sessions, schedules, onEdit, onSave, editingSessions, sessionDates, onDateChange, savingId, onCancel }: {
-  sessions: { id: string; session: number; duration: number }[]
-  schedules?: { id: string; datetime: string; sessionId: string }[]
-  onEdit: (id: string) => void
-  onSave: (id: string) => Promise<void>
-  editingSessions: Record<string, boolean>
-  sessionDates: Record<string, string>
-  onDateChange: (id: string, value: string) => void
-  savingId: string | null
-  onCancel: (id: string) => void
-}) {
-  if (sessions.length === 0) {
-    return (
-      <div className='rounded-element border border-dashed border-border bg-card/40 px-4 py-8 text-center text-sm text-muted-foreground'>
-        Aucune séance configurée
-      </div>
-    )
-  }
 
-  return (
-    <div className='relative'>
-      {sessions.map((session, idx) => {
-        const schedule = schedules?.find((s) => s.sessionId === session.id)
-        const isEditing = editingSessions[session.id]
-        const isLast = idx === sessions.length - 1
-        const hasDate = !!schedule?.datetime
-
-        return (
-          <div key={session.id} className='relative flex gap-4 pb-5 last:pb-0'>
-            <div className='flex flex-col items-center'>
-              <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-4 ring-card transition-colors duration-200 ${
-                hasDate ? 'bg-primary/12 text-primary' : 'bg-muted text-muted-foreground'
-              }`}>
-                {session.session}
-              </div>
-              {!isLast && <div className='mt-0.5 h-full w-px bg-border-subtle' />}
-            </div>
-            <div className='min-w-0 flex-1 pt-0.5'>
-              <div className='flex items-center justify-between gap-2'>
-                <div className='flex items-center gap-2'>
-                  <span className='text-sm font-medium text-foreground'>Séance {session.session}</span>
-                  <span className='rounded-element bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground'>{session.duration} min</span>
-                </div>
-                {!isEditing && (
-                  <Button onClick={() => onEdit(session.id)} type='button' variant='ghost' size='icon-xs' className='text-muted-foreground/40 hover:text-primary hover:bg-primary/8'>
-                    <Pen size={12} />
-                  </Button>
-                )}
-              </div>
-              {isEditing ? (
-                <div className='mt-2.5 space-y-2.5 rounded-element border border-border bg-muted/30 p-3'>
-                  <Input
-                    type='datetime-local'
-                    value={sessionDates[session.id] || ''}
-                    onChange={(e) => onDateChange(session.id, e.target.value)}
-                    className='h-8 text-xs'
-                  />
-                  <div className='flex gap-2'>
-                    <Button onClick={() => onCancel(session.id)} type='button' variant='ghost' size='xs'>
-                      Annuler
-                    </Button>
-                    <Button
-                      onClick={() => onSave(session.id)}
-                      type='button'
-                      size='xs'
-                      disabled={!sessionDates[session.id] || savingId === session.id}
-                    >
-                      {savingId === session.id ? 'Enregistrement…' : 'Enregistrer'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className='mt-0.5 text-xs text-muted-foreground/70'>
-                  {hasDate
-                    ? new Date(schedule.datetime).toLocaleString('fr-FR', {
-                        day: '2-digit', month: 'short', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
-                      })
-                    : <span className='italic text-muted-foreground/40'>Date non programmée</span>}
-                </p>
-              )}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 function ShowModal() {
-  const { openShowModal, setOpenShowModal, item, fetchItem, loadingItem, saveScheduleDate, savingScheduleSessionId } = useAppointmentsStore()
-  const [sessionDates, setSessionDates] = useState<Record<string, string>>({})
-  const [editingSessions, setEditingSessions] = useState<Record<string, boolean>>({})
-
-  function toDateTimeLocal(value?: string) {
-    if (!value) return ''
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return ''
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${year}-${month}-${day}T${hours}:${minutes}`
-  }
+  const { openShowModal, setOpenShowModal, item, fetchItem, loadingItem } = useAppointmentsStore()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!openShowModal || !item.id) return
     fetchItem(item.id)
   }, [openShowModal])
-
-  useEffect(() => {
-    const dates = (item.motif?.sessions || []).reduce((acc: Record<string, string>, session) => {
-      const schedule = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)
-      acc[session.id] = toDateTimeLocal(schedule?.datetime)
-      return acc
-    }, {} as Record<string, string>)
-    setSessionDates(dates)
-    setEditingSessions({})
-  }, [item])
 
   const motifColor = item.motif?.color || '#009fd6'
   const initials = (item.name || 'N/A').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -452,6 +346,19 @@ function ShowModal() {
   const schedFormatted = schedDate
     ? new Date(schedDate).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
     : null
+
+  // ponytail: assumes returning patient if email matches an existing patient record
+  const hasPatient = !!(item as any).patient?.id
+  const patientId = hasPatient ? (item as any).patient.id : null
+
+  const goToPatient = () => {
+    setOpenShowModal(false)
+    if (patientId) {
+      navigate(`/patients?patientId=${patientId}`)
+    } else if (item.email) {
+      navigate(`/patients?search=${encodeURIComponent(item.email)}`)
+    }
+  }
 
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
@@ -472,21 +379,38 @@ function ShowModal() {
                   {initials}
                 </div>
                 <div className='min-w-0 pt-0.5'>
-                  <h2 className='text-base font-semibold text-foreground leading-5'>{item.name}</h2>
-                  <div className='mt-1.5 flex items-center gap-2'>
+                  <div className='flex items-center gap-2'>
+                    <h2 className='text-base font-semibold text-foreground leading-5'>{item.name}</h2>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${hasPatient ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                      {hasPatient ? <User size={10} /> : <UserPlus size={10} />}
+                      {hasPatient ? 'Existant' : 'Nouveau'}
+                    </span>
+                  </div>
+                  <div className='mt-1 flex items-center gap-2'>
                     <Pill status={item.status || 'PENDING'} />
                   </div>
+                  <div className='mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/50'>
+                    {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}
+                    {item.phone && <span className='inline-flex items-center gap-1'><Phone size={10} />{item.phone}</span>}
+                  </div>
                   {schedFormatted && (
-                    <p className='mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/55'>
+                    <p className='mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground/45'>
                       <Clock size={11} />
                       {schedFormatted}
                     </p>
                   )}
                 </div>
               </div>
-              <button onClick={() => setOpenShowModal(false)} className='flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground -mt-0.5 -mr-0.5'>
-                <XCircle size={16} />
-              </button>
+              <div className='flex items-center gap-1.5'>
+                {hasPatient && (
+                  <button onClick={goToPatient} className='flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 transition-colors hover:bg-primary/[0.08] hover:text-primary' title='Voir le patient'>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
+                <button onClick={() => setOpenShowModal(false)} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/30 transition-colors hover:bg-muted/40 hover:text-foreground'>
+                  <XCircle size={16} />
+                </button>
+              </div>
             </div>
 
             <div className='mx-5 h-px bg-border-subtle/40' />
@@ -514,22 +438,6 @@ function ShowModal() {
                   ))}
                 </div>
 
-                {/* Patient */}
-                <div className='rounded-xl bg-muted/30 p-3.5'>
-                  <div className='flex items-center gap-3'>
-                    <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground/60'>
-                      {initials}
-                    </div>
-                    <div className='min-w-0'>
-                      <p className='text-sm font-medium text-foreground/85'>{item.name}</p>
-                      <div className='mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/50'>
-                        {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}
-                        {item.phone && <span className='inline-flex items-center gap-1'><Phone size={10} />{item.phone}</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Context */}
                 {item.context && (
                   <div className='space-y-1.5'>
@@ -552,37 +460,6 @@ function ShowModal() {
                     </div>
                   </div>
                 )}
-
-                {/* Séances */}
-                <div className='space-y-1.5'>
-                  <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Séances</p>
-                  <div className='rounded-xl bg-muted/30 p-3.5'>
-                    <SessionTimeline
-                      sessions={item.motif?.sessions || []}
-                      schedules={item.schedules}
-                      editingSessions={editingSessions}
-                      sessionDates={sessionDates}
-                      onEdit={(id) => {
-                        setEditingSessions({ [id]: true })
-                        const currentDate = item.schedules?.find((s) => s.sessionId === id)?.datetime
-                        setSessionDates({ ...sessionDates, [id]: toDateTimeLocal(currentDate) })
-                      }}
-                      onCancel={(id) => {
-                        setEditingSessions({})
-                        const currentDate = item.schedules?.find((s) => s.sessionId === id)?.datetime
-                        setSessionDates({ ...sessionDates, [id]: toDateTimeLocal(currentDate) })
-                      }}
-                      onDateChange={(id, value) => setSessionDates({ ...sessionDates, [id]: value })}
-                      onSave={async (id) => {
-                        const value = sessionDates[id]
-                        if (!value) return
-                        await saveScheduleDate({ sessionId: id, datetime: new Date(value).toISOString() })
-                        setEditingSessions({})
-                      }}
-                      savingId={savingScheduleSessionId}
-                    />
-                  </div>
-                </div>
               </div>
             </ScrollArea>
 

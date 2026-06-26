@@ -58,8 +58,8 @@ const NAV_GROUPS: NavGroup[] = [
     links: [
       { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
-      { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST'] },
-      { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST'] },
+      { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
+      { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
     ],
   },
   {
@@ -182,7 +182,7 @@ function SidebarContent({
         </div>
       </nav>
 
-      <div className={cn('shrink-0 p-4 pt-2', collapsed && 'px-2')}>
+      <div className={cn('shrink-0 p-4 pt-2', collapsed && 'px-2', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
         {user ? (
           <UserAccountMenu onNavigate={onNavigate} collapsed={collapsed} />
         ) : (

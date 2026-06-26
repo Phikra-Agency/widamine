@@ -157,8 +157,12 @@ export const useSchedulesStore = create<ScheduleStoreInterface>()(
 
         if (isFresh) return
 
-        const res = await api.get('schedule/' + date)
-        set({ items: res.data, fetchedDate: date, lastFetchedAt: Date.now() })
+        try {
+          const res = await api.get('schedule/' + date)
+          set({ items: res.data, fetchedDate: date, lastFetchedAt: Date.now() })
+        } catch {
+          // ponytail: auth wrapper handles retry, silence the rejection
+        }
       }
     }),
     {

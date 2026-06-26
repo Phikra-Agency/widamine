@@ -103,7 +103,7 @@ export class AppointmentController {
   @UseGuards(AuthGuard)
   findAll(@Req() req: { user: { id: string; role: string } }) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
-      return this.appointmentService.findByPractitioner(req.user.id);
+      return this.appointmentService.findByPractitioner(String(req.user.id));
     }
     return this.appointmentService.findAll();
   }
@@ -123,7 +123,7 @@ export class AppointmentController {
   ) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {
       const appointment = await this.appointmentService.findOne(id);
-      if (!appointment || appointment.practitionerId !== req.user.id) {
+      if (!appointment || appointment.practitionerId !== String(req.user.id)) {
         throw new ForbiddenException({
           message: "Not your appointment",
           code: "not_your_appointment",

@@ -171,7 +171,7 @@ function EventCardWithHover({
         const GAP = 8
         const spaceBelow = window.innerHeight - rect.bottom
         const flipAbove = spaceBelow < POPUP_HEIGHT + GAP
-        let left = rect.left + rect.width / 2 - POPUP_WIDTH / 2
+        let left = rect.left
         if (left + POPUP_WIDTH > window.innerWidth - GAP) {
           left = window.innerWidth - POPUP_WIDTH - GAP
         }

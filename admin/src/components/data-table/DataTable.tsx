@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table'
 
 function DataTableRoot({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('min-h-0', className)}>{children}</div>
+  return <div className={cn('flex min-h-0 flex-1 flex-col', className)}>{children}</div>
 }
 
 function DataTableToolbar({ children, className }: { children: ReactNode; className?: string }) {
@@ -24,7 +24,7 @@ function DataTableToolbar({ children, className }: { children: ReactNode; classN
 }
 
 function DataTableDesktop({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('hidden lg:block', className)}>{children}</div>
+  return <div className={cn('hidden lg:flex lg:flex-1 lg:flex-col lg:min-h-0', className)}>{children}</div>
 }
 
 function DataTableMobile({ children, className }: { children: ReactNode; className?: string }) {

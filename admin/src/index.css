@@ -202,7 +202,7 @@
 
 @layer components {
 	.bo-page {
-		@apply h-full overflow-hidden bg-transparent;
+		@apply overflow-hidden bg-transparent h-full max-lg:h-auto;
 	}
 
 	.bo-page-scroll {
@@ -218,7 +218,19 @@
 	}
 
 	.bo-section-stack {
-		@apply relative space-y-4;
+		@apply relative flex min-h-0 flex-col gap-4;
+	}
+
+	.bo-section-stack > .bo-page-heading {
+		@apply shrink-0;
+	}
+
+	.bo-section-stack > .bo-table-card {
+		@apply flex min-h-0 flex-1 flex-col;
+	}
+
+	.bo-section-stack > .bo-table-card > [data-slot="table-container"] {
+		@apply flex-1 min-h-0;
 	}
 
 	.bo-page-ambient-tr {
@@ -438,6 +450,11 @@
 
 	.bo-table-card {
 		@apply relative !gap-0 !p-0 overflow-hidden rounded-surface bg-card shadow-none ring-1 ring-border;
+	}
+
+	.bo-table-card > .bo-table-toolbar + * {
+		@apply overflow-y-auto;
+		max-height: calc(100dvh - 14rem);
 	}
 
 	.bo-table-toolbar {

@@ -33,7 +33,7 @@ export default function PractitionerStatusBar() {
   useEffect(() => {
     if (!isPractitioner) return
     if (stats) return
-    api.get('dashboard/stats').then(res => setStats(res.data)).catch(() => {})
+    api.get('dashboard/stats', { skipGlobalErrorHandler: true } as any).then(res => setStats(res.data)).catch(() => {})
   }, [isPractitioner, stats, setStats])
 
   const { current, next, todayTotal } = useMemo(() => {

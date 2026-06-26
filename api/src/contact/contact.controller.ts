@@ -24,25 +24,25 @@ export class ContactController {
     return this.contactService.create(createContactDto);
   }
 
-  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   @Get()
   findAll(@Query("read", new ParseBoolPipe({ optional: true })) read?: boolean) {
     return this.contactService.findAll(read);
   }
 
-  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.contactService.findOne(id);
   }
 
-  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   @Put(":id/read")
   read(@Param("id") id: string) {
     return this.contactService.read(id);
   }
 
-  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.contactService.remove(id);
