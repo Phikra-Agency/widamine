@@ -292,16 +292,6 @@ function EventCardWithHover({
               <p className='text-[10px] text-gray-400 text-center'>Cliquer pour ouvrir</p>
             </div>
           </div>
-          {/* Arrow */}
-          {popupRect.flipAbove ? (
-            <div className='absolute left-4 bottom-0 translate-y-full'>
-              <div className='h-2 w-2 rotate-45 border-r border-b border-gray-200 bg-white' />
-            </div>
-          ) : (
-            <div className='absolute left-4 top-0 -translate-y-full'>
-              <div className='h-2 w-2 rotate-45 border-l border-t border-gray-200 bg-white' />
-            </div>
-          )}
         </div>,
         document.body,
       )}
