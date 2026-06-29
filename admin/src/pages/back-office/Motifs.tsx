@@ -192,7 +192,7 @@ function MotifModal() {
         <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du motif</Label>
         <Input
           type='text'
-          value={item.name}
+          value={item.name ?? ''}
           onChange={(e) => {
             const next = { ...item, name: e.target.value }
             setItem(next)

@@ -123,16 +123,16 @@ export const usePatientStore = create<PatientStoreInterface>()(
           operation: 'edit',
           modalOpen: true,
           item: {
-            firstName: patient.firstName,
-            lastName: patient.lastName,
-            email: patient.email,
-            phone: patient.phone,
+            firstName: patient.firstName ?? '',
+            lastName: patient.lastName ?? '',
+            email: patient.email ?? '',
+            phone: patient.phone ?? '',
             dateOfBirth: patient.dateOfBirth ? patient.dateOfBirth.slice(0, 10) : '',
-            gender: patient.gender,
-            address: patient.address,
-            city: patient.city,
-            postalCode: patient.postalCode,
-            country: patient.country,
+            gender: patient.gender ?? '',
+            address: patient.address ?? '',
+            city: patient.city ?? '',
+            postalCode: patient.postalCode ?? '',
+            country: patient.country ?? '',
             medicalHistory: patient.medicalHistory || '',
             id: patient.id,
           } as any
@@ -179,15 +179,19 @@ export const usePatientStore = create<PatientStoreInterface>()(
         if (!payload.gender) delete payload.gender
         if (!payload.email) delete payload.email
         delete payload.id
-        if (isEdit) {
-          await api.put('patients/' + (get().item as any).id, payload)
-        } else {
-          await api.post('patients', payload)
+        try {
+          if (isEdit) {
+            await api.put('patients/' + (get().item as any).id, payload)
+          } else {
+            await api.post('patients', payload)
+          }
+          notify.success(isEdit ? 'Patient modifié.' : 'Patient créé.')
+          set({ lastFetchedAt: null })
+          await get().fetchItems()
+          get().closeModal()
+        } catch {
+          notify.error('Erreur lors de la sauvegarde.')
         }
-        notify.success(isEdit ? 'Patient modifié.' : 'Patient créé.')
-        set({ lastFetchedAt: null })
-        await get().fetchItems()
-        get().closeModal()
       },
       deleteItem: async () => {
         try {

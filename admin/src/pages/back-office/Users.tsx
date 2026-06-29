@@ -222,7 +222,7 @@ function Modal() {
       <div className='space-y-2'>
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom complet</Label>
         <Input
-          value={item.name}
+          value={item.name ?? ''}
           onChange={(e) => {
             const next = { ...item, name: e.target.value }
             setItem(next)
@@ -239,7 +239,7 @@ function Modal() {
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Email</Label>
         <Input
           type='email'
-          value={item.email}
+          value={item.email ?? ''}
           onChange={(e) => {
             const next = { ...item, email: e.target.value }
             setItem(next)
@@ -291,7 +291,7 @@ function Modal() {
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Mot de passe</Label>
         <Input
           type='password'
-          value={item.password}
+          value={item.password ?? ''}
           onChange={(e) => {
             const next = { ...item, password: e.target.value }
             setItem(next)

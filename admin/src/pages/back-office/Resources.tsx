@@ -179,7 +179,7 @@ function Modal() {
         <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom de la salle</Label>
         <Input
           type='text'
-          value={item.name}
+          value={item.name ?? ''}
           onChange={(e) => {
             const next = { ...item, name: e.target.value }
             setItem(next)
