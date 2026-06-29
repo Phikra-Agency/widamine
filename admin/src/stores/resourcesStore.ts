@@ -91,19 +91,28 @@ export const useResourcesStore = create<ResourceStoreInterface>()(
       saveItem: async () => {
         const { item, operation } = get()
         const isEdit = operation === 'edit'
-        if (isEdit) {
-          await api.put('resources/' + item.id, item)
-        } else {
-          await api.post('resources', item)
+        try {
+          if (isEdit) {
+            await api.put('resources/' + item.id, item)
+          } else {
+            await api.post('resources', item)
+          }
+          notify.success(isEdit ? 'Ressource modifiée.' : 'Ressource créée.')
+          set({ lastFetchedAt: null })
+          await get().fetchItems()
+          get().closeModal()
+        } catch {
+          notify.error('Erreur lors de la sauvegarde.')
         }
-        notify.success(isEdit ? 'Ressource modifiée.' : 'Ressource créée.')
-        set({ lastFetchedAt: null })
-        await get().fetchItems()
-        get().closeModal()
       },
       deleteItem: async () => {
-        await api.delete('resources/' + get().item.id)
-        notify.success('Ressource supprimée.')
+        try {
+          await api.delete('resources/' + get().item.id)
+          notify.success('Ressource supprimée.')
+        } catch {
+          notify.error('Erreur lors de la suppression.')
+        }
+        set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       }

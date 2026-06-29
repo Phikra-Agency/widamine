@@ -74,19 +74,28 @@ export const useMotifsStore = create<MotifStoreInterface>()(
           practitionerIds: item.practitionerIds || [],
         };
 
-        if (isEdit) {
-          await api.put('motifs/' + item.id, payload)
-        } else {
-          await api.post('motifs', payload)
+        try {
+          if (isEdit) {
+            await api.put('motifs/' + item.id, payload)
+          } else {
+            await api.post('motifs', payload)
+          }
+          notify.success(isEdit ? 'Motif modifié.' : 'Motif créé.')
+          set({ lastFetchedAt: null })
+          await get().fetchItems()
+          get().closeModal()
+        } catch {
+          notify.error('Erreur lors de la sauvegarde.')
         }
-        notify.success(isEdit ? 'Motif modifié.' : 'Motif créé.')
-        set({ lastFetchedAt: null })
-        await get().fetchItems()
-        get().closeModal()
       },
       deleteItem: async () => {
-        await api.delete('motifs/' + (get().item as Motif).id)
-        notify.success('Motif supprimé.')
+        try {
+          await api.delete('motifs/' + (get().item as Motif).id)
+          notify.success('Motif supprimé.')
+        } catch {
+          notify.error('Erreur lors de la suppression.')
+        }
+        set({ lastFetchedAt: null })
         await get().fetchItems()
         get().closeModal()
       }

@@ -74,21 +74,29 @@ export const useUsersStore = create<UserStoreInterface>((set, get) => ({
   saveItem: async () => {
     const item = get().item
     const isEdit = get().operation === 'edit'
-    if (isEdit) {
-      const payload = { ...item }
-      if (!payload.password) delete (payload as any).password
-      await api.put('users/' + (item as User).id, payload)
-    } else {
-      await api.post('users', item)
+    try {
+      if (isEdit) {
+        const payload = { ...item }
+        if (!payload.password) delete (payload as any).password
+        await api.put('users/' + (item as User).id, payload)
+      } else {
+        await api.post('users', item)
+      }
+      notify.success(isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.')
+      set({ lastFetchedAt: 0 })
+      get().fetchItems()
+      get().closeModal()
+    } catch {
+      notify.error('Erreur lors de la sauvegarde.')
     }
-    notify.success(isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.')
-    set({ lastFetchedAt: 0 })
-    get().fetchItems()
-    get().closeModal()
   },
   deleteItem: async () => {
-    await api.delete('users/' + (get().item as User).id)
-    notify.success('Utilisateur supprimé.')
+    try {
+      await api.delete('users/' + (get().item as User).id)
+      notify.success('Utilisateur supprimé.')
+    } catch {
+      notify.error('Erreur lors de la suppression.')
+    }
     set({ lastFetchedAt: 0 })
     get().fetchItems()
     get().closeModal()
