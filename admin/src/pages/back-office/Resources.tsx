@@ -1,6 +1,6 @@
 import { useResourcesStore } from '@/stores/resourcesStore'
 import { useMotifsStore } from '@/stores/motifsStore'
-import { Plus, Trash as Trash2, Door, Link } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2, Door, Link, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { cn } from '@/lib/utils'
@@ -22,6 +22,7 @@ import {
 import { createSallesColumns, SALLES_EMPTY_ILLUSTRATION } from './columns/sallesColumns'
 import { PRIORITY_CONFIG } from './columns/shared/priorityBadge'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
+import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
 
@@ -56,7 +57,7 @@ function Heading() {
   return (
     <div className='bo-page-heading'>
       <div>
-        <h3 className='bo-title'>Salles</h3>
+        <h3 className='bo-title'>Gestion de salles</h3>
       </div>
       <Button onClick={openCreateModal} className='hidden h-10 px-5 lg:inline-flex'>
         <Plus weight='bold' /> Ajouter Une Salle
@@ -69,6 +70,9 @@ function ResourcesTable() {
   const { items, fetchItems, openEditModal, openDeleteModal, openCreateModal } = useResourcesStore()
   const [loading, setLoading] = useState(true)
   const debouncedSearch = useDebouncedGlobalSearch()
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchTerm = useGlobalSearchStore((s) => s.term)
+  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -90,6 +94,27 @@ function ResourcesTable() {
 
   return (
     <DataTable.Root>
+      {/* Mobile top search bar */}
+      <div className='flex lg:hidden items-center gap-2 px-4 py-2.5'>
+        <button
+          onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+          className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
+          aria-label='Rechercher'
+        >
+          <MagnifyingGlass size={16} />
+        </button>
+      </div>
+      {mobileSearchOpen && (
+        <div className='px-4 pb-2 lg:hidden'>
+          <Input
+            placeholder='Rechercher...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='h-9 text-xs'
+            autoFocus
+          />
+        </div>
+      )}
       <TanStackDataTable
         table={table}
         loading={loading}
@@ -135,7 +160,7 @@ function ResourcesTable() {
         </Button>
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='flex justify-end px-4 py-3 max-lg:justify-start'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -220,10 +245,10 @@ function Modal() {
         </div>
       </div>
       <div className='space-y-2'>
-        <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motifs associés</Label>
+        <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitements associés</Label>
         <div className='flex min-h-[60px] flex-wrap gap-2 rounded-control border border-border bg-background p-3'>
           {motifs.length === 0 ? (
-            <span className='text-xs text-secondary/40'>Aucun motif disponible</span>
+            <span className='text-xs text-secondary/40'>Aucun traitement disponible</span>
           ) : (
             motifs.map((motif) => {
               const selected = (item.motifIds || []).includes(motif.id!)
@@ -257,7 +282,7 @@ function DeleteModal() {
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) closeModal() }}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-md'>
+      <DialogContent showCloseButton className='gap-0 overflow-hidden p-0 sm:max-w-md'>
         <div className='p-6 text-center'>
           <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-control bg-red-50'>
             <Trash2 size={26} className='text-red-500' />

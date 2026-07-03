@@ -178,7 +178,12 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className='overflow-hidden rounded-[1.25rem]' style={{ background: 'white', boxShadow: '0 2px 12px -4px rgba(0,0,0,0.04)' }}>
       <button onClick={() => setOpen(!open)} className='flex w-full items-center justify-between px-6 py-5 text-left'>
         <span className='pr-4 text-sm font-semibold sm:text-base' style={{ color: C.secondary }}>{question}</span>
-        <span className='shrink-0 text-lg' style={{ color: C.primary }}>{open ? '−' : '+'}</span>
+        <span className='shrink-0 transition-transform duration-300' style={{ color: C.primary, transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+          <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round'>
+            <line x1='12' y1='5' x2='12' y2='19' />
+            <line x1='5' y1='12' x2='19' y2='12' />
+          </svg>
+        </span>
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-60' : 'max-h-0'}`}>
         <div className='px-6 pb-5'>

@@ -240,7 +240,7 @@ export function PeriodLabelCell({
     <div
       title={title ?? label}
       className={clsx(
-        'sticky left-0 z-10 flex items-start justify-start border-r border-gray-200 bg-gray-50/80 backdrop-blur-sm px-3 py-3 text-[11px] font-medium leading-tight text-gray-500',
+        'sticky left-0 z-10 flex items-start justify-start border-r border-gray-200 bg-gray-50/80 backdrop-blur-sm px-3 py-3 text-[15px] sm:text-[11px] font-medium leading-tight text-gray-500',
         !isLastRow && 'border-b',
       )}
     >

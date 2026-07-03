@@ -1,20 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 @import 'swiper/css';
 
 @font-face {
-	font-family: Amoria;
+	font-family: 'Lexend Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url(/fonts/lexend-latin-ext-wght-normal.woff2) format('woff2-variations');
+	unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+@font-face {
+	font-family: 'Lexend Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url(/fonts/lexend-latin-wght-normal.woff2) format('woff2-variations');
+	unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+	font-family: 'Amoria';
+	font-display: swap;
 	src: url('/fonts/AMORIA.otf') format('opentype');
 }
 
+@font-face {
+	font-family: 'Chambora';
+	font-display: swap;
+	src: url('/fonts/Chambora-Regular.otf') format('opentype');
+}
+
+@font-face {
+	font-family: 'Poppins Thin';
+	font-style: normal;
+	font-weight: 250;
+	font-display: swap;
+	src: url('/fonts/Poppins-Thin.ttf') format('truetype');
+}
+
 @theme {
-	--color-custom-white: #f9fafc;
-	--color-primary: #2e90c0;
-	--color-secondary: #1a3646;
-	--color-accent: #e8c5b8;
-	--color-muted: oklch(92.8% 0.006 264.531);
+	--color-custom-white: #FBF7EF;
+	--color-primary: #009FD6;
+	--color-secondary: #1E1E1E;
+	--color-accent: #6D0024;
+	--color-muted: #dadada;
+	--color-brand-orange: #F7A269;
+	--color-brand-green: #62bca1;
+	--color-brand-yellow: #ffb500;
+	--color-brand-salmon: #ffad9b;
 	--font-amoria: 'Amoria', sans-serif;
-	--font-raleway: 'Raleway', sans-serif;
+	--font-raleway: 'Lexend Variable', sans-serif;
+	--font-heading: 'Newsreader', serif;
+	--font-body: 'Lexend Variable', sans-serif;
 	--shadow-bo-card: 0 1px 2px 0 rgba(0,0,0,0.03);
 	--shadow-bo-elevated: 0 8px 24px 0 rgba(0,0,0,0.08);
 	--shadow-bo-fab: 0 10px 25px -3px rgba(46,144,192,0.3);
@@ -32,22 +70,26 @@
 }
 
 .page-landing {
-	--color-primary: #2e90c0;
-	--color-custom-white: #F7F1EB;
-	--color-secondary: #1a3646;
-	--color-accent: #e8c5b8;
-	--color-muted: #dadada;
-	background-color: #F7F1EB;
+	background-color: #FBF7EF;
+}
+
+html, body, #root {
+	background-color: #FBF7EF;
+	font-family: 'Poppins Thin', 'Chambora', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Chambora', serif;
 }
 
 .page-landing body,
 .page-landing {
-	background-color: #F7F1EB;
+	background-color: #FBF7EF;
 }
 
 @layer base {
 	.padding-x-container {
-		@apply px-2 xl:px-10 2xl:px-40;
+		@apply px-4 sm:px-6 lg:px-8;
 	}
 
 	.padding-y-container {

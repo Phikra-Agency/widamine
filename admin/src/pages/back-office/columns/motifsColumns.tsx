@@ -20,8 +20,8 @@ export function createMotifsColumns({ onEdit, onDelete }: MotifColumnsDeps): Col
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column, table }) => (
-        <DataTableColumnHeader column={column} table={table} title='Motif' searchColumn={column} />
+        header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Traitement' searchColumn={column} />
       ),
       cell: ({ row }) => <span className='font-medium'>{row.original.name}</span>,
       meta: { width: 'wide' },

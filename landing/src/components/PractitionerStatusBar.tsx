@@ -128,7 +128,7 @@ export default function PractitionerStatusBar() {
             <p className='text-[10px] uppercase tracking-[0.18em] text-secondary/40 font-semibold'>Maintenant</p>
             {current ? (
               <div className='flex items-center gap-2 mt-0.5 px-1 -ml-1'>
-                <MotifPill name={current.motif?.name || 'Motif'} color={current.motif?.color} />
+                <MotifPill name={current.motif?.name || 'Traitement'} color={current.motif?.color} />
                 <span className='text-xs text-secondary/60 font-medium'>Salle {current.resource?.name || '1'}</span>
                 <span className='text-xs text-secondary/40'>·</span>
                 <span className='text-xs text-secondary/80 font-medium truncate'>{current.patient?.firstName || current.name || 'Patient'}</span>
@@ -158,7 +158,7 @@ export default function PractitionerStatusBar() {
             <p className='text-[10px] uppercase tracking-[0.18em] text-secondary/40 font-semibold'>Suivant</p>
             {next ? (
               <div className='flex items-center gap-2 mt-0.5 px-1 -ml-1'>
-                <MotifPill name={next.motif?.name || 'Motif'} color={next.motif?.color} />
+                <MotifPill name={next.motif?.name || 'Traitement'} color={next.motif?.color} />
                 <span className='text-xs text-secondary/60 font-medium'>Salle {next.resource?.name || '2'}</span>
                 <span className='text-xs text-secondary/40'>·</span>
                 <span className='text-xs text-secondary/80 font-medium truncate'>{next.patient?.firstName || next.name || 'Patient'}</span>

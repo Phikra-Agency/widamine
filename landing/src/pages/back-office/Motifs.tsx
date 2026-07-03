@@ -44,14 +44,14 @@ function Heading() {
   return (
     <div className='flex items-center justify-between'>
       <div>
-        <h3 className='bo-title'>Gestion Des Motifs</h3>
-        <p className='bo-subtitle'>Définissez les motifs de consultation</p>
+        <h3 className='bo-title'>Gestion Des Traitements</h3>
+        <p className='bo-subtitle'>Définissez les traitements de consultation</p>
       </div>
       <button
         onClick={() => { clearItem(); setOperation('create'); openModal() }}
         className='bo-primary-btn cursor-pointer hover:scale-[1.02]'
       >
-        <Plus weight='bold' /> Ajouter Un Motif
+        <Plus weight='bold' /> Ajouter Un Traitement
       </button>
     </div>
   )
@@ -65,14 +65,14 @@ function Table() {
       <table className='w-full text-sm'>
       <thead>
         <tr className='border-b border-black/[0.04]'>
-          <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</th>
+          <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitement</th>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Durée</th>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 text-right'>Actions</th>
         </tr>
       </thead>
       <tbody>
         {items.length === 0 && (
-          <tr><td colSpan={3} className='px-6 py-12 text-center text-secondary/40'>Aucun motif trouvé</td></tr>
+          <tr>          <td colSpan={3} className='px-6 py-12 text-center text-secondary/40'>Aucun traitement trouvé</td></tr>
         )}
         {items.map((item) => (
           <tr className='border-b border-black/[0.04] hover:bg-secondary/[0.02] transition-colors' key={item.id}>
@@ -100,12 +100,12 @@ function Modal() {
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
       <motion.form onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); saveItem() }} initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={['create', 'edit'].includes(operation) && modalOpen ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className={clsx('relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated', ['create', 'edit'].includes(operation) && modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
         <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'>
-          <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} motif</h2>
-          <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez le motif de consultation' : 'Ajoutez un nouveau motif'}</p>
+          <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} traitement</h2>
+          <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez le traitement de consultation' : 'Ajoutez un nouveau traitement'}</p>
         </div>
         <div className='p-6'>
-          <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 mb-2 block'>Nom du motif</label>
-          <input type='text' value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} className='bo-input' placeholder='Nom du motif' />
+          <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 mb-2 block'>Nom du traitement</label>
+          <input type='text' value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} className='bo-input' placeholder='Nom du traitement' />
           <label className='mt-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 mb-2 block'>Durée (minutes)</label>
           <input
             type='number'
@@ -136,7 +136,7 @@ function DeleteModal() {
           <div className='mx-auto w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4'>
             <Trash2 size={26} className='text-red-500' />
           </div>
-          <h2 className='text-lg font-semibold text-secondary'>Supprimer ce motif ?</h2>
+          <h2 className='text-lg font-semibold text-secondary'>Supprimer ce traitement ?</h2>
           <p className='text-sm text-secondary/50 mt-2'>Cette action est irréversible.</p>
         </div>
         <div className='px-6 py-4 flex gap-3 justify-end border-t border-black/[0.04]'>

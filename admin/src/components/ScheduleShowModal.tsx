@@ -13,6 +13,7 @@ import {
   ArrowRight,
   User,
   Door,
+  type Icon,
 } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 
@@ -37,11 +38,11 @@ function periodFromHour(h: number) {
 }
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-  PENDING: { label: 'En attente', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  CONFIRMED: { label: 'Confirmée', bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  CANCELLED: { label: 'Annulée', bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
-  COMPLETED: { label: 'Terminée', bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
-  EXPIRED: { label: 'Expirée', bg: 'bg-gray-50', text: 'text-gray-700', dot: 'bg-gray-400' },
+  PENDING: { label: 'En attente', bg: 'bg-secondary/[0.08]', text: 'text-secondary', dot: 'bg-secondary' },
+  CONFIRMED: { label: 'Confirmée', bg: 'bg-primary/[0.08]', text: 'text-primary', dot: 'bg-primary' },
+  CANCELLED: { label: 'Annulée', bg: 'bg-accent/[0.08]', text: 'text-accent', dot: 'bg-accent' },
+  COMPLETED: { label: 'Terminée', bg: 'bg-primary/[0.08]', text: 'text-primary', dot: 'bg-primary' },
+  EXPIRED: { label: 'Expirée', bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -58,18 +59,15 @@ function initials(name: string) {
   return name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 }
 
-function InfoCard({ icon: Icon, label, children, color }: { icon: React.ElementType; label: string; children: React.ReactNode; color?: string }) {
+function InfoRow({ icon: Icon, label, children }: { icon: Icon; label: string; children: React.ReactNode }) {
   return (
-    <div className='relative overflow-hidden rounded-surface bg-card shadow-bo-card'>
-      <div className='px-4 py-3'>
-        <div className='mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground'>
-          <Icon size={11} />
-          {label}
-        </div>
-        <div className='flex items-center gap-2 text-sm font-medium text-foreground'>
-          {children}
-          {color && <span className='h-2.5 w-2.5 shrink-0 rounded-full' style={{ backgroundColor: color }} />}
-        </div>
+    <div className='flex items-center gap-2.5'>
+      <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06]'>
+        <Icon size={12} className='text-primary' />
+      </div>
+      <div>
+        <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>{label}</p>
+        <p className='text-sm text-foreground'>{children}</p>
       </div>
     </div>
   )
@@ -123,10 +121,10 @@ export default function ScheduleShowModal() {
     <Dialog open={openShowModal} onOpenChange={(o) => { if (!o) toggleOpenShowModal() }}>
       <DialogContent
         showCloseButton={false}
-        className='max-h-[85vh] overflow-hidden p-0 shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl'
+        className='max-lg:left-[15px] max-lg:right-[15px] max-lg:top-1/2 max-lg:-translate-y-1/2 max-h-[85vh] overflow-hidden shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl'
       >
         {/* Header */}
-        <div className='flex items-start justify-between px-5 pt-5 pb-3'>
+        <div className='flex items-start justify-between pb-3'>
           <div className='flex items-start gap-3'>
             <div
               className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white'
@@ -159,30 +157,27 @@ export default function ScheduleShowModal() {
                 <CaretRight size={13} />
               </button>
             </div>
+            <button onClick={() => toggleOpenShowModal()} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/40 hover:text-foreground transition-colors' aria-label='Fermer'>
+              <X size={13} />
+            </button>
           </div>
         </div>
 
-        <div className='mx-5 h-px bg-border-subtle/40' />
+        <div className='h-px bg-border-subtle/40' />
 
-        {/* Info cards grid */}
-        <div className='grid grid-cols-2 gap-2.5 px-5 py-4'>
-          <InfoCard icon={Tag} label='Motif' color={color}>{motif?.name || '-'}</InfoCard>
-          <InfoCard icon={Clock} label='Durée'>{duration ? `${duration} min` : '-'}</InfoCard>
-          <InfoCard icon={CalendarBlank} label='Séance'>{item.session?.session ? `Séance ${item.session.session}` : '-'}</InfoCard>
-          <InfoCard icon={User} label='Praticien'>{apt?.practitioner?.name || 'Non assigné'}</InfoCard>
-        </div>
-
-        <div className='mx-5 h-px bg-border-subtle/40' />
-
-        {/* Salle full width */}
-        <div className='px-5 py-3'>
-          <InfoCard icon={Door} label='Salle'>{apt?.resource?.name || 'Non assignée'}</InfoCard>
+        {/* Info rows */}
+        <div className='grid grid-cols-2 gap-x-6 gap-y-4 py-4'>
+          <InfoRow icon={Tag} label='Traitement'>{motif?.name || '-'}</InfoRow>
+          <InfoRow icon={Clock} label='Durée'>{duration ? `${duration} min` : '-'}</InfoRow>
+          <InfoRow icon={CalendarBlank} label='Séance'>{item.session?.session ? `Séance ${item.session.session}` : '-'}</InfoRow>
+          <InfoRow icon={User} label='Praticien'>{apt?.practitioner?.name || 'Non assigné'}</InfoRow>
+          <InfoRow icon={Door} label='Salle'>{apt?.resource?.name || 'Non assignée'}</InfoRow>
         </div>
 
         {/* Footer */}
-        <div className='flex items-center justify-between border-t border-border-subtle/40 px-5 py-3.5'>
+        <div className='flex items-center justify-between border-t border-border-subtle/40 py-3.5'>
           <span className='text-xs font-medium text-muted-foreground/40'>
-            {period}{curIdx >= 0 && <span className='ml-1 text-muted-foreground/25'>· {curIdx + 1}{curIdx === 0 ? 'er' : 'e'} du jour</span>}
+            {period}{curIdx >= 0 && <span className='ml-1 text-muted-foreground/25'>· {curIdx + 1}</span>}
           </span>
           {apt?.id && (
             <Button onClick={goDetails} variant='ghost' size='sm' className='gap-1.5 text-xs font-medium h-8 text-primary/80 hover:text-primary hover:bg-primary/[0.06]'>

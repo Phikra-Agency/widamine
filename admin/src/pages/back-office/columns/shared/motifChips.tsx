@@ -2,7 +2,7 @@ import { Link } from '@phosphor-icons/react'
 
 export function MotifChips({
   motifs,
-  emptyLabel = 'Aucun motif',
+  emptyLabel = 'Aucun traitement',
 }: {
   motifs?: { id: string; name: string }[]
   emptyLabel?: string
@@ -31,7 +31,7 @@ export function SallesMotifChips({
   assignments?: { id?: string; motifId?: string; motif?: { name?: string } }[]
 }) {
   if (!assignments?.length) {
-    return <span className='text-xs text-secondary/30'>Aucun motif</span>
+    return <span className='text-xs text-secondary/30'>Aucun traitement</span>
   }
   return (
     <div className='flex flex-wrap gap-1.5'>

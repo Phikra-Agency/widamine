@@ -139,7 +139,7 @@ function Table() {
             <tr className='border-b border-black/[0.04]'>
               <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Patient</th>
               <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Contact</th>
-              <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</th>
+              <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitement</th>
               <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Statut</th>
               <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Praticien</th>
               <th scope='col' className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 text-right'>Actions</th>
@@ -470,7 +470,7 @@ function ShowModal() {
                 </div>
 
                 <div className='space-y-2'>
-                  <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</label>
+                  <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitement</label>
                   <div className='flex items-center gap-2 rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary'>
                     <Stethoscope size={15} className='text-secondary/30' />
                     {item.motif?.name || 'Service direct'}

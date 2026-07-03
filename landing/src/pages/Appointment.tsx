@@ -43,7 +43,7 @@ export default function Appointment() {
                 Réservez votre <span style={{ color: C.primary, fontStyle: 'italic' }}>consultation</span>
               </h1>
               <p className='mt-6 max-w-md text-sm leading-8 sm:text-base' style={{ color: `${C.secondary}b3` }}>
-                Choisissez votre motif de visite, sélectionnez le créneau qui vous convient et renseignez vos coordonnées. En quelques clics, votre rendez-vous est confirmé.
+                Choisissez votre traitement, sélectionnez le créneau qui vous convient et renseignez vos coordonnées. En quelques clics, votre rendez-vous est confirmé.
               </p>
               <div className='mt-6 flex flex-wrap gap-3'>
                 <TrustPill icon={ShieldCheck} text='Réservation sécurisée' />
@@ -55,7 +55,7 @@ export default function Appointment() {
             {/* Motifs card */}
             <div className='rounded-[2rem] bg-white p-6 sm:p-8' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}>
               <p className='text-xs uppercase tracking-[0.26em] font-semibold' style={{ color: C.primary }}>
-                Motifs disponibles
+                Traitements disponibles
               </p>
               <p className='mt-1 text-xs' style={{ color: `${C.secondary}a0` }}>Sélectionnez votre motif dans le formulaire</p>
               <div className='mt-5 flex flex-wrap gap-2'>

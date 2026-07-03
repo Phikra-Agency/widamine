@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin, PhoneCall } from '@phosphor-icons/react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -11,6 +12,8 @@ import 'swiper/css/navigation'
 import 'swiper/css/effect-coverflow'
 import 'swiper/css/effect-creative'
 import PublicNavbar from '@/components/PublicNavbar'
+import { SERVICE_PAGES, ICON_MAP } from '@/lib/siteContent'
+import { C, TYPE } from '@/lib/theme'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -67,16 +70,6 @@ const SM = {
 
 /* ── Widamine palette ────────────────────────────────────────── */
 
-const C = {
-  bg: '#F7F1EB',
-  primary: '#2e90c0',
-  secondary: '#1a3646',
-  accent: '#e8c5b8',
-  orange: '#ef6007',
-  yellow: '#ffb500',
-  green: '#62bca1',
-}
-
 /* ── SVG Icons ────────────────────────────────────────────────── */
 
 const RightArrow = () => (
@@ -120,10 +113,64 @@ const NavArrow = ({ dir }: { dir: 'left' | 'right' }) => (
 
 /* ── Plant SVG Icons (from Square Moncey) ────────────────────── */
 
-const PlantIcon = ({ color }: { color: string }) => (
-  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='91' viewBox='0 0 44 91' fill='none'>
-    <path d='M13.7736 64.6343C9.42909 66.5848 7.62586 70.846 7.77719 75.6056C7.92851 80.3651 10.9247 86.6199 15.1469 88.8223C19.3696 91.0242 24.6402 90.9164 28.9173 88.8223C33.2328 86.7096 36.6254 80.5319 36.4075 75.732C36.1991 71.1419 32.9537 67.3338 29.8782 63.9203C30.1378 63.5547 30.6852 58.9374 31.092 55.1963L13.6142 54.2195L13.7736 64.6343Z' fill='currentColor' />
-    <path d='M36.7295 25.8855C34.9362 26.1773 33.0686 26.4655 31.3293 25.9404C29.5899 25.4153 28.0304 23.8168 28.1863 22.0068C28.4047 19.4704 31.5146 18.3341 34.06 18.3024C36.6053 18.2707 39.4556 18.6554 41.4197 17.0361C42.914 15.8037 43.4133 13.5129 42.5678 11.7704C41.7224 10.0279 39.6133 9.00257 37.7208 9.41397C35.3544 9.92821 33.8819 12.2226 31.9468 13.6779C30.0117 15.1332 26.3939 15.1377 25.9721 12.7531C25.4909 10.0306 29.7299 8.85442 30.5346 6.20936C30.9818 4.73913 30.1903 3.10625 28.9737 2.16702C27.7572 1.22779 26.2018 0.855815 24.6813 0.633355C22.7222 0.346558 20.6575 0.280416 18.8294 1.04068C17.0012 1.80049 15.4757 3.56113 15.511 5.54062C15.5459 7.48658 16.9758 9.07733 17.892 10.7949C18.8081 12.5121 18.987 15.0906 17.2635 15.9953C14.9397 17.2159 12.8152 14.0988 10.4429 12.9756C8.19748 11.9127 5.1877 12.9847 4.1198 15.2278C3.0519 17.471 4.11708 20.4831 6.35754 21.556C8.53503 22.5989 11.094 21.8645 13.508 21.8156C15.922 21.7666 18.8846 23.1363 18.7474 25.5466C18.6654 26.9915 17.4026 28.1473 16.0235 28.5863C14.6443 29.0254 13.1591 28.9044 11.7147 28.8083C8.67729 28.6067 5.3558 28.6203 2.95087 30.4865C0.545946 32.3528 0.0724764 36.7594 2.77825 38.1539C4.51715 39.0501 6.64162 38.3352 8.35742 37.3946C10.0728 36.454 11.7768 35.2601 13.7318 35.194C15.6873 35.1278 17.8353 36.9025 17.2413 38.7665C16.8299 40.0564 15.3629 40.6921 14.0186 40.8525C12.6743 41.0128 11.2748 40.866 9.99665 41.3123C7.73218 42.1034 6.41282 44.9125 7.24965 47.1606C8.08693 49.4088 10.9218 50.6706 13.1528 49.788C15.0924 49.0205 16.2351 47.0691 17.5 45.4104C18.765 43.7517 20.6752 42.1569 22.7104 42.6136C25.5063 43.2406 26.0981 46.9345 27.9865 49.0898C29.304 50.5936 31.5128 51.3466 33.4071 50.7073C35.3014 50.0685 36.6375 47.9286 36.1473 45.9903C35.5066 43.4581 32.5757 42.4387 30.2668 41.2167C27.9579 39.9943 25.8117 36.9628 27.542 35.0055C28.6217 33.7845 30.5885 33.9023 32.0918 34.5316C33.5951 35.1609 34.9398 36.1939 36.5301 36.5509C39.3387 37.1816 42.4695 35.2157 43.1215 32.4121C43.7735 29.6085 41.7976 27.1287 40.0935 25.1733C39.8339 24.8758 39.5646 24.5875 39.2865 24.3085L36.7295 25.8855Z' fill={color} />
+/* ── Category Icons ──────────────────────────────────────────── */
+
+const FaceIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <ellipse cx='22' cy='28' rx='18' ry='14' fill='currentColor' opacity='0.15' />
+    <path d='M22 8C13.716 8 7 14.716 7 23v5c0 4.418 3.582 8 8 8h14c4.418 0 8-3.582 8-8v-5c0-8.284-6.716-15-15-15z' stroke='currentColor' strokeWidth='2' fill='none' />
+    <circle cx='16' cy='22' r='2' fill='currentColor' />
+    <circle cx='28' cy='22' r='2' fill='currentColor' />
+    <path d='M15 30c2 2 5 3 7 3s5-1 7-3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' fill='none' />
+  </svg>
+)
+
+const BodyIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <ellipse cx='22' cy='26' rx='16' ry='12' fill='currentColor' opacity='0.15' />
+    <path d='M22 8c-4 0-7 2-7 6v4c0 4 3 6 7 6s7-2 7-6v-4c0-4-3-6-7-6z' stroke='currentColor' strokeWidth='2' fill='none' />
+    <path d='M11 18c-2 2-4 6-4 10s2 6 5 6' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' fill='none' />
+    <path d='M33 18c2 2 4 6 4 10s-2 6-5 6' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' fill='none' />
+    <path d='M16 32c0 2 2 4 6 4s6-2 6-4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' fill='none' />
+  </svg>
+)
+
+const LaserIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <circle cx='22' cy='22' r='16' fill='currentColor' opacity='0.1' />
+    <path d='M22 6v8M22 30v8M6 22h8M30 22h8' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' opacity='0.4' />
+    <circle cx='22' cy='22' r='6' stroke='currentColor' strokeWidth='2' fill='none' />
+    <circle cx='22' cy='22' r='2' fill='currentColor' />
+    <path d='M14 14l4 4M26 26l4 4M26 14l-4 4M14 26l4-4' stroke='currentColor' strokeWidth='1.2' strokeLinecap='round' opacity='0.5' />
+  </svg>
+)
+
+const ConsultIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <rect x='8' y='12' width='28' height='22' rx='4' stroke='currentColor' strokeWidth='2' fill='none' />
+    <path d='M8 18h28' stroke='currentColor' strokeWidth='1.5' opacity='0.3' />
+    <circle cx='17' cy='27' r='3' stroke='currentColor' strokeWidth='1.5' fill='none' />
+    <path d='M22 28c2 0 3-1 3-2' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' fill='none' />
+    <path d='M30 26h2M30 29h1' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' opacity='0.5' />
+  </svg>
+)
+
+const NeedleIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <circle cx='22' cy='22' r='16' fill='currentColor' opacity='0.1' />
+    <path d='M16 30l10-18' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
+    <circle cx='15' cy='31' r='3' stroke='currentColor' strokeWidth='1.5' fill='none' />
+    <path d='M27 11l2-1M25 14l-1 1' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' opacity='0.4' />
+  </svg>
+)
+
+const ScissorsIcon = ({ color }: { color: string }) => (
+  <svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'>
+    <circle cx='22' cy='22' r='16' fill='currentColor' opacity='0.1' />
+    <path d='M14 16l16 16M14 32l16-16' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />
+    <circle cx='14' cy='16' r='3' stroke='currentColor' strokeWidth='1.5' fill='none' />
+    <circle cx='14' cy='32' r='3' stroke='currentColor' strokeWidth='1.5' fill='none' />
+    <path d='M30 16h2M30 19h1' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' opacity='0.4' />
   </svg>
 )
 
@@ -175,20 +222,7 @@ const TEAM_ICONS = ['#62bca1', '#62bca1', '#62bca1', '#ffb500', C.primary, C.pri
 
 function HeroSection() {
   const heroRef = useRef<HTMLElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
   const { open } = useScheduleModalStore()
-  const [isPlaying, setIsPlaying] = useState(true)
-
-  const toggleVideo = () => {
-    if (!videoRef.current) return
-    if (videoRef.current.paused) {
-      videoRef.current.play()
-      setIsPlaying(true)
-    } else {
-      videoRef.current.pause()
-      setIsPlaying(false)
-    }
-  }
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -198,52 +232,60 @@ function HeroSection() {
   }, [])
 
   return (
-    <section ref={heroRef} className='relative' style={{ background: C.bg, minHeight: '100svh' }}>
-      <div className='relative z-10 mx-auto max-w-7xl px-4 sm:px-6 text-center pt-32 sm:pt-40 lg:pt-48'>
-        <img src='/logo.png' alt='Widamine' data-fade className='mx-auto w-12 sm:w-14 lg:w-16' />
-        <h1 data-fade className='mt-10 font-amoria text-[2.2rem] leading-[1.08] sm:text-5xl md:text-6xl' style={{ color: C.secondary }}>
+    <section ref={heroRef} className='relative overflow-hidden' style={{ background: C.bg, minHeight: '100svh' }}>
+      <div className='relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 pt-44 sm:pt-52 lg:pt-60'>
+        <h1
+          data-fade
+          className='mx-auto max-w-[980px] leading-[0.98]'
+          style={{
+            fontFamily: TYPE.headingFamily,
+            fontSize: 'clamp(3rem, 6.4vw, 5.9rem)',
+            letterSpacing: TYPE.headingSpacing,
+            color: C.secondary,
+          }}
+        >
           Bienvenue à <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine</span>
           <br className='hidden sm:block' />
           Centre de dermato-esthétique
         </h1>
-        <p data-fade className='mx-auto mt-6 max-w-xl text-base leading-7' style={{ color: `${C.secondary}99` }}>
-          1er centre médical de Dermato-Esthétique, Bodycontouring et Lasers au Maroc.
-        </p>
-        <div data-fade className='mt-10 flex flex-wrap items-center justify-center gap-4'>
-          <button onClick={open} className='inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.secondary }}>
-            Prendre rendez-vous <RightArrow />
+        <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
+          <button
+            onClick={open}
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(109,0,36,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(109,0,36,0.22)]'
+            style={{ background: C.accent }}
+          >
+            Prendre rendez-vous
           </button>
-          <Link to='/services/consultation' className='inline-flex items-center gap-2.5 rounded-full border-2 px-7 py-3.5 text-sm font-semibold transition-all hover:-translate-y-0.5' style={{ borderColor: C.primary, color: C.primary }}>
-            Consultation <RightArrow />
+          <Link
+            to='/appointment'
+            className='inline-flex min-h-14 items-center justify-center rounded-full border px-8 text-base font-semibold transition-all hover:-translate-y-0.5 hover:bg-primary/7'
+            style={{ borderColor: C.primary, color: C.secondary }}
+          >
+            Prendre rendez-vous
           </Link>
         </div>
       </div>
 
-      <div className='max-w-4xl mx-auto px-4 mt-20 sm:mt-28 pb-16 relative z-20' data-video-wrap>
-        <div data-fade className='overflow-hidden rounded-[2rem] relative group' style={{ aspectRatio: '16/9', boxShadow: '0 25px 60px -12px rgba(0,0,0,0.25), 0 8px 24px -8px rgba(0,0,0,0.15)' }}>
-          <img src='https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/660ea71c6f94851cc9dbd4a9_cabine1.jpg' alt='' className='absolute inset-0 h-full w-full object-cover widamine-tint' loading='eager' />
-          <video ref={videoRef} autoPlay muted loop playsInline className='absolute inset-0 h-full w-full object-cover'>
-            <source src='https://cdn.pixabay.com/video/2020/07/30/45349-445002403_large.mp4' type='video/mp4' />
-          </video>
-          <button
-            onClick={toggleVideo}
-            className='absolute bottom-4 right-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/30'
-            aria-label={isPlaying ? 'Pause video' : 'Play video'}
-          >
-            {isPlaying ? (
-              <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'><rect x='6' y='4' width='4' height='16' rx='1'/><rect x='14' y='4' width='4' height='16' rx='1'/></svg>
-            ) : (
-              <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'><path d='M8 5v14l11-7z'/></svg>
-            )}
-          </button>
+      <div className='relative z-20 mx-auto mt-32 max-w-[980px] px-5 pb-0 sm:mt-36' data-video-wrap>
+        <div
+          data-fade
+          className='relative overflow-hidden rounded-[28px]'
+          style={{
+            aspectRatio: '16/9',
+            boxShadow: '0 28px 70px -28px rgba(30,30,30,0.36)',
+          }}
+        >
+          <img src='/hero.jpg' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' />
         </div>
       </div>
 
       <div className='absolute inset-0 pointer-events-none'>
-        <img src={SM.hero.topLeft} alt='' className='absolute left-0 top-0 w-44 sm:w-56 opacity-60 widamine-tint' loading='lazy' />
-        <img src={SM.hero.topRight} alt='' className='absolute right-0 top-0 w-44 sm:w-56 opacity-60 widamine-tint' loading='lazy' />
-        <img src={SM.hero.midRight} alt='' className='absolute right-0 top-1/3 w-36 sm:w-44 opacity-50 widamine-tint' loading='lazy' />
-        <img src={SM.hero.midLeft} alt='' className='absolute left-0 bottom-0 w-44 sm:w-56 opacity-50 widamine-tint' loading='lazy' />
+        <div className='absolute -left-20 top-32 h-56 w-56 rounded-full bg-white/70' />
+        <div className='absolute -right-10 top-0 h-28 w-52 rounded-bl-full bg-white/70' />
+        <img src={SM.hero.topLeft} alt='' className='absolute -left-8 top-0 w-48 opacity-65 widamine-tint sm:w-64' loading='lazy' />
+        <img src={SM.hero.topRight} alt='' className='absolute right-0 top-0 w-36 opacity-65 widamine-tint sm:w-48' loading='lazy' />
+        <img src={SM.hero.midRight} alt='' className='absolute right-0 top-[38%] w-36 opacity-55 widamine-tint sm:w-52' loading='lazy' />
+        <img src={SM.hero.midLeft} alt='' className='absolute left-0 bottom-0 w-40 opacity-45 widamine-tint sm:w-56' loading='lazy' />
       </div>
     </section>
   )
@@ -253,16 +295,16 @@ function IntroSection() {
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10'>
-        <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+        <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           Bienvenue à Widamine <span style={{ color: C.primary, fontStyle: 'italic' }}>Aesthetic Center</span>
         </h2>
         <p className='mx-auto mt-8 max-w-[700px] text-base leading-8' style={{ color: `${C.secondary}a6` }}>
           Ici, chaque traitement est une promesse d'excellence. Grâce à une combinaison unique de technologies de pointe et de savoir-faire expert, nous vous aidons à redécouvrir votre beauté et à retrouver une peau saine et éclatante.
         </p>
       </div>
-      <img src={SM.intro.topLeft} alt='' className='absolute left-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
-      <img src={SM.intro.topRight} alt='' className='absolute right-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
-      <img src={SM.intro.bottomRight} alt='' className='absolute right-0 bottom-0 w-40 sm:w-52 opacity-40 widamine-tint' loading='lazy' />
+      <img src={SM.intro.topLeft} alt='' data-parallax className='absolute left-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
+      <img src={SM.intro.topRight} alt='' data-parallax className='absolute right-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
+      <img src='/methode-top-right.avif' alt='' data-parallax className='absolute right-0 bottom-0 w-40 sm:w-52 opacity-40 widamine-tint' loading='lazy' />
     </section>
   )
 }
@@ -270,28 +312,52 @@ function IntroSection() {
 
 function ConceptSection() {
   return (
-    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: '#FFF4F1' }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
-          <div className='relative'>
-            <div className='overflow-hidden rounded-[2rem]' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-              <img src={SM.concept.image} alt='Concept Widamine' className='h-full w-full object-cover widamine-tint' loading='lazy' style={{ minHeight: 320 }} />
+        <div className='grid gap-16 lg:grid-cols-[0.95fr_1fr] lg:items-center'>
+          <div className='relative mx-auto h-[560px] w-full max-w-[560px]'>
+            <div className='absolute -left-16 top-16 h-44 w-52 rounded-[48%] bg-white/60' />
+            <div className='absolute -bottom-10 left-8 h-72 w-56 rounded-[50%] bg-white/45' />
+            <div className='absolute bottom-0 right-12 h-80 w-44 rounded-[50%] bg-white/50' />
+            <img
+              src={SM.concept.flower}
+              alt=''
+              className='pointer-events-none absolute right-16 top-0 z-20 w-28 select-none widamine-tint sm:w-36'
+              loading='lazy'
+            />
+
+            <div className='absolute left-12 top-24 h-[390px] w-[350px] overflow-hidden rounded-[22px] shadow-[0_24px_55px_rgba(30,30,30,0.12)] sm:left-16 sm:w-[360px]'>
+              <img
+                src={SM.concept.image}
+                alt='Concept Widamine'
+                className='h-full w-full object-cover widamine-tint'
+                loading='lazy'
+              />
             </div>
-            <img src={SM.concept.flower} alt='' className='absolute -bottom-8 -right-8 w-32 sm:w-44 opacity-70 widamine-tint' loading='lazy' />
+
+            <div className='absolute bottom-10 right-2 z-10 h-[350px] w-[235px] overflow-hidden rounded-[999px] border-[10px] border-white bg-white shadow-[0_26px_60px_rgba(30,30,30,0.14)] sm:right-8 sm:h-[365px] sm:w-[245px]'>
+              <img
+                src={SM.gallery[0]}
+                alt='Espace Widamine'
+                className='h-full w-full object-cover widamine-tint'
+                loading='lazy'
+              />
+            </div>
           </div>
-          <div>
-        <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
-          Notre <span style={{ color: C.primary, fontStyle: 'italic' }}>Objectif</span>
-        </h2>
-        <p className='mt-8 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
-          Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu.
-        </p>
-        <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
-          Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.
-        </p>
-        <Link to='/contact' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
-          Nous contacter <RightArrow />
-        </Link>
+
+          <div className='max-w-xl'>
+            <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+              Notre <span style={{ color: C.primary, fontStyle: 'italic' }}>Objectif</span>
+            </h2>
+            <p className='mt-8 text-base leading-8' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 600 }}>
+              Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu.
+            </p>
+            <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+              Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.
+            </p>
+            <Link to='/contact' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+              Nous contacter <RightArrow />
+            </Link>
           </div>
         </div>
       </div>
@@ -299,68 +365,201 @@ function ConceptSection() {
   )
 }
 
-function MethodeSection() {
-  const cards = [
-    {
-      cat: 'visage',
-      label: 'Traitements du visage',
-      desc: 'Facial Aesthetics, Esthétique des lèvres, de l\'œil, des sourcils et consultation personnalisée.',
-      icon: PlantIcon,
-      bg: C.primary,
-      link: '/services/facial-aesthetics',
-    },
-    {
-      cat: 'corps',
-      label: 'Traitements du corps',
-      desc: 'Body Aesthetics, Breast Aesthetics, BBL, Liposuccion, Vaser, Épilation laser et plus.',
-      icon: VaseIcon,
-      bg: C.green,
-      link: '/services/body-aesthetics',
-    },
-    {
-      cat: 'techniques',
-      label: 'Épilation laser',
-      desc: 'Épilation définitive laser pour toutes les zones du corps et du visage.',
-      icon: FlowerIcon,
-      bg: C.yellow,
-      link: '/services/epilation-laser',
-    },
-  ]
+interface ServiceItem {
+  name: string; slug: string; description: string | null; color: string; duration: number;
+}
+
+function assignIcon(name: string, slug: string) {
+  const kw = (name + ' ' + slug).toLowerCase()
+  if (kw.includes('visage') || kw.includes('facial') || kw.includes('lip') || kw.includes('eye') || kw.includes('eyebrow')) return FaceIcon
+  if (kw.includes('corps') || kw.includes('body') || kw.includes('breast') || kw.includes('bbl') || kw.includes('liposuction')) return BodyIcon
+  if (kw.includes('laser') || kw.includes('peeling') || kw.includes('epilation')) return LaserIcon
+  if (kw.includes('consultation') || kw.includes('bilan') || kw.includes('suivi')) return ConsultIcon
+  if (kw.includes('urgence') || kw.includes('detartrage')) return NeedleIcon
+  return ScissorsIcon
+}
+
+function assignCategory(name: string, slug: string): 'face' | 'body' | 'laser' | 'medical' {
+  const kw = (name + ' ' + slug).toLowerCase()
+  if (kw.includes('visage') || kw.includes('facial') || kw.includes('lip') || kw.includes('eye') || kw.includes('eyebrow')) return 'face'
+  if (kw.includes('corps') || kw.includes('body') || kw.includes('breast') || kw.includes('bbl') || kw.includes('liposuction')) return 'body'
+  if (kw.includes('laser') || kw.includes('peeling') || kw.includes('epilation')) return 'laser'
+  return 'medical'
+}
+
+const SERVICES_WITH_TESTIMONIALS = SERVICE_PAGES
+  .filter((s) => s.slug !== 'consultation')
+  .map((service, i) => ({
+    service,
+    testimonial: TESTIMONIALS[i % TESTIMONIALS.length],
+  }))
+
+function TreatmentsSection() {
+  const total = SERVICES_WITH_TESTIMONIALS.length
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [direction, setDirection] = useState(1)
+
+  const active = SERVICES_WITH_TESTIMONIALS[activeIndex]
+
+  const goNext = useCallback(() => {
+    setDirection(1)
+    setActiveIndex((prev) => (prev + 1) % total)
+  }, [total])
+
+  const goPrev = useCallback(() => {
+    setDirection(-1)
+    setActiveIndex((prev) => (prev - 1 + total) % total)
+  }, [total])
+
+  // ponytail: auto-rotation resets on manual nav (interval restarts)
+  useEffect(() => {
+    const timer = setInterval(goNext, 5000)
+    return () => clearInterval(timer)
+  }, [goNext])
+
+  const slideVariants = {
+    enter: (dir: number) => ({ x: dir * 80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir * -80, opacity: 0 }),
+  }
 
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
-          <span style={{ color: C.primary, fontStyle: 'italic' }}>Nos traitements</span>
+        <h2
+          className='text-center leading-tight sm:text-4xl md:text-5xl'
+          style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}
+        >
+          L'énergie du{' '}
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine Center</span>
         </h2>
-        <p className='mx-auto mt-4 max-w-lg text-center text-sm leading-7' style={{ color: `${C.secondary}99` }}>
-          Des soins dermatologiques et esthétiques pour le visage et le corps, adaptés à chaque besoin.
-        </p>
-        <div className='mt-14 grid gap-6 sm:grid-cols-3' data-methode-wrap>
-          {cards.map((card, i) => {
-            const Icon = card.icon
-            return (
-              <Link
-                key={i}
-                to={card.link}
-                data-methode-item={i === 0 ? 'first' : i === 2 ? 'third' : 'second'}
-                className='group relative flex flex-col overflow-hidden rounded-[2rem] p-8 text-white shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl'
-                style={{ background: card.bg }}
+
+        <div className='mt-14 grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center'>
+          {/* Left side */}
+          <div className='relative min-h-[260px]'>
+            <AnimatePresence mode='wait' custom={direction}>
+              <motion.div
+                key={active.service.slug + '-left'}
+                custom={direction}
+                variants={slideVariants}
+                initial='enter'
+                animate='center'
+                exit='exit'
+                transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
               >
-                <div className='mb-6 h-16 flex items-end'>
-                  <Icon color='white' />
-                </div>
-                <h3 className='text-xl font-semibold'>{card.label}</h3>
-                <p className='mt-3 text-sm leading-6 text-white/75'>{card.desc}</p>
-                <div className='mt-auto pt-8 flex items-center gap-2 text-sm font-medium text-white/80 group-hover:text-white transition-all'>
-                  Découvrir <RightArrow />
-                </div>
-              </Link>
-            )
-          })}
+                <p className='text-lg italic font-medium' style={{ color: `${C.secondary}cc`, fontFamily: TYPE.headingFamily }}>
+                  <span style={{ color: C.primary }}>Nos</span> soins
+                </p>
+                <h3
+                  className='mt-6 text-[clamp(1.8rem,4vw,3rem)] font-bold leading-[1.2]'
+                  style={{ color: C.secondary, fontFamily: TYPE.headingFamily, maxWidth: 620 }}
+                >
+                  {active.service.title}
+                </h3>
+                <p className='mt-8 text-[clamp(1rem,1.3vw,1.3rem)] leading-relaxed' style={{ color: `${C.secondary}b3`, maxWidth: 520 }}>
+                  {active.service.intro}
+                </p>
+                <Link
+                  to={`/services/${active.service.slug}`}
+                  className='mt-10 inline-flex h-14 items-center gap-3 rounded-full px-8 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl'
+                  style={{ background: C.orange }}
+                >
+                  En savoir plus <RightArrow />
+                </Link>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right side */}
+          <div className='relative flex items-center justify-center py-4'>
+            <div
+              className='absolute h-[450px] w-[650px] rounded-full opacity-[0.18] max-w-[90vw]'
+              style={{ background: C.orange }}
+            />
+
+            <div
+              className='relative w-[460px] max-w-full rounded-[28px] bg-white px-10 py-14 sm:px-12 sm:py-16'
+              style={{ boxShadow: '0 30px 70px rgba(0,0,0,0.06)' }}
+            >
+              {/* Service icon — floating top-right */}
+              <div className='absolute -top-5 -right-5 flex h-14 w-14 items-center justify-center rounded-full shadow-lg' style={{ background: C.orange }}>
+                {ICON_MAP[active.service.slug] && (
+                  <img src={ICON_MAP[active.service.slug]} alt='' className='h-7 w-7 object-contain brightness-0 invert' />
+                )}
+              </div>
+
+              <p className='text-[56px] leading-none' style={{ color: C.orange }}>&ldquo;</p>
+
+              <div className='overflow-hidden' style={{ height: 170 }}>
+                <AnimatePresence mode='popLayout' custom={direction} initial={false}>
+                  <motion.div
+                    key={active.service.slug + '-quote'}
+                    custom={direction}
+                    variants={{
+                      enter: (dir: number) => ({ y: dir * 60, opacity: 0 }),
+                      center: { y: 0, opacity: 1 },
+                      exit: (dir: number) => ({ y: dir * -60, opacity: 0 }),
+                    }}
+                    initial='enter'
+                    animate='center'
+                    exit='exit'
+                    transition={{ duration: 0.7, ease: [0.65, 0, 0.35, 1] }}
+                  >
+                    <p className='text-[clamp(1rem,1.6vw,1.25rem)] leading-[1.7]' style={{ color: C.secondary }}>
+                      {active.testimonial.text}
+                    </p>
+                    <p className='mt-5 text-sm font-semibold tracking-wide' style={{ color: C.orange }}>
+                      — {active.testimonial.name}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Dots */}
+              <div className='mt-8 flex items-center gap-2'>
+                {SERVICES_WITH_TESTIMONIALS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setDirection(i > activeIndex ? 1 : -1); setActiveIndex(i) }}
+                    className='h-2 rounded-full transition-all'
+                    style={{
+                      background: i === activeIndex ? C.orange : `${C.secondary}26`,
+                      width: i === activeIndex ? 24 : 8,
+                    }}
+                    aria-label={`Service ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation arrows */}
+        <div className='mt-10 flex justify-center gap-4'>
+          <button
+            onClick={goPrev}
+            className='flex h-[52px] w-[52px] items-center justify-center rounded-full text-white transition-all hover:scale-105 active:scale-95'
+            style={{ background: C.orange }}
+            aria-label='Précédent'
+          >
+            <ArrowLeft />
+          </button>
+          <button
+            onClick={goNext}
+            className='flex h-[52px] w-[52px] items-center justify-center rounded-full text-white transition-all hover:scale-105 active:scale-95'
+            style={{ background: C.orange }}
+            aria-label='Suivant'
+          >
+            <ArrowRight />
+          </button>
         </div>
       </div>
-      <img src={SM.energie.bubbles} alt='' className='absolute left-0 bottom-0 opacity-20 hidden lg:block w-48 widamine-tint' loading='lazy' />
+      <img
+        src={SM.energie.bubbles}
+        alt=''
+        className='pointer-events-none absolute left-0 bottom-0 w-48 select-none hidden lg:block'
+        loading='lazy'
+      />
     </section>
   )
 }
@@ -369,7 +568,7 @@ function TeamSection() {
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+        <h2 className='text-center leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           <span style={{ color: C.primary, fontStyle: 'italic' }}>L'équipe</span> du Widamine Center
         </h2>
         <div className='mt-14'>
@@ -393,7 +592,7 @@ function TeamSection() {
                     <div className='mx-auto mb-3 h-10 w-10 rounded-full flex items-center justify-center' style={{ background: TEAM_ICONS[i] }}>
                       <svg width='20' height='20' viewBox='0 0 24 24' fill='white'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>
                     </div>
-                    <h3 className='text-lg font-semibold' style={{ color: C.secondary }}>{m.name}</h3>
+                    <h3 className='text-lg font-semibold' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, color: C.secondary }}>{m.name}</h3>
                     <p className='mt-1 text-xs font-medium' style={{ color: C.primary }}>{m.role}</p>
                   </div>
                 </article>
@@ -417,41 +616,103 @@ function TeamSection() {
 }
 
 function GallerySection() {
+  const [galleryIndex, setGalleryIndex] = useState(0)
+  const galleryTimer = useRef<ReturnType<typeof setInterval>>()
+
+  const goTo = (i: number) => {
+    setGalleryIndex(i)
+    clearInterval(galleryTimer.current)
+    galleryTimer.current = setInterval(() => {
+      setGalleryIndex((prev) => (prev + 1) % SM.gallery.length)
+    }, 4000)
+  }
+
+  useEffect(() => {
+    galleryTimer.current = setInterval(() => {
+      setGalleryIndex((prev) => (prev + 1) % SM.gallery.length)
+    }, 4000)
+    return () => clearInterval(galleryTimer.current)
+  }, [])
+
   return (
-    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl mb-14' style={{ color: C.secondary }}>
-          <span style={{ color: C.primary, fontStyle: 'italic' }}>Notre</span> espace
-        </h2>
-        <Swiper
-          modules={[Autoplay, Navigation, EffectCoverflow]}
-          effect='coverflow'
-          grabCursor
-          centeredSlides
-          slidesPerView={3}
-          spaceBetween={24}
-          coverflowEffect={{ rotate: 0, stretch: 0, depth: 200, modifier: 1.5, slideShadows: false }}
-          navigation={{ prevEl: '.gallery-prev', nextEl: '.gallery-next' }}
-          autoplay={{ delay: 3500, disableOnInteraction: false }}
-          speed={600}
-          loop
-          className='gallery-swiper'
-        >
-          {SM.gallery.map((src, i) => (
-            <SwiperSlide key={i}>
-              <div className='h-[250px] sm:h-[300px] overflow-hidden rounded-2xl mx-2' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-                <img src={src} alt={`Espace ${i + 1}`} className='h-full w-full object-cover transition-transform duration-500 hover:scale-110' loading='lazy' />
+    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: '#FFF4F1' }}>
+      <div className='pointer-events-none absolute -left-28 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
+      <img src={SM.hero.topRight} alt='' className='pointer-events-none absolute right-0 top-0 w-44 opacity-80 widamine-tint' loading='lazy' />
+      <div className='mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-[1fr_0.92fr] lg:items-center'>
+        <div className='relative min-h-[420px]'>
+          <div className='relative overflow-hidden rounded-[1.5rem] shadow-[0_20px_50px_rgba(30,30,30,0.14)]'>
+            {SM.gallery.map((src, i) => (
+              <div
+                key={i}
+                className='absolute inset-0 transition-opacity duration-700'
+                style={{ opacity: i === galleryIndex ? 1 : 0 }}
+              >
+                <img src={src} alt={`Espace Widamine ${i + 1}`} className='h-[420px] w-full object-cover widamine-tint' loading='lazy' />
               </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-        <div className='mt-6 flex justify-center gap-3'>
-          <button className='gallery-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
-            <ArrowLeft />
-          </button>
-          <button className='gallery-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
-            <ArrowRight />
-          </button>
+            ))}
+            <div style={{ height: 0, paddingBottom: '75%' }} />
+          </div>
+          <div className='mt-4 flex items-center justify-center gap-3'>
+            <button
+              onClick={() => goTo((galleryIndex - 1 + SM.gallery.length) % SM.gallery.length)}
+              className='flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:scale-105'
+              style={{ background: C.primary }}
+              aria-label='Précédent'
+            >
+              <ArrowLeft />
+            </button>
+            <div className='flex items-center gap-2'>
+              {SM.gallery.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className='h-2 rounded-full transition-all'
+                  style={{
+                    background: i === galleryIndex ? C.primary : `${C.secondary}26`,
+                    width: i === galleryIndex ? 24 : 8,
+                  }}
+                  aria-label={`Photo ${i + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => goTo((galleryIndex + 1) % SM.gallery.length)}
+              className='flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:scale-105'
+              style={{ background: C.primary }}
+              aria-label='Suivant'
+            >
+              <ArrowRight />
+            </button>
+          </div>
+        </div>
+
+        <div className='relative z-10 max-w-[620px]'>
+          <div className='mb-10 grid w-28 grid-cols-3 gap-4 opacity-25'>
+            {Array.from({ length: 9 }).map((_, i) => (
+              <span key={i} className='h-2.5 w-2.5 rounded-full' style={{ background: C.orange }} />
+            ))}
+          </div>
+          <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+            Un <span style={{ color: C.primary, fontStyle: 'italic' }}>aperçu</span> du
+            <br />
+            Widamine Center
+          </h2>
+          <p className='mt-12 max-w-xl text-xl leading-8 font-bold' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
+            Voici quelques photos des lieux, un centre dermato-esthétique pensé pour accueillir chaque patient avec calme et précision.
+          </p>
+          <p className='mt-10 max-w-xl text-base leading-9' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+            Un univers chaleureux qui vous accompagne depuis l'accueil jusqu'aux salles de traitement, avec une attention portée aux matières, à la lumière et au confort.
+          </p>
+          <p className='mt-8 max-w-xl text-base leading-9' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+            En photo c'est beau, mais l'expérience est encore plus agréable en vrai.
+          </p>
+          <Link
+            to='/category/corps'
+            className='mt-10 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5'
+            style={{ background: C.primary }}
+          >
+            Traitements du corps <RightArrow />
+          </Link>
         </div>
       </div>
     </section>
@@ -462,7 +723,7 @@ function TestimonialsSection() {
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 className='text-center font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl mb-14' style={{ color: C.secondary }}>
+        <h2 data-fade-scroll className='text-center leading-tight sm:text-4xl md:text-5xl mb-14' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           Les <span style={{ color: C.primary, fontStyle: 'italic' }}>Témoignages</span> de nos patientes
         </h2>
         <Swiper
@@ -510,7 +771,7 @@ function ConsultSection() {
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
           <div>
-              <h2 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
+              <h2 className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
                 Comment <span style={{ color: C.primary, fontStyle: 'italic' }}>prendre rendez-vous</span> au Widamine Center ?
               </h2>
               <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
@@ -563,12 +824,14 @@ function ConsultSection() {
 
 function useGSAPAnimations() {
   useEffect(() => {
-    const scroller = '#app-scroll'
+    const scrollerEl = document.getElementById('app-scroll')
+    if (!scrollerEl) return
+
     const ctx = gsap.context(() => {
       // Navbar show/hide
       ScrollTrigger.create({
         trigger: 'body',
-        scroller,
+        scroller: scrollerEl,
         start: 'top top',
         end: 'bottom bottom',
         onUpdate: (self) => {
@@ -580,38 +843,34 @@ function useGSAPAnimations() {
       })
 
       // Fade-in animations on scroll
-      gsap.utils.toArray<HTMLElement>('[data-fade-scroll]').forEach((el) => {
+      document.querySelectorAll('[data-fade-scroll]').forEach((el) => {
         gsap.fromTo(el, { opacity: 0, y: 30 }, {
           opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: el, scroller, start: 'top 85%', toggleActions: 'play none none none' },
+          scrollTrigger: { trigger: el, scroller: scrollerEl, start: 'top 85%', toggleActions: 'play none none none' },
         })
       })
 
-      // Method cards rotation on scroll (desktop)
-      gsap.matchMedia().add('(min-width: 992px)', () => {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: '[data-methode-wrap]',
-            scroller,
-            start: '-5% center',
-            end: '50% 40%',
-            scrub: 1.5,
-          },
-        }).to('[data-methode-item="first"]', { rotation: -8 })
-          .to('[data-methode-item="third"]', { rotation: 8 }, '<')
-          .to('[data-methode-item="second"]', { y: '-2rem' }, '<')
+      // Parallax decorative images
+      document.querySelectorAll('[data-parallax]').forEach((el) => {
+        gsap.fromTo(el, { y: -60 }, {
+          y: 60, ease: 'none',
+          scrollTrigger: { trigger: el.closest('section') || el, scroller: scrollerEl, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+        })
       })
 
       // Hero video scale on scroll
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: '[data-video-wrap]',
-          scroller,
-          start: 'top 90%',
-          end: 'top 20%',
-          scrub: 2,
-        },
-      }).fromTo('[data-video-wrap] > div', { scale: 0.85, y: 40 }, { scale: 1, y: 0 })
+      const videoWrap = document.querySelector('[data-video-wrap]')
+      if (videoWrap) {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: '[data-video-wrap]',
+            scroller: scrollerEl,
+            start: 'top 90%',
+            end: 'top 20%',
+            scrub: 2,
+          },
+        }).fromTo('[data-video-wrap] > div', { scale: 0.85, y: 40 }, { scale: 1, y: 0 })
+      }
     })
 
     return () => ctx.revert()
@@ -625,17 +884,18 @@ export default function Home() {
 
   return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Amoria&display=swap'); .font-amoria{font-family:'Amoria',serif;}`}</style>
       <PublicNavbar />
       <main className='page-landing'>
         <HeroSection />
         <IntroSection />
         <ConceptSection />
-        <MethodeSection />
+        <TreatmentsSection />
         <TeamSection />
         <GallerySection />
         <TestimonialsSection />
         <ConsultSection />
+
+
       </main>
     </>
   )

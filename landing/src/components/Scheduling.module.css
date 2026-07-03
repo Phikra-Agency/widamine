@@ -2,61 +2,70 @@
 
 /* Calendar day styles */
 .datePickerDay {
-	@apply text-white!;
+	color: #0F2546 !important;
 }
 
 .datePickerDay:hover {
-	@apply bg-primary/20! text-white! rounded-full;
+	@apply bg-primary/20! rounded-full;
+	color: #0F2546 !important;
 }
 
 .datePickerDay[data-selected] {
-	@apply rounded-full text-white border border-primary bg-primary;
+	@apply rounded-full border border-primary bg-primary;
+	color: #ffffff !important;
 }
 
 .datePickerDay:disabled {
-	@apply cursor-not-allowed hover:bg-transparent! text-white/30;
+	@apply cursor-not-allowed hover:bg-transparent!;
+	opacity: 0.3;
 }
 
 /* Calendar header styles */
 .datePickerHeaderLevel {
-	@apply text-white! font-semibold! rounded-full;
+	color: #0F2546 !important;
+	@apply font-semibold! rounded-full;
 }
 
 .datePickerHeaderLevel:hover {
-	@apply bg-white/10!;
+	background-color: rgba(15, 37, 70, 0.05) !important;
 }
 
 .datePickerHeaderControl {
-	@apply text-white! rounded-full;
+	color: #0F2546 !important;
+	@apply rounded-full;
 }
 
 .datePickerHeaderControl:hover {
-	@apply bg-white/10!;
+	background-color: rgba(15, 37, 70, 0.05) !important;
 }
 
 .datePickerHeaderControlIcon {
-	@apply text-white!;
+	color: #0F2546 !important;
 }
 
 /* Month/Year selector styles */
 .datePickerMonthControl,
 .datePickerYearControl {
-	@apply text-white! rounded-full;
+	color: #0F2546 !important;
+	@apply rounded-full;
 }
 
 .datePickerMonthControl:hover,
 .datePickerYearControl:hover {
-	@apply bg-primary/20! text-white!;
+	@apply bg-primary/20!;
+	color: #0F2546 !important;
 }
 
 .datePickerMonthControl[data-selected],
 .datePickerYearControl[data-selected] {
-	@apply rounded-full text-white border border-primary bg-primary;
+	@apply rounded-full border border-primary bg-primary;
+	color: #ffffff !important;
 }
 
 .datePickerMonthControl:disabled,
 .datePickerYearControl:disabled {
-	@apply cursor-not-allowed hover:bg-transparent! text-white/30;
+	@apply cursor-not-allowed hover:bg-transparent!;
+	opacity: 0.3;
 }
 
 /* Smooth calm animations */

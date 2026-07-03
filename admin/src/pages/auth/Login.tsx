@@ -139,7 +139,7 @@ export default function Login() {
           <img
             src='/logo.svg'
             alt='Widamine'
-            className='mb-8 h-14 w-auto max-w-[min(100%,18rem)] object-contain object-left lg:hidden'
+            className='mb-8 mx-auto h-14 w-auto max-w-[min(100%,18rem)] object-contain object-center lg:hidden'
           />
 
           <Card className='overflow-hidden rounded-[1.35rem] border-border-subtle shadow-bo-elevated'>

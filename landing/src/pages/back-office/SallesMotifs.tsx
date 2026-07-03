@@ -56,8 +56,8 @@ export default function SallesMotifs() {
         <div className='bo-section-stack h-full min-h-0 overflow-y-auto'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div>
-              <h3 className='bo-title'>Salles & Motifs</h3>
-              <p className='bo-subtitle'>Gérez les salles, motifs et leurs associations</p>
+              <h3 className='bo-title'>Salles & Traitements</h3>
+              <p className='bo-subtitle'>Gérez les salles, traitements et leurs associations</p>
             </div>
             <div className='flex items-center gap-3'>
               <div className='inline-flex items-center gap-1 rounded-xl border border-black/[0.06] bg-secondary/[0.01] p-1 w-full sm:w-auto'>
@@ -65,7 +65,7 @@ export default function SallesMotifs() {
                   <Door size={14} /> Salles
                 </button>
                 <button onClick={() => handleSetTab('motifs')} className={clsx('flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 sm:flex-initial', tab === 'motifs' ? 'bg-white text-secondary border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04)]' : 'text-secondary/55 hover:text-secondary hover:bg-white/80')}>
-                  <Stethoscope size={14} /> Motifs
+                  <Stethoscope size={14} /> Traitements
                 </button>
               </div>
               <button onClick={handleCreate} className='bo-primary-btn hidden lg:inline-flex cursor-pointer'>
@@ -102,7 +102,7 @@ function SallesTable() {
           <tr className='border-b border-black/[0.04] bg-secondary/[0.01]'>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Salle</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Priorité</th>
-            <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Motifs associés</th>
+            <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Traitements associés</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-right'>Actions</th>
           </tr>
         </thead>
@@ -112,7 +112,7 @@ function SallesTable() {
             <tr className='group hover:bg-secondary/[0.02] transition-colors cursor-pointer' key={item.id} onClick={() => openEditModal(item)}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Door size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
               <td className='px-6 py-4'><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${p.color}`}><Star size={11} weight={item.priority >= 3 ? 'fill' : 'regular'} />{p.label}</span></td>
-              <td className='px-6 py-4'><div className='flex flex-wrap gap-1.5'>{(item.motifAssignments || []).length === 0 ? <span className='text-xs text-secondary/30'>Aucun motif</span> : (item.motifAssignments || []).map((assignment: any) => <span key={assignment.id || assignment.motifId} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border bg-secondary/[0.03] text-secondary/50 border-black/[0.04]'><LinkIcon size={9} />{assignment.motif?.name || assignment.motifId}</span>)}</div></td>
+              <td className='px-6 py-4'><div className='flex flex-wrap gap-1.5'>{(item.motifAssignments || []).length === 0 ? <span className='text-xs text-secondary/30'>Aucun traitement</span> : (item.motifAssignments || []).map((assignment: any) => <span key={assignment.id || assignment.motifId} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border bg-secondary/[0.03] text-secondary/50 border-black/[0.04]'><LinkIcon size={9} />{assignment.motif?.name || assignment.motifId}</span>)}</div></td>
               <td className='px-6 py-4' onClick={(e) => e.stopPropagation()}><div className='flex items-center justify-end gap-1'><button onClick={() => openEditModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-amber-600 hover:bg-amber-50 transition-all'><Pen size={16} /></button><button onClick={() => openDeleteModal(item)} className='p-2 rounded-lg text-secondary/30 hover:text-red-600 hover:bg-red-50 transition-all'><Trash2 size={16} /></button></div></td>
             </tr>
           )})}
@@ -155,7 +155,7 @@ function SallesTable() {
                   </div>
                   {(item.motifs || []).length > 0 && (
                     <p className='mt-0.5 truncate text-[11px] text-secondary/50'>
-                      {(item.motifs || []).length} motif{(item.motifs || []).length > 1 ? 's' : ''}
+                      {(item.motifs || []).length} traitement{(item.motifs || []).length > 1 ? 's' : ''}
                     </p>
                   )}
                 </div>
@@ -200,14 +200,14 @@ function MotifsTable() {
         <table className='w-full text-sm'>
         <thead>
           <tr className='border-b border-black/[0.04] bg-secondary/[0.01]'>
-            <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Motif</th>
+            <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Traitement</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Couleur</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-left'>Durée</th>
             <th className='px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40 text-right'>Actions</th>
           </tr>
         </thead>
         <tbody className='divide-y divide-black/[0.02]'>
-          {items.length === 0 && <tr><td colSpan={4} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Stethoscope size={24} /><p className='text-sm font-medium'>Aucun motif trouvé</p></div></td></tr>}
+          {items.length === 0 && <tr><td colSpan={4} className='px-6 py-12 text-center'><div className='flex flex-col items-center gap-2 text-secondary/30'><Stethoscope size={24} /><p className='text-sm font-medium'>Aucun traitement trouvé</p></div></td></tr>}
           {items.map((item) => (
             <tr className='group hover:bg-secondary/[0.02] transition-colors cursor-pointer' key={item.id} onClick={() => { setItem(item); setOperation('edit'); openModal() }}>
               <td className='px-6 py-4'><div className='flex items-center gap-3'><div className='w-9 h-9 rounded-xl bg-secondary/[0.04] flex items-center justify-center group-hover:bg-primary/10 transition-colors'><Stethoscope size={16} className='text-secondary/40 group-hover:text-primary transition-colors' /></div><span className='font-semibold text-secondary text-sm tracking-tight'>{item.name}</span></div></td>
@@ -232,8 +232,8 @@ function MotifsTable() {
               <Stethoscope size={28} className='text-secondary/20' />
             </div>
             <div>
-              <p className='text-sm font-medium text-secondary'>Aucun motif trouvé</p>
-              <p className='mt-1 text-xs text-secondary/40'>Ajoutez un motif pour commencer</p>
+              <p className='text-sm font-medium text-secondary'>Aucun traitement trouvé</p>
+              <p className='mt-1 text-xs text-secondary/40'>Ajoutez un traitement pour commencer</p>
             </div>
           </div>
         ) : (
@@ -284,7 +284,7 @@ function MotifsTable() {
         )}
       </div>
       <div className='lg:hidden'>
-        <button type='button' onClick={() => { clearItem(); setOperation('create'); openModal() }} className='bo-fab' aria-label='Ajouter un motif'>
+        <button type='button' onClick={() => { clearItem(); setOperation('create'); openModal() }} className='bo-fab' aria-label='Ajouter un traitement'>
           <Plus size={24} weight='bold' />
         </button>
       </div>
@@ -310,7 +310,7 @@ function SalleModal() {
         <div className='p-6 space-y-5'>
           <div className='space-y-2'><label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom</label><input type='text' value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all' placeholder='Salle A' /></div>
           <div className='space-y-2'><label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Priorité</label><div className='grid grid-cols-4 gap-2'>{[1, 2, 3, 4].map((p) => (<button key={p} type='button' onClick={() => setItem({ ...item, priority: p })} className={clsx('flex flex-col items-center gap-1 p-2.5 rounded-lg border transition-all', item.priority === p ? 'border-primary bg-primary/5 text-primary' : 'border-black/[0.06] bg-white text-secondary/50 hover:border-black/[0.1]')}><Star size={16} weight={p >= 3 ? 'fill' : 'regular'} /><span className='text-[10px] font-bold'>{PRIO[p].label}</span></button>))}</div></div>
-          <div className='space-y-2'><label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Motifs associés</label><div className='flex flex-wrap gap-2 p-3 rounded-lg border border-black/[0.06] bg-white min-h-[60px]'>{motifs.length === 0 ? <span className='text-xs text-secondary/30'>Aucun motif disponible</span> : motifs.map((m) => { const sel = (item.motifIds || []).includes(m.id!); return <button key={m.id} type='button' onClick={() => toggleMotif(m.id!)} className={clsx('inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold border transition-all', sel ? 'border-primary bg-primary/10 text-primary' : 'border-black/[0.06] bg-white text-secondary/50 hover:border-black/[0.1]')}><LinkIcon size={10} />{m.name}</button> })}</div></div>
+          <div className='space-y-2'><label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Traitements associés</label><div className='flex flex-wrap gap-2 p-3 rounded-lg border border-black/[0.06] bg-white min-h-[60px]'>{motifs.length === 0 ? <span className='text-xs text-secondary/30'>Aucun traitement disponible</span> : motifs.map((m) => { const sel = (item.motifIds || []).includes(m.id!); return <button key={m.id} type='button' onClick={() => toggleMotif(m.id!)} className={clsx('inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold border transition-all', sel ? 'border-primary bg-primary/10 text-primary' : 'border-black/[0.06] bg-white text-secondary/50 hover:border-black/[0.1]')}><LinkIcon size={10} />{m.name}</button> })}</div></div>
         </div>
         <div className='sticky bottom-0 border-t border-black/[0.04] bg-white px-6 py-4 flex gap-3 justify-end'><button onClick={closeModal} type='button' className='px-5 py-2.5 rounded-lg text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/5 transition-all'>Annuler</button><button type='submit' className='px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/10 transition-all'>{isEdit ? 'Enregistrer' : 'Créer'}</button></div>
       </motion.form>
@@ -369,20 +369,20 @@ function MotifModal() {
         className='relative w-full max-w-lg max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-black/[0.06] bg-white shadow-bo-elevated'
       >
         <div className='sticky top-0 z-10 border-b border-black/[0.04] bg-white px-6 py-4'>
-          <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} motif</h2>
-          <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez le motif' : 'Ajoutez un nouveau motif'}</p>
+          <h2 className='text-lg font-semibold text-secondary'>{isEdit ? 'Modifier' : 'Nouveau'} traitement</h2>
+          <p className='text-sm text-secondary/50 mt-0.5'>{isEdit ? 'Modifiez le traitement' : 'Ajoutez un nouveau traitement'}</p>
         </div>
         
         <div className='p-6 space-y-6'>
           {/* Name Field */}
           <div className='space-y-2'>
-            <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du motif</label>
+            <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du traitement</label>
             <input 
               type='text' 
               value={item.name} 
               onChange={(e) => setItem({ ...item, name: e.target.value })} 
               className='w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all' 
-              placeholder='Nom du motif' 
+              placeholder='Nom du traitement' 
             />
           </div>
 
@@ -406,7 +406,7 @@ function MotifModal() {
 
           <div className='space-y-2'>
             <div className='flex items-center justify-between gap-3'>
-              <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du motif</label>
+              <label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du traitement</label>
               <button
                 type='button'
                 onClick={randomizeColor}
@@ -499,7 +499,7 @@ function MotifDeleteModal() {
     <div className={clsx('fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8 px-4', visible ? 'opacity-100' : 'opacity-0 pointer-events-none')}>
       <div className='absolute inset-0 bg-secondary/30 backdrop-blur-sm' onClick={closeModal} />
       <div onClick={(e) => e.stopPropagation()} className='relative w-full max-w-md rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)]'>
-        <div className='p-6 text-center'><div className='mx-auto w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4'><Trash2 size={26} className='text-red-500' /></div><h2 className='text-lg font-semibold text-secondary'>Supprimer ce motif ?</h2><p className='text-sm text-secondary/50 mt-2'>Cette action est irréversible.</p></div>
+        <div className='p-6 text-center'><div className='mx-auto w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4'><Trash2 size={26} className='text-red-500' /></div><h2 className='text-lg font-semibold text-secondary'>Supprimer ce traitement ?</h2><p className='text-sm text-secondary/50 mt-2'>Cette action est irréversible.</p></div>
         <div className='px-6 py-4 flex gap-3 justify-end border-t border-black/[0.04]'><button onClick={closeModal} className='px-5 py-2.5 rounded-lg text-sm font-medium text-secondary/60 hover:text-secondary hover:bg-secondary/5 transition-all'>Annuler</button><button onClick={deleteItem} className='px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all'>Supprimer</button></div>
       </div>
     </div>

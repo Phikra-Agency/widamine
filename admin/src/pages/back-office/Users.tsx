@@ -1,6 +1,6 @@
 import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore } from '@/stores/authStore'
-import { Plus, Trash as Trash2 } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,8 @@ import { userCreateSchema, userEditSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 import { createUsersColumns, RoleBadge, USERS_EMPTY_ILLUSTRATION } from './columns/usersColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
@@ -76,6 +78,9 @@ function UsersTable() {
   const [roleFilter, setRoleFilter] = useState<Role | 'all'>('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const debouncedSearch = useDebouncedGlobalSearch()
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchTerm = useGlobalSearchStore((s) => s.term)
+  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -115,13 +120,51 @@ function UsersTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar>
-        <DataTableFilterPills
-          options={ROLE_FILTER_PILLS}
-          value={roleFilter}
-          onChange={(value) => setRoleFilter(value as Role | 'all')}
-        />
+      <DataTable.Toolbar className='max-lg:px-0'>
+        <div className='hidden lg:flex flex-wrap items-center gap-1.5'>
+          <DataTableFilterPills
+            options={ROLE_FILTER_PILLS}
+            value={roleFilter}
+            onChange={(value) => setRoleFilter(value as Role | 'all')}
+          />
+        </div>
+        <div className='flex lg:hidden items-center gap-2 flex-1'>
+          <Select
+            value={roleFilter}
+            onValueChange={(value) => setRoleFilter(value as Role | 'all')}
+          >
+            <SelectTrigger size='sm' className='h-9 flex-1 text-xs font-medium'>
+              <SelectValue placeholder="Filtrer" />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLE_FILTER_PILLS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
+            aria-label='Rechercher'
+          >
+            <MagnifyingGlass size={16} />
+          </button>
+        </div>
       </DataTable.Toolbar>
+
+      {mobileSearchOpen && (
+        <div className='px-4 pb-2 lg:hidden'>
+          <Input
+            placeholder='Rechercher...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='h-9 text-xs'
+            autoFocus
+          />
+        </div>
+      )}
 
       <TanStackDataTable
         table={table}
@@ -177,7 +220,7 @@ function UsersTable() {
         </Button>
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='flex justify-end px-4 py-3 max-lg:justify-start'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -314,7 +357,7 @@ function DeleteModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-md'>
+      <DialogContent showCloseButton className='gap-0 overflow-hidden p-0 sm:max-w-md'>
         <div className='p-5 text-center sm:p-6'>
           <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-control bg-red-50'>
             <Trash2 size={26} className='text-red-500' />

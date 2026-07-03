@@ -57,7 +57,7 @@ export function createReservationsColumns({
     {
       id: 'motif',
       accessorFn: (row) => row.motif?.name || '',
-      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Motif' />,
+      header: ({ column, table }) => <DataTableColumnHeader column={column} table={table} title='Traitement' />,
       cell: ({ row }) => (
         <span className='text-muted-foreground text-sm'>
           {row.original.motif?.name || '—'}

@@ -8,7 +8,7 @@ import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 
 import { Layout } from '@/components/layouts'
-import { Home, Contact, Appointment, ServiceDetail } from '@/pages'
+import { Home, Contact, Appointment, ServiceCategory, ServiceDetail } from '@/pages'
 
 gsap.registerPlugin(useGSAP)
 
@@ -22,6 +22,7 @@ export default function App() {
               <Route index element={<Home />} />
               <Route path='contact' element={<Contact />} />
               <Route path='appointment' element={<Appointment />} />
+              <Route path='category/:category' element={<ServiceCategory />} />
               <Route path='services/:slug' element={<ServiceDetail />} />
               <Route path='*' element={<>404</>} />
             </Route>

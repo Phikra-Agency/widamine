@@ -143,7 +143,7 @@ export class AppointmentNotificationService {
   private motifBox(name: string): string {
     return `
       <div style="background: linear-gradient(135deg, #f7fafc, #edf2f7); padding: 20px 24px; margin: 24px 0; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <p style="margin: 0 0 4px; font-size: 11px; color: ${this.COLORS.primary}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Motif</p>
+        <p style="margin: 0 0 4px; font-size: 11px; color: ${this.COLORS.primary}; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Traitement</p>
         <p style="margin: 0; font-size: 18px; color: ${this.COLORS.secondary}; font-family: ${this.FONTS.serif};">${name}</p>
       </div>`;
   }
@@ -217,7 +217,7 @@ export class AppointmentNotificationService {
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph(`Bonne nouvelle ! Votre rendez-vous pour <strong>${appt.motif?.name || '—'}</strong> a été confirmé.`)}
       ${this.detailsTable([
-        ['Motif', appt.motif?.name || '—'],
+        ['Traitement', appt.motif?.name || '—'],
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
@@ -272,7 +272,7 @@ export class AppointmentNotificationService {
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph('Ceci est un rappel pour votre rendez-vous <strong>demain</strong>.')}
       ${this.detailsTable([
-        ['Motif', appt.motif?.name || '—'],
+        ['Traitement', appt.motif?.name || '—'],
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
@@ -308,7 +308,7 @@ export class AppointmentNotificationService {
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
         ['Téléphone', appt.phone || '—'],
-        ['Motif', appt.motif?.name || '—'],
+        ['Traitement', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
         ['Note', appt.context || '—'],
       ])}
@@ -342,7 +342,7 @@ export class AppointmentNotificationService {
       ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
-        ['Motif', appt.motif?.name || '—'],
+        ['Traitement', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
       ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
@@ -375,7 +375,7 @@ export class AppointmentNotificationService {
       ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
       ${this.detailsTable([
         ['Patient', this.patientName(appt)],
-        ['Motif', appt.motif?.name || '—'],
+        ['Traitement', appt.motif?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
       ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}

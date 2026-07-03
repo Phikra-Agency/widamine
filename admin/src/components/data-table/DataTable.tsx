@@ -24,15 +24,15 @@ function DataTableToolbar({ children, className }: { children: ReactNode; classN
 }
 
 function DataTableDesktop({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('hidden lg:flex lg:flex-1 lg:flex-col lg:min-h-0', className)}>{children}</div>
+  return <div className={cn('hidden lg:flex lg:flex-1 lg:flex-col lg:min-h-0 lg:overflow-auto', className)}>{children}</div>
 }
 
 function DataTableMobile({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('lg:hidden', className)}>{children}</div>
+  return <div className={cn('lg:hidden flex min-h-0 flex-1 flex-col', className)}>{children}</div>
 }
 
 function DataTableMobileList({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('space-y-2 p-3', className)}>{children}</div>
+  return <div className={cn('flex-1 min-h-0 overflow-y-auto space-y-2 p-3', className)}>{children}</div>
 }
 
 function DataTableHeader({ className, ...props }: React.ComponentProps<typeof TableHeader>) {

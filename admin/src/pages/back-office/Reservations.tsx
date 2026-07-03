@@ -1,6 +1,6 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { useAuthStore } from '@/stores/authStore'
-import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, Clock, CheckCircle, XCircle, Timer, ArrowRight, UserPlus } from '@phosphor-icons/react'
+import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, Clock, CheckCircle, XCircle, Timer, ArrowRight, UserPlus, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
@@ -19,6 +19,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RESERVATIONS_EMPTY_ILLUSTRATION, createReservationsColumns } from './columns/reservationsColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 
 const STATUS_FILTER_PILLS: FilterPillOption[] = [
   { value: 'all', label: 'Toutes', color: 'mist' },
@@ -60,10 +62,13 @@ function ReservationsTable() {
   const { items, filters, setFilters, fetchItems, setItem, toggleOpenShowModal, setOpenShowModal } = useAppointmentsStore()
   const [loading, setLoading] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const { 0: debouncedStatus } = useDebounce(filters.status, 300)
+  const { 0: debouncedStatus } = useDebounce(filters.status || 'PENDING', 300)
   const debouncedSearch = useDebouncedGlobalSearch()
   const [searchParams] = useSearchParams()
   const hasOpenedFromUrl = useRef(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchTerm = useGlobalSearchStore((s) => s.term)
+  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     setColumnFilters(prev => {
@@ -121,13 +126,51 @@ function ReservationsTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar>
-        <DataTableFilterPills
-          options={STATUS_FILTER_PILLS}
-          value={filters.status || 'all'}
-          onChange={(value) => setFilters({ ...filters, status: value === 'all' ? '' : value })}
-        />
+      <DataTable.Toolbar className='max-lg:px-0'>
+        <div className='hidden lg:flex flex-wrap items-center gap-1.5'>
+          <DataTableFilterPills
+            options={STATUS_FILTER_PILLS}
+            value={filters.status || 'PENDING'}
+            onChange={(value) => setFilters({ ...filters, status: value === 'PENDING' ? '' : value })}
+          />
+        </div>
+        <div className='flex lg:hidden items-center gap-2 flex-1'>
+          <Select
+            value={filters.status || 'PENDING'}
+            onValueChange={(value) => setFilters({ ...filters, status: value === 'PENDING' ? '' : value })}
+          >
+            <SelectTrigger size='sm' className='h-9 flex-1 text-xs font-medium'>
+              <SelectValue placeholder="Filtrer par statut" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_FILTER_PILLS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
+            aria-label='Rechercher'
+          >
+            <MagnifyingGlass size={16} />
+          </button>
+        </div>
       </DataTable.Toolbar>
+
+      {mobileSearchOpen && (
+        <div className='px-4 pb-2 lg:hidden'>
+          <Input
+            placeholder='Rechercher...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='h-9 text-xs'
+            autoFocus
+          />
+        </div>
+      )}
 
       <TanStackDataTable
         table={table}
@@ -159,25 +202,17 @@ function ReservationsTable() {
                   ? new Date(firstSchedule.datetime).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                   : null
                 return (
-                <DataTable.MobileCard
-                  key={row.id}
-                  onClick={() => {
-                    useAppointmentsStore.setState({ item, openShowModal: true })
-                  }}
-                >
-                  <div className='flex items-start justify-between gap-3'>
-                    <div className='min-w-0'>
-                      <div className='flex items-center gap-2'>
-                        <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
-                          <User size={14} className='text-primary' />
-                        </div>
-                        <p className='text-sm font-semibold'>{item.name}</p>
-                      </div>
-                      <p className='mt-1 text-xs text-secondary/50 ml-9'>
+                <DataTable.MobileCard key={row.id}>
+                  <div className='flex items-center gap-2'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
+                      <User size={14} className='text-primary' />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-sm font-semibold'>{item.name}</p>
+                      <p className='mt-0.5 text-xs text-secondary/50'>
                         {scheduledDate || 'Non programmé'} · {item.motif?.name || '-'}
                       </p>
                     </div>
-                    <StatusBadge status={item.status || 'PENDING'} />
                   </div>
                   <div className='mt-3 space-y-2 text-sm text-secondary/65'>
                     <div className='flex items-center gap-2'>
@@ -199,8 +234,15 @@ function ReservationsTable() {
                       </div>
                     )}
                   </div>
-                  <div className='mt-3'>
-                    <StatusSelect appointmentId={item.id!} status={item.status || 'PENDING'} />
+                  <div className='mt-3 flex items-center gap-2'>
+                    <StatusSelect appointmentId={item.id!} status={item.status || 'PENDING'} className='flex-1 h-9' />
+                    <button
+                      type='button'
+                      onClick={() => useAppointmentsStore.setState({ item, openShowModal: true })}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-secondary/50 hover:bg-secondary/[0.08] hover:text-secondary transition-colors'
+                    >
+                      <ArrowRight size={15} weight='bold' />
+                    </button>
                   </div>
                 </DataTable.MobileCard>
                 )
@@ -208,7 +250,10 @@ function ReservationsTable() {
           </DataTable.MobileList>
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='lg:hidden'>
+        <DataTablePagination table={table} />
+      </div>
+      <div className='hidden lg:flex justify-end px-4 py-3'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -248,7 +293,7 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function StatusSelect({ appointmentId, status }: { appointmentId: number; status: string }) {
+function StatusSelect({ appointmentId, status, className }: { appointmentId: number; status: string; className?: string }) {
   const { fetchItems } = useAppointmentsStore()
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
@@ -288,7 +333,7 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
       onChange={(e) => handleChange(e.target.value)}
       disabled={saving}
       className={clsx(
-        'min-w-[140px] py-1 rounded-control text-xs font-medium border cursor-pointer appearance-none bg-no-repeat focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60',
+        'min-w-[140px] py-1 rounded-control text-xs font-medium border cursor-pointer appearance-none bg-no-repeat focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60', className,
         current === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
         current === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
         current === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border-rose-100' :
@@ -362,7 +407,7 @@ function ShowModal() {
 
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
-      <DialogContent showCloseButton={false} className='sm:max-w-lg rounded-2xl overflow-hidden p-0 gap-0'>
+      <DialogContent showCloseButton className='flex flex-col gap-0 p-0 sm:max-w-lg rounded-2xl'>
         {loadingItem ? (
           <div className='flex items-center justify-center p-14 text-sm text-muted-foreground'>
             <div className='flex items-center gap-2.5'>
@@ -373,7 +418,7 @@ function ShowModal() {
         ) : (
           <>
             {/* Header */}
-            <div className='flex items-start justify-between px-5 pt-5 pb-3'>
+            <div className='flex items-start justify-between shrink-0 px-5 pt-5 pb-3'>
               <div className='flex items-start gap-3'>
                 <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white' style={{ backgroundColor: motifColor }}>
                   {initials}
@@ -413,12 +458,12 @@ function ShowModal() {
             <div className='mx-5 h-px bg-border-subtle/40' />
 
             {/* Content */}
-            <ScrollArea className='max-h-[calc(100dvh-12rem)]'>
+            <ScrollArea className='min-h-0 flex-1'>
               <div className='px-5 py-4 space-y-4'>
                 {/* Info grid */}
                 <div className='grid grid-cols-2 gap-x-6 gap-y-3'>
                   {[
-                    { icon: CalendarBlank, label: 'Motif', value: item.motif?.name || '—' },
+                    { icon: CalendarBlank, label: 'Traitement', value: item.motif?.name || '—' },
                     { icon: Stethoscope, label: 'Praticien', value: item.practitioner?.name || 'Auto' },
                     { icon: Door, label: 'Salle', value: item.resource?.name || '—' },
                     { icon: Timer, label: 'Durée', value: item.motif?.duration ? `${item.motif.duration} min` : '—' },
@@ -435,11 +480,15 @@ function ShowModal() {
                   ))}
                 </div>
 
+
+
                 {/* Context */}
                 {item.context && (
                   <div className='space-y-1.5'>
                     <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Message</p>
-                    <p className='text-sm leading-relaxed text-foreground/65 rounded-xl bg-muted/30 p-3.5'>{item.context}</p>
+                    <div className='max-h-[180px] overflow-y-auto rounded-xl bg-muted/30 p-3.5'>
+                      <p className='text-sm leading-relaxed text-foreground/65'>{item.context}</p>
+                    </div>
                   </div>
                 )}
 
@@ -461,7 +510,7 @@ function ShowModal() {
             </ScrollArea>
 
             {/* Footer */}
-            <div className='flex items-center justify-end border-t border-border-subtle/40 px-5 py-3'>
+            <div className='flex items-center justify-end shrink-0 border-t border-border-subtle/40 px-5 py-3'>
               <Button type='button' variant='ghost' size='sm' onClick={() => setOpenShowModal(false)} className='text-xs font-medium text-muted-foreground/45 hover:text-foreground'>
                 Fermer
               </Button>

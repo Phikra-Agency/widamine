@@ -1,279 +1,359 @@
-import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import PublicFooter from '@/components/PublicFooter'
 import PublicNavbar from '@/components/PublicNavbar'
-import { getServicePage, SERVICE_PAGES } from '@/lib/siteContent'
-import { CalendarBlank, ArrowLeft, PhoneCall, EnvelopeSimple, Clock, ShieldCheck, Star, FileText } from '@phosphor-icons/react'
+import { getServicePage, ICON_MAP } from '@/lib/siteContent'
+import { CalendarBlank, CheckCircle, Sparkle } from '@phosphor-icons/react'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
-import { C } from '@/lib/theme'
+import { C, TYPE } from '@/lib/theme'
 
-const SM = {
-  branch: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66ba364172b57bbc64c50e1e_consult-branche-feuiille.avif',
-  flower: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b0fbb4c50c3351ead87c66_concept-fleur.avif',
-  libellule: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66bdb3d4417f66a31d312431_contact-header-libellule.avif',
-  feuillage: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66bdb37252963420db73fe16_contact-header-feuillage.avif',
-  fallback: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/660ea71c6f94851cc9dbd4a9_cabine1.jpg',
-  bubbles: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66aa4ea27518914b10e9001c_section-2-left-bubbles.svg',
-}
+const CAT_LINKS: Record<string, string> = { visage: '/category/visage', corps: '/category/corps', techniques: '/category/techniques' }
+const CAT_LABELS: Record<string, string> = { visage: 'Traitements du visage', corps: 'Traitements du corps', techniques: 'Nos techniques' }
 
-const FAQS = [
-  { q: 'Combien de séances sont nécessaires ?', a: "Le nombre de séances dépend du traitement et de votre cas particulier. Lors de la consultation, nous établissons un plan personnalisé avec une estimation précise du nombre de séances recommandé." },
-  { q: 'Est-ce que c\'est douloureux ?', a: 'La plupart de nos traitements sont bien tolérés. Nous utilisons des technologies modernes qui minimisent l\'inconfort. Une anesthésie locale peut être proposée si nécessaire pour certains soins.' },
-  { q: 'Quels sont les délais de récupération ?', a: 'Cela varie selon le traitement. Certains soins permettent une reprise immédiate des activités, d\'autres nécessitent quelques jours de repos. Tout vous sera expliqué en détail lors de la consultation.' },
-  { q: 'Les résultats sont-ils permanents ?', a: 'Certains traitements offrent des résultats définitifs (épilation laser, liposuccion), d\'autres nécessitent des séances d\'entretien. Nous vous informons clairement sur la durée des résultats attendus.' },
-  { q: 'Y a-t-il des contre-indications ?', a: 'Chaque traitement a ses contre-indications spécifiques. Une consultation préalable est indispensable pour vérifier votre éligibilité et adapter le soin à votre profil médical.' },
-]
+const CTN = { maxWidth: 1280, width: '100%', margin: '0 auto', padding: '32px clamp(20px, 6vw, 80px) 24px' } as const
+
+const BRAND_FLOWER = 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b0fbb4c50c3351ead87c66_concept-fleur.avif'
+const BRAND_BUBBLES = 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66aa4ea27518914b10e9001c_section-2-left-bubbles.svg'
 
 export default function ServiceDetail() {
   const { slug = '' } = useParams()
   const service = getServicePage(slug)
-  const { open } = useScheduleModalStore()
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const { openWithMotif } = useScheduleModalStore()
 
   if (!service) {
     return (
       <div className='min-h-screen' style={{ background: C.bg }}>
         <PublicNavbar />
-        <section className='mx-auto max-w-6xl px-5 pt-32 pb-16 sm:px-8 sm:pt-40'>
-          <div className='rounded-[2rem] bg-white p-8 text-center' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}>
-            <p className='text-lg' style={{ color: C.secondary }}>Service introuvable.</p>
+        <main className='mx-auto w-full max-w-7xl px-4 pt-32 pb-16 sm:px-6 sm:pt-40 lg:px-8'>
+          <div className='rounded-2xl bg-white p-8 text-center shadow-lg'>
+            <p style={{ color: C.secondary, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>Service introuvable.</p>
             <Link to='/' className='mt-4 inline-flex items-center gap-2 text-sm font-medium' style={{ color: C.primary }}>
-              <ArrowLeft size={16} /> Retour à l'accueil
+              Retour
             </Link>
           </div>
-        </section>
+        </main>
       </div>
     )
   }
 
-  const related = SERVICE_PAGES.filter((p) => p.category === service.category && p.slug !== service.slug).slice(0, 3)
+  const titleWords = service.title.split(' ')
+  const firstSection = service.sections[0]
+  const detailSections = service.sections.slice(1)
+  const iconUrl = ICON_MAP[service.slug]
 
   return (
     <div className='min-h-screen' style={{ background: C.bg }}>
       <PublicNavbar />
+      <main>
+        <section className='relative overflow-hidden pt-32 sm:pt-40 lg:pt-44'>
+          <div
+            className='pointer-events-none absolute right-0 top-20 h-72 w-72 rounded-full blur-3xl'
+            style={{ background: C.orange, opacity: 0.18 }}
+          />
+          <div style={CTN}>
+            <div className='grid items-center gap-12 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-20'>
+              <div className='relative mx-auto flex min-h-[280px] w-full max-w-[340px] items-center justify-center lg:mx-0'>
+                <div
+                  className='absolute left-4 top-0 h-36 w-36 rounded-full'
+                  style={{ background: service.color, opacity: 0.14 }}
+                />
+                <div
+                  className='absolute bottom-4 right-2 h-44 w-44 rounded-full'
+                  style={{ background: C.primary, opacity: 0.1 }}
+                />
+                <img
+                  src={BRAND_BUBBLES}
+                  alt=''
+                  className='pointer-events-none absolute left-0 top-4 w-24 select-none opacity-45'
+                  loading='lazy'
+                />
+                {iconUrl ? (
+                  <div className='relative z-10 h-[200px] w-[200px] drop-shadow-[0_18px_26px_rgba(30,30,30,0.10)]'>
+                    <img
+                      src={iconUrl}
+                      alt=''
+                      className='h-full w-full object-contain'
+                      loading='lazy'
+                    />
+                    <div
+                      className='pointer-events-none absolute inset-0'
+                      style={{
+                        backgroundColor: service.color,
+                        opacity: 0.13,
+                        maskImage: `url("${iconUrl}")`,
+                        maskRepeat: 'no-repeat',
+                        maskPosition: 'center',
+                        maskSize: 'contain',
+                        WebkitMaskImage: `url("${iconUrl}")`,
+                        WebkitMaskRepeat: 'no-repeat',
+                        WebkitMaskPosition: 'center',
+                        WebkitMaskSize: 'contain',
+                      }}
+                    />
+                  </div>
+                ) : null}
+              </div>
 
-      {/* ─── Hero ─── */}
-      <section className='relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-16 lg:pt-36 lg:pb-20'>
-        <img src={SM.libellule} alt='' className='absolute left-0 top-16 w-28 sm:w-40 lg:w-48 widamine-tint opacity-40' loading='lazy' />
-        <img src={SM.feuillage} alt='' className='absolute right-0 top-16 w-28 sm:w-40 lg:w-48 widamine-tint opacity-40' loading='lazy' />
-        <img src={SM.branch} alt='' className='absolute right-0 bottom-0 w-24 sm:w-32 widamine-tint opacity-30' loading='lazy' />
-
-        <div className='relative mx-auto max-w-6xl px-5 sm:px-8'>
-          <Link to='/' className='mb-6 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] transition hover:opacity-65' style={{ color: C.primary }}>
-            <ArrowLeft size={12} /> Retour
-          </Link>
-          <div className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center'>
-            <div>
-              <span className='inline-block rounded-full px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white mb-4' style={{ background: C.primary }}>
-                {service.eyebrow}
-              </span>
-              <h1 className='font-amoria text-[1.75rem] leading-[1.1] sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
-                {service.title}
-              </h1>
-              <p className='mt-5 max-w-lg text-sm leading-7 sm:text-base' style={{ color: `${C.secondary}99` }}>
-                {service.heroDescription}
-              </p>
-              <div className='mt-7 flex flex-wrap gap-3'>
-                <button
-                  onClick={open}
-                  className='inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl'
-                  style={{ background: C.primary }}
+              <div className='relative z-10 flex max-w-[680px] flex-col items-start gap-5'>
+                <Link
+                  to={CAT_LINKS[service.category]}
+                  className='inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition hover:opacity-65'
+                  style={{ color: C.primary, fontFamily: TYPE.bodyFamily }}
                 >
-                  <CalendarBlank size={16} />
-                  Prendre rendez-vous
-                </button>
-                <a
-                  href='tel:+212535624696'
-                  className='inline-flex items-center gap-2 rounded-full border-2 px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5'
-                  style={{ borderColor: C.primary, color: C.primary }}
+                  {CAT_LABELS[service.category]}
+                </Link>
+                <h1
+                  style={{
+                    fontFamily: TYPE.headingFamily,
+                    fontSize: 'clamp(2.7rem, 7vw, 5.8rem)',
+                    fontWeight: 700,
+                    lineHeight: 0.95,
+                    letterSpacing: '-0.03em',
+                    color: C.secondary,
+                    margin: 0,
+                  }}
                 >
-                  <PhoneCall size={16} />
-                  +212 (535) 624 696
-                </a>
+                  {titleWords[0]}{' '}
+                  <em style={{ color: service.color, fontStyle: 'italic' }}>{titleWords.slice(1).join(' ')}</em>
+                </h1>
+                <p
+                  style={{
+                    fontFamily: TYPE.bodyFamily,
+                    fontSize: 18,
+                    fontWeight: 500,
+                    lineHeight: '32px',
+                    color: C.secondary,
+                    margin: 0,
+                  }}
+                >
+                  {service.heroDescription}
+                </p>
+                <p
+                  style={{
+                    fontFamily: TYPE.bodyFamily,
+                    fontSize: 16,
+                    fontWeight: 500,
+                    lineHeight: '30px',
+                    color: 'rgba(30,30,30,0.82)',
+                    margin: 0,
+                  }}
+                >
+                  {service.intro}
+                </p>
+                <p
+                  className='border-l-2 pl-4'
+                  style={{
+                    borderColor: service.color,
+                    fontFamily: TYPE.bodyFamily,
+                    fontSize: 14,
+                    fontWeight: 500,
+                    lineHeight: '25px',
+                    color: C.accent,
+                    margin: 0,
+                  }}
+                >
+                  <em style={{ fontWeight: 700 }}>Contre-indications :</em> {service.contraindications}
+                </p>
               </div>
             </div>
-            <div className='overflow-hidden rounded-[2rem]' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-              <img
-                src={service.image}
-                alt={service.title}
-                className='h-56 w-full object-cover sm:h-72 widamine-tint'
-                loading='lazy'
-                onError={(e) => { (e.currentTarget as HTMLImageElement).src = SM.fallback }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Intro + highlights bar ─── */}
-      <section className='mx-auto max-w-6xl px-5 sm:px-8 -mt-5 relative z-10'>
-        <div className='rounded-[2rem] bg-white p-6 sm:p-8 shadow-xl border border-black/5' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}>
-          <p className='text-sm leading-7' style={{ color: `${C.secondary}a6` }}>
-            {service.intro}
-          </p>
-          <div className='mt-5 flex flex-wrap gap-2'>
-            {service.highlights.map((h) => (
-              <span key={h} className='inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-[11px] font-medium' style={{ background: `${C.primary}12`, color: C.primary }}>
-                <Star size={10} weight='fill' />
-                {h}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Pourquoi choisir ce traitement ─── */}
-      <section className='mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20'>
-        <div className='text-center'>
-          <h2 className='font-amoria text-2xl leading-tight sm:text-3xl' style={{ color: C.secondary }}>
-            Pourquoi choisir ce <span style={{ color: C.primary, fontStyle: 'italic' }}>traitement</span> ?
-          </h2>
-        </div>
-        <div className='mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
-          {[
-            { icon: ShieldCheck, label: 'Expertise médicale', desc: 'Prise en charge par des médecins spécialistes en dermatologie esthétique.' },
-            { icon: Star, label: 'Technologies de pointe', desc: 'Équipements dernière génération pour des résultats optimaux et sécurisés.' },
-            { icon: Clock, label: 'Résultats durables', desc: 'Des protocoles éprouvés pour des effets qui durent dans le temps.' },
-            { icon: FileText, label: 'Suivi personnalisé', desc: 'Un accompagnement sur mesure avant, pendant et après chaque traitement.' },
-          ].map((item) => (
-            <div key={item.label} className='rounded-[1.25rem] bg-white p-5 text-center border border-black/5 transition-all hover:-translate-y-1 hover:shadow-md' style={{ boxShadow: '0 2px 12px -6px rgba(0,0,0,0.06)' }}>
-              <div className='mx-auto flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}14`, color: C.primary }}>
-                <item.icon size={18} />
-              </div>
-              <h3 className='mt-3 text-sm font-semibold' style={{ color: C.secondary }}>{item.label}</h3>
-              <p className='mt-1.5 text-[11px] leading-6' style={{ color: `${C.secondary}80` }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── Content sections ─── */}
-      <section className='mx-auto max-w-6xl px-5 sm:px-8'>
-        <div className='mx-auto max-w-4xl'>
-          <div className='space-y-5'>
-            {service.sections.map((section, i) => (
-              <div
-                key={section.title}
-                className='relative overflow-hidden rounded-[2rem] bg-white p-6 sm:p-8 lg:p-10 transition-all hover:-translate-y-1'
-                style={{ boxShadow: '0 4px 20px -8px rgba(0,0,0,0.08)' }}
-              >
-                <div className='flex items-start gap-4'>
-                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold' style={{ background: C.primary }}>
-                    {i + 1}
-                  </div>
-                  <div className='min-w-0'>
-                    <h3 className='text-base font-semibold' style={{ color: C.secondary }}>{section.title}</h3>
-                    <p className='mt-2 text-sm leading-7' style={{ color: `${C.secondary}a0` }}>{section.body}</p>
-                  </div>
-                </div>
-                <img src={SM.flower} alt='' className='absolute right-0 bottom-0 w-16 opacity-[0.06]' loading='lazy' />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── FAQ ─── */}
-      <section className='mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20'>
-        <div className='mx-auto max-w-4xl'>
-          <h2 className='text-center font-amoria text-2xl leading-tight sm:text-3xl' style={{ color: C.secondary }}>
-            Questions <span style={{ color: C.primary, fontStyle: 'italic' }}>fréquentes</span>
-          </h2>
-          <div className='mt-8 space-y-2'>
-            {FAQS.map((faq, i) => {
-              const isOpen = openFaq === i
-              return (
-                <div key={i} className='overflow-hidden rounded-[1.25rem] bg-white border border-black/5 transition-shadow hover:shadow-md' style={{ boxShadow: isOpen ? '0 4px 20px -8px rgba(0,0,0,0.1)' : '0 2px 12px -4px rgba(0,0,0,0.04)' }}>
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className='flex w-full items-center justify-between px-5 py-4 text-left'
-                  >
-                    <span className='pr-3 text-sm font-semibold' style={{ color: C.secondary }}>{faq.q}</span>
-                    <span className={`shrink-0 text-lg transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`} style={{ color: C.primary }}>
-                      +
-                    </span>
-                  </button>
-                  <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-48' : 'max-h-0'}`}>
-                    <div className='px-5 pb-4'>
-                      <p className='text-sm leading-7' style={{ color: `${C.secondary}a0` }}>{faq.a}</p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Related services ─── */}
-      {related.length > 0 ? (
-        <section className='mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20'>
-          <h2 className='text-center font-amoria text-xl leading-tight sm:text-2xl' style={{ color: C.secondary }}>
-            Autres traitements <span style={{ color: C.primary, fontStyle: 'italic' }}>associés</span>
-          </h2>
-          <div className='mt-8 grid gap-3 sm:grid-cols-3'>
-            {related.map((r) => (
-              <Link
-                key={r.slug}
-                to={`/services/${r.slug}`}
-                className='group relative overflow-hidden rounded-[1.5rem] bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-lg border border-black/5'
-                style={{ boxShadow: '0 2px 12px -6px rgba(0,0,0,0.06)' }}
-              >
-                <div className='flex h-10 w-10 items-center justify-center rounded-full text-white text-xs font-bold' style={{ background: C.primary }}>
-                  {r.title[0]}
-                </div>
-                <h3 className='mt-3 text-sm font-semibold' style={{ color: C.secondary }}>{r.title}</h3>
-                <p className='mt-1 text-[11px] leading-5' style={{ color: `${C.secondary}70` }}>{r.highlights.slice(0, 2).join(' · ')}</p>
-                <span className='mt-3 inline-flex items-center gap-1 text-[11px] font-medium transition-all group-hover:gap-2' style={{ color: C.primary }}>
-                  Découvrir <ArrowLeft size={10} className='rotate-180' />
-                </span>
-              </Link>
-            ))}
           </div>
         </section>
-      ) : null}
 
-      {/* ─── CTA ─── */}
-      <section className='mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20'>
-        <div className='relative overflow-hidden rounded-[2rem] p-7 sm:p-10' style={{ background: C.secondary, color: 'white' }}>
-          <div className='relative z-10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12'>
-            <div>
-              <h2 className='font-amoria text-xl leading-tight sm:text-2xl'>
-                Prêt(e) à prendre <span style={{ color: C.primary, fontStyle: 'italic' }}>rendez-vous</span> ?
+        <section className='relative overflow-hidden py-8 sm:py-12'>
+          <div style={CTN}>
+            <div className='mx-auto max-w-[680px] text-center'>
+              <div className='mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full' style={{ background: `${service.color}1F`, color: service.color }}>
+                <Sparkle size={20} weight='fill' />
+              </div>
+              <h2
+                style={{
+                  fontFamily: TYPE.headingFamily,
+                  fontSize: 'clamp(2rem, 4vw, 3.4rem)',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  letterSpacing: '-0.03em',
+                  color: C.secondary,
+                  margin: 0,
+                }}
+              >
+                En <em style={{ color: service.color, fontStyle: 'italic' }}>quelques mots</em>
               </h2>
-              <p className='mt-2 text-sm leading-6 text-white/65'>
-                Contactez-nous par téléphone ou par email pour une consultation.
-              </p>
-            </div>
-            <div className='flex flex-wrap gap-2'>
-              <a
-                href='tel:+212535624696'
-                className='inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl'
-              >
-                <PhoneCall size={14} />
-                +212 (535) 624 696
-              </a>
-              <a
-                href='mailto:info@widamineaestheticcenter.com'
-                className='inline-flex items-center gap-2 rounded-full border-2 px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5'
-                style={{ borderColor: 'rgba(255,255,255,0.25)' }}
-              >
-                <EnvelopeSimple size={14} />
-                Email
-              </a>
-              <button
-                onClick={open}
-                className='inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl'
-                style={{ color: C.primary }}
-              >
-                <CalendarBlank size={14} />
-                Réserver
-              </button>
+              <ul className='mx-auto mt-8 grid max-w-[560px] gap-4 p-0 text-left' style={{ listStyle: 'none' }}>
+                {service.highlights.map((highlight) => (
+                  <li
+                    key={highlight}
+                    className='grid grid-cols-[24px_1fr] items-start gap-3'
+                    style={{
+                      fontFamily: TYPE.bodyFamily,
+                      fontSize: 17,
+                      fontWeight: 600,
+                      lineHeight: '28px',
+                      color: C.secondary,
+                    }}
+                  >
+                    <CheckCircle size={22} weight='fill' style={{ color: service.color, marginTop: 3 }} />
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-          <img src={SM.bubbles} alt='' className='absolute left-0 bottom-0 w-28 opacity-20 hidden lg:block' loading='lazy' />
-          <img src={SM.branch} alt='' className='absolute right-0 bottom-0 w-28 opacity-25 hidden lg:block widamine-tint' loading='lazy' />
-        </div>
-      </section>
+        </section>
+
+        {firstSection ? (
+          <section className='relative overflow-hidden py-10 sm:py-16'>
+            <div style={CTN}>
+              <div className='grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_430px] lg:gap-20'>
+                <div className='flex max-w-[660px] flex-col items-start gap-6'>
+                  <h2
+                    style={{
+                      fontFamily: TYPE.headingFamily,
+                      fontSize: 'clamp(2.15rem, 4vw, 4rem)',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      letterSpacing: '-0.03em',
+                      color: C.secondary,
+                      margin: 0,
+                    }}
+                  >
+                    <em style={{ color: service.color, fontStyle: 'italic' }}>Que faire</em> ?
+                  </h2>
+                  <p
+                    style={{
+                      fontFamily: TYPE.bodyFamily,
+                      fontSize: 17,
+                      fontWeight: 500,
+                      lineHeight: '32px',
+                      color: 'rgba(30,30,30,0.84)',
+                      margin: 0,
+                    }}
+                  >
+                    {firstSection.body}
+                  </p>
+                  <button
+                    type='button'
+                    onClick={() => openWithMotif(service.title)}
+                    className='inline-flex cursor-pointer items-center gap-2 rounded-full border-0 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                    style={{
+                      fontFamily: TYPE.bodyFamily,
+                      color: '#ffffff',
+                      backgroundColor: C.primary,
+                      padding: '13px 24px',
+                      fontSize: 15,
+                      fontWeight: 700,
+                      lineHeight: '18px',
+                    }}
+                  >
+                    <CalendarBlank size={17} weight='bold' />
+                    Prendre rendez-vous
+                  </button>
+                </div>
+
+                <div className='relative mx-auto h-[360px] w-full max-w-[430px] lg:mx-0'>
+                  <div
+                    className='absolute right-8 top-0 h-28 w-28 rounded-full'
+                    style={{ background: service.color, opacity: 0.16 }}
+                  />
+                  <div
+                    className='absolute bottom-0 left-0 h-52 w-52 rounded-full'
+                    style={{ background: C.orange, opacity: 0.22 }}
+                  />
+                  <div
+                    className='absolute bottom-8 right-4 h-44 w-44 rounded-full'
+                    style={{ background: C.primary, opacity: 0.12 }}
+                  />
+                  <img
+                    src={BRAND_FLOWER}
+                    alt=''
+                    className='relative z-10 h-full w-full object-contain drop-shadow-[0_24px_34px_rgba(30,30,30,0.11)]'
+                    loading='lazy'
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {detailSections.length > 0 ? (
+          <section className='relative overflow-hidden py-6 sm:py-10'>
+            <div style={CTN}>
+              <div className='mx-auto grid max-w-[900px] gap-10'>
+                {detailSections.map((section, index) => (
+                  <article key={section.title} className='grid gap-5 border-t pt-8 sm:grid-cols-[190px_1fr]' style={{ borderColor: 'rgba(30,30,30,0.12)' }}>
+                    <h3
+                      style={{
+                        fontFamily: TYPE.headingFamily,
+                        fontSize: 26,
+                        fontWeight: 700,
+                        lineHeight: '32px',
+                        letterSpacing: '-0.02em',
+                        color: index % 2 === 0 ? service.color : C.accent,
+                        margin: 0,
+                      }}
+                    >
+                      {section.title}
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: TYPE.bodyFamily,
+                        fontSize: 16,
+                        fontWeight: 500,
+                        lineHeight: '30px',
+                        color: 'rgba(30,30,30,0.82)',
+                        margin: 0,
+                      }}
+                    >
+                      {section.body}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        <section className='relative overflow-hidden py-10 sm:py-16'>
+          <div style={{ ...CTN, padding: '32px clamp(20px, 6vw, 80px) 56px' }}>
+            <div className='relative overflow-hidden rounded-[28px]' style={{ backgroundColor: C.primary, padding: 'clamp(40px, 6vw, 64px) clamp(24px, 5vw, 48px)' }}>
+              <div className='absolute -left-12 -top-14 h-44 w-44 rounded-full bg-white/10' />
+              <div className='absolute -bottom-14 right-10 h-52 w-52 rounded-full' style={{ background: C.orange, opacity: 0.18 }} />
+              <div className='relative z-10 mx-auto max-w-[740px] text-center'>
+                <h2
+                  style={{
+                    fontFamily: TYPE.headingFamily,
+                    fontSize: 'clamp(2rem, 4vw, 3.3rem)',
+                    fontWeight: 700,
+                    lineHeight: 1.12,
+                    letterSpacing: '-0.03em',
+                    color: '#ffffff',
+                    margin: 0,
+                  }}
+                >
+                  Ensemble, élaborons un plan de traitement efficace et adapté à votre demande, votre psychologie et votre peau.
+                </h2>
+                <button
+                  type='button'
+                  onClick={() => openWithMotif(service.title)}
+                  className='inline-flex cursor-pointer items-center gap-2 rounded-full border-0 transition duration-300 hover:-translate-y-0.5'
+                  style={{
+                    marginTop: 32,
+                    padding: '14px 24px',
+                    backgroundColor: '#ffffff',
+                    color: C.secondary,
+                    fontFamily: TYPE.bodyFamily,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    lineHeight: '18px',
+                  }}
+                >
+                  <CalendarBlank size={17} weight='bold' />
+                  Prendre rendez-vous
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <PublicFooter />
     </div>
   )
 }

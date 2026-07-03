@@ -68,7 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
     links: [
       { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
       { to: 'resources', label: 'Salles', icon: Door, roles: ['ADMIN', 'RECEPTIONIST'] },
-      { to: 'motifs', label: 'Motifs', icon: Stethoscope, roles: ['ADMIN', 'RECEPTIONIST'] },
+      { to: 'motifs', label: 'Traitements', icon: Stethoscope, roles: ['ADMIN', 'RECEPTIONIST'] },
     ],
   },
 ]
@@ -310,7 +310,7 @@ export default function BackOfficeLayout() {
         </Button>
 
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side='left' showCloseButton className='flex w-[17rem] max-w-[85vw] flex-col gap-0 border-border-subtle bg-sidebar p-0 xl:hidden'>
+          <SheetContent side='right' showCloseButton className='flex w-[17rem] max-w-[85vw] flex-col gap-0 border-border-subtle bg-sidebar p-0 xl:hidden'>
             <SidebarContent onNavigate={() => setSidebarOpen(false)} />
           </SheetContent>
         </Sheet>

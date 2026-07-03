@@ -202,7 +202,7 @@
 
 @layer components {
 	.bo-page {
-		@apply overflow-hidden bg-transparent h-full max-lg:h-auto;
+		@apply overflow-hidden bg-transparent h-full;
 	}
 
 	.bo-page-scroll {

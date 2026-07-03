@@ -1,10 +1,13 @@
 import { useContactsStore } from '@/stores/contactsStore'
-import { EnvelopeSimple, Phone, User, CheckCircle, X } from '@phosphor-icons/react'
+import { EnvelopeSimple, Phone, User, CheckCircle, X, ArrowRight, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent } from '@/components/ui'
 import { CONTACTS_EMPTY_ILLUSTRATION, createContactsColumns } from './columns/contactsColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 
 const READ_FILTER_PILLS: FilterPillOption[] = [
   { value: '0', label: 'Non lus', color: 'coral' },
@@ -40,6 +43,9 @@ function ContactsTable() {
   const { items, filters, fetchItems, setItem, readItem, setFilters } = useContactsStore()
   const [loading, setLoading] = useState(true)
   const debouncedSearch = useDebouncedGlobalSearch()
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchTerm = useGlobalSearchStore((s) => s.term)
+  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     setLoading(true)
@@ -73,13 +79,51 @@ function ContactsTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar>
-        <DataTableFilterPills
-          options={READ_FILTER_PILLS}
-          value={filters.read ? '1' : '0'}
-          onChange={(value) => setFilters({ read: value === '1' })}
-        />
+      <DataTable.Toolbar className='max-lg:px-0'>
+        <div className='hidden lg:flex flex-wrap items-center gap-1.5'>
+          <DataTableFilterPills
+            options={READ_FILTER_PILLS}
+            value={filters.read ? '1' : '0'}
+            onChange={(value) => setFilters({ read: value === '1' })}
+          />
+        </div>
+        <div className='flex lg:hidden items-center gap-2 flex-1'>
+          <Select
+            value={filters.read ? '1' : '0'}
+            onValueChange={(value) => setFilters({ read: value === '1' })}
+          >
+            <SelectTrigger size='sm' className='h-9 flex-1 text-xs font-medium'>
+              <SelectValue placeholder="Filtrer par statut" />
+            </SelectTrigger>
+            <SelectContent>
+              {READ_FILTER_PILLS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
+            aria-label='Rechercher'
+          >
+            <MagnifyingGlass size={16} />
+          </button>
+        </div>
       </DataTable.Toolbar>
+
+      {mobileSearchOpen && (
+        <div className='px-4 pb-2 lg:hidden'>
+          <Input
+            placeholder='Rechercher...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='h-9 text-xs'
+            autoFocus
+          />
+        </div>
+      )}
 
       <TanStackDataTable
         table={table}
@@ -107,13 +151,13 @@ function ContactsTable() {
             rows.map((row) => {
               const contact = row.original
               return (
-                <DataTable.MobileCard key={row.id} onClick={() => useContactsStore.setState({ item: contact, openShowModal: true })}>
-                  <div className='flex items-center gap-3 min-w-0'>
-                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-primary/8'>
-                      <User size={20} className='text-primary' />
+                <DataTable.MobileCard key={row.id}>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
+                      <User size={14} className='text-primary' />
                     </div>
                     <div className='min-w-0 flex-1'>
-                      <p className='truncate text-sm font-semibold'>{contact.name}</p>
+                      <p className='text-sm font-semibold'>{contact.name}</p>
                     </div>
                   </div>
                   <div className='mt-3 space-y-2 text-xs text-foreground/60'>
@@ -134,16 +178,24 @@ function ContactsTable() {
                       <Button
                         variant='outline'
                         size='sm'
-                        className='flex-1 gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50'
+                        className='flex-1 h-9 gap-1.5 text-primary border-primary/30 hover:bg-primary/5'
                         onClick={(e) => {
                           e.stopPropagation()
                           setItem(contact)
                           void readItem()
                         }}
                       >
-                        <CheckCircle size={14} /> Marquer comme lu
+                        <CheckCircle size={14} /> Lu
                       </Button>
                     )}
+                    {filters.read && <div className='flex-1' />}
+                    <button
+                      type='button'
+                      onClick={() => useContactsStore.setState({ item: contact, openShowModal: true })}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-secondary/50 hover:bg-secondary/[0.08] hover:text-secondary transition-colors'
+                    >
+                      <ArrowRight size={15} weight='bold' />
+                    </button>
                   </div>
                 </DataTable.MobileCard>
               )
@@ -151,7 +203,10 @@ function ContactsTable() {
         </DataTable.MobileList>
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='lg:hidden'>
+        <DataTablePagination table={table} />
+      </div>
+      <div className='hidden lg:flex justify-end px-4 py-3'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -169,9 +224,8 @@ function ShowModal() {
 
   return (
     <Dialog open onOpenChange={(open) => !open && toggleOpenShowModal()}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-lg rounded-2xl'>
-        {/* Header */}
-        <div className='flex items-start justify-between px-5 pt-5 pb-3'>
+      <DialogContent showCloseButton className='flex flex-col gap-0 p-0 sm:max-w-lg rounded-2xl'>
+        <div className='flex items-start justify-between shrink-0 px-5 pt-5 pb-3'>
           <div className='flex items-start gap-3'>
             <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/[0.08] text-sm font-bold text-primary'>
               {initials}
@@ -186,7 +240,7 @@ function ShowModal() {
         <div className='mx-5 h-px bg-border-subtle/40' />
 
         {/* Body */}
-        <div className='max-h-[calc(100vh-12rem)] overflow-y-auto p-5 space-y-4'>
+        <div className='min-h-0 flex-1 overflow-y-auto p-5 space-y-4'>
           <div className='flex items-center gap-2.5'>
             <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06]'>
               <EnvelopeSimple size={13} className='text-primary/60' />
@@ -215,7 +269,7 @@ function ShowModal() {
           </div>
         </div>
 
-        <div className='flex items-center justify-end border-t border-border-subtle/40 px-5 py-3'>
+        <div className='flex items-center justify-end shrink-0 border-t border-border-subtle/40 px-5 py-3'>
           <Button variant='ghost' size='sm' onClick={toggleOpenShowModal} type='button' className='text-xs font-medium text-muted-foreground/45 hover:text-foreground'>
             Fermer
           </Button>

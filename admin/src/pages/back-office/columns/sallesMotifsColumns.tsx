@@ -14,8 +14,8 @@ export function createSallesMotifsColumns(): ColumnDef<SallesMotifRow>[] {
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column, table }) => (
-        <DataTableColumnHeader column={column} table={table} title='Motif' searchColumn={column} />
+        header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Traitement' searchColumn={column} />
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>

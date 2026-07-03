@@ -32,7 +32,7 @@ const LINKS: {
   // { to: 'appointments', label: 'Rendez-vous', icon: Door, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
   { to: 'calendar', label: 'Calendrier', icon: CalendarDays, roles: ['ADMIN', 'RECEPTIONIST'] },
   { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
-  { to: 'resources', label: 'Salles & Motifs', icon: Door, roles: ['ADMIN', 'RECEPTIONIST'] },
+  { to: 'resources', label: 'Salles & Traitements', icon: Door, roles: ['ADMIN', 'RECEPTIONIST'] },
   { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN', 'RECEPTIONIST'] },
 ]
 
@@ -51,7 +51,7 @@ export default function BackOfficeLayout() {
       <div className='flex items-center justify-between border-b border-secondary/10 bg-white px-4 py-3 xl:hidden'>
         <Link to='/back-office/dashboard' className='flex items-center gap-3'>
           <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10'>
-            <img src='/logo.png' alt='Widamine' className='h-6 w-6 object-contain' />
+            <img src='/logo.svg' alt='Widamine' className='h-6 w-6 object-contain' />
           </div>
           <div>
             <p className='text-xs font-medium text-secondary font-amoria tracking-wider'>Widamine</p>
@@ -123,7 +123,7 @@ function Sidebar({
         <div className='flex items-center justify-between gap-3 px-5 py-6 border-b border-secondary/10'>
           <Link to='/back-office/dashboard' className='flex items-center gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10'>
-              <img src='/logo.png' alt='Widamine' className='h-6 w-6 object-contain' />
+              <img src='/logo.svg' alt='Widamine' className='h-6 w-6 object-contain' />
             </div>
             <div>
               <p className='text-xs font-medium text-secondary font-amoria tracking-wider'>Widamine</p>

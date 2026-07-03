@@ -80,7 +80,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
           } else {
             await api.post('motifs', payload)
           }
-          notify.success(isEdit ? 'Motif modifié.' : 'Motif créé.')
+          notify.success(isEdit ? 'Traitement modifié.' : 'Traitement créé.')
           set({ lastFetchedAt: null })
           await get().fetchItems()
           get().closeModal()
@@ -91,7 +91,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
       deleteItem: async () => {
         try {
           await api.delete('motifs/' + (get().item as Motif).id)
-          notify.success('Motif supprimé.')
+          notify.success('Traitement supprimé.')
         } catch {
           notify.error('Erreur lors de la suppression.')
         }

@@ -177,7 +177,7 @@ export default function ScheduleShowModal() {
           <Info label='Praticien' value={item.appointment?.practitioner?.name || 'Non assigné'} />
           <Info label='Salle' value={item.appointment?.resource?.name || 'Non assignée'} />
           <Info label='Statut' value={item.appointment?.status || '-'} />
-          <Info label='Motif' value={item.appointment?.motif?.name || '-'} />
+          <Info label='Traitement' value={item.appointment?.motif?.name || '-'} />
         </div>
 
         <div className='mt-6 flex items-center justify-between gap-4'>

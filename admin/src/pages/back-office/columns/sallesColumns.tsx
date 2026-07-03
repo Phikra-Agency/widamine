@@ -34,7 +34,7 @@ export function createSallesColumns(): ColumnDef<Resource>[] {
     },
     {
       id: 'motifs',
-      header: 'Motifs associés',
+      header: 'Traitements associés',
       enableSorting: false,
       cell: ({ row }) => <SallesMotifChips assignments={row.original.motifAssignments} />,
     },

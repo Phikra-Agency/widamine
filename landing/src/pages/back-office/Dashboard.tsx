@@ -661,7 +661,7 @@ export default function Dashboard() {
                           </div>
 
                           <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-                            <span className='text-xs text-secondary/40'>Motif</span>
+                            <span className='text-xs text-secondary/40'>Traitement</span>
                             <div className='w-full sm:w-[220px]'>
                               <SelectField
                                 value={details.motifId || ''}

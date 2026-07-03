@@ -27,6 +27,7 @@ import {
 } from '@/lib/scheduleNavigation'
 import CalendarControlBar from '@/components/calendar/CalendarControlBar'
 import CalendarDatePicker from '@/components/calendar/CalendarDatePicker'
+import CalendarNotificationBell from '@/components/calendar/CalendarNotificationBell'
 import EventCard from '@/components/calendar/EventCard'
 import {
   CalendarDayGrid,
@@ -324,7 +325,7 @@ function Planner() {
           onChange={setFilterPractitionerIds}
         />
         <CalendarFilterSelect
-          placeholder='Motif'
+          placeholder='Traitement'
           color='sea'
           icon={Tag}
           options={motifSelectOptions}
@@ -388,14 +389,14 @@ function Planner() {
           onClick={() => togglePeriod(period)}
           className='flex w-full items-center gap-1.5 py-1'
         >
-          <CaretDown size={10} className={`shrink-0 text-secondary/40 transition-transform ${open ? '' : '-rotate-90'}`} />
-          <p className='text-[10px] font-semibold uppercase tracking-wider text-secondary/40'>{label}</p>
-          <span className='text-[9px] text-secondary/25'>({schedules.length})</span>
+          <CaretDown size={13} className={`shrink-0 text-secondary/40 transition-transform ${open ? '' : '-rotate-90'}`} />
+          <p className='text-[13px] font-semibold uppercase tracking-wider text-secondary/40'>{label}</p>
+          <span className='text-[11px] text-secondary/25'>({schedules.length})</span>
         </button>
         {open && (
           <div className='space-y-1.5 pt-0.5'>
             {schedules.length === 0 ? (
-              <p className='py-2 text-[11px] text-secondary/30 italic px-0.5'>Aucune réservation</p>
+              <p className='py-2 text-[13px] text-secondary/40 italic px-0.5'>Aucune réservation</p>
             ) : (
               schedules.map((schedule) => (
                 <EventCard
@@ -427,7 +428,9 @@ function Planner() {
         dateValue={filters.date}
         onDateChange={handleDateChange}
         compact={false}
-      />
+      >
+        <CalendarNotificationBell />
+      </CalendarControlBar>
 
       {showMobileDayStrip && (
       <div className='flex gap-1 overflow-x-auto border-b border-border-subtle bg-background px-3 py-2 lg:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
@@ -440,7 +443,7 @@ function Planner() {
               onClick={() => setMobileDayIdx(idx)}
               className='flex min-w-[44px] shrink-0 cursor-pointer flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors'
             >
-              <span className={clsx('text-[9px] font-semibold uppercase tracking-[0.1em]', isActive ? 'text-primary' : 'text-secondary/35')}>
+              <span className={clsx('text-[11px] font-semibold uppercase tracking-[0.1em]', isActive ? 'text-primary' : 'text-secondary/35')}>
                 {DAY_LABELS[idx].slice(0, 3)}
               </span>
               <div
@@ -503,7 +506,7 @@ function Planner() {
                 </>
               )}
               {!mobileMonthData && (
-                <p className='py-4 text-center text-[11px] text-secondary/30 italic'>Aucune réservation</p>
+                <p className='py-4 text-center text-[13px] text-secondary/40 italic'>Aucune réservation</p>
               )}
             </div>
           </div>
@@ -563,7 +566,7 @@ function MobileMonthGrid({
     <div>
       <div className='grid grid-cols-7'>
         {dayLabels.map((label, i) => (
-          <div key={i} className='py-1 text-center text-[9px] font-semibold uppercase text-secondary/40'>
+          <div key={i} className='py-1 text-center text-[11px] font-semibold uppercase text-secondary/40'>
             {label}
           </div>
         ))}
@@ -591,7 +594,7 @@ function MobileMonthGrid({
             >
               <span
                 className={clsx(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-medium transition',
+                  'flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-medium transition',
                   isSelected && 'bg-primary text-white shadow-sm',
                   !isSelected && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
                   !isSelected && !isToday && 'text-secondary/70',

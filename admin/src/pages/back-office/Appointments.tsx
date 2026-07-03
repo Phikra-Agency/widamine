@@ -1,6 +1,6 @@
 import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { useAuthStore } from '@/stores/authStore'
-import { Eye, CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen } from '@phosphor-icons/react'
+import { Eye, CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, PencilSimple as Pen, CheckCircle, Clock, Translate, type Icon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
@@ -296,6 +296,24 @@ function StatusSelect({ appointmentId, status }: { appointmentId: number; status
   )
 }
 
+function initials(name: string) {
+  return name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
+
+function InfoRow({ icon: Icon, label, value }: { icon: Icon; label: string; value?: string }) {
+  return (
+    <div className='flex items-center gap-2.5'>
+      <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06]'>
+        <Icon size={12} className='text-primary' />
+      </div>
+      <div>
+        <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>{label}</p>
+        <p className='text-sm text-foreground'>{value || '—'}</p>
+      </div>
+    </div>
+  )
+}
+
 function ShowModal() {
   const { openShowModal, setOpenShowModal, item, fetchItem, loadingItem, saveScheduleDate, savingScheduleSessionId } = useAppointmentsStore()
   const [sessionDates, setSessionDates] = useState<Record<string, string>>({})
@@ -333,158 +351,119 @@ function ShowModal() {
 
   return (
     <Dialog open={openShowModal} onOpenChange={setOpenShowModal}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-4xl'>
-        <DialogHeader className='border-b border-border px-4 py-4 text-left sm:px-6'>
-          <DialogTitle className='text-lg font-semibold text-secondary'>Détails du rendez-vous</DialogTitle>
-        </DialogHeader>
-
+      <DialogContent showCloseButton className='flex flex-col gap-0 overflow-hidden p-0 sm:max-w-lg'>
         {loadingItem ? (
-          <div className='flex items-center justify-center p-6 text-secondary/60'>
-            Chargement...
+          <div className='flex items-center justify-center p-14 text-sm text-muted-foreground'>
+            <div className='flex items-center gap-2.5'>
+              <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary/25 border-t-primary' />
+              <span>Chargement…</span>
+            </div>
           </div>
         ) : (
-          <ScrollArea className='max-h-[calc(100dvh-12rem)] sm:max-h-[calc(100vh-14rem)]'>
-            <div className='p-4 sm:p-6'>
-              <div className='mb-6 flex flex-col gap-4 border-b border-border-subtle pb-6 sm:flex-row sm:items-center'>
-                <div className='flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-control bg-secondary/[0.04]'>
-                  <User size={26} className='text-secondary/50' />
+          <>
+            {/* Header */}
+            <div className='flex items-start justify-between shrink-0 px-5 pt-5 pb-3'>
+              <div className='flex items-start gap-3'>
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/[0.08] text-sm font-bold text-primary'>
+                  {initials(item.name)}
                 </div>
-                <div className='min-w-0'>
-                  <h3 className='text-lg font-semibold text-secondary'>{item.name}</h3>
-                  <p className='text-sm text-secondary/50'>{item.motif?.name || '-'}</p>
+                <div className='min-w-0 pt-0.5'>
+                  <h2 className='text-base font-semibold leading-5 text-foreground'>{item.name}</h2>
+                  <div className='mt-1.5'>
+                    <StatusBadge status={item.status || 'PENDING'} />
+                  </div>
+                  <p className='mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/60'>
+                    <EnvelopeSimple size={12} />
+                    {item.email}
+                    <span className='mx-1 text-muted-foreground/20'>·</span>
+                    <Phone size={12} />
+                    {item.phone}
+                  </p>
                 </div>
-                <div className='sm:ml-auto'>
-                  <StatusBadge status={item.status || 'PENDING'} />
+              </div>
+            </div>
+
+            <div className='mx-5 h-px bg-border-subtle/40' />
+
+            <ScrollArea className='flex-1 min-h-0'>
+              <div className='grid grid-cols-2 gap-x-6 gap-y-4 px-5 py-4'>
+                <InfoRow icon={User} label='Nom' value={item.name} />
+                <InfoRow icon={Stethoscope} label='Traitement' value={item.motif?.name || 'Service direct'} />
+                <InfoRow icon={User} label='Praticien' value={item.practitioner?.name || 'Affectation automatique'} />
+                <InfoRow icon={Door} label='Ressource' value={item.resource?.name || 'Aucune'} />
+              </div>
+
+              {item.context && (
+                <>
+                  <div className='mx-5 h-px bg-border-subtle/40' />
+                  <div className='px-5 py-4'>
+                    <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Message</p>
+                    <div className='mt-2 max-h-[180px] overflow-y-auto rounded-xl bg-muted/30 p-3.5 text-xs leading-relaxed text-muted-foreground/60'>
+                      {item.context}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className='mx-5 h-px bg-border-subtle/40' />
+              <div className='px-5 py-4'>
+                <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Notifications</p>
+                <div className='mt-2 space-y-2'>
+                  {(item.notifications || []).length === 0 ? (
+                    <p className='text-sm text-muted-foreground/40'>Aucune notification</p>
+                  ) : (
+                    (item.notifications || []).map((notification) => (
+                      <div key={notification.id} className='flex items-center justify-between gap-3'>
+                        <span className='text-sm text-muted-foreground/60'>{notification.channel} · {notification.recipientType}</span>
+                        <StatusBadge status={notification.status} />
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
-              <div className='grid grid-cols-1 gap-6 xl:grid-cols-2'>
-                <div className='space-y-5'>
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Nom complet</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <User size={15} className='text-secondary/30' />
-                      {item.name}
-                    </div>
-                  </div>
+              <div className='mx-5 h-px bg-border-subtle/40' />
 
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Email</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <EnvelopeSimple size={15} className='text-secondary/30' />
-                      {item.email}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Téléphone</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Phone size={15} className='text-secondary/30' />
-                      {item.phone}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <CalendarBlank size={15} className='text-secondary/30' />
-                      {item.motif?.name || '—'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motif</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Stethoscope size={15} className='text-secondary/30' />
-                      {item.motif?.name || 'Service direct'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Praticien</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Stethoscope size={15} className='text-secondary/30' />
-                      {item.practitioner?.name || 'Affectation automatique'}
-                    </div>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Ressource</Label>
-                    <div className='flex items-center gap-2 rounded-control border border-border bg-background px-4 py-2.5 text-sm text-secondary'>
-                      <Door size={15} className='text-secondary/30' />
-                      {item.resource?.name || 'Aucune ressource dédiée'}
-                    </div>
-                  </div>
-
-                  {item.context && (
-                    <div className='space-y-2'>
-                      <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Message</Label>
-                      <div className='max-h-32 overflow-y-auto rounded-control border border-border bg-background px-4 py-3 text-sm text-secondary/70'>
-                        {item.context}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className='space-y-2'>
-                    <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Notifications</Label>
-                    <div className='max-h-32 space-y-2 overflow-y-auto rounded-control border border-border bg-background p-3'>
-                      {(item.notifications || []).length === 0 ? (
-                        <p className='text-sm text-secondary/40'>Aucune notification</p>
-                      ) : (
-                        (item.notifications || []).map((notification) => (
-                          <div key={notification.id} className='flex items-center justify-between gap-3 border-b border-border-subtle pb-2 last:border-0 last:pb-0'>
-                            <span className='text-sm text-secondary/60'>{notification.channel} · {notification.recipientType}</span>
-                            <StatusBadge status={notification.status} />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className='space-y-4'>
-                  <h3 className='font-medium text-secondary'>Séances du motif</h3>
-                  <div className='space-y-3'>
+              <div className='px-5 py-4'>
+                <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>Séances</p>
+                <div className='mt-2 space-y-3'>
                     {(item.motif?.sessions || []).length === 0 && (
-                      <div className='rounded-control border border-border bg-background p-4 text-center text-sm text-secondary/40'>
-                        Aucune séance trouvée
-                      </div>
+                      <p className='text-sm text-muted-foreground/40'>Aucune séance</p>
                     )}
 
                     {(item.motif?.sessions || []).map((session) => (
-                      <div key={session.id} className='space-y-3 rounded-control border border-border bg-background p-4'>
+                      <div key={session.id} className='rounded-xl bg-muted/30 p-3.5'>
                         <div className='flex items-center justify-between'>
                           <div className='flex items-center gap-2'>
-                            <div className='flex h-6 w-6 items-center justify-center rounded-full bg-secondary/[0.04] text-sm font-medium text-secondary'>{session.session}</div>
-                            <span className='text-sm font-medium text-secondary'>{session.duration} min</span>
+                            <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary/[0.06] text-xs font-medium text-primary'>
+                              {session.session}
+                            </div>
+                            <span className='text-sm font-medium text-foreground'>{session.duration} min</span>
                           </div>
                         </div>
 
                         {editingSessions[session.id] ? (
-                          <div className='space-y-3'>
+                          <div className='mt-3 space-y-3'>
                             <Input
                               type='datetime-local'
                               value={sessionDates[session.id] || ''}
                               onChange={(e) => setSessionDates({ ...sessionDates, [session.id]: e.target.value })}
                             />
                             <div className='flex justify-end gap-2'>
-                              <Button
-                                onClick={() => {
+                              <Button onClick={() => {
                                   setEditingSessions({})
                                   const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
-                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
+                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) }}
                                 }}
-                                type='button'
-                                variant='ghost'
+                                type='button' variant='ghost'
                               >
                                 Annuler
                               </Button>
                               <Button
-                                onClick={async () => {
+                                onClick={() => {
                                   const value = sessionDates[session.id]
                                   if (!value) return
-                                  await saveScheduleDate({ sessionId: session.id, datetime: new Date(value).toISOString() })
-                                  setEditingSessions({})
+                                  saveScheduleDate({ sessionId: session.id, datetime: new Date(value).toISOString() }).then(() => setEditingSessions({}))
                                 }}
                                 type='button'
                                 disabled={!sessionDates[session.id] || savingScheduleSessionId === session.id}
@@ -494,37 +473,30 @@ function ShowModal() {
                             </div>
                           </div>
                         ) : (
-                          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-                            <span className='text-sm text-secondary/60'>
+                          <div className='mt-2 flex items-center justify-between'>
+                            <span className='text-sm text-muted-foreground/60'>
                               {(() => {
                                 const schedule = item.schedules?.find((s) => s.sessionId === session.id)
                                 if (schedule?.datetime) {
                                   return new Date(schedule.datetime).toLocaleString('fr-FR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
+                                    day: '2-digit', month: '2-digit', year: 'numeric',
+                                    hour: '2-digit', minute: '2-digit',
                                   })
                                 }
                                 return 'Date non programmée'
                               })()}
                             </span>
-                            <div className='flex justify-end sm:block'>
-                              <Button
-                                onClick={() => {
-                                  setEditingSessions({ [session.id]: true })
-                                  const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
-                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
-                                }}
-                                type='button'
-                                variant='ghost'
-                                size='icon-sm'
-                                className='text-secondary/40 hover:text-primary hover:bg-primary/10'
-                              >
-                                <Pen size={14} />
-                              </Button>
-                            </div>
+                            <Button
+                              onClick={() => {
+                                setEditingSessions({ [session.id]: true })
+                                const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
+                                setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
+                              }}
+                              type='button' variant='ghost' size='icon-sm'
+                              className='text-muted-foreground/40 hover:text-primary hover:bg-primary/10'
+                            >
+                              <Pen size={14} />
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -532,15 +504,14 @@ function ShowModal() {
                   </div>
                 </div>
               </div>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
         )}
 
-        <DialogFooter className='border-t border-border px-4 py-4 sm:px-6'>
+        <div className='flex shrink-0 items-center justify-end border-t border-border-subtle/40 px-5 py-3'>
           <Button type='button' variant='ghost' onClick={() => setOpenShowModal(false)}>
             Fermer
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

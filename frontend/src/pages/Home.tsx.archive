@@ -1,0 +1,780 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { ArrowUpRightIcon } from '@phosphor-icons/react'
+import type { Icon } from '@phosphor-icons/react'
+import { Link } from 'react-router-dom'
+import {
+	CalendarBlank as CalendarDays,
+	ClipboardText,
+	Clock as Clock3,
+	CrosshairSimple as Crosshair,
+	Drop as Droplets,
+	FileMagnifyingGlass,
+	HeartStraight,
+	MapPin,
+	PhoneCall,
+	ScanSmiley as ScanFace,
+	ShieldCheck,
+	Sparkle as Sparkles,
+	Star,
+} from '@phosphor-icons/react'
+import { useScheduleModalStore } from '@/stores/scheduleModalStore'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { motion } from 'framer-motion'
+import PublicNavbar from '@/components/PublicNavbar'
+import WIDAMINE_ASSETS, { WIDAMINE_CONTENT } from '@/lib/widamineSource'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const SERVICES = [
+	{
+		icon: '🌿',
+		title: 'Esthétique du visage',
+		eyebrow: 'Visage',
+		description: "Soins orientés éclat, texture et harmonie du teint avec une lecture esthétique précise avant chaque protocole.",
+		color: '#2e90c0',
+		bgColor: 'bg-primary/10',
+	},
+	{
+		icon: '👁️',
+		title: "Esthétique de l'œil",
+		eyebrow: 'Regard',
+		description: "Approche délicate du contour de l'œil pour apporter fraîcheur, précision visuelle et équilibre du regard.",
+		color: '#e8c5b8',
+		bgColor: 'bg-accent/30',
+	},
+	{
+		icon: '💋',
+		title: 'Esthétique des lèvres',
+		eyebrow: 'Lèvres',
+		description: "Travail sur la définition, la proportion et l'élégance du volume pour un rendu naturel et maîtrisé.",
+		color: '#1a3646',
+		bgColor: 'bg-secondary/10',
+	},
+]
+
+const CARE_UNIVERSES = [
+	{
+		title: 'Consultation',
+		eyebrow: 'Diagnostic',
+		description: 'Consultation générale et urgence dermatologique dans un parcours de prise en charge clair et réactif.',
+		items: ['Consultation générale', 'Urgence dermatologique'],
+		icon: '🩺',
+		color: '#2e90c0',
+	},
+	{
+		title: 'Dermatologie esthétique',
+		eyebrow: 'Esthétique médicale',
+		description: 'Des traitements ciblés pour le visage, l\'anti-âge et la qualité de peau, portés par une lecture médicale précise.',
+		items: ['Injection Botox & acide hyaluronique', 'Peeling', 'Traitement anti-âge', 'Soins du visage'],
+		icon: '✨',
+		color: '#e8c5b8',
+	},
+	{
+		title: 'Séances laser',
+		eyebrow: 'Technologies',
+		description: 'Des protocoles laser ajustés selon l\'indication, la peau et l\'objectif thérapeutique ou esthétique.',
+		items: ['Épilation laser', 'Traitement des taches', 'Cicatrices / acné', 'Détatouage'],
+		icon: '💡',
+		color: '#1a3646',
+	},
+]
+
+const JOURNEY_CARDS = [
+	{
+		icon: FileMagnifyingGlass,
+		title: 'Diagnostic précis',
+		description: 'Chaque parcours démarre par une lecture précise des besoins du patient et un diagnostic adapté à sa situation.',
+		color: '#2e90c0',
+	},
+	{
+		icon: ClipboardText,
+		title: 'Protocoles sur mesure',
+		description: "Chaque patient bénéficie d'un plan de traitement personnalisé, construit autour de ses attentes et de ses priorités.",
+		color: '#e8c5b8',
+	},
+	{
+		icon: HeartStraight,
+		title: 'Suivi attentif',
+		description: "Notre équipe accompagne chaque étape du parcours avec une présence claire, rassurante et continue.",
+		color: '#1a3646',
+	},
+]
+
+const EXPERTISES = [
+	{
+		name: 'Dr. SLAOUI WIDAD',
+		role: 'Plastic Surgery',
+		image: '/hero.png',
+		description: "Votre bien-être nous est confié. Notre équipe d'experts, pour des résultats à la hauteur de vos attentes.",
+	},
+	{
+		name: 'Équipe Widamine',
+		role: 'Accompagnement patient',
+		image: '/services/service_1.png',
+		description: "Des professionnels dévoués présents à chaque étape pour guider, rassurer et structurer l'expérience patient.",
+	},
+]
+
+const TRUST_POINTS = [
+	{
+		icon: ShieldCheck,
+		title: 'Fiabilité',
+		description: 'Des services précis, fiables et éthiques portés par une équipe experte.',
+	},
+	{
+		icon: Sparkles,
+		title: 'Empathie',
+		description: 'Une écoute attentive pour comprendre vos besoins médicaux et vos aspirations personnelles.',
+	},
+	{
+		icon: Crosshair,
+		title: 'Innovation',
+		description: 'Les dernières technologies intégrées à une approche harmonieuse et équilibrée.',
+	},
+	{
+		icon: Droplets,
+		title: 'Éthique',
+		description: 'Des pratiques transparentes et respectueuses de votre peau, de votre santé et de votre confiance.',
+	},
+]
+
+const MEDICAL_INSIGHTS = [
+	{
+		icon: ScanFace,
+		title: 'Notre Objectif',
+		description: "Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu.",
+	},
+	{
+		icon: Droplets,
+		title: 'Notre Vision',
+		description: 'Être le centre de référence en dermatologie et esthétique médicale, où innovation et qualité se rencontrent.',
+	},
+	{
+		icon: Crosshair,
+		title: 'Notre Mission',
+		description: 'Nous sommes dédiés à améliorer la vie de nos patients par des soins dermatologiques et esthétiques personnalisés.',
+	},
+]
+
+const revealProps = {
+	initial: { opacity: 0, y: 34, scale: 0.985, filter: 'blur(16px)' },
+	whileInView: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
+	viewport: { once: true, amount: 0.2 },
+	transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
+}
+
+function RevealBlock({
+	children,
+	className,
+	delay = 0,
+}: {
+	children: ReactNode
+	className?: string
+	delay?: number
+}) {
+	return (
+		<motion.div
+			className={className}
+			initial={revealProps.initial}
+			whileInView={revealProps.whileInView}
+			viewport={revealProps.viewport}
+			transition={{ ...revealProps.transition, delay }}
+		>
+			{children}
+		</motion.div>
+	)
+}
+
+/* ── Botanical SVG accents ───────────────────────────────────────── */
+
+function LeafAccent({ className, color = '#2e90c0', size = 200 }: { className?: string; color?: string; size?: number }) {
+	return (
+		<svg className={className} width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden='true'>
+			<path d="M40 160c30-44 58-70 95-92 33-20 55-38 74-62-5 46-17 82-38 110-23 32-56 56-98 72-12 4-23 6-33 7Z" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+			<path d="M58 146c15-15 28-25 43-33 13-8 27-17 41-32-7 20-15 33-27 47-12 13-29 25-50 35" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.35" />
+		</svg>
+	)
+}
+
+function FlowerAccent({ className, color = '#e8c5b8', size = 120 }: { className?: string; color?: string; size?: number }) {
+	return (
+		<svg className={className} width={size} height={size} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden='true'>
+			<circle cx="60" cy="60" r="8" fill={color} opacity="0.3" />
+			<ellipse cx="60" cy="38" rx="6" ry="14" fill={color} opacity="0.2" />
+			<ellipse cx="60" cy="82" rx="6" ry="14" fill={color} opacity="0.2" />
+			<ellipse cx="38" cy="60" rx="14" ry="6" fill={color} opacity="0.2" />
+			<ellipse cx="82" cy="60" rx="14" ry="6" fill={color} opacity="0.2" />
+			<ellipse cx="44" cy="44" rx="5" ry="12" fill={color} opacity="0.15" transform="rotate(-45 44 44)" />
+			<ellipse cx="76" cy="76" rx="5" ry="12" fill={color} opacity="0.15" transform="rotate(-45 76 76)" />
+			<ellipse cx="76" cy="44" rx="5" ry="12" fill={color} opacity="0.15" transform="rotate(45 76 44)" />
+			<ellipse cx="44" cy="76" rx="5" ry="12" fill={color} opacity="0.15" transform="rotate(45 44 76)" />
+		</svg>
+	)
+}
+
+function BranchAccent({ className, color = '#1a3646', size = 180 }: { className?: string; color?: string; size?: number }) {
+	return (
+		<svg className={className} width={size} height={size} viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden='true'>
+			<path d="M10 170C30 130 50 90 90 60c20-15 45-28 70-45" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+			<path d="M90 60c-8-18-2-30 8-38" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.25" />
+			<path d="M90 60c12-14 28-12 32-2" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.25" />
+			<circle cx="96" cy="22" r="4" fill={color} opacity="0.12" />
+			<circle cx="126" cy="56" r="3" fill={color} opacity="0.1" />
+		</svg>
+	)
+}
+
+/* ── Hero ────────────────────────────────────────────────────────── */
+
+function Hero() {
+	const heroRef = useRef<HTMLElement>(null)
+	const { open } = useScheduleModalStore()
+
+	useEffect(() => {
+		const ctx = gsap.context(() => {
+			gsap.fromTo(
+				'[data-hero-anim]',
+				{ opacity: 0, y: 22 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 1,
+					stagger: 0.12,
+					ease: 'power3.out',
+					delay: 0.15,
+				}
+			)
+		}, heroRef)
+		return () => ctx.revert()
+	}, [])
+
+	return (
+		<section ref={heroRef} className='relative z-[1200] min-h-[100svh] overflow-hidden isolate' style={{ backgroundColor: '#fff6f4' }}>
+			{/* Organic background shapes */}
+			<div className='absolute inset-0 pointer-events-none'>
+				<div className='absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-accent/20 blur-3xl' />
+				<div className='absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/8 blur-3xl' />
+				<div className='absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-primary/6 blur-3xl' />
+				<div className='absolute bottom-1/4 right-1/3 h-48 w-48 rounded-full bg-accent/15 blur-2xl' />
+
+				{/* Botanical SVGs */}
+				<LeafAccent className='absolute -left-10 top-16 opacity-40 hidden lg:block' color='#1a3646' size={280} />
+				<FlowerAccent className='absolute right-12 top-24 opacity-50 hidden lg:block' color='#e8c5b8' size={140} />
+				<BranchAccent className='absolute -right-8 bottom-32 opacity-35 hidden lg:block' color='#2e90c0' size={220} />
+				<LeafAccent className='absolute left-8 bottom-20 opacity-25 hidden sm:block lg:hidden' color='#2e90c0' size={100} />
+				<FlowerAccent className='absolute right-4 top-1/2 opacity-30 sm:hidden' color='#e8c5b8' size={60} />
+			</div>
+
+			<PublicNavbar theme='light' />
+
+			<motion.div
+				className='relative z-0 flex min-h-[100svh] items-center justify-center px-6 pt-24 pb-20 sm:px-8 sm:pt-28 sm:pb-28'
+				initial={{ opacity: 0, scale: 0.95 }}
+				animate={{ opacity: 1, scale: 1 }}
+				transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+			>
+				<div className='w-full max-w-3xl text-center'>
+					<motion.div
+						className='flex flex-col items-center'
+						initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+						transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+					>
+						<div className='flex h-16 w-16 items-center justify-center rounded-full border border-secondary/10 bg-white/80 shadow-sm'>
+							<img src={WIDAMINE_ASSETS.logos.primary} alt='Widamine' className='h-9 w-9 object-contain' />
+						</div>
+						<h1 className='mt-4 font-amoria text-xl tracking-[0.2em] text-secondary'>WIDAMINE</h1>
+						<p className='mt-1 text-[10px] uppercase tracking-[0.34em] text-secondary/50'>Sobriété Esthétique</p>
+					</motion.div>
+
+					<motion.h2
+						className='mt-8 font-amoria text-[2.2rem] leading-[1.08] text-secondary sm:text-5xl sm:leading-[1.03] md:text-6xl md:leading-[1.01]'
+						initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+						transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+					>
+						Bienvenue dans <span className='italic text-primary'>la jungle</span> de la
+						<br className='hidden sm:block' />
+						dermatologie <span className='italic text-primary'>esthétique</span> et laser.
+					</motion.h2>
+
+					<motion.p
+						className='mx-auto mt-6 max-w-xl text-base leading-8 text-secondary/60 sm:text-lg sm:leading-9'
+						initial={{ opacity: 0, y: 18, filter: 'blur(6px)' }}
+						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+						transition={{ duration: 0.6, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+					>
+						Que ce soit pour des rides, de la cicatrisation, des taches ou une simple envie de retrouver une peau saine et éclatante, nous avons la solution adaptée.
+					</motion.p>
+
+					<motion.div
+						className='mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row'
+						initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
+						animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+						transition={{ duration: 0.6, delay: 0.75, ease: [0.25, 0.46, 0.45, 0.94] }}
+					>
+						<button
+							onClick={open}
+							className='group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(46,144,192,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_18px_40px_rgba(46,144,192,0.35)] active:translate-y-0'
+						>
+							Prendre rendez-vous
+							<ArrowUpRightIcon size={18} className='transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5' />
+						</button>
+					</motion.div>
+				</div>
+			</motion.div>
+		</section>
+	)
+}
+
+/* ── Services (3 colorful cards) ─────────────────────────────────── */
+
+function Services() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>L'energie du</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>Widamine Center</h2>
+					<p className='mx-auto mt-5 max-w-2xl text-base leading-8 text-secondary/60'>
+						Que ce soit pour des rides, de la cicatrisation, des taches ou une simple envie de retrouver une peau saine et éclatante, nous avons la solution adaptée.
+					</p>
+					<Link to='/appointment' className='mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(46,144,192,0.25)] transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_16px_36px_rgba(46,144,192,0.32)]'>
+						Découvrir nos soins
+						<ArrowUpRightIcon size={16} />
+					</Link>
+				</div>
+
+				<div className='mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+					{SERVICES.map((service, idx) => (
+						<motion.div
+							key={service.title}
+							className='group relative overflow-hidden rounded-[2rem] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(26,54,70,0.1)]'
+							style={{ backgroundColor: `${service.color}12`, border: `1px solid ${service.color}18` }}
+							initial={{ opacity: 0, y: 24 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, amount: 0.2 }}
+							transition={{ duration: 0.6, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+						>
+							<div className='mb-6 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl' style={{ backgroundColor: `${service.color}18` }}>
+								{service.icon}
+							</div>
+							<p className='text-[11px] font-semibold uppercase tracking-[0.24em]' style={{ color: service.color }}>{service.eyebrow}</p>
+							<h3 className='mt-2 text-xl font-semibold text-secondary'>{service.title}</h3>
+							<p className='mt-3 text-sm leading-7 text-secondary/60'>{service.description}</p>
+							<div className='mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary'>
+								Découvrir le traitement
+								<ArrowUpRightIcon size={14} className='transition-transform group-hover:translate-x-0.5' />
+							</div>
+						</motion.div>
+					))}
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── La méthode (3 steps) ───────────────────────────────────────── */
+
+function MethodSection() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>La méthode</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>Widamine Center</h2>
+				</div>
+
+				<div className='mt-16 grid gap-6 sm:grid-cols-3'>
+					{CARE_UNIVERSES.map((universe, idx) => (
+						<motion.div
+							key={universe.title}
+							className='group relative overflow-hidden rounded-[2rem] border border-secondary/8 bg-white p-8 shadow-[0_18px_40px_rgba(26,54,70,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(26,54,70,0.1)]'
+							initial={{ opacity: 0, y: 24 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, amount: 0.2 }}
+							transition={{ duration: 0.6, delay: idx * 0.12, ease: [0.22, 1, 0.36, 1] }}
+						>
+							<div className='pointer-events-none absolute -right-6 top-0 h-20 w-20 rounded-full blur-3xl' style={{ backgroundColor: `${universe.color}15` }} />
+							<div className='mb-6 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl' style={{ backgroundColor: `${universe.color}12` }}>
+								{universe.icon}
+							</div>
+							<p className='text-[11px] font-semibold uppercase tracking-[0.24em]' style={{ color: universe.color }}>{universe.eyebrow}</p>
+							<h3 className='mt-2 text-xl font-semibold text-secondary'>{universe.title}</h3>
+							<p className='mt-3 text-sm leading-7 text-secondary/60'>{universe.description}</p>
+							<div className='mt-5 space-y-2'>
+								{universe.items.map((item) => (
+									<div key={item} className='flex items-start gap-2.5 text-sm text-secondary/65'>
+										<span className='mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: universe.color }} />
+										<span>{item}</span>
+									</div>
+								))}
+							</div>
+							<div className='mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary'>
+								Découvrir le traitement
+								<ArrowUpRightIcon size={14} className='transition-transform group-hover:translate-x-0.5' />
+							</div>
+						</motion.div>
+					))}
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── L'équipe ────────────────────────────────────────────────────── */
+
+function ExpertsSection() {
+	return (
+		<section className='relative overflow-hidden py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<div className='pointer-events-none absolute inset-0 opacity-60'>
+				<div className='absolute -top-32 -left-32 h-[24rem] w-[24rem] rounded-full bg-accent/15 blur-3xl' />
+				<div className='absolute -bottom-32 -right-32 h-[24rem] w-[24rem] rounded-full bg-primary/8 blur-3xl' />
+			</div>
+			<RevealBlock className='relative mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>L'équipe</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>du Widamine Center</h2>
+				</div>
+				<div className='mt-16 grid gap-8 md:grid-cols-2'>
+					{EXPERTISES.map((expert, idx) => (
+						<motion.article
+							key={expert.name}
+							className='overflow-hidden rounded-[2rem] border border-secondary/8 bg-white shadow-[0_22px_45px_rgba(26,54,70,0.06)]'
+							initial={{ opacity: 0, y: 24 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, amount: 0.18 }}
+							transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+						>
+							<div className='h-64 overflow-hidden bg-secondary/5'>
+								<img src={expert.image ?? WIDAMINE_CONTENT.experts[idx % WIDAMINE_CONTENT.experts.length].image} alt={expert.name} className='h-full w-full object-cover' />
+							</div>
+							<div className='space-y-4 p-7'>
+								<div>
+									<p className='text-sm uppercase tracking-[0.18em] text-primary'>{expert.role}</p>
+									<h3 className='mt-2 text-2xl font-semibold text-secondary'>{expert.name}</h3>
+								</div>
+								<p className='text-sm leading-7 text-secondary/65'>{expert.description}</p>
+								<div className='flex items-center gap-2 text-sm text-secondary/50'>
+									<Star size={15} className='fill-accent text-accent' />
+									<span>Approche personnalisée et cadre premium</span>
+								</div>
+							</div>
+						</motion.article>
+					))}
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Témoignages ─────────────────────────────────────────────────── */
+
+function TestimonialsSection() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Les</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>
+						<span className='italic text-primary'>Témoignages</span> de nos patientes
+					</h2>
+				</div>
+				<div className='mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+					{WIDAMINE_CONTENT.testimonials.map((t, idx) => (
+						<motion.article
+							key={t.name}
+							className='rounded-[2rem] border border-secondary/8 bg-white p-7 shadow-[0_18px_40px_rgba(26,54,70,0.05)]'
+							initial={{ opacity: 0, y: 24 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, amount: 0.18 }}
+							transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+						>
+							<div className='flex items-center gap-3'>
+								<img src={WIDAMINE_ASSETS.testimonials[idx % WIDAMINE_ASSETS.testimonials.length]} alt={t.name} className='h-12 w-12 rounded-full object-cover' />
+								<div className='flex items-center gap-1 text-accent'>
+									{Array.from({ length: 5 }).map((_, i) => (
+										<Star key={i} size={16} className='fill-accent text-accent' />
+									))}
+								</div>
+							</div>
+							<p className='mt-6 text-base leading-8 text-secondary/70'>"{t.quote}"</p>
+							<div className='mt-6 border-t border-secondary/8 pt-5'>
+								<p className='text-sm font-semibold text-secondary'>{t.name}</p>
+								<p className='mt-1 text-xs uppercase tracking-[0.18em] text-primary'>{t.service}</p>
+							</div>
+						</motion.article>
+					))}
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Parcours patient ────────────────────────────────────────────── */
+
+function PatientJourney() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Votre parcours</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>Une expérience pensée pour vous</h2>
+					<p className='mx-auto mt-5 max-w-2xl text-base leading-8 text-secondary/60'>
+						Un parcours clair et structuré, de la première consultation jusqu'au suivi post-traitement.
+					</p>
+				</div>
+				<div className='mt-14 grid gap-6 sm:grid-cols-3'>
+					{JOURNEY_CARDS.map((card, idx) => {
+						const Icon = card.icon as Icon
+						return (
+							<motion.div
+								key={card.title}
+								className='rounded-[2rem] border border-secondary/8 bg-white p-8 shadow-[0_18px_40px_rgba(26,54,70,0.05)]'
+								initial={{ opacity: 0, y: 24 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.2 }}
+								transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+							>
+								<div className='mb-8 flex h-14 w-14 items-center justify-center rounded-2xl' style={{ backgroundColor: `${card.color}12` }}>
+									<Icon size={22} style={{ color: card.color }} />
+								</div>
+								<h3 className='text-xl font-semibold text-secondary'>{card.title}</h3>
+								<p className='mt-3 text-sm leading-7 text-secondary/60'>{card.description}</p>
+							</motion.div>
+						)
+					})}
+				</div>
+				<div className='mt-10 flex flex-wrap justify-center gap-3 text-sm'>
+					<span className='rounded-full border border-secondary/10 bg-white px-5 py-2.5 text-secondary/65'>Traitements des rides</span>
+					<span className='rounded-full border border-secondary/10 bg-white px-5 py-2.5 text-secondary/65'>Restauration du volume</span>
+					<span className='rounded-full border border-secondary/10 bg-white px-5 py-2.5 text-secondary/65'>Amélioration des lèvres</span>
+					<span className='rounded-full border border-secondary/10 bg-white px-5 py-2.5 text-secondary/65'>Nettoyage de peau</span>
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Objectif / Vision / Mission ──────────────────────────────────── */
+
+function MedicalAestheticsSection() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='grid gap-10 lg:grid-cols-2 lg:items-center'>
+					<div className='space-y-6'>
+						<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Esthétique médicale</p>
+						<h2 className='max-w-xl font-amoria text-4xl leading-tight text-secondary md:text-5xl'>
+							Notre expertise au service de <span className='italic text-primary'>votre beauté</span>
+						</h2>
+						<p className='max-w-xl text-base leading-8 text-secondary/65'>
+							Nous combinons technologies de pointe, savoir-faire expert et accompagnement personnalisé pour offrir des résultats remarquables et durables.
+						</p>
+						<div className='flex flex-wrap gap-3 text-sm'>
+							<span className='rounded-full border border-primary/15 bg-primary/6 px-5 py-2.5 text-secondary'>Hydratation profonde</span>
+							<span className='rounded-full border border-primary/15 bg-primary/6 px-5 py-2.5 text-secondary'>Texture raffinée</span>
+							<span className='rounded-full border border-primary/15 bg-primary/6 px-5 py-2.5 text-secondary'>Approche sur mesure</span>
+						</div>
+					</div>
+					<div className='grid gap-4 sm:grid-cols-1'>
+						{MEDICAL_INSIGHTS.map((item, idx) => {
+							const Icon = item.icon
+							return (
+								<motion.div
+									key={item.title}
+									className='rounded-[1.75rem] border border-secondary/8 bg-white p-6 shadow-[0_14px_30px_rgba(26,54,70,0.04)]'
+									initial={{ opacity: 0, x: 20 }}
+									whileInView={{ opacity: 1, x: 0 }}
+									viewport={{ once: true, amount: 0.2 }}
+									transition={{ duration: 0.6, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+								>
+									<div className='flex items-start gap-4'>
+										<div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+											<Icon size={18} />
+										</div>
+										<div>
+											<h3 className='text-lg font-semibold text-secondary'>{item.title}</h3>
+											<p className='mt-2 text-sm leading-7 text-secondary/60'>{item.description}</p>
+										</div>
+									</div>
+								</motion.div>
+							)
+						})}
+					</div>
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Confiance (Pourquoi Widamine) ────────────────────────────────── */
+
+function TrustSection() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-center'>
+					<div className='rounded-[2.25rem] bg-secondary px-8 py-10 text-white shadow-[0_30px_60px_rgba(26,54,70,0.18)] md:px-10'>
+						<p className='text-xs uppercase tracking-[0.28em] text-white/60'>Pourquoi Widamine</p>
+						<h2 className='mt-4 font-amoria text-4xl leading-tight md:text-5xl'>Une approche qui rassure et inspire confiance.</h2>
+						<p className='mt-6 max-w-lg text-base leading-8 text-white/75'>
+							Notre engagement est d'offrir une expérience complète, de la première consultation jusqu'au suivi post-traitement.
+						</p>
+						<div className='mt-8 grid gap-4 sm:grid-cols-3'>
+							<div>
+								<div className='text-3xl font-semibold'>12+</div>
+								<p className='mt-2 text-sm text-white/65'>Protocoles personnalisables</p>
+							</div>
+							<div>
+								<div className='text-3xl font-semibold'>1:1</div>
+								<p className='mt-2 text-sm text-white/65'>Suivi individualisé</p>
+							</div>
+							<div>
+								<div className='text-3xl font-semibold'>100%</div>
+								<p className='mt-2 text-sm text-white/65'>Engagement qualité</p>
+							</div>
+						</div>
+					</div>
+					<div className='grid gap-5 sm:grid-cols-2'>
+						{TRUST_POINTS.map((point, idx) => {
+							const Icon = point.icon
+							return (
+								<motion.div
+									key={point.title}
+									className='rounded-[1.75rem] border border-secondary/8 bg-white p-6 shadow-[0_14px_30px_rgba(26,54,70,0.04)]'
+									initial={{ opacity: 0, y: 24 }}
+									whileInView={{ opacity: 1, y: 0 }}
+									viewport={{ once: true, amount: 0.2 }}
+									transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+								>
+									<div className='flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary'>
+										<Icon size={18} />
+									</div>
+									<h3 className='mt-5 text-lg font-semibold text-secondary'>{point.title}</h3>
+									<p className='mt-2 text-sm leading-7 text-secondary/60'>{point.description}</p>
+								</motion.div>
+							)
+						})}
+					</div>
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── CTA Section ─────────────────────────────────────────────────── */
+
+function ConsultationBanner() {
+	const { open } = useScheduleModalStore()
+
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='relative overflow-hidden rounded-[2rem] bg-primary px-8 py-12 text-white shadow-[0_28px_55px_rgba(46,144,192,0.3)] sm:rounded-[2.5rem] sm:px-12 sm:py-16'>
+					<div className='pointer-events-none absolute -top-14 right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl' />
+					<div className='pointer-events-none absolute -bottom-16 left-12 h-44 w-44 rounded-full bg-secondary/20 blur-2xl' />
+					<LeafAccent className='absolute -right-6 -top-6 opacity-15' color='white' size={160} />
+					<FlowerAccent className='absolute -left-4 bottom-4 opacity-10' color='white' size={100} />
+
+					<div className='relative grid gap-10 lg:grid-cols-[1fr_300px] lg:items-center'>
+						<div>
+							<p className='text-xs font-semibold uppercase tracking-[0.28em] text-white/60'>Consultation</p>
+							<h2 className='mt-4 max-w-2xl font-amoria text-[2rem] leading-tight sm:text-4xl md:text-5xl'>
+								Comment prendre rendez-vous au Widamine Center ?
+							</h2>
+							<p className='mt-5 max-w-2xl text-base leading-8 text-white/75 sm:text-lg'>
+								Pour une consultation, 2 solutions : Prendre directement un rendez-vous via le visio consultation qui permet ensuite de choisir le créneau.
+							</p>
+							<div className='mt-8 flex flex-col gap-3 sm:flex-row'>
+								<button onClick={open} className='inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition-all hover:-translate-y-0.5 hover:bg-white/95'>
+									Prendre rendez-vous
+									<ArrowUpRightIcon size={16} />
+								</button>
+							</div>
+						</div>
+						<div className='space-y-4 text-sm text-white/80'>
+							<div className='flex items-start gap-3'>
+								<CalendarDays size={18} className='mt-0.5 shrink-0 text-white/60' />
+								<span>Par téléphone, du lundi au samedi de 9h à 19h au +212 535 624 696</span>
+							</div>
+							<div className='flex items-start gap-3'>
+								<PhoneCall size={18} className='mt-0.5 shrink-0 text-white/60' />
+								<span>Par mail en envoyant votre demande et des photos de bonne qualité à contact@widamine.com</span>
+							</div>
+							<div className='flex items-start gap-3'>
+								<MapPin size={18} className='mt-0.5 shrink-0 text-white/60' />
+								<span>Boulevard Slaoui, Bureaux Nour, 2ème étage, Fès</span>
+							</div>
+							<div className='flex items-start gap-3'>
+								<Clock3 size={18} className='mt-0.5 shrink-0 text-white/60' />
+								<span>Lundi à samedi, de 9h à 19h</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Contact / Closing ────────────────────────────────────────────── */
+
+function ClosingSection() {
+	return (
+		<section className='py-20 sm:py-28 lg:py-36' style={{ backgroundColor: '#fff6f4' }}>
+			<RevealBlock className='mx-auto max-w-6xl px-6 sm:px-8'>
+				<div className='text-center'>
+					<p className='text-xs font-semibold uppercase tracking-[0.28em] text-primary'>Informations</p>
+					<h2 className='mt-3 font-amoria text-4xl text-secondary md:text-5xl'>Contactez Widamine Center</h2>
+					<p className='mx-auto mt-5 max-w-2xl text-base leading-8 text-secondary/60'>
+						Pour en savoir plus sur nos traitements, planifier une consultation ou poser une question à notre équipe, nous restons disponibles pour vous accompagner.
+					</p>
+				</div>
+				<div className='mt-14 grid gap-6 sm:grid-cols-3'>
+					{[
+						{ icon: MapPin, title: 'Adresse', text: 'Boulevard Slaoui, Bureaux Nour, 2ème étage, Fès.' },
+						{ icon: PhoneCall, title: 'Téléphone', text: '+212 (535) 624 696\n+212 (535) 930 182\n+212 (694) 722 113' },
+						{ icon: Clock3, title: 'Horaires', text: 'Lundi à samedi, de 9h à 19h\nConsultations sur rendez-vous' },
+					].map((item, idx) => {
+						const Icon = item.icon
+						return (
+							<motion.div
+								key={item.title}
+								className='rounded-[1.75rem] border border-secondary/8 bg-white p-7 shadow-[0_14px_30px_rgba(26,54,70,0.04)]'
+								initial={{ opacity: 0, y: 24 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								viewport={{ once: true, amount: 0.2 }}
+								transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+							>
+								<Icon size={20} className='text-primary' />
+								<h3 className='mt-5 text-xl font-semibold text-secondary'>{item.title}</h3>
+								<p className='mt-3 text-sm leading-7 text-secondary/60 whitespace-pre-line'>{item.text}</p>
+							</motion.div>
+						)
+					})}
+				</div>
+			</RevealBlock>
+		</section>
+	)
+}
+
+/* ── Main ─────────────────────────────────────────────────────────── */
+
+export default function Home() {
+	return (
+		<>
+			<Hero />
+			<Services />
+			<MethodSection />
+			<ExpertsSection />
+			<TestimonialsSection />
+			<PatientJourney />
+			<MedicalAestheticsSection />
+			<TrustSection />
+			<ConsultationBanner />
+			<ClosingSection />
+		</>
+	)
+}

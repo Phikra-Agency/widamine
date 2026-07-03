@@ -3,7 +3,6 @@ import {
   ArrowLeft as ArrowLeftIcon,
   ArrowRight as ArrowRightIcon,
   Check as CheckIcon,
-  Microscope as MicroscopeIcon,
   X,
   User,
   EnvelopeSimple as Mail,
@@ -13,6 +12,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { DatePicker } from '@mantine/dates'
 import clsx from 'clsx'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
+import { C, TYPE } from '@/lib/theme'
 import classes from './Scheduling.module.css'
 
 const panelVariants = {
@@ -28,11 +28,11 @@ const stepVariants = {
 }
 
 function getPanelWidth(step: number) {
-  return step === 3 ? 520 : step === 1 ? 480 : 720
+  return step === 3 ? 640 : step === 1 ? 640 : 800
 }
 
 function getStepTitle(step: number) {
-  return step === 1 ? 'Motif Principal' : step === 2 ? 'Date Et Heure' : 'Informations De Contact'
+  return step === 1 ? 'Traitement' : step === 2 ? 'Date Et Heure' : 'Informations De Contact'
 }
 
 function formatDateInputValue(date: Date | null) {
@@ -146,7 +146,9 @@ function ReservationSteps({
     }
   }
 
-  const inputBase = 'w-full rounded-full border border-white/20 bg-transparent py-2.5 pr-4 pl-10 text-sm text-white placeholder:text-white/40 hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+  const inputBase = `w-full rounded-full border py-2.5 pr-4 pl-10 text-sm focus:outline-none ${C.secondary} placeholder:text-gray-400 border-gray-200 bg-white hover:border-gray-300 focus:border-[${C.primary}] focus:ring-1 focus:ring-[${C.primary}]/20`
+
+  const cardBase = 'overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 sm:p-6'
 
   return (
     <motion.div
@@ -154,19 +156,20 @@ function ReservationSteps({
       initial='hidden'
       animate='visible'
       exit='exit'
-      className={`overflow-hidden rounded-[1.45rem] border border-white/18 bg-[linear-gradient(180deg,rgba(52,52,52,0.98),rgba(33,33,33,0.98))] p-4 text-white sm:rounded-[1.65rem] sm:p-6 ${
+      className={`shadow-xl ${
         embedded
           ? 'relative flex w-full max-w-full flex-col min-h-[24rem] sm:max-w-[720px] sm:min-h-[30rem]'
-          : 'pointer-events-auto relative flex max-h-[calc(100dvh-1.5rem)] w-full flex-col sm:max-h-[min(90dvh,52rem)]'
-      }`}
+          : 'pointer-events-auto relative flex w-full flex-col'
+      } ${cardBase}`}
       style={embedded ? undefined : { width: `min(calc(100vw - 1.5rem), ${getPanelWidth(step)}px)` }}
     >
-      <div className='pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent' />
       <div className='mb-5 flex items-center justify-between sm:mb-6'>
-        <h2 className='text-lg font-normal'>{getStepTitle(step)}</h2>
+        <h2 className='text-lg' style={{ fontFamily: TYPE.headingFamily, color: C.secondary, fontWeight: 500 }}>
+          {getStepTitle(step)}
+        </h2>
         {embedded ? null : (
-          <button onClick={handleDismiss} className='text-white/50 hover:text-white'>
-            <X size={20} />
+          <button onClick={handleDismiss} style={{ color: C.secondary }}>
+            <X size={20} opacity={0.4} />
           </button>
         )}
       </div>
@@ -178,13 +181,13 @@ function ReservationSteps({
           initial='initial'
           animate='animate'
           exit='exit'
-          className={`relative w-full flex-1 overflow-y-auto pr-1 ${embedded ? 'min-h-[18rem] sm:min-h-[24rem]' : 'min-h-[18rem]'}`}
+          className='relative w-full flex-1 overflow-y-auto pr-1'
         >
           {step === 1 ? (
-            <div className='min-h-[190px] sm:min-h-[220px]'>
+            <div>
               {motifsError ? <InlineMessage tone='error'>{motifsError}</InlineMessage> : null}
               {isLoadingMotifs ? <InlineMessage>Chargement des motifs...</InlineMessage> : null}
-              <div className='mb-5 grid grid-cols-1 gap-2.5 sm:mb-6 sm:grid-cols-2 sm:gap-3'>
+              <div className='mb-5 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-2'>
                 {motifs.map((motif) => (
                   <button
                     key={motif.id}
@@ -193,18 +196,29 @@ function ReservationSteps({
                       setSelectedMotif(motif)
                       setStep(2)
                     }}
-                    className='group flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-left hover:border-white/20 hover:bg-white/10 data-[active=true]:border-primary/50 data-[active=true]:bg-primary/10 data-[active=true]:shadow-[0_0_20px_rgba(39,168,228,0.15)]'
+                    className='group flex min-w-0 cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md'
+                    style={{
+                      borderColor: selectedMotif?.id === motif.id ? C.primary : '#e5e7eb',
+                      backgroundColor: selectedMotif?.id === motif.id ? '#f0f9ff' : '#ffffff',
+                      boxShadow: selectedMotif?.id === motif.id ? `0 0 0 1px ${C.primary}` : '0 1px 2px rgba(0,0,0,0.04)',
+                    }}
                   >
-                    <div className='flex h-6 w-6 items-center justify-center rounded-lg bg-white/5 group-hover:bg-white/10'>
-                      <MicroscopeIcon size={14} className='text-white/60' />
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg' style={{ backgroundColor: `${C.primary}10` }}>
+                      {motif.icon ? (
+                        <img src={motif.icon} alt='' className='h-6 w-6' />
+                      ) : (
+                        <div className='h-6 w-6 rounded-full' style={{ backgroundColor: `${C.primary}30` }} />
+                      )}
                     </div>
-                    <span className='min-w-0 text-[13px] font-medium text-white/80 sm:text-sm'>{motif.name}</span>
-                    {selectedMotif?.id === motif.id ? <CheckIcon size={14} className='ml-1 text-primary' /> : null}
+                    <span className='min-w-0 text-sm font-medium' style={{ color: C.secondary }}>{motif.name}</span>
+                    {selectedMotif?.id === motif.id ? <CheckIcon size={14} className='ml-auto shrink-0' style={{ color: C.primary }} /> : null}
                   </button>
                 ))}
               </div>
 
-              {selectedMotif?.description ? <p className='text-sm leading-6 text-white/55'>{selectedMotif.description}</p> : null}
+              {selectedMotif?.description ? (
+                <p className='text-sm leading-6' style={{ color: `${C.secondary}99` }}>{selectedMotif.description}</p>
+              ) : null}
             </div>
           ) : null}
 
@@ -233,7 +247,7 @@ function ReservationSteps({
                 />
               </div>
 
-              <div className='flex-1 space-y-4 overflow-y-auto border-white/10 lg:max-h-[60vh] lg:border-l lg:pl-6'>
+              <div className='flex-1 space-y-4 overflow-y-auto lg:border-l lg:pl-6' style={{ borderColor: '#e5e7eb' }}>
                 {availabilityError ? <InlineMessage tone='error'>{availabilityError}</InlineMessage> : null}
                 {isLoadingAvailability ? <InlineMessage>Chargement des disponibilités...</InlineMessage> : null}
 
@@ -279,16 +293,16 @@ function ReservationSteps({
           ) : null}
 
           {step === 3 ? (
-            <div className='min-h-[280px] sm:min-h-[320px]'>
+            <div>
               {submitError ? (
-                <div className='mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300'>
+                <div className='mb-4 rounded-lg border p-3 text-sm' style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2', color: '#dc2626' }}>
                   {submitError}
                 </div>
               ) : null}
 
-              <div className='mb-4 grid grid-cols-1 gap-3.5 sm:gap-4 sm:grid-cols-2'>
+              <div className='mb-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4'>
                 <div className='relative'>
-                  <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
+                  <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2' style={{ color: `${C.secondary}60` }} />
                   <input
                     required
                     type='text'
@@ -296,10 +310,11 @@ function ReservationSteps({
                     value={userData.prenom}
                     onChange={(e) => setUserData({ ...userData, prenom: e.target.value })}
                     className={inputBase}
+                    style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
                   />
                 </div>
                 <div className='relative'>
-                  <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
+                  <User size={16} className='absolute left-3 top-1/2 -translate-y-1/2' style={{ color: `${C.secondary}60` }} />
                   <input
                     required
                     type='text'
@@ -307,31 +322,38 @@ function ReservationSteps({
                     value={userData.nom}
                     onChange={(e) => setUserData({ ...userData, nom: e.target.value })}
                     className={inputBase}
+                    style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
                   />
                 </div>
-                <div className='relative sm:col-span-2'>
-                  <Mail size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
-                  <input
-                    required
-                    type='email'
-                    placeholder='Adresse Email'
-                    value={userData.email}
-                    onChange={(e) => { setUserData({ ...userData, email: e.target.value }); setErrors({ ...errors, email: undefined }) }}
-                    className={inputBase}
-                  />
-                  {errors.email && <p className='mt-1 px-3 text-[11px] text-red-400'>{errors.email}</p>}
+                <div className='sm:col-span-2'>
+                  <div className='relative'>
+                    <Mail size={16} className='absolute left-3 top-1/2 -translate-y-1/2' style={{ color: `${C.secondary}60` }} />
+                    <input
+                      required
+                      type='email'
+                      placeholder='Adresse Email'
+                      value={userData.email}
+                      onChange={(e) => { setUserData({ ...userData, email: e.target.value }); setErrors({ ...errors, email: undefined }) }}
+                      className={inputBase}
+                      style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                  {errors.email && <p className='mt-1 px-3 text-[11px]' style={{ color: '#dc2626' }}>{errors.email}</p>}
                 </div>
-                <div className='relative sm:col-span-2'>
-                  <Phone size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-white/40' />
-                  <input
-                    required
-                    type='tel'
-                    placeholder='Numéro De Téléphone'
-                    value={userData.phone}
-                    onChange={(e) => { setUserData({ ...userData, phone: e.target.value }); setErrors({ ...errors, phone: undefined }) }}
-                    className={inputBase}
-                  />
-                  {errors.phone && <p className='mt-1 px-3 text-[11px] text-red-400'>{errors.phone}</p>}
+                <div className='sm:col-span-2'>
+                  <div className='relative'>
+                    <Phone size={16} className='absolute left-3 top-1/2 -translate-y-1/2' style={{ color: `${C.secondary}60` }} />
+                    <input
+                      required
+                      type='tel'
+                      placeholder='Numéro De Téléphone'
+                      value={userData.phone}
+                      onChange={(e) => { setUserData({ ...userData, phone: e.target.value }); setErrors({ ...errors, phone: undefined }) }}
+                      className={inputBase}
+                      style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                  {errors.phone && <p className='mt-1 px-3 text-[11px]' style={{ color: '#dc2626' }}>{errors.phone}</p>}
                 </div>
               </div>
 
@@ -341,7 +363,8 @@ function ReservationSteps({
                   rows={4}
                   value={userData.note}
                   onChange={(e) => setUserData({ ...userData, note: e.target.value })}
-                  className='w-full resize-none rounded-xl border border-white/20 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/40 hover:border-white/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none'
+                  className='w-full resize-none rounded-xl border px-4 py-3 text-sm'
+                  style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
                 />
               </div>
             </div>
@@ -349,11 +372,12 @@ function ReservationSteps({
         </motion.div>
       </AnimatePresence>
 
-      <div className='mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between'>
+      <div className='mt-6 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between' style={{ borderColor: '#e5e7eb' }}>
         {step === 1 ? (
           <button
             onClick={handleDismiss}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm sm:w-auto'
+            style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
           >
             <X size={16} />
             Annuler
@@ -361,7 +385,8 @@ function ReservationSteps({
         ) : (
           <button
             onClick={() => setStep(step - 1)}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm sm:w-auto'
+            style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
           >
             <ArrowLeftIcon size={16} />
             Retour
@@ -371,7 +396,8 @@ function ReservationSteps({
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !userData.prenom || !userData.nom || !userData.email || !userData.phone}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-medium hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            style={{ backgroundColor: C.primary }}
           >
             {isSubmitting ? (
               <>
@@ -393,7 +419,8 @@ function ReservationSteps({
           <button
             onClick={() => setStep(step + 1)}
             disabled={step === 1 ? !selectedMotif : !selectedDate || !selectedHour}
-            className='flex w-full items-center justify-center gap-2 rounded-full bg-primary/80 px-5 py-2 text-sm hover:bg-primary disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            className='flex w-full items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
+            style={{ backgroundColor: C.primary }}
           >
             {step === 1 ? 'Date Et Heure' : 'Informations De Contact'}
             <ArrowRightIcon size={16} />
@@ -407,7 +434,11 @@ function ReservationSteps({
 function InlineMessage({ children, tone = 'neutral' }: { children: string; tone?: 'neutral' | 'error' }) {
   return (
     <div
-      className={`mb-4 rounded-lg border p-3 text-sm ${tone === 'error' ? 'border-red-500/30 bg-red-500/10 text-red-300' : 'border-white/10 bg-white/5 text-white/60'}`}
+      className='mb-4 rounded-lg border p-3 text-sm'
+      style={tone === 'error'
+        ? { borderColor: '#fca5a5', backgroundColor: '#fef2f2', color: '#dc2626' }
+        : { borderColor: '#e5e7eb', backgroundColor: '#f9fafb', color: `${C.secondary}99` }
+      }
     >
       {children}
     </div>
@@ -429,8 +460,8 @@ function TimeSection({
   return (
     <div>
       <div className='mb-3 flex items-center gap-2'>
-        <span className='text-sm font-medium text-white'>{title}</span>
-        <div className='h-px flex-1 bg-white/20' />
+        <span className='text-sm font-medium' style={{ color: C.secondary }}>{title}</span>
+        <div className='h-px flex-1' style={{ backgroundColor: '#e5e7eb' }} />
       </div>
       <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
         {uniqueTimes.map((slot) => (
@@ -438,7 +469,8 @@ function TimeSection({
             key={slot.label}
             type='button'
             onClick={() => onSelectTime(slot.label)}
-            className='flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/70 hover:border-primary/40 hover:bg-primary/10 hover:text-white'
+            className='flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-sm'
+            style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
           >
             {slot.label}
           </button>
@@ -476,13 +508,14 @@ function DoctorSelection({
         <button
           type='button'
           onClick={onBack}
-          className='flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 hover:border-white/20 hover:bg-white/10'
+          className='flex items-center gap-2 rounded-full border px-4 py-2 text-sm'
+          style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
         >
           <ArrowLeftIcon size={16} />
           Retour
         </button>
-        <div className='h-px flex-1 bg-white/20' />
-        <span className='text-sm font-medium text-white/80'>{viewingDoctorsFor}</span>
+        <div className='h-px flex-1' style={{ backgroundColor: '#e5e7eb' }} />
+        <span className='text-sm font-medium' style={{ color: C.secondary }}>{viewingDoctorsFor}</span>
       </div>
 
       <div className='grid grid-cols-1 gap-2'>
@@ -503,27 +536,31 @@ function DoctorSelection({
                 onContinue()
               }}
               className={clsx(
-                'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left',
-                isSelected
-                  ? 'border-primary/60 bg-primary/15'
-                  : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm',
+                isSelected && 'border-2'
               )}
+              style={{
+                borderColor: isSelected ? C.primary : '#e5e7eb',
+                backgroundColor: isSelected ? '#f0f9ff' : '#ffffff',
+              }}
             >
-              <div className='h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-white/5'>
+              <div className='h-10 w-10 overflow-hidden rounded-full border' style={{ borderColor: '#e5e7eb' }}>
                 {img ? <img src={img} alt={fullName} className='h-full w-full object-cover' /> : null}
               </div>
               <div className='min-w-0 flex-1'>
                 <div
-                  className={clsx(
-                    'text-sm font-semibold leading-snug whitespace-normal break-words',
-                    isSelected ? 'text-white' : 'text-white/85'
-                  )}
+                  className='text-sm font-semibold leading-snug whitespace-normal break-words'
+                  style={{ color: C.secondary }}
                 >
                   {fullName}
                 </div>
-                <div className={clsx('mt-0.5 text-[11px]', isSelected ? 'text-primary/90' : 'text-white/45')}>Disponible à {viewingDoctorsFor}</div>
+                <div className='mt-0.5 text-[11px]' style={{ color: isSelected ? C.primary : `${C.secondary}60` }}>
+                  Disponible à {viewingDoctorsFor}
+                </div>
               </div>
-              <div className={clsx('text-xs font-semibold', isSelected ? 'text-primary' : 'text-white/35')}>{isSelected ? 'Choisi' : 'Choisir'}</div>
+              <div className='text-xs font-semibold' style={{ color: isSelected ? C.primary : `${C.secondary}40` }}>
+                {isSelected ? 'Choisi' : 'Choisir'}
+              </div>
             </button>
           )
         })}
@@ -533,33 +570,34 @@ function DoctorSelection({
 }
 
 function SuccessStep({ onClose, embedded }: { onClose: () => void; embedded: boolean }) {
-return (
-<motion.div
-variants={panelVariants}
-initial='hidden'
-animate='visible'
-exit='exit'
-className={`border border-white/20 bg-[#2a2a2a]/98 rounded-2xl p-6 text-center text-white sm:p-8 ${embedded ? 'relative w-full max-w-[520px]' : 'pointer-events-auto w-full max-w-[min(calc(100vw-1.5rem),400px)]'}`}
->
-<div className='relative mb-6'>
-<div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20'>
-<CheckIcon size={40} className='text-primary' />
-</div>
-</div>
+  return (
+    <motion.div
+      variants={panelVariants}
+      initial='hidden'
+      animate='visible'
+      exit='exit'
+      className={`overflow-hidden rounded-2xl border text-center ${embedded ? 'relative w-full max-w-[520px]' : 'pointer-events-auto w-full max-w-[min(calc(100vw-1.5rem),400px)]'} border-gray-100 bg-white p-6 shadow-xl sm:p-8`}
+    >
+      <div className='relative mb-6'>
+        <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
+          <CheckIcon size={40} style={{ color: C.primary }} />
+        </div>
+      </div>
 
-<h3 className='mb-2 text-xl'>
-Réservation Confirmée!
-</h3>
-<p className='mb-6 text-sm leading-relaxed text-white/60'>
-Votre rendez-vous a été enregistré avec succès. Notre équipe vous contactera prochainement pour confirmer.
-</p>
+      <h3 className='mb-2 text-xl' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
+        Réservation Confirmée!
+      </h3>
+      <p className='mb-6 text-sm leading-relaxed' style={{ color: `${C.secondary}80` }}>
+        Votre rendez-vous a été enregistré avec succès. Notre équipe vous contactera prochainement pour confirmer.
+      </p>
 
-<button
-onClick={onClose}
-className='w-full rounded-full bg-primary py-3 text-sm font-medium hover:bg-primary/90'
->
-Parfait
-</button>
-</motion.div>
-)
+      <button
+        onClick={onClose}
+        className='w-full rounded-full py-3 text-sm font-medium text-white'
+        style={{ backgroundColor: C.primary }}
+      >
+        Parfait
+      </button>
+    </motion.div>
+  )
 }

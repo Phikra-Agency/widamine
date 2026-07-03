@@ -132,7 +132,7 @@ export class CronService {
       <p style="margin: 0 0 20px; color: #2d3748;">Bonjour <strong>${name}</strong>,</p>
       <p style="margin: 0 0 20px; color: #2d3748;">Ceci est un rappel pour votre rendez-vous <strong>demain</strong>.</p>
       <table cellpadding="8" cellspacing="0" style="margin: 24px 0; border: 1px solid #e2e8f0; border-radius: 4px; width: 100%;">
-        <tr><td style="font-weight: 600; color: #718096;">Motif</td><td>${motifName}</td></tr>
+        <tr><td style="font-weight: 600; color: #718096;">Traitement</td><td>${motifName}</td></tr>
         ${practitionerName ? `<tr><td style="font-weight: 600; color: #718096;">Praticien</td><td>${practitionerName}</td></tr>` : ""}
         <tr><td style="font-weight: 600; color: #718096;">Date</td><td>${dateStr}</td></tr>
       </table>

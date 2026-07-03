@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import api from '@/lib/api'
+import { ICON_MAP } from '@/lib/siteContent'
 
 interface ScheduleModalStoreInterface {
   isOpen: boolean
@@ -10,6 +11,7 @@ interface ScheduleModalStoreInterface {
   closeModal: () => void
 
   open: () => void
+  openWithMotif: (motifName: string) => void
   close: () => void
   reset: () => void
   restart: () => void
@@ -62,12 +64,16 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   loadMotifs: async () => {
     set({ isLoadingMotifs: true, motifsError: null })
     try {
-      const res = await api.get('services') 
-      let data = res.data.map((item: any) => ({
-         ...item,
-         practitioners: item.primaryDoctor ? [{ ...item.primaryDoctor, id: item.primaryDoctorId || item.primaryDoctor.name || 'doctor-1' }] : [],
-         requiresPractitionerChoice: !!item.primaryDoctor
-      }))
+      const res = await api.get('public/motifs') 
+      let data = res.data.map((item: any) => {
+        const slug = item.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') || ''
+         return {
+           ...item,
+           icon: ICON_MAP[slug as keyof typeof ICON_MAP] || null,
+           practitioners: item.primaryDoctor ? [{ ...item.primaryDoctor, id: item.primaryDoctorId || item.primaryDoctor.name || 'doctor-1' }] : [],
+           requiresPractitionerChoice: !!item.primaryDoctor
+        }
+      })
       set({ motifs: data })
     } catch (e: any) {
       set({ motifsError: 'Erreur lors du chargement' })
@@ -78,6 +84,14 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   open: async () => {
     set({ isOpen: true, step: 1, submitSuccess: false })
     await get().loadMotifs()
+  },
+  openWithMotif: async (motifName: string) => {
+    set({ isOpen: true, step: 1, submitSuccess: false, selectedMotif: null })
+    await get().loadMotifs()
+    const motif = get().motifs.find(m => m.name.toLowerCase() === motifName.toLowerCase())
+    if (motif) {
+      set({ selectedMotif: motif, step: 2, selectedPractitionerId: null })
+    }
   },
   close: () => set({ isOpen: false }),
   reset: () => get().restart(),
@@ -131,7 +145,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
       const res = await api.get('appointments/availability', {
         params: {
           date: dateStr,
-          serviceId: selectedMotif.id
+          motifId: selectedMotif.id
         }
       })
       
@@ -191,7 +205,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         email: userData.email,
         phone: userData.phone,
         context: userData.note,
-        serviceId: selectedMotif.id,
+        motifId: selectedMotif.id,
         practitionerId: selectedPractitionerId || undefined,
         datetime: selectedHour 
       })

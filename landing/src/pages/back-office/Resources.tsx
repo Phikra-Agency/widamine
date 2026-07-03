@@ -75,7 +75,7 @@ function Table() {
         <tr className='border-b border-black/[0.04]'>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Salle</th>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Priorité</th>
-          <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motifs associés</th>
+          <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitements associés</th>
           <th className='px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40 text-right'>Actions</th>
         </tr>
       </thead>
@@ -104,7 +104,7 @@ function Table() {
               <td className='px-6 py-4'>
                 <div className='flex flex-wrap gap-1.5'>
                   {(item.motifs || []).length === 0 ? (
-                    <span className='text-xs text-secondary/40'>Aucun motif</span>
+                    <span className='text-xs text-secondary/40'>Aucun traitement</span>
                   ) : (
                     (item.motifs || []).map((m) => (
                       <span key={m.id} className='inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-secondary/[0.03] text-secondary/60'>
@@ -183,10 +183,10 @@ function Modal() {
             </div>
           </div>
           <div className='space-y-2'>
-            <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Motifs associés</label>
+            <label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Traitements associés</label>
             <div className='flex flex-wrap gap-2 p-3 rounded-lg border border-black/[0.06] bg-white min-h-[60px]'>
               {motifs.length === 0 ? (
-                <span className='text-xs text-secondary/40'>Aucun motif disponible</span>
+                <span className='text-xs text-secondary/40'>Aucun traitement disponible</span>
               ) : (
                 motifs.map((motif) => {
                   const selected = (item.motifIds || []).includes(motif.id!)

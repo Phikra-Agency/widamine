@@ -54,7 +54,7 @@ export const resourceSchema = z.object({
 })
 
 export const motifSchema = z.object({
-  name: z.string().trim().min(1, 'Le nom du motif est requis.'),
+  name: z.string().trim().min(1, 'Le nom du traitement est requis.'),
   duration: z.coerce.number().min(5, 'La durée minimale est de 5 minutes.').optional(),
   color: z.string().optional(),
   numberOfSessions: z.coerce.number().min(1, 'Minimum 1 séance').optional(),

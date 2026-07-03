@@ -44,7 +44,7 @@ function Heading() {
   const { openModal, setOperation, clearItem } = useMotifsStore()
   return (
     <div className='bo-page-heading'>
-      <h3 className='bo-title'>Motifs</h3>
+      <h3 className='bo-title'>Traitements</h3>
       <Button
         onClick={() => {
           clearItem()
@@ -53,7 +53,7 @@ function Heading() {
         }}
         className='hidden h-10 px-5 lg:inline-flex'
       >
-        <Plus weight='bold' /> Ajouter un motif
+        <Plus weight='bold' /> Ajouter un traitement
       </Button>
     </div>
   )
@@ -94,7 +94,7 @@ function MotifsTable() {
         table={table}
         loading={loading}
         emptyIllustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucun motif trouvé'
+        emptyTitle='Aucun traitement trouvé'
         stopClickOnColumns={[]}
         onRowClick={openEdit}
       />
@@ -102,7 +102,7 @@ function MotifsTable() {
       <DataTable.Mobile>
         <DataTable.MobileList>
           {loading && <div className='py-8 text-center text-sm text-muted-foreground'>Chargement…</div>}
-          {isEmpty && <DataTable.Empty illustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION} title='Aucun motif trouvé' />}
+          {isEmpty && <DataTable.Empty illustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION} title='Aucun traitement trouvé' />}
           {!loading &&
             rows.map((row) => {
               const item = row.original
@@ -134,13 +134,13 @@ function MotifsTable() {
             openModal()
           }}
           className={FAB_CLASSES}
-          aria-label='Ajouter un motif'
+          aria-label='Ajouter un traitement'
         >
           <Plus size={24} weight='bold' />
         </Button>
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='flex justify-end px-4 py-3 max-lg:justify-start'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -178,7 +178,7 @@ function MotifModal() {
     <FormDialog
       open={visible}
       onOpenChange={(open) => !open && closeModal()}
-      title={`${isEdit ? 'Modifier' : 'Nouveau'} motif`}
+      title={`${isEdit ? 'Modifier' : 'Nouveau'} traitement`}
       onSubmit={(e) => {
         e.preventDefault()
         if (!validation.validateAll()) return
@@ -189,7 +189,7 @@ function MotifModal() {
       className='sm:max-w-lg'
     >
       <div className='space-y-2'>
-        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du motif</Label>
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Nom du traitement</Label>
         <Input
           type='text'
           value={item.name ?? ''}
@@ -199,7 +199,7 @@ function MotifModal() {
             validation.onFieldChange('name', next)
           }}
           onBlur={() => validation.onFieldBlur('name')}
-          placeholder='Nom du motif'
+          placeholder='Nom du traitement'
           aria-invalid={!!validation.getError('name')}
         />
         <FieldError message={validation.getError('name')} />
@@ -295,7 +295,7 @@ function MotifModal() {
 
       <div className='space-y-2'>
         <div className='flex items-center justify-between gap-3'>
-          <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du motif</Label>
+          <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du traitement</Label>
           <Button type='button' variant='outline' size='sm' onClick={() => setItem({ ...item, color: getRandomMotifColor() })} className='text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary/55'>
             Aléatoire
           </Button>
@@ -321,7 +321,7 @@ function MotifModal() {
               <div className='mt-2 flex items-center gap-2'>
                 <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
                 <span className='rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: color }}>
-                  {item.name || 'Motif'}
+                  {item.name || 'Traitement'}
                 </span>
               </div>
             </div>
@@ -365,12 +365,12 @@ function MotifDeleteModal() {
   const visible = operation === 'delete' && modalOpen
   return (
     <Dialog open={visible} onOpenChange={(open) => !open && closeModal()}>
-      <DialogContent showCloseButton={false} className='gap-0 overflow-hidden p-0 sm:max-w-md'>
+      <DialogContent showCloseButton className='gap-0 overflow-hidden p-0 sm:max-w-md'>
         <div className='p-6 text-center'>
           <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-control bg-red-50'>
             <Trash2 size={26} className='text-red-500' />
           </div>
-          <h2 className='text-lg font-semibold text-secondary'>Supprimer ce motif ?</h2>
+          <h2 className='text-lg font-semibold text-secondary'>Supprimer ce traitement ?</h2>
         </div>
         <DialogFooter className='border-t border-border px-6 py-4'>
           <Button variant='ghost' onClick={closeModal}>

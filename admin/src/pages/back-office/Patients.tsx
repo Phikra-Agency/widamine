@@ -1,9 +1,10 @@
 import { usePatientStore } from '@/stores/patientsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, CalendarBlank, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, MagnifyingGlass, CalendarBlank, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
+import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 import { cn } from '@/lib/utils'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -27,7 +28,7 @@ import {
 import { FormDialog, FieldError } from '@/components/bo'
 import { patientSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTablePagination, TanStackDataTable, useDataTable } from '@/components/data-table'
+import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import type { ColumnFiltersState, OnChangeFn } from '@tanstack/react-table'
 import {
   createPatientsColumns,
@@ -44,6 +45,13 @@ import {
   stashAppointmentForCalendarOpen,
 } from '@/lib/scheduleNavigation'
 
+
+const GENDER_FILTER_PILLS: FilterPillOption[] = [
+  { value: 'all', label: 'Tous', color: 'mist' },
+  { value: 'MALE', label: 'Homme', color: 'sky' },
+  { value: 'FEMALE', label: 'Femme', color: 'coral' },
+  { value: 'OTHER', label: 'Autre', color: 'aqua' },
+]
 
 export default function Patients() {
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -131,6 +139,9 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [loading, setLoading] = useState(true)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchTerm = useGlobalSearchStore((s) => s.term)
+  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   const cities = useMemo(() => {
     const norm = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
@@ -208,6 +219,52 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
 
   return (
     <DataTable.Root>
+      <DataTable.Toolbar className='max-lg:px-0'>
+        <div className='hidden lg:flex flex-wrap items-center gap-1.5'>
+          <DataTableFilterPills
+            options={GENDER_FILTER_PILLS}
+            value={filters.gender || 'all'}
+            onChange={(value) => setFilters({ ...filters, gender: value === 'all' ? '' : value })}
+          />
+        </div>
+        <div className='flex lg:hidden items-center gap-2 flex-1'>
+          <Select
+            value={filters.gender || 'all'}
+            onValueChange={(value) => setFilters({ ...filters, gender: value === 'all' ? '' : value })}
+          >
+            <SelectTrigger size='sm' className='h-9 flex-1 text-xs font-medium'>
+              <SelectValue placeholder="Filtrer" />
+            </SelectTrigger>
+            <SelectContent>
+              {GENDER_FILTER_PILLS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
+            aria-label='Rechercher'
+          >
+            <MagnifyingGlass size={16} />
+          </button>
+        </div>
+      </DataTable.Toolbar>
+
+      {mobileSearchOpen && (
+        <div className='px-4 pb-2 lg:hidden'>
+          <Input
+            placeholder='Rechercher...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='h-9 text-xs'
+            autoFocus
+          />
+        </div>
+      )}
+
       <TanStackDataTable
         table={table}
         loading={loading}
@@ -227,60 +284,61 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
               const item = row.original
               const stats = getAppointmentStats(item)
               return (
-                <DataTable.MobileCard
-                  key={row.id}
-                  onClick={() => openDrawer(item)}
-                >
-                    <div className='flex items-center gap-3'>
-                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary/40'>
-                        <User size={18} />
-                      </div>
-                      <div className='min-w-0 flex-1'>
-                        <p className='truncate text-sm font-semibold'>{item.firstName} {item.lastName}</p>
-                        <div className='mt-0.5 flex items-center gap-1.5 text-[11px] text-secondary/50'>
-                          {item.phone && <span className='truncate'>{item.phone}</span>}
-                          {item.phone && stats.count > 0 && <span className='text-secondary/20'>·</span>}
-                          {stats.count > 0 && <span className='shrink-0'>{stats.count} RDV</span>}
-                        </div>
-                        <div className='mt-0.5 flex items-center gap-1.5 text-[10px] text-secondary/35'>
-                          {item.email && <span className='truncate'>{item.email}</span>}
-                          {item.email && stats.nextDate && <span className='text-secondary/20'>·</span>}
-                          {stats.nextDate && (
-                            <span className='shrink-0 text-primary/60'>
-                              {stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className='flex shrink-0 items-center' onClick={(e) => e.stopPropagation()}>
-                        {!isPractitioner && (
-                          <>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='icon-sm'
-                              onClick={() => openEditModal(item)}
-                              className='h-7 w-7 text-secondary/30 hover:bg-amber-50 hover:text-amber-600'
-                            >
-                              <Pen size={12} />
-                            </Button>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='icon-sm'
-                              onClick={() => openDeleteModal(item)}
-                              className='h-7 w-7 text-secondary/30 hover:bg-red-50 hover:text-red-600'
-                            >
-                              <Trash2 size={12} />
-                            </Button>
-                          </>
-                        )}
-                        <div className='ml-1 flex h-5 w-5 items-center justify-center text-secondary/20'>
-                          <ArrowRight size={12} />
-                        </div>
+                <DataTable.MobileCard key={row.id}>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
+                      <User size={14} className='text-primary' />
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='truncate text-sm font-semibold'>{item.firstName} {item.lastName}</p>
+                      <div className='mt-0.5 flex items-center gap-1.5 text-[11px] text-secondary/50'>
+                        {item.phone && <span className='truncate'>{item.phone}</span>}
+                        {item.phone && stats.count > 0 && <span className='text-secondary/20'>·</span>}
+                        {stats.count > 0 && <span className='shrink-0'>{stats.count} RDV</span>}
                       </div>
                     </div>
-                  </DataTable.MobileCard>
+                  </div>
+                  <div className='mt-3 space-y-2 text-xs text-foreground/60'>
+                    {item.email && (
+                      <div className='flex items-center gap-2'>
+                        <EnvelopeSimple size={14} className='shrink-0 text-muted-foreground/30' />
+                        <span className='truncate'>{item.email}</span>
+                      </div>
+                    )}
+                    {item.phone && (
+                      <div className='flex items-center gap-2'>
+                        <Phone size={14} className='shrink-0 text-muted-foreground/30' />
+                        <span>{item.phone}</span>
+                      </div>
+                    )}
+                    {stats.nextDate && (
+                      <div className='flex items-center gap-2'>
+                        <CalendarBlank size={14} className='shrink-0 text-muted-foreground/30' />
+                        <span className='text-primary/60'>{stats.nextDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className='mt-3 flex items-center gap-2'>
+                    {!isPractitioner && (
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className='flex-1 h-9 gap-1.5 text-primary border-primary/30 hover:bg-primary/5'
+                        onClick={() => openEditModal(item)}
+                      >
+                        <Pen size={14} /> Modifier
+                      </Button>
+                    )}
+                    {isPractitioner && <div className='flex-1' />}
+                    <button
+                      type='button'
+                      onClick={() => openDrawer(item)}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-secondary/50 hover:bg-secondary/[0.08] hover:text-secondary transition-colors'
+                    >
+                      <ArrowRight size={15} weight='bold' />
+                    </button>
+                  </div>
+                </DataTable.MobileCard>
                 )
               })}
         </DataTable.MobileList>
@@ -297,7 +355,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
         )}
       </DataTable.Mobile>
 
-      <div className='flex justify-end px-4 py-3'>
+      <div className='flex justify-end px-4 py-3 max-lg:justify-start'>
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
@@ -340,7 +398,7 @@ function Modal({ onAfterSave }: { onAfterSave?: () => void }) {
       }}
       submitLabel={isEdit ? 'Enregistrer' : 'Créer le patient'}
       className='sm:max-w-2xl'
-      contentClassName='max-h-[calc(100vh-10rem)]'
+      contentClassName='max-h-[calc(100dvh-14rem)] sm:max-h-[calc(100vh-10rem)]'
     >
       <div className='flex items-center justify-center mb-2'>
         <div className='w-14 h-14 rounded-control bg-secondary/[0.04] flex items-center justify-center'>
@@ -445,7 +503,7 @@ function DeleteModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeModal() }}>
-      <DialogContent showCloseButton={false} className='sm:max-w-md'>
+      <DialogContent showCloseButton className='sm:max-w-md'>
         <DialogHeader>
           <div className='mx-auto w-14 h-14 rounded-control bg-red-50 flex items-center justify-center mb-4'>
             <Trash2 size={26} className='text-red-500' />
@@ -584,7 +642,7 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
 
   return (
     <Dialog open={open && !!patient} onOpenChange={(next) => { if (!next) onClose() }}>
-      <DialogContent showCloseButton={false} className='max-h-[90vh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
+      <DialogContent showCloseButton className='max-h-[90vh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
         {patient && (
           <>
             <div className='flex items-start justify-between gap-3 border-b border-border px-5 py-4 shrink-0'>

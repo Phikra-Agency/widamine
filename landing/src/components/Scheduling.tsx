@@ -20,7 +20,7 @@ export default function Scheduling() {
 					exit={{ opacity: 0 }}
 					transition={{ duration: 0.15 }}
 				>
-					<div className='absolute inset-0 bg-black/60' onClick={handleClose} />
+					<div className='absolute inset-0 bg-black/40' onClick={handleClose} />
 					<div className='pointer-events-none absolute inset-0 flex items-end justify-center px-3 py-3 sm:items-center sm:px-4 sm:py-6'>
 						<BookingFlow onClose={handleClose} />
 					</div>

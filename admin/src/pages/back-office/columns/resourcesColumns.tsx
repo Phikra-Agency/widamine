@@ -37,7 +37,7 @@ export function createResourcesColumns({ onEdit, onDelete }: ResourceColumnsDeps
     },
     {
       id: 'motifs',
-      header: 'Motifs associés',
+      header: 'Traitements associés',
       enableSorting: false,
       cell: ({ row }) => <MotifChips motifs={row.original.motifs} />,
     },

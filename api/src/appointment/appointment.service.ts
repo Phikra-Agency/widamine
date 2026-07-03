@@ -246,6 +246,22 @@ export class AppointmentService {
     return this.prisma.appointment.delete({ where: { id } });
   }
 
+  private getMoroccoOffsetMinutes(dateStr: string): number {
+    const d = new Date(dateStr + 'T12:00:00Z');
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Africa/Casablanca',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(d);
+    const get = (t: string) => parseInt(parts.find(p => p.type === t)?.value || '0', 10);
+    const localMs = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'));
+    return (localMs - d.getTime()) / 60000;
+  }
+
   async getAvailability(motifId: string, date: string, practitionerId?: string) {
     const motif = await this.prisma.motif.findUnique({
       where: { id: motifId },
@@ -268,11 +284,11 @@ export class AppointmentService {
     if (!practitionerIds.length) return [];
 
     const assignedResourceIds = motif.resourceAssignments.map(ra => ra.resource.id);
+    const [year, month, day] = date.split('-').map(Number);
+    const offsetMinutes = this.getMoroccoOffsetMinutes(date);
 
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = new Date(Date.UTC(year, month - 1, day, -offsetMinutes / 60, 0, 0));
+    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23 - offsetMinutes / 60, 59, 59, 999));
 
     const existingAppointments = await this.prisma.appointment.findMany({
       where: {
@@ -318,8 +334,7 @@ export class AppointmentService {
 
       for (let hour = 9; hour < 18; hour++) {
         for (let min = 0; min < 60; min += duration) {
-          const slotTime = new Date(date);
-          slotTime.setHours(hour, min, 0, 0);
+          const slotTime = new Date(Date.UTC(year, month - 1, day, hour - offsetMinutes / 60, min, 0));
           const timeKey = slotTime.getTime();
 
           const practitionerConflict = conflicts.has(`practitioner_${practitioner.id}_${timeKey}`);
