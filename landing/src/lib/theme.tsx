@@ -6,7 +6,7 @@ import type React from 'react'
 export const C = {
   bg: '#FBF7EF',
   primary: '#009FD6',
-  secondary: '#1E1E1E',
+  secondary: '#1a3646',
   accent: '#6D0024',
   orange: '#F7A269',
   yellow: '#ffb500',

@@ -154,7 +154,7 @@ export default function UserAccountMenu({
             ? 'flex w-full cursor-pointer justify-center rounded-control border border-border bg-card p-2 hover:bg-secondary/[0.03]'
             : variant === 'sidebar'
             ? 'flex w-full cursor-pointer items-center gap-2 rounded-surface border border-border bg-card px-3 py-2.5 text-left hover:bg-secondary/[0.03]'
-            : 'flex min-w-0 cursor-pointer items-center gap-3 rounded-control px-1 py-1 hover:bg-secondary/[0.04]',
+            : 'flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-control px-1 py-1 text-left hover:bg-secondary/[0.04]',
           className,
         )}
       >
@@ -181,11 +181,11 @@ export default function UserAccountMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side={variant === 'sidebar' ? 'top' : 'bottom'}
+        side={variant === 'sidebar' || variant === 'compact' ? 'top' : 'bottom'}
         align='start'
         className='w-64 p-1.5'
       >
-        <div className='relative min-h-[200px] overflow-hidden'>
+        <div className='relative min-h-[140px] overflow-hidden'>
           <div
             className={cn(
               'transition-all duration-200',

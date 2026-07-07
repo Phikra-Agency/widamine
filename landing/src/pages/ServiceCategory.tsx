@@ -34,7 +34,7 @@ export default function ServiceCategory() {
         <PublicNavbar />
         <section className={`${SPACING.container} pt-32 pb-16 sm:pt-40`}>
           <div className='rounded-2xl bg-white p-8 text-center' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}>
-            <p className='text-lg' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>Catégorie introuvable.</p>
+            <p className='text-lg'>Catégorie introuvable.</p>
             <Link to='/' className='mt-4 inline-flex items-center gap-2 text-sm font-medium' style={{ color: C.primary }}>
               ← Retour
             </Link>
@@ -66,7 +66,7 @@ export default function ServiceCategory() {
               <em style={{ color: C.primary, fontStyle: 'italic' }}>{cat.title.split(' ')[0]}</em>
               {` ${cat.title.split(' ').slice(1).join(' ')}`}
             </h1>
-            <p className='mx-auto mt-6 max-w-xl text-sm leading-7 sm:text-base' style={{ color: `${C.secondary}99`, fontFamily: TYPE.bodyFamily }}>
+            <p className='mx-auto mt-6 max-w-xl text-sm leading-7 sm:text-base'>
               {cat.description}
             </p>
           </div>
@@ -95,7 +95,6 @@ export default function ServiceCategory() {
                     </h3>
                     <p
                       className='mt-1 text-xs leading-5 line-clamp-2'
-                      style={{ color: `${C.secondary}99`, fontFamily: TYPE.bodyFamily }}
                     >
                       {service.intro}
                     </p>
@@ -135,7 +134,7 @@ export default function ServiceCategory() {
                       <h3 className='text-sm font-semibold' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
                         {catData.title}
                       </h3>
-                      <p className='mt-0.5 text-xs' style={{ color: `${C.primary}`, fontFamily: TYPE.bodyFamily }}>
+                      <p className='mt-0.5 text-xs'>
                         Découvrir les traitements →
                       </p>
                     </div>
@@ -163,18 +162,16 @@ export default function ServiceCategory() {
               <div className='mt-8 flex flex-wrap items-center justify-center gap-3'>
                 <button
                   onClick={open}
-                  className='inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold'
+                  className='inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold'
                   style={{ background: '#ffffff', color: C.primary }}
                 >
-                  <CalendarBlank size={16} />
                   Prendre rendez-vous
                 </button>
                 <a
                   href='tel:+212535624696'
-                  className='inline-flex items-center gap-2.5 rounded-full border-2 px-7 py-3.5 text-sm font-semibold transition'
+                  className='inline-flex items-center rounded-full border-2 px-7 py-3.5 text-sm font-semibold transition'
                   style={{ borderColor: '#ffffff', color: '#ffffff' }}
                 >
-                  <PhoneCall size={16} />
                   +212 (535) 624 696
                 </a>
               </div>

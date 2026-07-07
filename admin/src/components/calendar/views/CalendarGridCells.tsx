@@ -323,6 +323,7 @@ export function CalendarDayGrid({
   const events = useMemo(() => flattenDaySlots(displayDay), [displayDay])
   const eventLayout = useMemo(() => layoutOverlappingEvents(events), [events])
   const [containerHeight, setContainerHeight] = useState(0)
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null)
 
   useEffect(() => {
     const el = scrollRef.current
@@ -396,11 +397,11 @@ export function CalendarDayGrid({
 
             {/* Events + now indicator */}
             <div className='absolute inset-0'>
-              {/* Now indicator — z-0 paints behind events */}
+              {/* Now indicator — always above events (z-20) unless hovered event pushes higher */}
               {nowTop != null && (
                 <div
                   className='pointer-events-none absolute left-0 right-0'
-                  style={{ top: nowTop, zIndex: 0 }}
+                  style={{ top: nowTop, zIndex: 20 }}
                   aria-hidden
                 >
                   <div className='absolute -left-[5px] -top-[5px] h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.2)]' />
@@ -408,8 +409,8 @@ export function CalendarDayGrid({
                 </div>
               )}
 
-              {/* Events — z-10 paints on top of indicator */}
-              <div className='absolute inset-0 overflow-hidden' style={{ zIndex: 10 }}>
+              {/* Events — no container z-index so children can stack above red line */}
+              <div className='absolute inset-0 overflow-hidden'>
                 {events.map((schedule) => {
                   const layout = getEventLayout(schedule.datetime, hourHeight)
                   if (!layout) return null
@@ -418,6 +419,7 @@ export function CalendarDayGrid({
                   const colIdx = col ?? 0
                   const totalCols = eventLayout.totalColumns
                   const colWidth = 100 / totalCols
+                  const isHovered = hoveredEventId === schedule.id
 
                   return (
                     <div
@@ -428,7 +430,10 @@ export function CalendarDayGrid({
                         height: layout.height - 4,
                         left: `calc(${colIdx * colWidth}% + 15px)`,
                         width: `calc(${colWidth}% - 30px)`,
+                        zIndex: isHovered ? 30 : 10,
                       }}
+                      onMouseEnter={() => setHoveredEventId(schedule.id)}
+                      onMouseLeave={() => setHoveredEventId(null)}
                     >
                       <EventCard
                         schedule={schedule}

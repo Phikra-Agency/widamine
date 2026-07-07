@@ -41,7 +41,7 @@ export default function Contact() {
               <h1 className='font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
                 Contactez <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine</span>
               </h1>
-              <p className='mt-6 max-w-md text-sm leading-8 sm:text-base' style={{ color: `${C.secondary}b3` }}>
+              <p className='mt-6 max-w-md text-sm leading-8 sm:text-base'>
                 Retrouvez ci-dessous nos coordonnées pour nous contacter. Nous serons ravis de vous accueillir.
               </p>
               <div className='mt-8 space-y-5'>
@@ -140,7 +140,7 @@ export default function Contact() {
             <h2 className='font-amoria text-2xl leading-tight sm:text-3xl' style={{ color: C.secondary }}>
               Écrivez-<span style={{ color: C.primary, fontStyle: 'italic' }}>nous</span>
             </h2>
-            <p className='mt-4 text-sm leading-7' style={{ color: `${C.secondary}a0` }}>
+            <p className='mt-4 text-sm leading-7'>
               Partagez votre besoin ou le soin qui vous intéresse. Nous vous recontacterons rapidement.
             </p>
           </div>
@@ -164,7 +164,7 @@ function ContactRow({ icon, label, text, sub }: { icon: React.ReactNode; label: 
           {label}
           {sub && <span className='ml-1.5 text-xs font-normal' style={{ color: `${C.secondary}a0` }}>{sub}</span>}
         </h3>
-        <p className='mt-1 text-sm leading-6' style={{ color: `${C.secondary}a0` }}>{text}</p>
+        <p className='mt-1 text-sm leading-6'>{text}</p>
       </div>
     </div>
   )
@@ -187,7 +187,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-60' : 'max-h-0'}`}>
         <div className='px-6 pb-5'>
-          <p className='text-sm leading-7' style={{ color: `${C.secondary}a0` }}>{answer}</p>
+          <p className='text-sm leading-7'>{answer}</p>
         </div>
       </div>
     </div>

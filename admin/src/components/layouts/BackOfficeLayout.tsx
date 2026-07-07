@@ -21,6 +21,8 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import PractitionerStatusBar from '@/components/PractitionerStatusBar'
 import ScheduleShowModal from '@/components/ScheduleShowModal'
 import UserAccountMenu from '@/components/UserAccountMenu'
+import SidebarNotificationBell from '@/components/SidebarNotificationBell'
+import NotificationToast from '@/components/NotificationToast'
 import SidebarSearch from '@/components/layouts/SidebarSearch'
 import { cn } from '@/lib/utils'
 
@@ -182,19 +184,35 @@ function SidebarContent({
         </div>
       </nav>
 
-      <div className={cn('shrink-0 p-4 pt-2', collapsed && 'px-2', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
-        {user ? (
-          <UserAccountMenu onNavigate={onNavigate} collapsed={collapsed} />
+      <div className={cn('shrink-0 p-4 pt-2', collapsed && 'px-2 pb-4', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
+        {collapsed ? (
+          <div className='flex flex-col items-center gap-4'>
+            <SidebarNotificationBell collapsed />
+            {user ? (
+              <UserAccountMenu onNavigate={onNavigate} collapsed />
+            ) : (
+              <Link to='/login' onClick={onNavigate} title='Se connecter' className='bo-nav-link text-xs bo-nav-link-collapsed'>
+                <LogIn size={18} weight='duotone' className='bo-nav-icon' />
+              </Link>
+            )}
+          </div>
         ) : (
-          <Link
-            to='/login'
-            onClick={onNavigate}
-            title={collapsed ? 'Se connecter' : undefined}
-            className={cn('bo-nav-link text-xs', collapsed && 'bo-nav-link-collapsed')}
-          >
-            <LogIn size={18} weight='duotone' className='bo-nav-icon' />
-            Se connecter
-          </Link>
+          <div className='flex items-center justify-between rounded-surface border border-border bg-card/60 p-1.5 shadow-sm transition-colors hover:bg-card/80'>
+            <div className='min-w-0 flex-1'>
+              {user ? (
+                <UserAccountMenu onNavigate={onNavigate} variant='compact' className='hover:bg-transparent w-full' />
+              ) : (
+                <Link to='/login' onClick={onNavigate} className='bo-nav-link text-xs border-transparent bg-transparent'>
+                  <LogIn size={18} weight='duotone' className='bo-nav-icon' />
+                  Se connecter
+                </Link>
+              )}
+            </div>
+            <div className='mx-1 h-8 w-[1px] shrink-0 bg-border-subtle' />
+            <div className='shrink-0 px-1'>
+              <SidebarNotificationBell />
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -332,6 +350,7 @@ export default function BackOfficeLayout() {
 
       <PractitionerStatusBar />
       <ScheduleShowModal />
+      <NotificationToast />
     </main>
   )
 }

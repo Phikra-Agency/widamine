@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, PhoneCall } from '@phosphor-icons/react'
+import { GraduationCap, Heart, MapPin, PhoneCall, Sparkle } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Navigation, EffectCoverflow, EffectCreative } from 'swiper/modules'
+import { Autoplay, Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
-import 'swiper/css/effect-coverflow'
-import 'swiper/css/effect-creative'
 import PublicNavbar from '@/components/PublicNavbar'
 import { SERVICE_PAGES, ICON_MAP } from '@/lib/siteContent'
 import { C, TYPE } from '@/lib/theme'
@@ -96,9 +94,11 @@ const HeartIcon = () => (
   </svg>
 )
 
-const StarIcon = () => (
-  <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 18 17' fill='none'>
-    <path d='M8.13024 0.533005C8.51342-0.142371 9.48658-0.142372 9.86976 0.533003L11.9616 4.22001C12.1041 4.47108 12.3481 4.64834 12.6308 4.70623L16.7838 5.55636C17.5445 5.71208 17.8453 6.63762 17.3214 7.21075L14.4612 10.3396C14.2665 10.5526 14.1733 10.8394 14.2056 11.1263L14.6804 15.3387C14.7674 16.1103 13.9801 16.6823 13.2731 16.3612L9.4136 14.6079C9.15079 14.4885 8.84921 14.4885 8.5864 14.6079L4.72688 16.3612C4.0199 16.6823 3.23259 16.1103 3.31957 15.3387L3.79439 11.1263C3.82672 10.8395 3.73353 10.5526 3.53877 10.3396L0.678637 7.21075C0.154726 6.63762 0.45545 5.71208 1.21618 5.55636L5.36916 4.70623C5.65195 4.64834 5.89593 4.47108 6.03838 4.22002L8.13024 0.533005Z' fill='currentColor' />
+const Stars5 = () => (
+  <svg width='90' height='18' viewBox='0 0 90 18' fill='currentColor'>
+    {[0,1,2,3,4].map(i => (
+      <path key={i} d='M9 0l2.2 4.5 4.9.7-3.5 3.4.8 4.9L9 11.2 4.6 13.5l.8-4.9L2 5.2l4.9-.7L9 0z' transform={`translate(${i * 18},0)`} />
+    ))}
   </svg>
 )
 
@@ -244,17 +244,19 @@ function HeroSection() {
             color: C.secondary,
           }}
         >
-          Bienvenue à <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine</span>
-          <br className='hidden sm:block' />
-          Centre de dermato-esthétique
+          Une peau éclatante,{' '}
+          <span style={{ color: C.primary, fontStyle: 'italic' }}>une confiance retrouvée</span>
         </h1>
+        <p className='mx-auto mt-4 max-w-[600px] text-sm font-semibold tracking-[0.08em] uppercase sm:text-base' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily }}>
+          Votre centre de dermato-esthétique de référence
+        </p>
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(109,0,36,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(109,0,36,0.22)]'
-            style={{ background: C.accent }}
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(0,159,214,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(0,159,214,0.22)]'
+            style={{ background: C.primary }}
           >
-            Prendre rendez-vous
+            Recevoir le catalogue
           </button>
           <Link
             to='/appointment'
@@ -298,7 +300,7 @@ function IntroSection() {
         <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           Bienvenue à Widamine <span style={{ color: C.primary, fontStyle: 'italic' }}>Aesthetic Center</span>
         </h2>
-        <p className='mx-auto mt-8 max-w-[700px] text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+        <p className='mx-auto mt-8 max-w-[700px] text-base leading-8'>
           Ici, chaque traitement est une promesse d'excellence. Grâce à une combinaison unique de technologies de pointe et de savoir-faire expert, nous vous aidons à redécouvrir votre beauté et à retrouver une peau saine et éclatante.
         </p>
       </div>
@@ -312,7 +314,7 @@ function IntroSection() {
 
 function ConceptSection() {
   return (
-    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: '#FFF4F1' }}>
+    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-16 lg:grid-cols-[0.95fr_1fr] lg:items-center'>
           <div className='relative mx-auto h-[560px] w-full max-w-[560px]'>
@@ -349,14 +351,14 @@ function ConceptSection() {
             <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
               Notre <span style={{ color: C.primary, fontStyle: 'italic' }}>Objectif</span>
             </h2>
-            <p className='mt-8 text-base leading-8' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 600 }}>
+            <p className='mt-8 text-base leading-8' style={{ fontWeight: 600 }}>
               Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu.
             </p>
-            <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+            <p className='mt-4 text-base leading-8' style={{ fontWeight: 500 }}>
               Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.
             </p>
             <Link to='/contact' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
-              Nous contacter <RightArrow />
+              Nous contacter
             </Link>
           </div>
         </div>
@@ -395,163 +397,77 @@ const SERVICES_WITH_TESTIMONIALS = SERVICE_PAGES
   }))
 
 function TreatmentsSection() {
-  const total = SERVICES_WITH_TESTIMONIALS.length
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [direction, setDirection] = useState(1)
+  const imgRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
 
-  const active = SERVICES_WITH_TESTIMONIALS[activeIndex]
-
-  const goNext = useCallback(() => {
-    setDirection(1)
-    setActiveIndex((prev) => (prev + 1) % total)
-  }, [total])
-
-  const goPrev = useCallback(() => {
-    setDirection(-1)
-    setActiveIndex((prev) => (prev - 1 + total) % total)
-  }, [total])
-
-  // ponytail: auto-rotation resets on manual nav (interval restarts)
   useEffect(() => {
-    const timer = setInterval(goNext, 5000)
-    return () => clearInterval(timer)
-  }, [goNext])
+    const scrollerEl = document.getElementById('app-scroll')
+    if (!scrollerEl || !imgRef.current) return
+    const ctx = gsap.context(() => {
+      gsap.fromTo(imgRef.current, { y: -80 }, {
+        y: 80, ease: 'none',
+        scrollTrigger: { trigger: imgRef.current.closest('section'), scroller: scrollerEl, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+      })
+    })
+    return () => ctx.revert()
+  }, [])
 
-  const slideVariants = {
-    enter: (dir: number) => ({ x: dir * 80, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: number) => ({ x: dir * -80, opacity: 0 }),
-  }
+  const name = 'Dr. Widad Slaoui'.split('')
 
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2
-          className='text-center leading-tight sm:text-4xl md:text-5xl'
-          style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}
-        >
-          L'énergie du{' '}
-          <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine Center</span>
-        </h2>
-
-        <div className='mt-14 grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center'>
-          {/* Left side */}
-          <div className='relative min-h-[260px]'>
-            <AnimatePresence mode='wait' custom={direction}>
-              <motion.div
-                key={active.service.slug + '-left'}
-                custom={direction}
-                variants={slideVariants}
-                initial='enter'
-                animate='center'
-                exit='exit'
-                transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
-              >
-                <p className='text-lg italic font-medium' style={{ color: `${C.secondary}cc`, fontFamily: TYPE.headingFamily }}>
-                  <span style={{ color: C.primary }}>Nos</span> soins
-                </p>
-                <h3
-                  className='mt-6 text-[clamp(1.8rem,4vw,3rem)] font-bold leading-[1.2]'
-                  style={{ color: C.secondary, fontFamily: TYPE.headingFamily, maxWidth: 620 }}
-                >
-                  {active.service.title}
-                </h3>
-                <p className='mt-8 text-[clamp(1rem,1.3vw,1.3rem)] leading-relaxed' style={{ color: `${C.secondary}b3`, maxWidth: 520 }}>
-                  {active.service.intro}
-                </p>
-                <Link
-                  to={`/services/${active.service.slug}`}
-                  className='mt-10 inline-flex h-14 items-center gap-3 rounded-full px-8 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl'
-                  style={{ background: C.orange }}
-                >
-                  En savoir plus <RightArrow />
-                </Link>
-              </motion.div>
-            </AnimatePresence>
+        <div className='grid gap-16 lg:grid-cols-[0.9fr_1fr] lg:items-center'>
+          {/* Left — image */}
+          <div className='relative flex items-center justify-center'>
+            <div
+              ref={imgRef}
+              className='h-[500px] w-full max-w-[420px] rounded-[2rem] bg-cover bg-center shadow-[0_30px_70px_rgba(30,30,30,0.18)]'
+              style={{ backgroundImage: "url('/images/dr-widad.jpg')" }}
+            />
+            <div className='pointer-events-none absolute -bottom-6 -right-6 h-[500px] w-full max-w-[420px] rounded-[2rem] border-2 opacity-20' style={{ borderColor: C.primary, translate: '12px 12px' }} />
           </div>
 
-          {/* Right side */}
-          <div className='relative flex items-center justify-center py-4'>
-            <div
-              className='absolute h-[450px] w-[650px] rounded-full opacity-[0.18] max-w-[90vw]'
-              style={{ background: C.orange }}
-            />
-
-            <div
-              className='relative w-[460px] max-w-full rounded-[28px] bg-white px-10 py-14 sm:px-12 sm:py-16'
-              style={{ boxShadow: '0 30px 70px rgba(0,0,0,0.06)' }}
+          {/* Right — content */}
+          <div className='max-w-xl'>
+            <h3
+              ref={titleRef}
+              className='text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[1.05] tracking-[-0.03em]'
+              style={{ color: C.secondary, fontFamily: TYPE.headingFamily }}
             >
-              {/* Service icon — floating top-right */}
-              <div className='absolute -top-5 -right-5 flex h-14 w-14 items-center justify-center rounded-full shadow-lg' style={{ background: C.orange }}>
-                {ICON_MAP[active.service.slug] && (
-                  <img src={ICON_MAP[active.service.slug]} alt='' className='h-7 w-7 object-contain brightness-0 invert' />
-                )}
+              {name.map((char, i) => (
+                <motion.span
+                  key={i}
+                  className='inline-block'
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04, duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </motion.span>
+              ))}
+            </h3>
+            <p className='mt-2 text-sm font-semibold uppercase tracking-[0.2em]' style={{ color: C.primary }}>
+              Dermatologue esthétique
+            </p>
+            <div className='mt-8 leading-8' style={{ color: `${C.secondary}cc` }}>
+              <p>Médecin dermatologue avec une expertise en médecine esthétique, laser et bodycontouring. Formation internationale et participation active aux congrès mondiaux, apportant les techniques les plus avancées et sécurisées de la dermatologie moderne.</p>
+              <p className='mt-4'>Son approche est fondée sur un accompagnement personnalisé, recherchant toujours des résultats naturels, harmonieux et reflétant le bien-être de chaque patiente.</p>
+            </div>
+            <div className='mt-8 flex items-center gap-4'>
+              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
+                <GraduationCap size={22} weight='duotone' />
               </div>
-
-              <p className='text-[56px] leading-none' style={{ color: C.orange }}>&ldquo;</p>
-
-              <div className='overflow-hidden' style={{ height: 170 }}>
-                <AnimatePresence mode='popLayout' custom={direction} initial={false}>
-                  <motion.div
-                    key={active.service.slug + '-quote'}
-                    custom={direction}
-                    variants={{
-                      enter: (dir: number) => ({ y: dir * 60, opacity: 0 }),
-                      center: { y: 0, opacity: 1 },
-                      exit: (dir: number) => ({ y: dir * -60, opacity: 0 }),
-                    }}
-                    initial='enter'
-                    animate='center'
-                    exit='exit'
-                    transition={{ duration: 0.7, ease: [0.65, 0, 0.35, 1] }}
-                  >
-                    <p className='text-[clamp(1rem,1.6vw,1.25rem)] leading-[1.7]' style={{ color: C.secondary }}>
-                      {active.testimonial.text}
-                    </p>
-                    <p className='mt-5 text-sm font-semibold tracking-wide' style={{ color: C.orange }}>
-                      — {active.testimonial.name}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
+              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
+                <Heart size={22} weight='duotone' />
               </div>
-
-              {/* Dots */}
-              <div className='mt-8 flex items-center gap-2'>
-                {SERVICES_WITH_TESTIMONIALS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setDirection(i > activeIndex ? 1 : -1); setActiveIndex(i) }}
-                    className='h-2 rounded-full transition-all'
-                    style={{
-                      background: i === activeIndex ? C.orange : `${C.secondary}26`,
-                      width: i === activeIndex ? 24 : 8,
-                    }}
-                    aria-label={`Service ${i + 1}`}
-                  />
-                ))}
+              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
+                <Sparkle size={22} weight='duotone' />
               </div>
+              <span className='text-xs font-medium' style={{ color: `${C.secondary}80` }}>Formation internationale · Laser · Bodycontouring</span>
             </div>
           </div>
-        </div>
-
-        {/* Navigation arrows */}
-        <div className='mt-10 flex justify-center gap-4'>
-          <button
-            onClick={goPrev}
-            className='flex h-[52px] w-[52px] items-center justify-center rounded-full text-white transition-all hover:scale-105 active:scale-95'
-            style={{ background: C.orange }}
-            aria-label='Précédent'
-          >
-            <ArrowLeft />
-          </button>
-          <button
-            onClick={goNext}
-            className='flex h-[52px] w-[52px] items-center justify-center rounded-full text-white transition-all hover:scale-105 active:scale-95'
-            style={{ background: C.orange }}
-            aria-label='Suivant'
-          >
-            <ArrowRight />
-          </button>
         </div>
       </div>
       <img
@@ -593,7 +509,7 @@ function TeamSection() {
                       <svg width='20' height='20' viewBox='0 0 24 24' fill='white'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>
                     </div>
                     <h3 className='text-lg font-semibold' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, color: C.secondary }}>{m.name}</h3>
-                    <p className='mt-1 text-xs font-medium' style={{ color: C.primary }}>{m.role}</p>
+                    <p className='mt-1 text-xs font-medium'>{m.role}</p>
                   </div>
                 </article>
               </SwiperSlide>
@@ -617,73 +533,64 @@ function TeamSection() {
 
 function GallerySection() {
   const [galleryIndex, setGalleryIndex] = useState(0)
-  const galleryTimer = useRef<ReturnType<typeof setInterval>>()
+  const swipeRef = useRef({ startX: 0 })
+  const total = SM.gallery.length
 
-  const goTo = (i: number) => {
-    setGalleryIndex(i)
-    clearInterval(galleryTimer.current)
-    galleryTimer.current = setInterval(() => {
-      setGalleryIndex((prev) => (prev + 1) % SM.gallery.length)
-    }, 4000)
+  const goTo = (i: number) => setGalleryIndex(((i % total) + total) % total)
+
+  const handlePointerDown = (e: React.PointerEvent) => { swipeRef.current.startX = e.clientX }
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const dx = e.clientX - swipeRef.current.startX
+    if (Math.abs(dx) < 50) return
+    goTo(dx > 0 ? galleryIndex - 1 : galleryIndex + 1)
   }
 
-  useEffect(() => {
-    galleryTimer.current = setInterval(() => {
-      setGalleryIndex((prev) => (prev + 1) % SM.gallery.length)
-    }, 4000)
-    return () => clearInterval(galleryTimer.current)
-  }, [])
-
   return (
-    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: '#FFF4F1' }}>
+    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='pointer-events-none absolute -left-28 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
       <img src={SM.hero.topRight} alt='' className='pointer-events-none absolute right-0 top-0 w-44 opacity-80 widamine-tint' loading='lazy' />
       <div className='mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-[1fr_0.92fr] lg:items-center'>
-        <div className='relative min-h-[420px]'>
-          <div className='relative overflow-hidden rounded-[1.5rem] shadow-[0_20px_50px_rgba(30,30,30,0.14)]'>
-            {SM.gallery.map((src, i) => (
-              <div
-                key={i}
-                className='absolute inset-0 transition-opacity duration-700'
-                style={{ opacity: i === galleryIndex ? 1 : 0 }}
-              >
-                <img src={src} alt={`Espace Widamine ${i + 1}`} className='h-[420px] w-full object-cover widamine-tint' loading='lazy' />
-              </div>
-            ))}
-            <div style={{ height: 0, paddingBottom: '75%' }} />
-          </div>
-          <div className='mt-4 flex items-center justify-center gap-3'>
-            <button
-              onClick={() => goTo((galleryIndex - 1 + SM.gallery.length) % SM.gallery.length)}
-              className='flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:scale-105'
-              style={{ background: C.primary }}
-              aria-label='Précédent'
-            >
-              <ArrowLeft />
-            </button>
-            <div className='flex items-center gap-2'>
-              {SM.gallery.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => goTo(i)}
-                  className='h-2 rounded-full transition-all'
+        <div
+          className='relative select-none'
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          style={{ touchAction: 'pan-y', height: 420 }}
+        >
+          <div className='pointer-events-none absolute -left-36 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
+          <div className='relative mx-auto' style={{ width: 300, height: 420 }}>
+            {SM.gallery.map((src, i) => {
+              let x = 0, rot = 0, z = 0
+              const d = (i - galleryIndex + total) % total
+              if (d === 0) { x = 0; rot = 0; z = 10 }
+              else if (d === total - 1) { x = -60; rot = -5; z = 5 }
+              else if (d === 1) { x = 60; rot = 5; z = 5 }
+
+              return (
+                <div
+                  key={src}
+                  className='absolute left-0 top-0 transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]'
                   style={{
-                    background: i === galleryIndex ? C.primary : `${C.secondary}26`,
-                    width: i === galleryIndex ? 24 : 8,
+                    width: 300,
+                    height: 420,
+                    transform: `translateX(${x}px) rotateZ(${rot}deg)`,
+                    zIndex: z,
                   }}
-                  aria-label={`Photo ${i + 1}`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => goTo((galleryIndex + 1) % SM.gallery.length)}
-              className='flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:scale-105'
-              style={{ background: C.primary }}
-              aria-label='Suivant'
-            >
-              <ArrowRight />
-            </button>
+                >
+                  <div className='h-full w-full overflow-hidden rounded-[18px] border-[4px] border-white shadow-[0_16px_40px_rgba(30,30,30,0.15)]'>
+                    <img src={src} alt={`Espace Widamine ${i + 1}`} className='h-full w-full object-cover' loading='lazy' />
+                  </div>
+                </div>
+              )
+            })}
           </div>
+          <button
+            onClick={() => goTo(galleryIndex + 1)}
+            className='absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 translate-x-6 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105'
+            style={{ background: C.primary }}
+            aria-label='Suivant'
+          >
+            <ArrowRight />
+          </button>
         </div>
 
         <div className='relative z-10 max-w-[620px]'>
@@ -697,13 +604,13 @@ function GallerySection() {
             <br />
             Widamine Center
           </h2>
-          <p className='mt-12 max-w-xl text-xl leading-8 font-bold' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
+          <p className='mt-12 max-w-xl text-xl leading-8 font-bold'>
             Voici quelques photos des lieux, un centre dermato-esthétique pensé pour accueillir chaque patient avec calme et précision.
           </p>
-          <p className='mt-10 max-w-xl text-base leading-9' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+          <p className='mt-10 max-w-xl text-base leading-9' style={{ fontWeight: 500 }}>
             Un univers chaleureux qui vous accompagne depuis l'accueil jusqu'aux salles de traitement, avec une attention portée aux matières, à la lumière et au confort.
           </p>
-          <p className='mt-8 max-w-xl text-base leading-9' style={{ color: `${C.secondary}d9`, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>
+          <p className='mt-8 max-w-xl text-base leading-9' style={{ fontWeight: 500 }}>
             En photo c'est beau, mais l'expérience est encore plus agréable en vrai.
           </p>
           <Link
@@ -711,7 +618,7 @@ function GallerySection() {
             className='mt-10 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5'
             style={{ background: C.primary }}
           >
-            Traitements du corps <RightArrow />
+            Traitements du corps
           </Link>
         </div>
       </div>
@@ -720,45 +627,52 @@ function GallerySection() {
 }
 
 function TestimonialsSection() {
+  const items = [...TESTIMONIALS, ...TESTIMONIALS]
+  const [paused, setPaused] = useState<'left' | 'right' | null>(null)
   return (
-    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
+    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <h2 data-fade-scroll className='text-center leading-tight sm:text-4xl md:text-5xl mb-14' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
-          Les <span style={{ color: C.primary, fontStyle: 'italic' }}>Témoignages</span> de nos patientes
+          Les <span style={{ color: C.orange, fontStyle: 'italic' }}>Témoignages</span> de nos patientes
         </h2>
-        <Swiper
-          modules={[Autoplay, Navigation]}
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
-          centeredSlides
-          slidesPerView={3}
-          spaceBetween={24}
-          speed={600}
-          loop
-          grabCursor
-          navigation={{ prevEl: '.test-prev', nextEl: '.test-next' }}
-          className='test-swiper py-8'
-        >
-          {TESTIMONIALS.map((t, i) => (
-            <SwiperSlide key={i}>
-              <div className='rounded-[2rem] bg-white p-8 border border-black/5 flex flex-col' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)', height: 280 }}>
-                <div className='flex items-center gap-1 text-[#ffb500] mb-4'>
-                  {Array.from({ length: 5 }).map((_, j) => <StarIcon key={j} />)}
-                </div>
-                <p className='text-sm leading-6 mb-6 flex-1' style={{ color: `${C.secondary}b3` }}>"{t.text}"</p>
-                <p className='font-semibold text-sm' style={{ color: C.secondary }}>{t.name}</p>
+      </div>
+
+      <div className='flex flex-col gap-3'>
+        <div className='marquee-left flex' onMouseEnter={() => setPaused('left')} onMouseLeave={() => setPaused(null)}>
+          <div className={`marquee-track flex shrink-0 gap-6 ${paused === 'left' ? 'pause' : ''}`}>
+            {items.map((t, i) => (
+              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] bg-white p-6 border border-black/5'>
+                <div className='text-[#ffb500] mb-3 shrink-0'><Stars5 /></div>
+                <p className='text-sm leading-6' style={{ color: C.secondary }}>"{t.text}"</p>
+                <p className='pt-3 text-sm font-semibold shrink-0' style={{ color: C.orange }}>{t.name}</p>
               </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-        <div className='mt-6 flex justify-center gap-3'>
-          <button className='test-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
-            <ArrowLeft />
-          </button>
-          <button className='test-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
-            <ArrowRight />
-          </button>
+            ))}
+          </div>
+        </div>
+
+        <div className='marquee-right flex' onMouseEnter={() => setPaused('right')} onMouseLeave={() => setPaused(null)}>
+          <div className={`marquee-track flex shrink-0 gap-6 ${paused === 'right' ? 'pause' : ''}`}>
+            {items.map((t, i) => (
+              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] bg-white p-6 border border-black/5'>
+                <div className='text-[#ffb500] mb-3 shrink-0'><Stars5 /></div>
+                <p className='text-sm leading-6' style={{ color: C.secondary }}>"{t.text}"</p>
+                <p className='pt-3 text-sm font-semibold shrink-0' style={{ color: C.orange }}>{t.name}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <style>{`
+        .marquee-left { overflow: hidden; }
+        .marquee-right { overflow: hidden; }
+        .marquee-left .marquee-track { animation: scroll-left 50s linear infinite; }
+        .marquee-right .marquee-track { animation: scroll-right 50s linear infinite; }
+        .marquee-left .marquee-track.pause,
+        .marquee-right .marquee-track.pause { animation-play-state: paused; }
+        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+      `}</style>
     </section>
   )
 }
@@ -774,7 +688,7 @@ function ConsultSection() {
               <h2 className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
                 Comment <span style={{ color: C.primary, fontStyle: 'italic' }}>prendre rendez-vous</span> au Widamine Center ?
               </h2>
-              <p className='mt-4 text-base leading-8' style={{ color: `${C.secondary}a6` }}>
+              <p className='mt-4 text-base leading-8'>
                 La consultation en présentiel ou la visio-consultation (qui permet souvent de diminuer le délai).
               </p>
               <div className='mt-8 space-y-4'>
@@ -783,8 +697,8 @@ function ConsultSection() {
                     <PhoneCall className='h-5 w-5' style={{ color: C.primary }} />
                   </div>
                   <div>
-                    <p className='font-semibold' style={{ color: C.secondary }}>Par téléphone</p>
-                    <p className='text-sm' style={{ color: `${C.secondary}99` }}>+212 (535) 624 696</p>
+                    <p className='font-semibold'>Par téléphone</p>
+                    <p className='text-sm'>+212 (535) 624 696</p>
                   </div>
                 </div>
                 <div className='flex items-start gap-4'>
@@ -792,13 +706,13 @@ function ConsultSection() {
                     <MapPin className='h-5 w-5' style={{ color: C.primary }} />
                   </div>
                   <div>
-                    <p className='font-semibold' style={{ color: C.secondary }}>En personne</p>
-                    <p className='text-sm' style={{ color: `${C.secondary}99` }}>Boulevard Slaoui, Bureaux Nour, 2ème étage, Fès</p>
+                    <p className='font-semibold'>En personne</p>
+                    <p className='text-sm'>Boulevard Slaoui, Bureaux Nour, 2ème étage, Fès</p>
                   </div>
                 </div>
               </div>
-            <button onClick={open} className='mt-8 inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
-              Prendre rendez-vous <RightArrow />
+            <button onClick={open} className='mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+              Prendre rendez-vous
             </button>
           </div>
           <div className='w-full overflow-hidden rounded-[2rem] relative' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>

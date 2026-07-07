@@ -2,6 +2,8 @@ import {
   CaretLeft,
   CaretRight,
   Funnel,
+  Table,
+  CalendarBlank,
 } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
@@ -20,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 
 interface CalendarControlBarProps {
   viewMode: CalendarViewMode
@@ -33,6 +36,8 @@ interface CalendarControlBarProps {
   onDateChange: (date: string) => void
   children?: React.ReactNode
   compact?: boolean
+  isAnalytics?: boolean
+  onToggleAnalytics?: () => void
 }
 
 export default function CalendarControlBar({
@@ -47,6 +52,8 @@ export default function CalendarControlBar({
   onDateChange,
   compact = false,
   children,
+  isAnalytics = false,
+  onToggleAnalytics,
 }: CalendarControlBarProps) {
   const pickerLabel = formatCalendarPickerLabel(dateValue, viewMode)
   const todayButtonSide = getTodayButtonPlacement(viewMode, dateValue)
@@ -138,6 +145,12 @@ export default function CalendarControlBar({
           {navGroup}
         </div>
         <div className='flex items-center gap-3 flex-shrink-0'>
+          {onToggleAnalytics && (
+            <div className='flex items-center gap-2 mr-1'>
+              <span className='text-[11px] font-medium text-muted-foreground'>Praticiens</span>
+              <Switch checked={isAnalytics} onCheckedChange={onToggleAnalytics} className='scale-75 origin-right' />
+            </div>
+          )}
           <div className='relative'>
             <button
               onClick={() => setFilterModalOpen(!filterModalOpen)}
@@ -160,7 +173,7 @@ export default function CalendarControlBar({
               </>
             )}
           </div>
-<Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
+          <Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
             <SelectTrigger size='sm' className='bo-filter-pill shrink-0 gap-1 !rounded-full border-transparent bg-transparent px-3 py-1.5 text-[13px] font-medium text-muted-foreground hover:bg-muted/35'>
               <SelectValue placeholder={CALENDAR_VIEW_OPTIONS.find(o => o.value === viewMode)?.label} />
             </SelectTrigger>
@@ -212,10 +225,20 @@ export default function CalendarControlBar({
           </div>
         )}
 
-        {/* Right wing: view switcher */}
-        <div className='flex shrink-0 items-center gap-1'>
-          {children}
-          {viewSwitcher}
+        {/* Right wing: toggle + view switcher */}
+        <div className='flex shrink-0 items-center gap-3'>
+          {onToggleAnalytics && (
+            <div className='flex items-center gap-2 mr-2 border-r border-border pr-5'>
+              <span className={cn('text-[12px] font-medium transition-colors', isAnalytics ? 'text-foreground' : 'text-muted-foreground')}>
+                Praticiens
+              </span>
+              <Switch checked={isAnalytics} onCheckedChange={onToggleAnalytics} />
+            </div>
+          )}
+          <div className='flex items-center gap-1'>
+            {children}
+            {viewSwitcher}
+          </div>
         </div>
       </div>
     </div>

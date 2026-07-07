@@ -38,11 +38,11 @@ export default function Appointment() {
         <div className='relative mx-auto max-w-6xl px-5 sm:px-8'>
           <div className='grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-start'>
             <div>
-              <p className='text-xs font-semibold uppercase tracking-[0.28em]' style={{ color: C.primary }}>Rendez-vous</p>
+              <p className='text-xs font-semibold uppercase tracking-[0.28em]'>Rendez-vous</p>
               <h1 className='mt-3 font-amoria text-3xl leading-tight sm:text-4xl md:text-5xl' style={{ color: C.secondary }}>
                 Réservez votre <span style={{ color: C.primary, fontStyle: 'italic' }}>consultation</span>
               </h1>
-              <p className='mt-6 max-w-md text-sm leading-8 sm:text-base' style={{ color: `${C.secondary}b3` }}>
+              <p className='mt-6 max-w-md text-sm leading-8 sm:text-base'>
                 Choisissez votre traitement, sélectionnez le créneau qui vous convient et renseignez vos coordonnées. En quelques clics, votre rendez-vous est confirmé.
               </p>
               <div className='mt-6 flex flex-wrap gap-3'>
@@ -54,10 +54,10 @@ export default function Appointment() {
 
             {/* Motifs card */}
             <div className='rounded-[2rem] bg-white p-6 sm:p-8' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}>
-              <p className='text-xs uppercase tracking-[0.26em] font-semibold' style={{ color: C.primary }}>
+              <p className='text-xs uppercase tracking-[0.26em] font-semibold'>
                 Traitements disponibles
               </p>
-              <p className='mt-1 text-xs' style={{ color: `${C.secondary}a0` }}>Sélectionnez votre motif dans le formulaire</p>
+              <p className='mt-1 text-xs'>Sélectionnez votre motif dans le formulaire</p>
               <div className='mt-5 flex flex-wrap gap-2'>
                 {motifs.map((motif) => {
                   const key = motif.name.toLowerCase().includes('visage') ? 'visage'

@@ -1,5 +1,4 @@
 import { Link, useParams } from 'react-router-dom'
-import PublicFooter from '@/components/PublicFooter'
 import PublicNavbar from '@/components/PublicNavbar'
 import { getServicePage, ICON_MAP } from '@/lib/siteContent'
 import { CalendarBlank, CheckCircle, Sparkle } from '@phosphor-icons/react'
@@ -25,7 +24,7 @@ export default function ServiceDetail() {
         <PublicNavbar />
         <main className='mx-auto w-full max-w-7xl px-4 pt-32 pb-16 sm:px-6 sm:pt-40 lg:px-8'>
           <div className='rounded-2xl bg-white p-8 text-center shadow-lg'>
-            <p style={{ color: C.secondary, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}>Service introuvable.</p>
+            <p style={{ fontWeight: 500 }}>Service introuvable.</p>
             <Link to='/' className='mt-4 inline-flex items-center gap-2 text-sm font-medium' style={{ color: C.primary }}>
               Retour
             </Link>
@@ -117,11 +116,9 @@ export default function ServiceDetail() {
                 </h1>
                 <p
                   style={{
-                    fontFamily: TYPE.bodyFamily,
                     fontSize: 18,
                     fontWeight: 500,
                     lineHeight: '32px',
-                    color: C.secondary,
                     margin: 0,
                   }}
                 >
@@ -129,11 +126,9 @@ export default function ServiceDetail() {
                 </p>
                 <p
                   style={{
-                    fontFamily: TYPE.bodyFamily,
                     fontSize: 16,
                     fontWeight: 500,
                     lineHeight: '30px',
-                    color: 'rgba(30,30,30,0.82)',
                     margin: 0,
                   }}
                 >
@@ -143,11 +138,9 @@ export default function ServiceDetail() {
                   className='border-l-2 pl-4'
                   style={{
                     borderColor: service.color,
-                    fontFamily: TYPE.bodyFamily,
                     fontSize: 14,
                     fontWeight: 500,
                     lineHeight: '25px',
-                    color: C.accent,
                     margin: 0,
                   }}
                 >
@@ -158,43 +151,43 @@ export default function ServiceDetail() {
           </div>
         </section>
 
-        <section className='relative overflow-hidden py-8 sm:py-12'>
+        <section className='relative overflow-hidden py-16 sm:py-24 lg:py-28' style={{ background: C.bg }}>
+          <div className='pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/40' />
+          <div className='pointer-events-none absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-white/30' />
           <div style={CTN}>
-            <div className='mx-auto max-w-[680px] text-center'>
-              <div className='mb-5 inline-flex h-11 w-11 items-center justify-center rounded-full' style={{ background: `${service.color}1F`, color: service.color }}>
-                <Sparkle size={20} weight='fill' />
+            <div className='relative mx-auto max-w-3xl'>
+              <div className='mb-12 text-center'>
+                <div className='mx-auto mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg' style={{ background: `linear-gradient(135deg, ${service.color}, ${C.primary})` }}>
+                  <Sparkle size={24} weight='fill' className='text-white' />
+                </div>
+                <h2
+                  className='leading-tight sm:text-4xl md:text-5xl'
+                  style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}
+                >
+                  En <em style={{ color: service.color, fontStyle: 'italic' }}>quelques mots</em>
+                </h2>
+                <p className='mx-auto mt-4 max-w-lg text-sm' style={{ fontWeight: 500 }}>
+                  Ce qu'il faut retenir de ce traitement
+                </p>
               </div>
-              <h2
-                style={{
-                  fontFamily: TYPE.headingFamily,
-                  fontSize: 'clamp(2rem, 4vw, 3.4rem)',
-                  fontWeight: 700,
-                  lineHeight: 1,
-                  letterSpacing: '-0.03em',
-                  color: C.secondary,
-                  margin: 0,
-                }}
-              >
-                En <em style={{ color: service.color, fontStyle: 'italic' }}>quelques mots</em>
-              </h2>
-              <ul className='mx-auto mt-8 grid max-w-[560px] gap-4 p-0 text-left' style={{ listStyle: 'none' }}>
-                {service.highlights.map((highlight) => (
-                  <li
+              <div className='grid gap-4 sm:grid-cols-2'>
+                {service.highlights.map((highlight, i) => (
+                  <div
                     key={highlight}
-                    className='grid grid-cols-[24px_1fr] items-start gap-3'
-                    style={{
-                      fontFamily: TYPE.bodyFamily,
-                      fontSize: 17,
-                      fontWeight: 600,
-                      lineHeight: '28px',
-                      color: C.secondary,
-                    }}
+                    className='group overflow-hidden rounded-2xl bg-white p-5 transition-all duration-300 hover:-translate-y-1'
+                    style={{ boxShadow: '0 4px 24px -6px rgba(30,30,30,0.08)' }}
                   >
-                    <CheckCircle size={22} weight='fill' style={{ color: service.color, marginTop: 3 }} />
-                    <span>{highlight}</span>
-                  </li>
+                    <div className='flex items-start gap-4'>
+                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors' style={{ background: `${service.color}14`, color: service.color }}>
+                        <CheckCircle size={20} weight='fill' />
+                      </div>
+                      <p className='pt-1 text-sm font-semibold leading-6'>
+                        {highlight}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </section>
@@ -219,11 +212,9 @@ export default function ServiceDetail() {
                   </h2>
                   <p
                     style={{
-                      fontFamily: TYPE.bodyFamily,
                       fontSize: 17,
                       fontWeight: 500,
                       lineHeight: '32px',
-                      color: 'rgba(30,30,30,0.84)',
                       margin: 0,
                     }}
                   >
@@ -232,7 +223,7 @@ export default function ServiceDetail() {
                   <button
                     type='button'
                     onClick={() => openWithMotif(service.title)}
-                    className='inline-flex cursor-pointer items-center gap-2 rounded-full border-0 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                    className='inline-flex cursor-pointer items-center rounded-full border-0 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg'
                     style={{
                       fontFamily: TYPE.bodyFamily,
                       color: '#ffffff',
@@ -243,7 +234,6 @@ export default function ServiceDetail() {
                       lineHeight: '18px',
                     }}
                   >
-                    <CalendarBlank size={17} weight='bold' />
                     Prendre rendez-vous
                   </button>
                 </div>
@@ -292,16 +282,14 @@ export default function ServiceDetail() {
                     >
                       {section.title}
                     </h3>
-                    <p
-                      style={{
-                        fontFamily: TYPE.bodyFamily,
-                        fontSize: 16,
-                        fontWeight: 500,
-                        lineHeight: '30px',
-                        color: 'rgba(30,30,30,0.82)',
-                        margin: 0,
-                      }}
-                    >
+                      <p
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 500,
+                          lineHeight: '30px',
+                          margin: 0,
+                        }}
+                      >
                       {section.body}
                     </p>
                   </article>
@@ -333,7 +321,7 @@ export default function ServiceDetail() {
                 <button
                   type='button'
                   onClick={() => openWithMotif(service.title)}
-                  className='inline-flex cursor-pointer items-center gap-2 rounded-full border-0 transition duration-300 hover:-translate-y-0.5'
+                  className='inline-flex cursor-pointer items-center rounded-full border-0 transition duration-300 hover:-translate-y-0.5'
                   style={{
                     marginTop: 32,
                     padding: '14px 24px',
@@ -345,7 +333,6 @@ export default function ServiceDetail() {
                     lineHeight: '18px',
                   }}
                 >
-                  <CalendarBlank size={17} weight='bold' />
                   Prendre rendez-vous
                 </button>
               </div>
@@ -353,7 +340,6 @@ export default function ServiceDetail() {
           </div>
         </section>
       </main>
-      <PublicFooter />
     </div>
   )
 }

@@ -39,10 +39,18 @@
 	src: url('/fonts/Poppins-Thin.ttf') format('truetype');
 }
 
+@font-face {
+	font-family: 'Poppins Light';
+	font-style: normal;
+	font-weight: 300;
+	font-display: swap;
+	src: url('/fonts/Poppins-Light.ttf') format('truetype');
+}
+
 @theme {
 	--color-custom-white: #FBF7EF;
 	--color-primary: #009FD6;
-	--color-secondary: #1E1E1E;
+	--color-secondary: #1a3646;
 	--color-accent: #6D0024;
 	--color-muted: #dadada;
 	--color-brand-orange: #F7A269;
@@ -75,7 +83,7 @@
 
 html, body, #root {
 	background-color: #FBF7EF;
-	font-family: 'Poppins Thin', 'Chambora', sans-serif;
+	font-family: 'Poppins Thin', 'Chambora', 'Poppins Light', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -149,6 +157,12 @@ h1, h2, h3, h4, h5, h6 {
 	.bo-select {
 		@apply w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
 	}
+}
+
+#app-scroll {
+	color: #1a3646;
+	font-family: 'Poppins Light', sans-serif;
+	font-weight: 300;
 }
 
 .widamine-tint {

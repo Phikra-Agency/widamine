@@ -297,8 +297,9 @@
 	}
 
 	.bo-desktop-shell[data-sidebar-collapsed='true'] .bo-sidebar-collapse-btn {
-		@apply bottom-[4.25rem] h-6 w-6 -translate-x-1/2;
+		@apply h-6 w-6 -translate-x-1/2;
 		left: calc(var(--sidebar-width) / 2);
+		bottom: 7.5rem;
 	}
 
 	.bo-desktop-shell:hover .bo-sidebar-collapse-btn {

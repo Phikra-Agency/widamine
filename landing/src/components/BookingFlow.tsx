@@ -376,19 +376,17 @@ function ReservationSteps({
         {step === 1 ? (
           <button
             onClick={handleDismiss}
-            className='flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm sm:w-auto'
+            className='flex w-full items-center justify-center rounded-full border px-4 py-2 text-sm sm:w-auto'
             style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
           >
-            <X size={16} />
             Annuler
           </button>
         ) : (
           <button
             onClick={() => setStep(step - 1)}
-            className='flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm sm:w-auto'
+            className='flex w-full items-center justify-center rounded-full border px-4 py-2 text-sm sm:w-auto'
             style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
           >
-            <ArrowLeftIcon size={16} />
             Retour
           </button>
         )}
@@ -423,7 +421,6 @@ function ReservationSteps({
             style={{ backgroundColor: C.primary }}
           >
             {step === 1 ? 'Date Et Heure' : 'Informations De Contact'}
-            <ArrowRightIcon size={16} />
           </button>
         )}
       </div>

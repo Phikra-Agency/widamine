@@ -1,6 +1,6 @@
 import { formatLocalDate, getMondayOfWeek, parseLocalDate } from '@/lib/date'
 
-export type CalendarViewMode = 'week' | 'day' | 'month'
+export type CalendarViewMode = 'week' | 'day' | 'month' | 'analytics'
 export type PeriodKey = 'morning' | 'afternoon' | 'evening'
 
 export const CALENDAR_VIEW_OPTIONS: {

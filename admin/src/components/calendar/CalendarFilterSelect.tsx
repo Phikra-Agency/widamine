@@ -1,5 +1,5 @@
-import { useState, type ElementType } from 'react'
-import { Check, X } from '@phosphor-icons/react'
+import { useState, useMemo, type ElementType } from 'react'
+import { Check, X, MagnifyingGlass } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,13 @@ export function CalendarFilterSelect({
   className,
 }: CalendarFilterSelectProps) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const hasFilter = value.length > 0
+
+  const filteredOptions = useMemo(
+    () => options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase())),
+    [options, search],
+  )
 
   const toggleOption = (optionValue: string) => {
     if (value.includes(optionValue)) {
@@ -46,6 +52,7 @@ export function CalendarFilterSelect({
 
   const clearAll = () => {
     onChange([])
+    setSearch('')
     setOpen(false)
   }
 
@@ -94,23 +101,39 @@ export function CalendarFilterSelect({
           </span>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='start' sideOffset={4} className='min-w-56'>
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => toggleOption(option.value)}
-            className={cn(
-              value.includes(option.value) && 'bg-muted/60 font-medium',
-            )}
-          >
-            <span className='flex size-4 shrink-0 items-center justify-center'>
-              {value.includes(option.value) && (
-                <Check size={13} weight='bold' className='text-primary' />
+      <DropdownMenuContent align='start' sideOffset={4} className='min-w-56 p-1'>
+        <div className='relative mb-1'>
+          <MagnifyingGlass size={13} className='pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40' />
+          <input
+            type='search'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder='Rechercher…'
+            autoComplete='off'
+            spellCheck={false}
+            className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
+          />
+        </div>
+        {filteredOptions.length === 0 ? (
+          <div className='px-2 py-4 text-center text-xs text-muted-foreground/50'>Aucun résultat</div>
+        ) : (
+          filteredOptions.map((option) => (
+            <DropdownMenuItem
+              key={option.value}
+              onClick={() => toggleOption(option.value)}
+              className={cn(
+                value.includes(option.value) && 'bg-muted/60 font-medium',
               )}
-            </span>
-            <span>{option.label}</span>
-          </DropdownMenuItem>
-        ))}
+            >
+              <span className='flex size-4 shrink-0 items-center justify-center'>
+                {value.includes(option.value) && (
+                  <Check size={13} weight='bold' className='text-primary' />
+                )}
+              </span>
+              <span>{option.label}</span>
+            </DropdownMenuItem>
+          ))
+        )}
         {hasFilter && (
           <>
             <div className='-mx-1 my-1 h-px bg-border' />

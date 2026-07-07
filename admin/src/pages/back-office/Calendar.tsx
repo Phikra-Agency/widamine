@@ -27,7 +27,8 @@ import {
 } from '@/lib/scheduleNavigation'
 import CalendarControlBar from '@/components/calendar/CalendarControlBar'
 import CalendarDatePicker from '@/components/calendar/CalendarDatePicker'
-import CalendarNotificationBell from '@/components/calendar/CalendarNotificationBell'
+
+import PractitionerAnalytics from '@/components/calendar/PractitionerAnalytics'
 import EventCard from '@/components/calendar/EventCard'
 import {
   CalendarDayGrid,
@@ -127,6 +128,7 @@ function Planner() {
     [viewMode, filters.date],
   )
   const [mobileDayIdx, setMobileDayIdx] = useState(0)
+  const [pageView, setPageView] = useState<'calendar' | 'analytics'>('calendar')
   const [filterPractitionerIds, setFilterPractitionerIds] = useState<string[]>([])
   const [filterStatuses, setFilterStatuses] = useState<string[]>([])
   const [filterMotifIds, setFilterMotifIds] = useState<string[]>([])
@@ -428,121 +430,138 @@ function Planner() {
         dateValue={filters.date}
         onDateChange={handleDateChange}
         compact={false}
+        isAnalytics={pageView === 'analytics'}
+        onToggleAnalytics={() => setPageView(pageView === 'calendar' ? 'analytics' : 'calendar')}
       >
-        <CalendarNotificationBell />
       </CalendarControlBar>
 
-      {showMobileDayStrip && (
-      <div className='flex gap-1 overflow-x-auto border-b border-border-subtle bg-background px-3 py-2 lg:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-        {weekDates.map((date, idx) => {
-          const isToday = formatLocalDate(date) === formatLocalDate(new Date())
-          const isActive = idx === mobileDayIdx
-          return (
-            <button
-              key={idx}
-              onClick={() => setMobileDayIdx(idx)}
-              className='flex min-w-[44px] shrink-0 cursor-pointer flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors'
-            >
-              <span className={clsx('text-[11px] font-semibold uppercase tracking-[0.1em]', isActive ? 'text-primary' : 'text-secondary/35')}>
-                {DAY_LABELS[idx].slice(0, 3)}
-              </span>
-              <div
-                className={clsx(
-                  'flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition',
-                  isActive && 'bg-primary text-white shadow-sm',
-                  !isActive && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
-                  !isActive && !isToday && 'text-secondary/45',
-                )}
-              >
-                {date.toLocaleDateString('fr-FR', { day: '2-digit' })}
-              </div>
-            </button>
-          )
-        })}
-        <div className='ml-auto flex shrink-0 items-center'>
-          <CalendarDatePicker
-            compact
-            value={filters.date}
-            label={filters.date}
-            onChange={(date) => {
-              handleDateChange(date)
-            }}
-          />
-        </div>
-      </div>
-      )}
-
-      <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
-        {viewMode === 'day' && mobileDayData && (
-          <div className='px-4 py-3'>
-            <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
-            <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
-            <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
-          </div>
-        )}
-
-        {viewMode === 'week' && mobileDayData && (
-          <div className='px-4 py-3'>
-            <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
-            <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
-            <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
-          </div>
-        )}
-
-        {showMobileMonthView && (
-          <div className='px-3 py-2'>
-            <MobileMonthGrid
-              anchorDate={filters.date}
-              selectedDate={mobileMonthSelectedDate}
-              onSelectDate={setMobileMonthSelectedDate}
-              itemsByDate={monthItemsByDate}
-            />
-            <div className='mt-3'>
-              {mobileMonthData && (
-                <>
-                  <MobilePeriod period='morning' label='Matin' schedules={mobileMonthData.morning} />
-                  <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileMonthData.afternoon} />
-                  <MobilePeriod period='evening' label='Soir' schedules={mobileMonthData.evening} />
-                </>
-              )}
-              {!mobileMonthData && (
-                <p className='py-4 text-center text-[13px] text-secondary/40 italic'>Aucune réservation</p>
-              )}
+      {pageView === 'calendar' && (
+        <>
+          {showMobileDayStrip && (
+          <div className='flex gap-1 overflow-x-auto border-b border-border-subtle bg-background px-3 py-2 lg:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+            {weekDates.map((date, idx) => {
+              const isToday = formatLocalDate(date) === formatLocalDate(new Date())
+              const isActive = idx === mobileDayIdx
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setMobileDayIdx(idx)}
+                  className='flex min-w-[44px] shrink-0 cursor-pointer flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors'
+                >
+                  <span className={clsx('text-[11px] font-semibold uppercase tracking-[0.1em]', isActive ? 'text-primary' : 'text-secondary/35')}>
+                    {DAY_LABELS[idx].slice(0, 3)}
+                  </span>
+                  <div
+                    className={clsx(
+                      'flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition',
+                      isActive && 'bg-primary text-white shadow-sm',
+                      !isActive && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
+                      !isActive && !isToday && 'text-secondary/45',
+                    )}
+                  >
+                    {date.toLocaleDateString('fr-FR', { day: '2-digit' })}
+                  </div>
+                </button>
+              )
+            })}
+            <div className='ml-auto flex shrink-0 items-center'>
+              <CalendarDatePicker
+                compact
+                value={filters.date}
+                label={filters.date}
+                onChange={(date) => {
+                  handleDateChange(date)
+                }}
+              />
             </div>
           </div>
-        )}
-      </div>
+          )}
 
-      <div className='hidden min-h-0 flex-1 overflow-auto lg:block'>
-        {viewMode === 'week' && (
-          <CalendarWeekGrid
-            weekDates={weekDates}
-            dayLabels={DAY_LABELS}
+          <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
+            {viewMode === 'day' && mobileDayData && (
+              <div className='px-4 py-3'>
+                <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+                <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+                <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
+              </div>
+            )}
+
+            {viewMode === 'week' && mobileDayData && (
+              <div className='px-4 py-3'>
+                <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+                <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+                <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
+              </div>
+            )}
+
+            {showMobileMonthView && (
+              <div className='px-3 py-2'>
+                <MobileMonthGrid
+                  anchorDate={filters.date}
+                  selectedDate={mobileMonthSelectedDate}
+                  onSelectDate={setMobileMonthSelectedDate}
+                  itemsByDate={monthItemsByDate}
+                />
+                <div className='mt-3'>
+                  {mobileMonthData && (
+                    <>
+                      <MobilePeriod period='morning' label='Matin' schedules={mobileMonthData.morning} />
+                      <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileMonthData.afternoon} />
+                      <MobilePeriod period='evening' label='Soir' schedules={mobileMonthData.evening} />
+                    </>
+                  )}
+                  {!mobileMonthData && (
+                    <p className='py-4 text-center text-[13px] text-secondary/40 italic'>Aucune réservation</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className='hidden min-h-0 flex-1 overflow-auto lg:block'>
+            {viewMode === 'week' && (
+              <CalendarWeekGrid
+                weekDates={weekDates}
+                dayLabels={DAY_LABELS}
+                displayItems={displayItems}
+                onOpenSchedule={openSchedule}
+                isOpened={isOpened}
+                formatTime={formatTimeOnly}
+              />
+            )}
+            {viewMode === 'day' && displayItems[activeDayIdx] && (
+              <CalendarDayGrid
+                date={weekDates[activeDayIdx] ?? parseLocalDate(filters.date)}
+                displayDay={displayItems[activeDayIdx]}
+                onOpenSchedule={openSchedule}
+                isOpened={isOpened}
+                formatTime={formatTimeOnly}
+              />
+            )}
+            {viewMode === 'month' && (
+              <CalendarMonthGrid
+                anchorDate={filters.date}
+                itemsByDate={monthItemsByDate}
+                onOpenSchedule={openSchedule}
+                isOpened={isOpened}
+                formatTime={formatTimeOnly}
+              />
+            )}
+          </div>
+        </>
+      )}
+
+      {pageView === 'analytics' && (
+        <div className='flex-1 overflow-auto relative'>
+          <PractitionerAnalytics 
+            practitioners={doctors} 
+            viewMode={viewMode}
             displayItems={displayItems}
-            onOpenSchedule={openSchedule}
-            isOpened={isOpened}
-            formatTime={formatTimeOnly}
+            monthItemsByDate={monthItemsByDate}
+            activeDayIdx={activeDayIdx}
           />
-        )}
-        {viewMode === 'day' && displayItems[activeDayIdx] && (
-          <CalendarDayGrid
-            date={weekDates[activeDayIdx] ?? parseLocalDate(filters.date)}
-            displayDay={displayItems[activeDayIdx]}
-            onOpenSchedule={openSchedule}
-            isOpened={isOpened}
-            formatTime={formatTimeOnly}
-          />
-        )}
-        {viewMode === 'month' && (
-          <CalendarMonthGrid
-            anchorDate={filters.date}
-            itemsByDate={monthItemsByDate}
-            onOpenSchedule={openSchedule}
-            isOpened={isOpened}
-            formatTime={formatTimeOnly}
-          />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

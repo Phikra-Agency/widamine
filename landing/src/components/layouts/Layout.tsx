@@ -10,6 +10,7 @@ import {
 } from 'react-router-dom'
 import { useEffect } from 'react'
 import Scheduling from '@/components/Scheduling'
+import Chatbot from '@/components/Chatbot'
 import PublicFooter from '@/components/PublicFooter'
 
 export default function Layout() {
@@ -35,6 +36,7 @@ export default function Layout() {
 				<PublicFooter />
 			</div>
 			<Scheduling />
+			<Chatbot />
 		</main>
 	)
 }

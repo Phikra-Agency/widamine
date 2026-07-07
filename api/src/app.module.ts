@@ -13,6 +13,8 @@ import { ResourceModule } from "./resource/resource.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
 import { SettingsModule } from "./settings/settings.module";
 import { CronModule } from "./cron/cron.module";
+import { ChatbotModule } from "./chatbot/chatbot.module";
+import { SearchModule } from "./search/search.module";
 
 console.log("[AppModule] Loading modules...");
 
@@ -32,6 +34,8 @@ console.log("[AppModule] Loading modules...");
     DashboardModule,
     SettingsModule,
     CronModule,
+    ChatbotModule,
+    SearchModule,
   ],
 })
 export class AppModule {}
