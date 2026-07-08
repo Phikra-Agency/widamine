@@ -12,6 +12,7 @@ interface TanStackDataTableProps<TData> {
   onRowClick?: (row: TData) => void
   stopClickOnColumns?: string[]
   className?: string
+  rowIdKey?: keyof TData & string
 }
 
 export function TanStackDataTable<TData>({
@@ -23,6 +24,7 @@ export function TanStackDataTable<TData>({
   onRowClick,
   stopClickOnColumns = ['actions'],
   className,
+  rowIdKey,
 }: TanStackDataTableProps<TData>) {
   const colCount = table.getAllColumns().length
   const rows = table.getRowModel().rows
@@ -69,6 +71,7 @@ export function TanStackDataTable<TData>({
                 row={row}
                 onRowClick={onRowClick}
                 stopClickOnColumns={stopClickOnColumns}
+                dataId={String((row.original as any)[rowIdKey ?? 'id'])}
               />
             ))}
         </DataTable.Body>
@@ -81,15 +84,18 @@ function DataTableRow<TData>({
   row,
   onRowClick,
   stopClickOnColumns,
+  dataId,
 }: {
   row: Row<TData>
   onRowClick?: (row: TData) => void
   stopClickOnColumns: string[]
+  dataId?: string
 }) {
   return (
     <DataTable.Row
       interactive={!!onRowClick}
       onClick={() => onRowClick?.(row.original)}
+      data-id={dataId}
     >
       {row.getVisibleCells().map((cell) => {
         const meta = cell.column.columnDef.meta

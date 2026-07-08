@@ -582,10 +582,10 @@ function SuccessStep({ onClose, embedded }: { onClose: () => void; embedded: boo
       </div>
 
       <h3 className='mb-2 text-xl' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
-        Réservation Confirmée!
+        Réservation reçue ✅
       </h3>
       <p className='mb-6 text-sm leading-relaxed' style={{ color: `${C.secondary}80` }}>
-        Votre rendez-vous a été enregistré avec succès. Notre équipe vous contactera prochainement pour confirmer.
+        Yo on a bien reçu ta réservation et on revient vers toi rapidement !
       </p>
 
       <button

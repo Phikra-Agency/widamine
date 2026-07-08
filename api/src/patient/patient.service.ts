@@ -76,6 +76,17 @@ export class PatientService {
     return this.findOrCreateByPhone(createPatientDto);
   }
 
+  async count(userRole?: string, userId?: string) {
+    if (userRole === 'DOCTOR' || userRole === 'PRACTITIONER') {
+      return this.prismaService.patient.count({
+        where: {
+          appointments: { some: { practitionerId: userId } },
+        },
+      })
+    }
+    return this.prismaService.patient.count()
+  }
+
   async findAll() {
     return this.prismaService.patient.findMany({
       orderBy: { createdAt: "desc" },

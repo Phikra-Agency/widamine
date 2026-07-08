@@ -10,6 +10,10 @@ export class ContactService {
     return this.prismaService.contact.create({ data });
   }
 
+  countUnread() {
+    return this.prismaService.contact.count({ where: { read: false } });
+  }
+
   findAll(read?: boolean) {
     const where = read !== undefined ? { read } : {};
     return this.prismaService.contact.findMany({ where, orderBy: { createdAt: "desc" } });

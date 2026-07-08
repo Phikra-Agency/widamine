@@ -22,6 +22,7 @@ interface CalendarFilterSelectProps {
   color?: FilterPillColor
   icon?: ElementType
   className?: string
+  showSearch?: boolean
 }
 
 export function CalendarFilterSelect({
@@ -32,6 +33,7 @@ export function CalendarFilterSelect({
   color = 'mist',
   icon: Icon,
   className,
+  showSearch = true,
 }: CalendarFilterSelectProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -102,18 +104,23 @@ export function CalendarFilterSelect({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start' sideOffset={4} className='min-w-56 p-1'>
-        <div className='relative mb-1'>
-          <MagnifyingGlass size={13} className='pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40' />
-          <input
-            type='search'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder='Rechercher…'
-            autoComplete='off'
-            spellCheck={false}
-            className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
-          />
-        </div>
+        {showSearch && (
+          <div className='relative mb-1'>
+            <MagnifyingGlass size={13} className='pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40' />
+            <input
+              type='search'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              placeholder='Rechercher…'
+              autoComplete='off'
+              spellCheck={false}
+              className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
+            />
+          </div>
+        )}
         {filteredOptions.length === 0 ? (
           <div className='px-2 py-4 text-center text-xs text-muted-foreground/50'>Aucun résultat</div>
         ) : (

@@ -99,6 +99,21 @@ export class AppointmentController {
     return result;
   }
 
+  @Get("reservations-count")
+  @UseGuards(AuthGuard)
+  countReservations() {
+    return this.appointmentService.countReservations();
+  }
+
+  @Get("count")
+  @UseGuards(AuthGuard)
+  countByDateRange(
+    @Query("from") from: string,
+    @Query("to") to: string,
+  ) {
+    return this.appointmentService.countByDateRange(from, to);
+  }
+
   @Get()
   @UseGuards(AuthGuard)
   findAll(@Req() req: { user: { id: string; role: string } }) {

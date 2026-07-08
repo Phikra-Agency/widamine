@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 import { cn } from '@/lib/utils'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchHighlight } from '@/hooks/useSearchHighlight'
 import {
   Badge,
   Button,
@@ -142,6 +143,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const searchTerm = useGlobalSearchStore((s) => s.term)
   const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
+  useSearchHighlight('patients')
 
   const cities = useMemo(() => {
     const norm = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
@@ -284,7 +286,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
               const item = row.original
               const stats = getAppointmentStats(item)
               return (
-                <DataTable.MobileCard key={row.id}>
+                <DataTable.MobileCard key={row.id} data-id={item.id}>
                   <div className='flex items-center gap-3'>
                     <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-element bg-primary/8'>
                       <User size={14} className='text-primary' />

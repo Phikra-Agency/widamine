@@ -134,6 +134,7 @@ export function formatCalendarPickerLabel(date: string, viewMode: CalendarViewMo
   const parsed = parseLocalDate(date)
   if (viewMode === 'day') {
     return parsed.toLocaleDateString('fr-FR', {
+      weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric',

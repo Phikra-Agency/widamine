@@ -48,6 +48,8 @@ interface ScheduleModalStoreInterface {
   submitError: string | null
   submitSuccess: boolean
   submit: () => Promise<void>
+  submitted: 'booking' | null
+  clearSubmitted: () => void
 }
 
 export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, get) => ({
@@ -194,6 +196,8 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   isSubmitting: false,
   submitError: null,
   submitSuccess: false,
+  submitted: null,
+  clearSubmitted: () => set({ submitted: null }),
   submit: async () => {
     const { selectedDate, selectedHour, selectedMotif, selectedPractitionerId, userData } = get()
     if (!selectedDate || !selectedHour || !selectedMotif) return
@@ -209,7 +213,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         practitionerId: selectedPractitionerId || undefined,
         datetime: selectedHour 
       })
-      set({ submitSuccess: true })
+      set({ submitSuccess: true, submitted: 'booking' })
     } catch (e: any) {
       set({ submitError: 'Erreur lors de la réservation' })
     } finally {

@@ -26,6 +26,12 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Get("count")
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
+  count() {
+    return this.userService.count();
+  }
+
   @Get()
   @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
   findAll() {

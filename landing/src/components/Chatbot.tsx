@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { ChatDots, PaperPlaneRight, X } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { C, TYPE } from '@/lib/theme'
+import { useScheduleModalStore } from '@/stores/scheduleModalStore'
+import { useContactPopupStore } from '@/stores/contactPopupStore'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -22,6 +24,8 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const openScheduleModal = useScheduleModalStore((s) => s.open)
+  const openContactPopup = useContactPopupStore((s) => s.open)
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 350)
@@ -30,6 +34,41 @@ export default function Chatbot() {
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, loading])
+
+  const scheduleSubmitted = useScheduleModalStore((s) => s.submitted)
+  const contactSubmitted = useContactPopupStore((s) => s.submitted)
+
+  useEffect(() => {
+    const type = scheduleSubmitted || contactSubmitted
+    if (!type) return
+
+    const msg =
+      type === 'booking'
+        ? 'Le client vient de soumettre une demande de réservation sur le site. Réponds de façon naturelle et chaleureuse pour confirmer la réception en une phrase.'
+        : 'Le client vient de soumettre un message de contact sur le site. Réponds de façon naturelle et chaleureuse pour confirmer la réception en une phrase.'
+
+    setOpen(true)
+    const fetchReply = async () => {
+      setLoading(true)
+      try {
+        const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }))
+        const res = await fetch('/api/chatbot/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, history }),
+        })
+        const data = await res.json()
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }])
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false)
+        useScheduleModalStore.getState().clearSubmitted()
+        useContactPopupStore.getState().setSubmitted(null)
+      }
+    }
+    fetchReply()
+  }, [scheduleSubmitted, contactSubmitted])
 
   const handleSend = async (textOverride?: string) => {
     const text = (textOverride ?? input).trim()
@@ -48,6 +87,8 @@ export default function Chatbot() {
       if (!res.ok) throw new Error('Erreur réseau')
       const data = await res.json()
       setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }])
+      if (data.trigger === 'booking') openScheduleModal()
+      else if (data.trigger === 'contact') openContactPopup()
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -73,7 +114,7 @@ export default function Chatbot() {
     <>
       <motion.button
         onClick={() => setOpen(!open)}
-        className='fixed bottom-6 right-6 z-40 flex cursor-pointer items-center justify-center rounded-full text-white'
+        className='fixed bottom-6 right-6 z-50 flex cursor-pointer items-center justify-center rounded-full text-white'
         style={{
           background: C.secondary,
           width: 52,
@@ -82,9 +123,7 @@ export default function Chatbot() {
         }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.94 }}
-        animate={open ? { opacity: 0, scale: 0.8 } : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-        aria-label='Ouvrir le chat'
+        aria-label={open ? 'Fermer le chat' : 'Ouvrir le chat'}
       >
         {open ? <X size={18} weight='bold' /> : <ChatDots size={20} weight='fill' />}
       </motion.button>
@@ -211,7 +250,7 @@ export default function Chatbot() {
             </div>
 
             <div
-              className='flex shrink-0 items-end gap-2.5 px-4 pb-4 pt-2'
+              className='flex shrink-0 items-end gap-2 px-4 pb-4 pt-2'
               style={{ borderTop: '1px solid rgba(26,54,70,0.05)' }}
             >
               <textarea
@@ -221,13 +260,15 @@ export default function Chatbot() {
                 onKeyDown={handleKeyDown}
                 placeholder='Votre message...'
                 rows={1}
-                className='flex-1 resize-none border-none px-3 py-2 text-[13px] outline-none'
+                className='min-w-0 resize-none border-none px-3 py-2 text-[13px] outline-none'
                 style={{
                   background: C.bg,
                   borderRadius: 10,
                   color: C.secondary,
                   fontFamily: "'Poppins Light', sans-serif",
                   maxHeight: 72,
+                  width: 0,
+                  flex: '1 1 0%',
                 }}
               />
               <motion.button

@@ -43,11 +43,11 @@ export default function SidebarNotificationBell({ collapsed = false }: Props) {
         title='Notifications'
         className={cn(
           'relative flex shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:text-foreground transition-colors',
-          collapsed ? 'mx-auto h-6 w-6' : 'h-8 w-8',
+          collapsed ? 'mx-auto h-6 w-6' : 'h-9 w-9',
         )}
         aria-label='Notifications'
       >
-        <Bell size={collapsed ? 18 : 16} weight='duotone' />
+        <Bell size={18} weight='duotone' />
         {count > 0 && (
           <span
             className={cn(

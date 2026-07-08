@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EventCard, { type EventCardSchedule } from '@/components/calendar/EventCard'
 import { formatLocalDate } from '@/lib/date'
 import { getWeekDates, PERIOD_OPTIONS, type PeriodKey } from '@/lib/calendarView'
@@ -158,6 +158,7 @@ export function ScheduleCell({
         !isLastRow && 'border-b',
         isToday && 'bg-blue-50/30',
       )}
+      data-today={isToday ? true : undefined}
     >
       <div
         ref={scrollRef}
@@ -270,32 +271,46 @@ export function CalendarWeekGrid({
   isOpened,
   formatTime,
 }: WeekGridProps) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = scrollRef.current?.querySelector('[data-today="true"]')
+    if (el && scrollRef.current) {
+      el.scrollIntoView({ inline: 'start', behavior: 'auto' as ScrollBehavior })
+    }
+  }, [])
+
   return (
-    <div className='grid h-full min-w-[880px] grid-cols-[4.25rem_repeat(6,minmax(0,1fr))] grid-rows-[3.5rem_repeat(3,minmax(0,1fr))]'>
-      <CornerCell />
-      {weekDates.map((date, dayIdx) => (
-        <DayHeaderCell key={dayLabels[dayIdx]} date={date} dayLabel={dayLabels[dayIdx]} />
-      ))}
-      {PERIOD_OPTIONS.map((period, periodIdx) => (
-        <div key={period.value} className='contents'>
-          <PeriodLabelCell
-            label={period.shortLabel}
-            title={period.label}
-            isLastRow={periodIdx === PERIOD_OPTIONS.length - 1}
-          />
-          {dayLabels.map((dayLabel, dayIdx) => (
-            <ScheduleCell
-              key={`${dayLabel}-${period.value}`}
-              schedules={displayItems[dayIdx]?.[period.value] || []}
-              isToday={formatLocalDate(weekDates[dayIdx]) === formatLocalDate(new Date())}
+    <div
+      ref={scrollRef}
+      className='h-full overflow-x-auto overscroll-x-contain snap-x snap-mandatory lg:snap-none'
+    >
+      <div className='grid h-full min-w-[880px] grid-cols-[4.25rem_repeat(6,minmax(0,1fr))] grid-rows-[3.5rem_repeat(3,minmax(0,1fr))]'>
+        <CornerCell />
+        {weekDates.map((date, dayIdx) => (
+          <DayHeaderCell key={dayLabels[dayIdx]} date={date} dayLabel={dayLabels[dayIdx]} />
+        ))}
+        {PERIOD_OPTIONS.map((period, periodIdx) => (
+          <div key={period.value} className='contents'>
+            <PeriodLabelCell
+              label={period.shortLabel}
+              title={period.label}
               isLastRow={periodIdx === PERIOD_OPTIONS.length - 1}
-              onOpenSchedule={onOpenSchedule}
-              isOpened={isOpened}
-              formatTime={formatTime}
             />
-          ))}
-        </div>
-      ))}
+            {dayLabels.map((dayLabel, dayIdx) => (
+              <ScheduleCell
+                key={`${dayLabel}-${period.value}`}
+                schedules={displayItems[dayIdx]?.[period.value] || []}
+                isToday={formatLocalDate(weekDates[dayIdx]) === formatLocalDate(new Date())}
+                isLastRow={periodIdx === PERIOD_OPTIONS.length - 1}
+                onOpenSchedule={onOpenSchedule}
+                isOpened={isOpened}
+                formatTime={formatTime}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -336,12 +351,6 @@ export function CalendarDayGrid({
   const hourHeight = Math.max(containerHeight / HOUR_COUNT, DEFAULT_HOUR_HEIGHT_PX)
   const nowTop = isToday ? getNowOffsetPx(now, hourHeight) : null
   const totalHeight = HOUR_COUNT * hourHeight
-  const weekday = date.toLocaleDateString('fr-FR', { weekday: 'long' })
-  const dayTitle = date.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
 
   useEffect(() => {
     if (!isToday || !scrollRef.current) return
@@ -352,18 +361,6 @@ export function CalendarDayGrid({
 
   return (
     <div className='flex h-full min-h-0 flex-col'>
-      <div
-        className={clsx(
-          'shrink-0 border-b border-gray-200 bg-gray-50/50 backdrop-blur-sm px-5 py-3',
-          isToday && 'bg-blue-50/30',
-        )}
-      >
-        <p className='text-[14px]'>
-          <span className='capitalize font-medium text-gray-500'>{weekday}</span>{' '}
-          <span className='font-semibold text-gray-900'>{dayTitle}</span>
-        </p>
-      </div>
-
       <div ref={scrollRef} className='min-h-0 flex-1 overflow-y-auto'>
         <div className='relative flex min-w-[320px]' style={{ minHeight: totalHeight }}>
           {/* Time column */}

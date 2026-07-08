@@ -10,6 +10,7 @@ import {
 } from 'react-router-dom'
 import { useEffect } from 'react'
 import Scheduling from '@/components/Scheduling'
+import ContactPopup from '@/components/ContactPopup'
 import Chatbot from '@/components/Chatbot'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -36,6 +37,7 @@ export default function Layout() {
 				<PublicFooter />
 			</div>
 			<Scheduling />
+			<ContactPopup />
 			<Chatbot />
 		</main>
 	)

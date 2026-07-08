@@ -432,7 +432,9 @@ function ShowModal() {
                     </span>
                   </div>
                   <div className='mt-1 flex items-center gap-2'>
-                    <Pill status={item.status || 'PENDING'} />
+                    {item.id && (
+                      <StatusSelect appointmentId={item.id} status={item.status || 'PENDING'} />
+                    )}
                   </div>
                   <div className='mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground/50'>
                     {item.email && <span className='inline-flex items-center gap-1'><EnvelopeSimple size={10} />{item.email}</span>}

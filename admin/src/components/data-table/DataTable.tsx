@@ -108,11 +108,12 @@ function DataTableMobileCard({
   children,
   className,
   onClick,
+  ...props
 }: {
   children: ReactNode
   className?: string
   onClick?: () => void
-}) {
+} & React.ComponentPropsWithoutRef<'div'>) {
   return (
     <div
       role={onClick ? 'button' : undefined}
@@ -124,6 +125,7 @@ function DataTableMobileCard({
         onClick && 'cursor-pointer hover:bg-primary/[0.04]',
         className,
       )}
+      {...props}
     >
       {children}
     </div>

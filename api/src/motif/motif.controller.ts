@@ -17,6 +17,11 @@ import { RoleGuard } from "@/auth/role.guard";
 export class MotifController {
   constructor(private readonly motifService: MotifService) {}
 
+  @Get("count")
+  count() {
+    return this.motifService.count();
+  }
+
   @Get()
   findAll() {
     return this.motifService.findAll();

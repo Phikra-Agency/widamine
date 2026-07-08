@@ -17,6 +17,11 @@ import { RoleGuard } from "@/auth/role.guard";
 export class ResourceController {
   constructor(private readonly resourceService: ResourceService) {}
 
+  @Get("count")
+  count() {
+    return this.resourceService.count();
+  }
+
   @Get()
   findAll() {
     return this.resourceService.findAll();

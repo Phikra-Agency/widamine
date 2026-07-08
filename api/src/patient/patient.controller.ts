@@ -28,6 +28,11 @@ export class PatientController {
     return this.patientService.create(createPatientDto);
   }
 
+  @Get("count")
+  count(@Req() req: { user: { id: string; role: string } }) {
+    return this.patientService.count(req.user.role, String(req.user.id));
+  }
+
   @Get()
   findAll(@Req() req: { user: { id: string; role: string } }) {
     if (["DOCTOR", "PRACTITIONER"].includes(req.user.role)) {

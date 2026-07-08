@@ -38,6 +38,10 @@ export class ResourceService {
     });
   }
 
+  async count() {
+    return this.prisma.resource.count()
+  }
+
   async findAll() {
     return this.prisma.resource.findMany({
       include: {

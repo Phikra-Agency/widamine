@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { cn } from '@/lib/utils'
 import type { ColumnFiltersState, SortingState } from '@tanstack/react-table'
+import { useSearchHighlight } from '@/hooks/useSearchHighlight'
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -81,6 +82,7 @@ function UsersTable() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const searchTerm = useGlobalSearchStore((s) => s.term)
   const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
+  useSearchHighlight('users')
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -186,7 +188,7 @@ function UsersTable() {
               const item = row.original
               const initials = (item.name || '?').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
               return (
-                <DataTable.MobileCard key={row.id} onClick={() => openEditModal(item)}>
+                <DataTable.MobileCard key={row.id} data-id={item.id} onClick={() => openEditModal(item)}>
                   <div className='flex items-center gap-3'>
                     <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10'>
                       <span className='text-sm font-semibold text-primary'>{initials}</span>

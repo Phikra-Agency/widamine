@@ -30,6 +30,10 @@ export class UserService {
     }
   }
 
+  async count() {
+    return this.prismaService.user.count()
+  }
+
   async findAll() {
     return this.prismaService.user.findMany({
       select: { id: true, name: true, email: true, role: true, admin: true },

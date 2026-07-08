@@ -1,21 +1,23 @@
+import { useEffect, useRef, useState } from 'react'
 import { useSchedulesStore } from '@/stores/schedulesStore'
+import { useAuthStore } from '@/stores/authStore'
 import { saveCalendarReturnContext } from '@/lib/scheduleNavigation'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import {
+  CaretDown,
   CaretLeft,
   CaretRight,
   CalendarBlank,
   Clock,
-  MapPin,
   Tag,
   X,
   ArrowRight,
   User,
   Door,
-  type Icon,
+  FadersHorizontal,
+  Sun,
 } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
+import api from '@/lib/api'
 
 function fmtDate(v?: string) {
   if (!v) return 'Date non définie'
@@ -37,45 +39,142 @@ function periodFromHour(h: number) {
   return 'Soir'
 }
 
-const STATUS_STYLE: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-  PENDING: { label: 'En attente', bg: 'bg-secondary/[0.08]', text: 'text-secondary', dot: 'bg-secondary' },
-  CONFIRMED: { label: 'Confirmée', bg: 'bg-primary/[0.08]', text: 'text-primary', dot: 'bg-primary' },
-  CANCELLED: { label: 'Annulée', bg: 'bg-accent/[0.08]', text: 'text-accent', dot: 'bg-accent' },
-  COMPLETED: { label: 'Terminée', bg: 'bg-primary/[0.08]', text: 'text-primary', dot: 'bg-primary' },
-  EXPIRED: { label: 'Expirée', bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'En attente',
+  CONFIRMED: 'Confirmée',
+  CANCELLED: 'Annulée',
+  COMPLETED: 'Terminée',
+  EXPIRED: 'Expirée',
+  NO_SHOW: 'Absent',
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_STYLE[status] || STATUS_STYLE.PENDING
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-      {s.label}
-    </span>
-  )
+const STATUS_THEME: Record<string, { hex: string }> = {
+  PENDING:   { hex: '#F59E0B' },
+  CONFIRMED: { hex: '#009FD6' },
+  CANCELLED: { hex: '#F43F5E' },
+  COMPLETED: { hex: '#1A3646' },
+  EXPIRED:   { hex: '#64748B' },
+  NO_SHOW:   { hex: '#8B5CF6' },
 }
+
+const hexAlpha = (hex: string, alpha: string) => `${hex}${alpha}`
 
 function initials(name: string) {
   return name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 }
 
-function InfoRow({ icon: Icon, label, children }: { icon: Icon; label: string; children: React.ReactNode }) {
+function InfoRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
-    <div className='flex items-center gap-2.5'>
-      <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06]'>
-        <Icon size={12} className='text-primary' />
+    <div className='flex items-start gap-2.5'>
+      <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.06] text-primary'>
+        {icon}
       </div>
-      <div>
-        <p className='text-[10px] font-medium uppercase tracking-wider text-muted-foreground/45'>{label}</p>
-        <p className='text-sm text-foreground'>{children}</p>
+      <div className='min-w-0'>
+        <p className='text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/60'>{label}</p>
+        <div className='mt-0.5 text-[13px] text-foreground'>{children}</div>
+      </div>
+    </div>
+  )
+}
+
+function StatusDropdown({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string
+  onChange: (next: string) => void
+  disabled: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const current = STATUS_THEME[value] || STATUS_THEME.PENDING
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div className='relative' ref={ref}>
+      <button
+        type='button'
+        disabled={disabled}
+        aria-haspopup='listbox'
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        className='inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors disabled:opacity-60'
+        style={{
+          color: current.hex,
+          backgroundColor: hexAlpha(current.hex, '1A'),
+          borderColor: hexAlpha(current.hex, '4D'),
+        }}
+      >
+        <span className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: current.hex }} />
+        {STATUS_LABELS[value] || STATUS_LABELS.PENDING}
+        <CaretDown size={10} weight='duotone' className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div
+        role='listbox'
+        className={`absolute right-0 top-full z-20 mt-1.5 w-40 origin-top-right rounded-xl border border-border bg-card p-1 shadow-lg shadow-black/[0.08] transition duration-150 ease-out ${
+          open ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
+        }`}
+      >
+        {Object.entries(STATUS_LABELS).map(([key, label]) => {
+          const s = STATUS_THEME[key] || STATUS_THEME.PENDING
+          const selected = key === value
+          return (
+            <button
+              key={key}
+              type='button'
+              role='option'
+              aria-selected={selected}
+              disabled={disabled}
+              onClick={() => { onChange(key); setOpen(false) }}
+              className='flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-primary/[0.06]'
+              style={selected ? { color: s.hex, backgroundColor: hexAlpha(s.hex, '1A') } : undefined}
+            >
+              <span className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: s.hex }} />
+              <span className={selected ? 'font-semibold' : ''}>{label}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )
 }
 
 export default function ScheduleShowModal() {
-  const { openShowModal, toggleOpenShowModal, item, items } = useSchedulesStore()
+  const { openShowModal, toggleOpenShowModal, item, items, filters, fetchItems } = useSchedulesStore()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
+  const [saving, setSaving] = useState(false)
+  const [entered, setEntered] = useState(false)
+
+  useEffect(() => {
+    if (openShowModal) {
+      // Reset animation on re-open
+      setEntered(false)
+      requestAnimationFrame(() => setEntered(true))
+    }
+  }, [openShowModal])
+
+  const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
+  const allowedLabels = isPractitioner
+    ? { CONFIRMED: STATUS_LABELS.CONFIRMED, COMPLETED: STATUS_LABELS.COMPLETED, NO_SHOW: STATUS_LABELS.NO_SHOW }
+    : STATUS_LABELS
 
   if (!item?.datetime) return null
 
@@ -117,75 +216,133 @@ export default function ScheduleShowModal() {
     if (apt?.id && apt?.patient?.id) navigate(`/patients?patientId=${apt.patient.id}`)
   }
 
+  async function handleStatusChange(next: string) {
+    if (next === status || !apt?.id) return
+    // Optimistic update
+    setSaving(true)
+    // Optimistic update
+    if (item.appointment) {
+      useSchedulesStore.getState().setItem({
+        ...item,
+        appointment: { ...item.appointment, status: next },
+      })
+    }
+    try {
+      await api.put(`appointments/${apt.id}`, { status: next })
+      if (filters.date) fetchItems(filters.date, { force: true })
+    } catch {
+      // Rollback
+      if (item.appointment) {
+        useSchedulesStore.getState().setItem({
+          ...item,
+          appointment: { ...item.appointment, status },
+        })
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!openShowModal) return null
+
   return (
-    <Dialog open={openShowModal} onOpenChange={(o) => { if (!o) toggleOpenShowModal() }}>
-      <DialogContent
-        showCloseButton={false}
-        className='max-lg:left-[15px] max-lg:right-[15px] max-lg:top-1/2 max-lg:-translate-y-1/2 max-h-[85vh] overflow-hidden shadow-xl shadow-black/[0.06] sm:max-w-md rounded-2xl'
+    <>
+      {/* Backdrop with blur */}
+      <div
+        className={`fixed inset-0 z-40 bg-secondary/40 backdrop-blur-[2px] transition-opacity duration-200 ${entered ? 'opacity-100' : 'opacity-0'}`}
+        onClick={() => toggleOpenShowModal()}
+      />
+
+      {/* Modal */}
+      <div
+        role='dialog'
+        aria-modal='true'
+        aria-label={`Réservation de ${name}`}
+        className={`fixed inset-x-2 top-[5%] z-50 w-auto rounded-2xl border border-border bg-card p-0 shadow-xl shadow-black/10 transition-all duration-200 ease-out sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 ${
+          entered ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}
       >
         {/* Header */}
-        <div className='flex items-start justify-between pb-3'>
-          <div className='flex items-start gap-3'>
-            <div
-              className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white'
-              style={{ backgroundColor: color }}
-            >
-              {initials(name)}
-            </div>
-            <div className='min-w-0 pt-0.5'>
-              <h2 className='text-base font-semibold leading-5 text-foreground'>{name}</h2>
-              <div className='mt-1.5 flex items-center gap-2'>
-                <StatusBadge status={status} />
-              </div>
-              <p className='mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/60'>
-                <CalendarBlank size={11} />
-                {fmtDate(item.datetime)}
-                {fmtTime(item.datetime) && <><span className='text-muted-foreground/30'>·</span>{fmtTime(item.datetime)}</>}
-              </p>
-            </div>
+        <div className='flex items-start gap-3 px-4 pt-4 pb-3'>
+          <span
+            className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm shadow-black/20'
+            style={{ backgroundColor: color }}
+          >
+            {initials(name)}
+          </span>
+          <div className='min-w-0 flex-1'>
+            <h2 className='truncate text-sm font-semibold text-foreground'>{name}</h2>
+            <p className='mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground/60'>
+              <CalendarBlank size={11} weight='duotone' className='text-primary' />
+              {fmtDate(item.datetime)}
+              {fmtTime(item.datetime) && <><span className='text-muted-foreground/30'>·</span>{fmtTime(item.datetime)}</>}
+            </p>
           </div>
 
-          <div className='flex shrink-0 items-center gap-1'>
-            <div className='inline-flex items-center rounded-lg bg-muted/40 px-0.5 py-0.5'>
-              <button onClick={() => nav('prev')} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-background hover:text-foreground' aria-label='Précédent'>
-                <CaretLeft size={13} />
+          {/* Nav pill + close */}
+          <div className='flex items-center gap-1.5'>
+            <div className='flex items-center rounded-full border border-border bg-cream/60 px-1 py-0.5'>
+              <button
+                type='button'
+                onClick={() => nav('prev')}
+                aria-label='Précédent'
+                className='rounded-full p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary'
+              >
+                <CaretLeft size={12} weight='bold' />
               </button>
-              <span className='flex h-7 min-w-[1.5rem] select-none items-center justify-center px-1 text-xs font-medium tabular-nums text-muted-foreground/60'>
+              <span className='px-1 text-[11px] font-medium tabular-nums text-foreground'>
                 {curIdx >= 0 ? curIdx + 1 : 1}/{schedulesForDay.length}
               </span>
-              <button onClick={() => nav('next')} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-background hover:text-foreground' aria-label='Suivant'>
-                <CaretRight size={13} />
+              <button
+                type='button'
+                onClick={() => nav('next')}
+                aria-label='Suivant'
+                className='rounded-full p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary'
+              >
+                <CaretRight size={12} weight='bold' />
               </button>
             </div>
-            <button onClick={() => toggleOpenShowModal()} className='flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/40 hover:text-foreground transition-colors' aria-label='Fermer'>
-              <X size={13} />
+            <button
+              type='button'
+              onClick={() => toggleOpenShowModal()}
+              aria-label='Fermer'
+              className='rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-black/[0.05] hover:text-foreground'
+            >
+              <X size={12} weight='bold' />
             </button>
           </div>
         </div>
 
-        <div className='h-px bg-border-subtle/40' />
-
-        {/* Info rows */}
-        <div className='grid grid-cols-2 gap-x-6 gap-y-4 py-4'>
-          <InfoRow icon={Tag} label='Traitement'>{motif?.name || '-'}</InfoRow>
-          <InfoRow icon={Clock} label='Durée'>{duration ? `${duration} min` : '-'}</InfoRow>
-          <InfoRow icon={CalendarBlank} label='Séance'>{item.session?.session ? `Séance ${item.session.session}` : '-'}</InfoRow>
-          <InfoRow icon={User} label='Praticien'>{apt?.practitioner?.name || 'Non assigné'}</InfoRow>
-          <InfoRow icon={Door} label='Salle'>{apt?.resource?.name || 'Non assignée'}</InfoRow>
+        {/* Info grid */}
+        <div className='grid grid-cols-1 gap-x-4 gap-y-4 border-t border-border px-4 py-4 sm:grid-cols-2'>
+          <InfoRow icon={<Tag size={12} weight='duotone' />} label='Traitement'>{motif?.name || '-'}</InfoRow>
+          <InfoRow icon={<Clock size={12} weight='duotone' />} label='Durée'>{duration ? `${duration} min` : '-'}</InfoRow>
+          <InfoRow icon={<CalendarBlank size={12} weight='duotone' />} label='Séance'>{item.session?.session ? `Séance ${item.session.session}` : '-'}</InfoRow>
+          <InfoRow icon={<User size={12} weight='duotone' />} label='Praticien'>{apt?.practitioner?.name || 'Non assigné'}</InfoRow>
+          <InfoRow icon={<Door size={12} weight='duotone' />} label='Salle'>{apt?.resource?.name || 'Non assignée'}</InfoRow>
+          <InfoRow icon={<FadersHorizontal size={12} weight='duotone' />} label='Statut'>
+            <StatusDropdown value={status} onChange={handleStatusChange} disabled={saving} />
+          </InfoRow>
         </div>
 
         {/* Footer */}
-        <div className='flex items-center justify-between border-t border-border-subtle/40 py-3.5'>
-          <span className='text-xs font-medium text-muted-foreground/40'>
-            {period}{curIdx >= 0 && <span className='ml-1 text-muted-foreground/25'>· {curIdx + 1}</span>}
+        <div className='flex items-center justify-between border-t border-border px-4 py-3'>
+          <span className='flex items-center gap-1.5 text-xs text-muted-foreground/60'>
+            <Sun size={11} weight='duotone' className='text-primary' />
+            {period}{curIdx >= 0 && <><span className='text-muted-foreground/30'>·</span> {curIdx + 1}</>}
           </span>
           {apt?.id && (
-            <Button onClick={goDetails} variant='ghost' size='sm' className='gap-1.5 text-xs font-medium h-8 text-primary/80 hover:text-primary hover:bg-primary/[0.06]'>
-              Voir le patient <ArrowRight size={12} />
-            </Button>
+            <button
+              type='button'
+              onClick={goDetails}
+              className='inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-primary/80 transition-colors hover:bg-primary/10 hover:text-primary'
+            >
+              Voir le patient
+              <ArrowRight size={11} weight='bold' />
+            </button>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>
   )
 }

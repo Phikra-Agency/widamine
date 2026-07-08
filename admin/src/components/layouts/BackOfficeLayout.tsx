@@ -24,6 +24,7 @@ import UserAccountMenu from '@/components/UserAccountMenu'
 import SidebarNotificationBell from '@/components/SidebarNotificationBell'
 import NotificationToast from '@/components/NotificationToast'
 import SidebarSearch from '@/components/layouts/SidebarSearch'
+import { useSidebarCounts } from '@/hooks/useSidebarCounts'
 import { cn } from '@/lib/utils'
 
 const SIDEBAR_COLLAPSED_KEY = 'widamine-sidebar-collapsed'
@@ -107,15 +108,29 @@ function SidebarContent({
   onNavigate,
   collapsed = false,
   onToggleCollapse,
+  mobile,
 }: {
   onNavigate?: () => void
   collapsed?: boolean
   onToggleCollapse?: () => void
+  mobile?: boolean
 }) {
   const location = useLocation()
   const { user } = useAuthStore()
 
   const navGroups = useMemo(() => visibleNavGroups(user?.role as LinkRole | undefined), [user?.role])
+  const { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount } = useSidebarCounts()
+
+  function getCounter(to: string): number | null {
+    if (to === '/calendar') return calendarCount
+    if (to === '/patients') return patientsCount
+    if (to === '/contacts') return messagesCount
+    if (to === '/reservations') return reservationsCount
+    if (to === '/users') return usersCount
+    if (to === '/resources') return resourcesCount
+    if (to === '/motifs') return motifsCount
+    return null
+  }
 
   function handleSidebarEmptyClick(e: MouseEvent<HTMLDivElement>) {
     if (!onToggleCollapse || isSidebarInteractiveTarget(e.target)) return
@@ -143,12 +158,14 @@ function SidebarContent({
           </div>
         </div>
 
-        <SidebarSearch
-          collapsed={collapsed}
-          onExpand={() => {
-            if (collapsed) onToggleCollapse?.()
-          }}
-        />
+        {!mobile && (
+          <SidebarSearch
+            collapsed={collapsed}
+            onExpand={() => {
+              if (collapsed) onToggleCollapse?.()
+            }}
+          />
+        )}
       </div>
 
       <nav className={cn('flex-1 overflow-y-auto py-2', collapsed ? 'px-2' : 'px-3')}>
@@ -164,6 +181,7 @@ function SidebarContent({
               <div className='space-y-0.5'>
                 {group.links.map((link) => {
             const isActive = location.pathname === link.to
+            const counter = getCounter(link.to)
                   return (
                     <Link
                       key={link.to}
@@ -171,10 +189,13 @@ function SidebarContent({
                       onClick={onNavigate}
                       data-active={isActive}
                       title={collapsed ? link.label : undefined}
-                      className={cn('bo-nav-link', collapsed && 'bo-nav-link-collapsed')}
+                      className={cn('bo-nav-link group', collapsed && 'bo-nav-link-collapsed')}
                     >
                       <SidebarNavIcon icon={link.icon} active={isActive} />
                       <span>{link.label}</span>
+                      {isActive && counter !== null && (
+                        <span className='bo-counter-badge'>{counter}</span>
+                      )}
                     </Link>
                   )
                 })}
@@ -184,8 +205,17 @@ function SidebarContent({
         </div>
       </nav>
 
-      <div className={cn('shrink-0 p-4 pt-2', collapsed && 'px-2 pb-4', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
-        {collapsed ? (
+      <div className={cn('shrink-0 px-4 py-2', collapsed && 'px-2 pb-4', mobile && 'border-t border-white/10 px-4 py-3', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
+        {mobile ? (
+          user ? (
+            <UserAccountMenu onNavigate={onNavigate} variant='compact' className='hover:bg-transparent text-white [&_*]:text-white' />
+          ) : (
+            <Link to='/login' onClick={onNavigate} className='bo-nav-link text-xs border-transparent bg-transparent text-white/65'>
+              <LogIn size={18} weight='duotone' className='bo-nav-icon' />
+              Se connecter
+            </Link>
+          )
+        ) : collapsed ? (
           <div className='flex flex-col items-center gap-4'>
             <SidebarNotificationBell collapsed />
             {user ? (
@@ -197,8 +227,8 @@ function SidebarContent({
             )}
           </div>
         ) : (
-          <div className='flex items-center justify-between rounded-surface border border-border bg-card/60 p-1.5 shadow-sm transition-colors hover:bg-card/80'>
-            <div className='min-w-0 flex-1'>
+          <div className='flex items-stretch rounded-surface border border-border bg-card/60 shadow-sm transition-colors hover:bg-card/80'>
+            <div className='min-w-0 flex-1 p-1.5'>
               {user ? (
                 <UserAccountMenu onNavigate={onNavigate} variant='compact' className='hover:bg-transparent w-full' />
               ) : (
@@ -208,8 +238,7 @@ function SidebarContent({
                 </Link>
               )}
             </div>
-            <div className='mx-1 h-8 w-[1px] shrink-0 bg-border-subtle' />
-            <div className='shrink-0 px-1'>
+            <div className='shrink-0 flex items-center justify-center px-1.5'>
               <SidebarNotificationBell />
             </div>
           </div>
@@ -328,12 +357,14 @@ export default function BackOfficeLayout() {
         </Button>
 
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side='right' showCloseButton className='flex w-[17rem] max-w-[85vw] flex-col gap-0 border-border-subtle bg-sidebar p-0 xl:hidden'>
-            <SidebarContent onNavigate={() => setSidebarOpen(false)} />
+          <SheetContent side='right' showCloseButton className='flex w-[280px] max-w-[85vw] flex-col gap-0 border-0 bg-secondary p-0 text-white xl:hidden'>
+            <div className='flex min-h-0 flex-1 flex-col text-white [&_.bo-nav-link]:text-white/65 [&_.bo-nav-link:hover]:text-white [&_.bo-nav-link[data-active="true"]]:text-white [&_.bo-nav-link[data-active="true"]]:bg-white/10 [&_.bo-nav-icon]:text-white/50 [&_.bo-nav-link:hover_.bo-nav-icon]:text-white [&_.bo-nav-link[data-active="true"]_.bo-nav-icon]:text-white [&_.bo-sidebar-group-label]:text-white/40 [&_.bo-sidebar-header]:border-white/10 [&_.bo-sidebar-brand-row]:pt-2'>
+              <SidebarContent onNavigate={() => setSidebarOpen(false)} collapsed={false} mobile />
+            </div>
           </SheetContent>
         </Sheet>
 
-        <section className='relative z-10 flex h-full min-h-0 min-w-0 flex-1 flex-col p-2 pr-3 pb-3 pt-2 xl:pl-1'>
+        <section className='relative z-10 flex h-full min-h-0 min-w-0 flex-1 flex-col p-2 pr-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 xl:pl-1'>
           <div className='bo-content-shell'>
             <div
               className={

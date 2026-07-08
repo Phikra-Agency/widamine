@@ -99,7 +99,7 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
 
   const handleSelect = (item: ResultItem) => {
     setOpen(false)
-    navigate(item.route)
+    navigate(item.route, { state: { sh: `${item.type}:${item.id}` } })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -128,6 +128,17 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
         break
     }
   }
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -214,6 +225,7 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
                     <div className='flex items-center gap-2 px-3 py-1.5'>
                       <group.icon size={12} className='text-muted-foreground/40' />
                       <span className='text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50'>{group.label}</span>
+                      <span className='ml-auto text-[10px] text-muted-foreground/30'>{list.length}</span>
                     </div>
                     {list.map((item: any, idx: number) => {
                       const globalIdx = groupStartIndex + idx

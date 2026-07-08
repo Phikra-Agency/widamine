@@ -25,6 +25,12 @@ export class ContactController {
   }
 
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
+  @Get("unread-count")
+  countUnread() {
+    return this.contactService.countUnread();
+  }
+
+  @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   @Get()
   findAll(@Query("read", new ParseBoolPipe({ optional: true })) read?: boolean) {
     return this.contactService.findAll(read);

@@ -71,6 +71,10 @@ export class MotifService {
     });
   }
 
+  async count() {
+    return this.prisma.motif.count()
+  }
+
   async findAll() {
     return this.prisma.motif.findMany({
       include: { 

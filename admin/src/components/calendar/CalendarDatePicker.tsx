@@ -149,11 +149,10 @@ export default function CalendarDatePicker({
               variant='ghost'
               aria-label={`Choisir une date, ${label}`}
               className={cn(
-                'h-9 gap-2.5 rounded-[calc(var(--radius)-2px)] px-4 text-[13px] font-medium capitalize',
+                'h-auto rounded-[calc(var(--radius)-2px)] px-3 py-1 text-[10px] font-medium capitalize leading-none sm:px-4 sm:py-1.5 sm:text-[11px]',
                 triggerClassName,
               )}
             >
-              <CalendarBlank size={16} className='text-muted-foreground/50' />
               {label}
             </Button>
           )

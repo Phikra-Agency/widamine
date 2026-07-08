@@ -198,6 +198,15 @@
 	* {
 		@apply border-border outline-ring/50;
 	}
+
+	button,
+	a,
+	[role='button'],
+	input,
+	label {
+		-webkit-tap-highlight-color: transparent;
+		touch-action: manipulation;
+	}
 }
 
 @layer components {
@@ -340,7 +349,7 @@
 	}
 
 	.bo-filter-pill {
-		@apply inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-[color,background-color,border-color];
+		@apply inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-[color,background-color,border-color] sm:py-1.5 sm:text-[11px];
 	}
 
 	.bo-filter-pill[data-active='false'] {
@@ -487,7 +496,7 @@
 	}
 
 	.bo-nav-link {
-		@apply flex cursor-pointer items-center gap-3 rounded-control border border-transparent bg-transparent px-3 py-2.5 text-sm text-muted-foreground transition-[color,background-color,border-color];
+		@apply relative flex cursor-pointer items-center gap-3 rounded-control border border-transparent bg-transparent px-3 py-2.5 text-sm text-muted-foreground transition-[color,background-color,border-color];
 	}
 
 	.bo-nav-link:hover {
@@ -505,13 +514,29 @@
 	.bo-nav-link-collapsed > span {
 		@apply sr-only;
 	}
+	.bo-nav-link-collapsed > .bo-counter-badge {
+		@apply not-sr-only pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary opacity-0 transition-opacity duration-150;
+	}
+	.bo-nav-link-collapsed[data-active='true']:hover > .bo-counter-badge {
+		@apply opacity-100;
+	}
+	.bo-nav-link-collapsed[data-active='true']:hover .bo-nav-icon {
+		@apply opacity-0;
+	}
+
+	.bo-nav-link:not(.bo-nav-link-collapsed) > .bo-counter-badge {
+		@apply ml-auto rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary;
+	}
 
 	.bo-nav-icon {
-		@apply shrink-0 text-muted-foreground transition-colors;
+		@apply shrink-0 text-muted-foreground transition-[color,opacity] duration-150;
 	}
 
 	.bo-nav-link:hover .bo-nav-icon {
 		@apply text-secondary-700;
+	}
+	.bo-nav-link-collapsed[data-active='true']:hover .bo-nav-icon {
+		@apply text-primary;
 	}
 
 	.bo-nav-icon-active,
@@ -526,6 +551,15 @@
 
 	.login-submit-btn {
 		@apply !bg-[#16344e] text-white hover:!bg-[#1b4964];
+	}
+
+	.search-highlight {
+		animation: search-highlight-fade 2s ease-out forwards;
+	}
+
+	@keyframes search-highlight-fade {
+		0% { background-color: color-mix(in srgb, var(--color-primary) 18%, transparent); }
+		100% { background-color: transparent; }
 	}
 
 	.login-decorative-grain::after {

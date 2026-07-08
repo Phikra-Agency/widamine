@@ -26,7 +26,6 @@ import {
   type PendingCalendarOpen,
 } from '@/lib/scheduleNavigation'
 import CalendarControlBar from '@/components/calendar/CalendarControlBar'
-import CalendarDatePicker from '@/components/calendar/CalendarDatePicker'
 
 import PractitionerAnalytics from '@/components/calendar/PractitionerAnalytics'
 import EventCard from '@/components/calendar/EventCard'
@@ -39,7 +38,7 @@ import CalendarMonthGrid from '@/components/calendar/views/CalendarMonthGrid'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
 
-import { Funnel, User, Tag, CaretDown } from '@phosphor-icons/react'
+import { Funnel, User, Tag, CaretDown, CalendarBlank } from '@phosphor-icons/react'
 
 const STATUS_OPTIONS = [
   { value: 'PENDING', label: 'En attente' },
@@ -122,16 +121,24 @@ function Planner() {
   const effectivePending = pendingOpen ?? pendingCalendarOpen
   const weekDates = useMemo(() => getWeekDates(filters.date), [filters.date])
   const activeDayIdx = useMemo(() => getDayIndexInWeek(filters.date), [filters.date])
-  const [viewMode, setViewMode] = useState<CalendarViewMode>('day')
+  const [viewMode, setViewMode] = useState<CalendarViewMode>(
+    () => (searchParams.get('view') as CalendarViewMode) || 'day',
+  )
   const showTodayButton = useMemo(
     () => shouldShowTodayButton(viewMode, filters.date),
     [viewMode, filters.date],
   )
   const [mobileDayIdx, setMobileDayIdx] = useState(0)
   const [pageView, setPageView] = useState<'calendar' | 'analytics'>('calendar')
-  const [filterPractitionerIds, setFilterPractitionerIds] = useState<string[]>([])
-  const [filterStatuses, setFilterStatuses] = useState<string[]>([])
-  const [filterMotifIds, setFilterMotifIds] = useState<string[]>([])
+  const [filterPractitionerIds, setFilterPractitionerIds] = useState<string[]>(
+    () => { const v = searchParams.get('practitionerIds'); return v ? v.split(',') : [] }
+  )
+  const [filterStatuses, setFilterStatuses] = useState<string[]>(
+    () => { const v = searchParams.get('statuses'); return v ? v.split(',') : [] }
+  )
+  const [filterMotifIds, setFilterMotifIds] = useState<string[]>(
+    () => { const v = searchParams.get('motifIds'); return v ? v.split(',') : [] }
+  )
   const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([])
   const [motifOptions, setMotifOptions] = useState<MotifItem[]>([])
   const [monthItemsByDate, setMonthItemsByDate] = useState<Map<string, CalendarDaySlots>>(new Map())
@@ -317,6 +324,7 @@ function Planner() {
           options={STATUS_OPTIONS}
           value={filterStatuses}
           onChange={setFilterStatuses}
+          showSearch={false}
         />
         <CalendarFilterSelect
           placeholder='Praticien'
@@ -337,6 +345,29 @@ function Planner() {
       </div>
     </div>
   )
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams)
+    const current = next.get('view')
+    if (current !== viewMode) {
+      if (viewMode === 'day') next.delete('view')
+      else next.set('view', viewMode)
+      setSearchParams(next, { replace: true })
+    }
+  }, [viewMode])
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams)
+    const sync = (key: string, values: string[]) => {
+      const joined = values.join(',')
+      if (joined) next.set(key, joined)
+      else next.delete(key)
+    }
+    sync('statuses', filterStatuses)
+    sync('practitionerIds', filterPractitionerIds)
+    sync('motifIds', filterMotifIds)
+    setSearchParams(next, { replace: true })
+  }, [filterStatuses, filterPractitionerIds, filterMotifIds])
 
   const openSchedule = (schedule: import('@/components/calendar/EventCard').EventCardSchedule) => {
     openShowSchedule(schedule as any)
@@ -379,6 +410,16 @@ function Planner() {
     if (viewMode !== 'month') return null
     return monthItemsByDate.get(mobileMonthSelectedDate) || null
   }, [viewMode, mobileMonthSelectedDate, monthItemsByDate])
+
+  function MobileEmptyState() {
+    return (
+      <div className='flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center'>
+        <CalendarBlank size={40} weight='duotone' className='text-primary/60' aria-hidden />
+        <p className='text-sm font-medium text-secondary'>Aucune réservation</p>
+        <p className='text-xs text-secondary/40'>Aucune réservation pour cette période</p>
+      </div>
+    )
+  }
 
   function MobilePeriod({ period, label, schedules }: {
     period: string; label: string; schedules: import('@/components/calendar/EventCard').EventCardSchedule[]
@@ -464,54 +505,52 @@ function Planner() {
                 </button>
               )
             })}
-            <div className='ml-auto flex shrink-0 items-center'>
-              <CalendarDatePicker
-                compact
-                value={filters.date}
-                label={filters.date}
-                onChange={(date) => {
-                  handleDateChange(date)
-                }}
-              />
-            </div>
           </div>
           )}
 
           <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:hidden'>
-            {viewMode === 'day' && mobileDayData && (
-              <div className='px-4 py-3'>
-                <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
-                <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
-                <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
-              </div>
+            {viewMode === 'day' && (
+              mobileDayData ? (
+                <div className='px-4 py-3'>
+                  <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+                  <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+                  <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
+                </div>
+              ) : (
+                <MobileEmptyState />
+              )
             )}
 
-            {viewMode === 'week' && mobileDayData && (
-              <div className='px-4 py-3'>
-                <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
-                <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
-                <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
-              </div>
+            {viewMode === 'week' && (
+              mobileDayData ? (
+                <div className='px-4 py-3'>
+                  <MobilePeriod period='morning' label='Matin' schedules={mobileDayData.morning} />
+                  <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileDayData.afternoon} />
+                  <MobilePeriod period='evening' label='Soir' schedules={mobileDayData.evening} />
+                </div>
+              ) : (
+                <MobileEmptyState />
+              )
             )}
 
             {showMobileMonthView && (
-              <div className='px-3 py-2'>
+              <div className='flex min-h-0 flex-1 flex-col px-3 py-2'>
                 <MobileMonthGrid
                   anchorDate={filters.date}
                   selectedDate={mobileMonthSelectedDate}
                   onSelectDate={setMobileMonthSelectedDate}
                   itemsByDate={monthItemsByDate}
                 />
-                <div className='mt-3'>
-                  {mobileMonthData && (
+                <div className='mt-3 flex flex-1 flex-col'>
+
+                  {mobileMonthData ? (
                     <>
                       <MobilePeriod period='morning' label='Matin' schedules={mobileMonthData.morning} />
                       <MobilePeriod period='afternoon' label='Après-midi' schedules={mobileMonthData.afternoon} />
                       <MobilePeriod period='evening' label='Soir' schedules={mobileMonthData.evening} />
                     </>
-                  )}
-                  {!mobileMonthData && (
-                    <p className='py-4 text-center text-[13px] text-secondary/40 italic'>Aucune réservation</p>
+                  ) : (
+                    <MobileEmptyState />
                   )}
                 </div>
               </div>
@@ -579,13 +618,13 @@ function MobileMonthGrid({
 }) {
   const gridDates = useMemo(() => getMonthGridDates(anchorDate), [anchorDate])
   const today = formatLocalDate(new Date())
-  const dayLabels = ['L', 'M', 'M', 'J', 'V', 'S']
+  const dayLabels = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
   return (
     <div>
-      <div className='grid grid-cols-7'>
+      <div className='grid grid-cols-7 border-b border-border-subtle'>
         {dayLabels.map((label, i) => (
-          <div key={i} className='py-1 text-center text-[11px] font-semibold uppercase text-secondary/40'>
+          <div key={i} className='py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-secondary/40'>
             {label}
           </div>
         ))}
@@ -607,25 +646,26 @@ function MobileMonthGrid({
               type='button'
               onClick={() => onSelectDate(dateKey)}
               className={clsx(
-                'flex flex-col items-center py-1.5 transition-colors',
+                'flex min-h-[52px] flex-col items-center justify-center gap-1 transition-colors',
                 !inMonth && 'opacity-30',
+                isSelected && !isToday && 'bg-primary/10',
               )}
             >
               <span
                 className={clsx(
-                  'flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-medium transition',
+                  'flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-medium transition',
                   isSelected && 'bg-primary text-white shadow-sm',
-                  !isSelected && isToday && 'text-primary ring-1 ring-inset ring-primary/25',
+                  !isSelected && isToday && 'ring-1 ring-inset ring-primary',
                   !isSelected && !isToday && 'text-secondary/70',
                 )}
               >
                 {date.getDate()}
               </span>
-              {count > 0 && !isSelected && (
-                <div className='mt-0.5 flex gap-0.5'>
-                  {dayData!.morning.length > 0 && <span className='h-1 w-1 rounded-full bg-primary' />}
-                  {dayData!.afternoon.length > 0 && <span className='h-1 w-1 rounded-full bg-amber-400' />}
-                  {dayData!.evening.length > 0 && <span className='h-1 w-1 rounded-full bg-purple-400' />}
+              {count > 0 && (
+                <div className='flex h-1 gap-0.5'>
+                  {dayData!.morning.length > 0 && <span className='h-1.5 w-1.5 rounded-full bg-primary' />}
+                  {dayData!.afternoon.length > 0 && <span className='h-1.5 w-1.5 rounded-full bg-amber-400' />}
+                  {dayData!.evening.length > 0 && <span className='h-1.5 w-1.5 rounded-full bg-purple-400' />}
                 </div>
               )}
             </button>

@@ -149,6 +149,29 @@ export class AppointmentService {
     return appointment;
   }
 
+  async countReservations() {
+    return this.prisma.appointment.count({
+      where: { status: { notIn: ["CANCELLED", "COMPLETED"] } },
+    })
+  }
+
+  async countByDateRange(from: string, to: string) {
+    const fromDate = new Date(from)
+    fromDate.setUTCHours(0, 0, 0, 0)
+    const toDate = new Date(to)
+    toDate.setUTCHours(23, 59, 59, 999)
+    return this.prisma.appointment.count({
+      where: {
+        status: { not: "CANCELLED" },
+        schedules: {
+          some: {
+            datetime: { gte: fromDate, lte: toDate },
+          },
+        },
+      },
+    })
+  }
+
   async findAll() {
     return this.prisma.appointment.findMany({
       include: {

@@ -25,7 +25,13 @@ export class ChatbotService {
     }
 
     const systemPrompt = `Tu es l'assistant du Widamine Center (dermato-esthétique, Fès, Maroc). Réponds en français, court et direct. Max 2-3 phrases sauf si on te demande des détails.
-Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes et redirige vers le centre.`
+
+Le site web permet aux visiteurs de :
+- Réserver un rendez-vous en ligne (popup de réservation)
+- Contacter le centre via un formulaire (popup de contact)
+- Consulter les services, l'équipe et les informations pratiques
+
+Quand un client demande à réserver ou à contacter le centre, utilise l'outil trigger_popup avec le type approprié ('booking' pour réservation, 'contact' pour contact).`
 
     const tools = [
       {
@@ -66,6 +72,20 @@ Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes 
           parameters: { type: 'object', properties: {} },
         },
       },
+      {
+        type: 'function' as const,
+        function: {
+          name: 'trigger_popup',
+          description: 'Ouvre un popup de réservation ou de contact pour le client sur le site',
+          parameters: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', enum: ['booking', 'contact'], description: "'booking' pour ouvrir le popup de réservation, 'contact' pour ouvrir le popup de contact" },
+            },
+            required: ['type'],
+          },
+        },
+      },
     ]
 
     const messages = [
@@ -102,7 +122,16 @@ Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes 
       return { reply: 'Désolé, je n\'ai pas pu traiter votre demande.', sources: [] }
     }
 
+    let trigger: string | null = null
     if (choice.finish_reason === 'tool_calls' && choice.message?.tool_calls) {
+      const popupCall = choice.message.tool_calls.find(
+        (tc: ToolCall) => tc.function.name === 'trigger_popup',
+      )
+      if (popupCall) {
+        const args = JSON.parse(popupCall.function.arguments)
+        trigger = args.type || null
+      }
+
       const toolResults = await Promise.all(
         choice.message.tool_calls.map((tc: ToolCall) => this.executeTool(tc)),
       )
@@ -118,7 +147,6 @@ Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes 
             content: JSON.stringify(r.result),
           })),
         ],
-        tools,
       }
 
       const res2 = await fetch(GROQ_API_URL, {
@@ -139,12 +167,14 @@ Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes 
       return {
         reply: data2.choices?.[0]?.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.',
         sources: toolResults.flatMap((r) => r.sources || []),
+        trigger,
       }
     }
 
     return {
       reply: choice.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.',
       sources: [],
+      trigger,
     }
   }
 
@@ -161,6 +191,8 @@ Utilise les outils pour des réponses précises. Hors-sujet : réponses courtes 
         return await this.getTeam(tc.id)
       case 'get_business_info':
         return this.getBusinessInfo(tc.id)
+      case 'trigger_popup':
+        return { id: tc.id, result: { triggered: args.type }, sources: [] }
       default:
         return { id: tc.id, result: 'Outil inconnu', sources: [] }
     }
