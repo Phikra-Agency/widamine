@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import PublicNavbar from '@/components/PublicNavbar'
 import BookingFlow from '@/components/BookingFlow'
+import { ServiceIcon } from '@/components/ServiceIcon'
 import { ShieldCheck, Clock as Clock3, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C } from '@/lib/theme'
@@ -10,11 +11,11 @@ const SM = {
 }
 
 const MOTIF_ICONS: Record<string, string> = {
-  'visage': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66a3622bd361eeb686e5034c_traitement-epilation-visage-icon.svg',
-  'corps': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e3ef40b0429e8f2bebc5c3_Epilation%20laser%20icon.svg',
-  'laser': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66bdeeb1e623adcef03992fa_laser-remodelage-icon.svg',
-  'injection': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e85a039533e71f235fffa1_Injection%20de%20Botox%20icon.svg',
-  'consultation': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e2f4b991b4497731bc170c_Trucs%20Dermato%20icon.svg',
+  'visage': 'facial-aesthetics',
+  'corps': 'body-aesthetics',
+  'laser': 'epilation-laser',
+  'injection': 'lip-aesthetics',
+  'consultation': 'consultation',
 }
 
 export default function Appointment() {
@@ -67,7 +68,7 @@ export default function Appointment() {
                     : 'consultation'
                   return (
                     <div key={motif.id} className='inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs shadow-sm' style={{ borderColor: `${C.primary}20`, color: C.secondary, background: `${C.primary}08` }}>
-                      <img src={MOTIF_ICONS[key]} alt='' className='h-4 w-4 object-contain opacity-60' loading='lazy' />
+                      <ServiceIcon slug={MOTIF_ICONS[key]} size={16} className='opacity-60' />
                       {motif.name}
                     </div>
                   )
@@ -91,7 +92,7 @@ export default function Appointment() {
 function TrustPill({ icon: Icon, text }: { icon: typeof ShieldCheck; text: string }) {
   return (
     <div className='inline-flex items-center gap-2 rounded-full border border-black/5 bg-white px-3.5 py-2 text-[13px] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)]' style={{ color: `${C.secondary}b3` }}>
-      <Icon className='h-4 w-4' style={{ color: C.primary }} />
+      <Icon className='h-4 w-4' weight='duotone' style={{ color: C.primary }} />
       {text}
     </div>
   )

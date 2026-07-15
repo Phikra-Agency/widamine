@@ -54,6 +54,7 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const navigate = useNavigate()
   const setGlobalTerm = useGlobalSearchStore((state) => state.setTerm)
 
@@ -89,7 +90,6 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
     setTerm('')
     setGlobalTerm('')
     setResults(null)
-    setOpen(false)
     setActiveIndex(-1)
     inputRef.current?.focus()
   }
@@ -151,6 +151,10 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
+  useEffect(() => {
+    return () => clearTimeout(blurTimeoutRef.current)
+  }, [])
+
   if (collapsed) {
     return (
       <div className='bo-sidebar-search-collapsed'>
@@ -177,7 +181,8 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
             type='search'
             value={term}
             onChange={(e) => handleChange(e.target.value)}
-            onFocus={() => { if (term.trim() && results) setOpen(true) }}
+            onFocus={() => { clearTimeout(blurTimeoutRef.current); if (term.trim()) setOpen(true) }}
+            onBlur={() => { blurTimeoutRef.current = setTimeout(() => setOpen(false), 200) }}
             onKeyDown={handleKeyDown}
             placeholder='Rechercher…'
             className='bo-sidebar-search-input'
@@ -197,7 +202,7 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
         )}
       </div>
 
-      {open && term.trim() && (
+      {open && (
         <div
           ref={dropdownRef}
           className='absolute left-3 right-3 top-full mt-1 z-50 overflow-hidden rounded-xl border border-border-subtle bg-white shadow-lg'

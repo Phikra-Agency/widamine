@@ -87,8 +87,11 @@ export default function Chatbot() {
       if (!res.ok) throw new Error('Erreur réseau')
       const data = await res.json()
       setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }])
-      if (data.trigger === 'booking') openScheduleModal()
-      else if (data.trigger === 'contact') openContactPopup()
+      if (data.trigger === 'booking') {
+        openScheduleModal()
+      } else if (data.trigger === 'contact') {
+        openContactPopup()
+      }
     } catch {
       setMessages((prev) => [
         ...prev,

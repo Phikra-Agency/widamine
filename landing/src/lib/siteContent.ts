@@ -251,25 +251,25 @@ export function getServicePage(slug: string) {
 /* ── Unique vector per service (square-moncey CDN icons) ─────── */
 export const ICON_MAP: Record<string, string> = {
   /* Visage */
-  'facial-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e2f8a83b4c68bcc2fc3cf3_Traitement%20du%20teint%20icon.svg',
-  'lip-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e85daa79197e1eafe8139d_Injection%20d%E2%80%99Acide%20Hyluronique%20icon.svg',
-  'eye-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e2e13d2bbbea8545df4cea_Paupie%CC%80res%20tombantes%20icon.svg',
-  'eyebrow-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e2e53d8e5fdbe80c28aed8_De%CC%81tatouage%20des%20sourcils%20icon.svg',
+  'facial-aesthetics': '/assets/icons/facial-aesthetics.svg',
+  'lip-aesthetics': '/assets/icons/lip-aesthetics.svg',
+  'eye-aesthetics': '/assets/icons/eye-aesthetics.svg',
+  'eyebrow-aesthetics': '/assets/icons/eyebrow-aesthetics.svg',
   /* Corps */
-  'body-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e3f23957bc7998591fc3c3_Rela%CC%82chement%20cutane%CC%81%20icon.svg',
-  'breast-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e3f943a2b8cdaf468486d7_Bourrelets%20graisseux%20icon.svg',
-  'butt-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e85815a6cbdeeff7508b77_Cryolipolyse%20icon.svg',
-  'arm-aesthetics': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e5b7a236c29ae5705095d6_Cicatrices%20autres%20icon.svg',
-  'liposuction': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e84fad266e707a821af1b7_Radiofre%CC%81quence%20icon.svg',
-  'vaser-liposuction': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e84f08672a3a9177d49088_Ultrasons%20icon.svg',
+  'body-aesthetics': '/assets/icons/body-aesthetics.svg',
+  'breast-aesthetics': '/assets/icons/breast-aesthetics.svg',
+  'butt-aesthetics': '/assets/icons/butt-aesthetics.svg',
+  'arm-aesthetics': '/assets/icons/arm-aesthetics.svg',
+  'liposuction': '/assets/icons/liposuction.svg',
+  'vaser-liposuction': '/assets/icons/vaser-liposuction.svg',
   /* Techniques */
-  'epilation-laser': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e3ef40b0429e8f2bebc5c3_Epilation%20laser%20icon.svg',
+  'epilation-laser': '/assets/icons/epilation-laser.svg',
   /* Diagnostic */
-  'consultation': 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e2f4b991b4497731bc170c_Trucs%20Dermato%20icon.svg',
+  'consultation': '/assets/icons/consultation.svg',
 }
 
 export const MEGA_CATEGORIES = [
-  { slug: 'visage', label: 'Visage', items: SERVICE_PAGES.filter(p => p.category === 'visage').map(p => ({ label: p.title, href: `/services/${p.slug}`, icon: ICON_MAP[p.slug] || '' })) },
-  { slug: 'corps', label: 'Corps', items: SERVICE_PAGES.filter(p => p.category === 'corps').map(p => ({ label: p.title, href: `/services/${p.slug}`, icon: ICON_MAP[p.slug] || '' })) },
-  { slug: 'techniques', label: 'Techniques', items: SERVICE_PAGES.filter(p => p.category === 'techniques').map(p => ({ label: p.title, href: `/services/${p.slug}`, icon: ICON_MAP[p.slug] || '' })) },
+  { slug: 'visage', label: 'Visage', items: SERVICE_PAGES.filter(p => p.category === 'visage').map(p => ({ label: p.title, href: `/services/${p.slug}`, slug: p.slug, icon: ICON_MAP[p.slug] || '' })) },
+  { slug: 'corps', label: 'Corps', items: SERVICE_PAGES.filter(p => p.category === 'corps').map(p => ({ label: p.title, href: `/services/${p.slug}`, slug: p.slug, icon: ICON_MAP[p.slug] || '' })) },
+  { slug: 'techniques', label: 'Techniques', items: SERVICE_PAGES.filter(p => p.category === 'techniques').map(p => ({ label: p.title, href: `/services/${p.slug}`, slug: p.slug, icon: ICON_MAP[p.slug] || '' })) },
 ] as const

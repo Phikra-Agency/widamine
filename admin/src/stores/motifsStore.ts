@@ -50,7 +50,10 @@ export const useMotifsStore = create<MotifStoreInterface>()(
         const { practitionerAssignments, ...clean } = item;
         set({ item: { ...clean, practitionerIds } });
       },
-      clearItem: () => set({ item: { name: '', duration: 30, color: getRandomMotifColor(), numberOfSessions: 1, isOnlineBookable: false, requiresPractitionerChoice: false, pendingTtlHours: 24, practitionerIds: [] } }),
+      clearItem: () => {
+        const existingColors = get().items.map(i => i.color).filter(Boolean) as string[]
+        set({ item: { name: '', duration: 30, color: getRandomMotifColor(existingColors), numberOfSessions: 1, isOnlineBookable: false, requiresPractitionerChoice: false, pendingTtlHours: 24, practitionerIds: [] } })
+      },
       openModal: () => set({ modalOpen: true }),
       closeModal: () => {
         set({ modalOpen: false })
@@ -67,7 +70,7 @@ export const useMotifsStore = create<MotifStoreInterface>()(
       saveItem: async () => {
         const { item, operation } = get();
         const isEdit = operation === 'edit'
-        const color = normalizeMotifColor(item.color) ?? getRandomMotifColor()
+        const color = normalizeMotifColor(item.color) ?? getRandomMotifColor(get().items.map(i => i.color).filter(Boolean) as string[])
         const payload = {
           ...item,
           color,
@@ -107,14 +110,21 @@ export const useMotifsStore = create<MotifStoreInterface>()(
   )
 )
 
-function normalizeMotifColor(value?: string) {
+export function normalizeMotifColor(value?: string) {
   if (!value) return null
   const trimmed = value.trim()
   const prefixed = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
   return /^#[0-9A-Fa-f]{6}$/.test(prefixed) ? prefixed.toUpperCase() : null
 }
 
-function getRandomMotifColor() {
-  const palette = ['#2E90C0', '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444', '#10B981', '#EC4899', '#0EA5E9']
+export function getRandomMotifColor(existingColors?: string[]) {
+  const palette = ['#2E90C0', '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444', '#10B981', '#EC4899', '#0EA5E9', '#F97316', '#06B6D4', '#A855F7', '#22C55E', '#EAB308', '#6366F1', '#D946EF', '#78716C']
+  if (existingColors?.length) {
+    const available = palette.filter(c => {
+      const n = normalizeMotifColor(c)
+      return n && !existingColors.some(ec => normalizeMotifColor(ec) === n)
+    })
+    if (available.length) return available[Math.floor(Math.random() * available.length)]
+  }
   return palette[Math.floor(Math.random() * palette.length)]
 }

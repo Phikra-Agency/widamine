@@ -168,14 +168,16 @@ function UsersTable() {
         </div>
       )}
 
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={USERS_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucun utilisateur trouvé'
-        stopClickOnColumns={[]}
-        onRowClick={(user) => openEditModal(user)}
-      />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={USERS_EMPTY_ILLUSTRATION}
+          emptyTitle='Aucun utilisateur trouvé'
+          stopClickOnColumns={[]}
+          onRowClick={(user) => openEditModal(user)}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>

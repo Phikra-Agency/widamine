@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import PublicNavbar from '@/components/PublicNavbar'
-import { getServicePage, ICON_MAP } from '@/lib/siteContent'
-import { CalendarBlank, CheckCircle, Sparkle } from '@phosphor-icons/react'
+import { getServicePage, SERVICE_PAGES } from '@/lib/siteContent'
+import { ServiceIcon } from '@/components/ServiceIcon'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C, TYPE } from '@/lib/theme'
 
@@ -11,7 +11,6 @@ const CAT_LABELS: Record<string, string> = { visage: 'Traitements du visage', co
 const CTN = { maxWidth: 1280, width: '100%', margin: '0 auto', padding: '32px clamp(20px, 6vw, 80px) 24px' } as const
 
 const BRAND_FLOWER = 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b0fbb4c50c3351ead87c66_concept-fleur.avif'
-const BRAND_BUBBLES = 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66aa4ea27518914b10e9001c_section-2-left-bubbles.svg'
 
 export default function ServiceDetail() {
   const { slug = '' } = useParams()
@@ -34,10 +33,10 @@ export default function ServiceDetail() {
     )
   }
 
+
   const titleWords = service.title.split(' ')
   const firstSection = service.sections[0]
   const detailSections = service.sections.slice(1)
-  const iconUrl = ICON_MAP[service.slug]
 
   return (
     <div className='min-h-screen' style={{ background: C.bg }}>
@@ -49,53 +48,11 @@ export default function ServiceDetail() {
             style={{ background: C.orange, opacity: 0.18 }}
           />
           <div style={CTN}>
-            <div className='grid items-center gap-12 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-20'>
-              <div className='relative mx-auto flex min-h-[280px] w-full max-w-[340px] items-center justify-center lg:mx-0'>
-                <div
-                  className='absolute left-4 top-0 h-36 w-36 rounded-full'
-                  style={{ background: service.color, opacity: 0.14 }}
-                />
-                <div
-                  className='absolute bottom-4 right-2 h-44 w-44 rounded-full'
-                  style={{ background: C.primary, opacity: 0.1 }}
-                />
-                <img
-                  src={BRAND_BUBBLES}
-                  alt=''
-                  className='pointer-events-none absolute left-0 top-4 w-24 select-none opacity-45'
-                  loading='lazy'
-                />
-                {iconUrl ? (
-                  <div className='relative z-10 h-[200px] w-[200px] drop-shadow-[0_18px_26px_rgba(30,30,30,0.10)]'>
-                    <img
-                      src={iconUrl}
-                      alt=''
-                      className='h-full w-full object-contain'
-                      loading='lazy'
-                    />
-                    <div
-                      className='pointer-events-none absolute inset-0'
-                      style={{
-                        backgroundColor: service.color,
-                        opacity: 0.13,
-                        maskImage: `url("${iconUrl}")`,
-                        maskRepeat: 'no-repeat',
-                        maskPosition: 'center',
-                        maskSize: 'contain',
-                        WebkitMaskImage: `url("${iconUrl}")`,
-                        WebkitMaskRepeat: 'no-repeat',
-                        WebkitMaskPosition: 'center',
-                        WebkitMaskSize: 'contain',
-                      }}
-                    />
-                  </div>
-                ) : null}
-              </div>
-
-              <div className='relative z-10 flex max-w-[680px] flex-col items-start gap-5'>
+            <div className='grid items-start gap-12 lg:grid-cols-[1fr_420px] lg:gap-20'>
+              <div className='relative max-w-[680px]'>
                 <Link
                   to={CAT_LINKS[service.category]}
-                  className='inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition hover:opacity-65'
+                  className='inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition hover:opacity-65 mb-4'
                   style={{ color: C.primary, fontFamily: TYPE.bodyFamily }}
                 >
                   {CAT_LABELS[service.category]}
@@ -114,83 +71,103 @@ export default function ServiceDetail() {
                   {titleWords[0]}{' '}
                   <em style={{ color: service.color, fontStyle: 'italic' }}>{titleWords.slice(1).join(' ')}</em>
                 </h1>
+
                 <p
+                  className='text-balance mt-6'
                   style={{
                     fontSize: 18,
                     fontWeight: 500,
-                    lineHeight: '32px',
+                    lineHeight: '1.7',
                     margin: 0,
                   }}
                 >
                   {service.heroDescription}
                 </p>
                 <p
+                  className='text-balance mt-5'
                   style={{
                     fontSize: 16,
                     fontWeight: 500,
-                    lineHeight: '30px',
+                    lineHeight: '1.7',
                     margin: 0,
                   }}
                 >
                   {service.intro}
                 </p>
-                <p
-                  className='border-l-2 pl-4'
+              </div>
+
+              <div className='flex flex-col gap-6 w-full lg:w-[420px] lg:flex-shrink-0 lg:sticky lg:top-28'>
+                <button
+                  type='button'
+                  onClick={() => openWithMotif(service.title)}
+                  className='inline-flex cursor-pointer items-center justify-center rounded-full border-0 font-semibold transition duration-300 hover:-translate-y-0.5 hover:shadow-lg min-h-touch w-full'
                   style={{
-                    borderColor: service.color,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    lineHeight: '25px',
-                    margin: 0,
+                    fontFamily: "'Poppins', sans-serif",
+                    color: '#ffffff',
+                    backgroundColor: C.primary,
+                    padding: '14px 28px',
+                    fontSize: 15,
+                    lineHeight: '18px',
                   }}
                 >
-                  <em style={{ fontWeight: 700 }}>Contre-indications :</em> {service.contraindications}
-                </p>
+                  Prendre rendez-vous
+                </button>
+
+                <div
+                  className='rounded-2xl p-5'
+                  style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.12)' }}
+                >
+                  <p className='text-xs font-semibold uppercase tracking-[0.1em] mb-3' style={{ color: service.color }}>
+                    Contre-indications
+                  </p>
+                  <p className='text-sm leading-6' style={{ color: C.secondary }}>
+                    {service.contraindications}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className='relative overflow-hidden py-16 sm:py-24 lg:py-28' style={{ background: C.bg }}>
-          <div className='pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/40' />
-          <div className='pointer-events-none absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-white/30' />
-          <div style={CTN}>
-            <div className='relative mx-auto max-w-3xl'>
-              <div className='mb-12 text-center'>
-                <div className='mx-auto mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg' style={{ background: `linear-gradient(135deg, ${service.color}, ${C.primary})` }}>
-                  <Sparkle size={24} weight='fill' className='text-white' />
-                </div>
-                <h2
-                  className='leading-tight sm:text-4xl md:text-5xl'
-                  style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}
-                >
-                  En <em style={{ color: service.color, fontStyle: 'italic' }}>quelques mots</em>
-                </h2>
-                <p className='mx-auto mt-4 max-w-lg text-sm' style={{ fontWeight: 500 }}>
-                  Ce qu'il faut retenir de ce traitement
-                </p>
-              </div>
-              <div className='grid gap-4 sm:grid-cols-2'>
-                {service.highlights.map((highlight, i) => (
-                  <div
-                    key={highlight}
-                    className='group overflow-hidden rounded-2xl bg-white p-5 transition-all duration-300 hover:-translate-y-1'
-                    style={{ boxShadow: '0 4px 24px -6px rgba(30,30,30,0.08)' }}
+<section className='relative overflow-hidden py-20 sm:py-28' style={{ background: C.bg }}>
+            <div className='pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/40' />
+            <div className='pointer-events-none absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-white/30' />
+            <div style={CTN}>
+              <div className='relative mx-auto max-w-4xl'>
+                <div className='mb-14 text-center'>
+                  <div className='mx-auto mb-4 h-0.5 w-8 rounded-full' style={{ background: service.color }} />
+                  <h2
+                    className='leading-tight'
+                    style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}
                   >
-                    <div className='flex items-start gap-4'>
-                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors' style={{ background: `${service.color}14`, color: service.color }}>
-                        <CheckCircle size={20} weight='fill' />
-                      </div>
-                      <p className='pt-1 text-sm font-semibold leading-6'>
+                    En <em style={{ color: service.color, fontStyle: 'italic' }}>quelques mots</em>
+                  </h2>
+                </div>
+                <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                  {service.highlights.map((highlight, i) => (
+                    <div
+                      key={highlight}
+                      className='group rounded-2xl bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl text-left'
+                      style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.05)' }}
+                    >
+                      <span
+                        className='mb-3 block text-[48px] font-bold leading-none transition-colors'
+                        style={{ color: service.color, fontFamily: TYPE.headingFamily }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <p
+                        className='leading-7 transition-colors group-hover:opacity-90'
+                        style={{ color: C.secondary, fontFamily: TYPE.bodyFamily, fontWeight: 500 }}
+                      >
                         {highlight}
                       </p>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         {firstSection ? (
           <section className='relative overflow-hidden py-10 sm:py-16'>
@@ -223,14 +200,13 @@ export default function ServiceDetail() {
                   <button
                     type='button'
                     onClick={() => openWithMotif(service.title)}
-                    className='inline-flex cursor-pointer items-center rounded-full border-0 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                    className='inline-flex cursor-pointer items-center rounded-full border-0 font-semibold transition duration-300 hover:-translate-y-0.5 hover:shadow-lg min-h-touch'
                     style={{
-                      fontFamily: TYPE.bodyFamily,
+                      fontFamily: "'Poppins', sans-serif",
                       color: '#ffffff',
                       backgroundColor: C.primary,
                       padding: '13px 24px',
                       fontSize: 15,
-                      fontWeight: 700,
                       lineHeight: '18px',
                     }}
                   >
@@ -238,7 +214,7 @@ export default function ServiceDetail() {
                   </button>
                 </div>
 
-                <div className='relative mx-auto h-[360px] w-full max-w-[430px] lg:mx-0'>
+                <div className='relative mx-auto h-[260px] w-full max-w-[430px] sm:h-[360px] lg:mx-0'>
                   <div
                     className='absolute right-8 top-0 h-28 w-28 rounded-full'
                     style={{ background: service.color, opacity: 0.16 }}
@@ -272,7 +248,7 @@ export default function ServiceDetail() {
                     <h3
                       style={{
                         fontFamily: TYPE.headingFamily,
-                        fontSize: 26,
+                        fontSize: 'clamp(1.15rem, 3.5vw, 1.625rem)',
                         fontWeight: 700,
                         lineHeight: '32px',
                         letterSpacing: '-0.02em',
@@ -299,6 +275,41 @@ export default function ServiceDetail() {
           </section>
         ) : null}
 
+        {/* ─── Related treatments ─── */}
+        {(() => {
+          const related = SERVICE_PAGES.filter((s) => s.category === service.category && s.slug !== service.slug).slice(0, 3)
+          if (related.length === 0) return null
+          return (
+            <section className='relative overflow-hidden py-10 sm:py-16'>
+              <div style={CTN}>
+                <h2 className='mb-8 text-center leading-tight sm:text-2xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h3, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+                  <em style={{ color: C.primary, fontStyle: 'italic' }}>Découvrez</em> aussi
+                </h2>
+                <div className='mx-auto grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                  {related.map((s) => (
+                    <Link
+                      key={s.slug}
+                      to={`/services/${s.slug}`}
+                      className='group flex items-center gap-4 rounded-2xl bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg min-h-touch'
+                      style={{ boxShadow: '0 4px 20px -4px rgba(0,0,0,0.08)' }}
+                    >
+                      <ServiceIcon slug={s.slug} size={48} color={s.color} className='shrink-0' />
+                      <div className='min-w-0 flex-1'>
+                        <h3 className='text-sm font-semibold' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
+                          {s.title}
+                        </h3>
+                        <span className='mt-1 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider' style={{ color: C.primary }}>
+                          Voir le soin
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )
+        })()}
+
         <section className='relative overflow-hidden py-10 sm:py-16'>
           <div style={{ ...CTN, padding: '32px clamp(20px, 6vw, 80px) 56px' }}>
             <div className='relative overflow-hidden rounded-[28px]' style={{ backgroundColor: C.primary, padding: 'clamp(40px, 6vw, 64px) clamp(24px, 5vw, 48px)' }}>
@@ -306,6 +317,7 @@ export default function ServiceDetail() {
               <div className='absolute -bottom-14 right-10 h-52 w-52 rounded-full' style={{ background: C.orange, opacity: 0.18 }} />
               <div className='relative z-10 mx-auto max-w-[740px] text-center'>
                 <h2
+                  className='text-balance'
                   style={{
                     fontFamily: TYPE.headingFamily,
                     fontSize: 'clamp(2rem, 4vw, 3.3rem)',
@@ -318,23 +330,22 @@ export default function ServiceDetail() {
                 >
                   Ensemble, élaborons un plan de traitement efficace et adapté à votre demande, votre psychologie et votre peau.
                 </h2>
-                <button
-                  type='button'
-                  onClick={() => openWithMotif(service.title)}
-                  className='inline-flex cursor-pointer items-center rounded-full border-0 transition duration-300 hover:-translate-y-0.5'
-                  style={{
-                    marginTop: 32,
-                    padding: '14px 24px',
-                    backgroundColor: '#ffffff',
-                    color: C.secondary,
-                    fontFamily: TYPE.bodyFamily,
-                    fontSize: 15,
-                    fontWeight: 700,
-                    lineHeight: '18px',
-                  }}
-                >
-                  Prendre rendez-vous
-                </button>
+                  <button
+                    type='button'
+                    onClick={() => openWithMotif(service.title)}
+                    className='inline-flex cursor-pointer items-center rounded-full border-0 font-semibold transition duration-300 hover:-translate-y-0.5 min-h-touch'
+                    style={{
+                      marginTop: 32,
+                      padding: '14px 24px',
+                      backgroundColor: '#ffffff',
+                      color: C.secondary,
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: 15,
+                      lineHeight: '18px',
+                    }}
+                  >
+                    Prendre rendez-vous
+                  </button>
               </div>
             </div>
           </div>

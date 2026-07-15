@@ -25,5 +25,8 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "npm@11.13.0"
+  "packageManager": "npm@11.13.0",
+  "dependencies": {
+    "@tabler/icons-react": "^3.44.0"
+  }
 }

@@ -1,4 +1,4 @@
-import { useMotifsStore } from '@/stores/motifsStore'
+import { useMotifsStore, getRandomMotifColor, normalizeMotifColor } from '@/stores/motifsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { Plus, Trash as Trash2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
@@ -9,6 +9,7 @@ import { motifSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createSallesMotifsColumns, SALLES_MOTIFS_EMPTY_ILLUSTRATION } from './columns/sallesMotifsColumns'
 import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
@@ -90,14 +91,17 @@ function MotifsTable() {
 
   return (
     <DataTable.Root>
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucun traitement trouvé'
-        stopClickOnColumns={[]}
-        onRowClick={openEdit}
-      />
+      <DataTable.Toolbar className='max-lg:px-0' />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION}
+          emptyTitle='Aucun traitement trouvé'
+          stopClickOnColumns={[]}
+          onRowClick={openEdit}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>
@@ -148,7 +152,7 @@ function MotifsTable() {
 }
 
 function MotifModal() {
-  const { operation, modalOpen, closeModal, item, setItem, saveItem } = useMotifsStore()
+  const { operation, modalOpen, closeModal, item, setItem, saveItem, items } = useMotifsStore()
   const { items: users, fetchItems: fetchUsers } = useUsersStore()
 
   const isEdit = operation === 'edit'
@@ -293,41 +297,7 @@ function MotifModal() {
         />
       </div>
 
-      <div className='space-y-2'>
-        <div className='flex items-center justify-between gap-3'>
-          <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du traitement</Label>
-          <Button type='button' variant='outline' size='sm' onClick={() => setItem({ ...item, color: getRandomMotifColor() })} className='text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary/55'>
-            Aléatoire
-          </Button>
-        </div>
-        <div className='flex items-center gap-3 rounded-control border border-border bg-secondary/[0.01] p-3'>
-          <input
-            type='color'
-            value={normalizeMotifColor(item.color) || '#2E90C0'}
-            onChange={(e) => setItem({ ...item, color: e.target.value.toUpperCase() })}
-            className='h-11 w-11 cursor-pointer rounded-control border border-border bg-transparent p-1'
-          />
-          <div className='min-w-0 flex-1 space-y-2'>
-            <Input type='text' value={item.color || ''} onChange={(e) => setItem({ ...item, color: e.target.value.toUpperCase() })} placeholder='#2E90C0' />
-            <div className='flex items-center gap-2'>
-              <span className='h-2.5 w-2.5 rounded-full' style={{ backgroundColor: normalizeMotifColor(item.color) || '#2E90C0' }} />
-            </div>
-          </div>
-        </div>
-        {(() => {
-          const color = normalizeMotifColor(item.color) || '#3b82f6'
-          return (
-            <div className='rounded-control border px-3 py-2.5' style={{ borderColor: `${color}30`, backgroundColor: `${color}10` }}>
-              <div className='mt-2 flex items-center gap-2'>
-                <span className='h-2 w-2 rounded-full' style={{ backgroundColor: color }} />
-                <span className='rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: color }}>
-                  {item.name || 'Traitement'}
-                </span>
-              </div>
-            </div>
-          )
-        })()}
-      </div>
+      <ColorPicker item={item} items={items} setItem={setItem} />
 
       <div className='space-y-2'>
         <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Praticiens assignés</Label>
@@ -385,14 +355,67 @@ function MotifDeleteModal() {
   )
 }
 
-function normalizeMotifColor(value?: string) {
-  if (!value) return null
-  const trimmed = value.trim()
-  const prefixed = trimmed.startsWith('#') ? trimmed : `#${trimmed}`
-  return /^#[0-9A-Fa-f]{6}$/.test(prefixed) ? prefixed.toUpperCase() : null
-}
+function ColorPicker({ item, items, setItem }: {
+  item: { color?: string; name?: string };
+  items: { color?: string }[];
+  setItem: (item: any) => void;
+}) {
+  const [open, setOpen] = useState(false)
+  const [hexInput, setHexInput] = useState(item.color || '')
+  const colors = [
+    '#2E90C0', '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444', '#10B981', '#EC4899', '#0EA5E9',
+    '#F97316', '#06B6D4', '#A855F7', '#22C55E', '#EAB308', '#6366F1', '#D946EF', '#78716C',
+  ]
+  const cc = normalizeMotifColor(item.color) || '#2E90C0'
 
-function getRandomMotifColor() {
-  const palette = ['#2E90C0', '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444', '#10B981', '#EC4899', '#0EA5E9']
-  return palette[Math.floor(Math.random() * palette.length)]
+  useEffect(() => { setHexInput(item.color || '') }, [item.color])
+
+  return (
+    <div className='space-y-2'>
+      <div className='flex items-center justify-between gap-3'>
+        <Label className='text-[10px] font-bold uppercase tracking-[0.2em] text-secondary/40'>Couleur du traitement</Label>
+        <Button type='button' variant='outline' size='sm' onClick={() => {
+          const ec = items.map(i => i.color).filter(Boolean) as string[]
+          setItem({ ...item, color: getRandomMotifColor(ec) })
+        }} className='text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary/55'>Aléatoire</Button>
+      </div>
+      <div className='flex items-center gap-3 rounded-control border border-border bg-secondary/[0.01] p-3'>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger className='h-11 w-11 shrink-0 cursor-pointer rounded-control border border-border' style={{ backgroundColor: cc }} />
+          <PopoverContent className='p-4'>
+            <div className='grid grid-cols-6 gap-2'>
+              {colors.map(c => (
+                <button key={c} type='button' className={cn('h-8 w-8 rounded-lg', c === cc && 'ring-2 ring-primary ring-offset-2')} style={{ backgroundColor: c }} onClick={() => { setItem({ ...item, color: c }); setOpen(false) }} />
+              ))}
+            </div>
+            <div className='mt-3 flex items-center gap-2'>
+              <Input type='text' value={hexInput} onChange={e => setHexInput(e.target.value)} placeholder='#HEX' className='h-8 text-xs' onKeyDown={e => { if (e.key === 'Enter') { const n = normalizeMotifColor(hexInput); if (n) { setItem({ ...item, color: n }); setOpen(false) } } }} />
+              <Button type='button' variant='outline' size='sm' className='h-8 shrink-0 text-xs' onClick={() => { const n = normalizeMotifColor(hexInput); if (n) { setItem({ ...item, color: n }); setOpen(false) } }}>OK</Button>
+            </div>
+            <div className='mt-2'>
+              <Button type='button' variant='ghost' size='sm' className='h-8 w-full text-xs text-muted-foreground' onClick={() => {
+                const inp = document.createElement('input')
+                inp.type = 'color'; inp.value = cc
+                inp.addEventListener('input', () => { const v = inp.value.toUpperCase(); setItem({ ...item, color: v }); setHexInput(v) })
+                inp.click()
+              }}>Personnalisé…</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <div className='min-w-0 flex-1 space-y-2'>
+          <Input type='text' value={item.color || ''} onChange={e => setItem({ ...item, color: e.target.value.toUpperCase() })} placeholder='#2E90C0' />
+          <div className='flex items-center gap-2'>
+            <span className='h-2.5 w-2.5 rounded-full' style={{ backgroundColor: cc }} />
+            <span className='text-[10px] text-muted-foreground'>{cc}</span>
+          </div>
+        </div>
+      </div>
+      <div className='rounded-control border px-3 py-2.5' style={{ borderColor: `${cc}30`, backgroundColor: `${cc}10` }}>
+        <div className='flex items-center gap-2'>
+          <span className='h-2 w-2 rounded-full' style={{ backgroundColor: cc }} />
+          <span className='rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white' style={{ backgroundColor: cc }}>{item.name || 'Traitement'}</span>
+        </div>
+      </div>
+    </div>
+  )
 }

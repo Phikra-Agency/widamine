@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { CalendarBlank as CalendarDays, CaretDown as ChevronDown, List as Menu, X } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown, List as Menu, X } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
-import { SERVICE_PAGES, ICON_MAP } from '@/lib/siteContent'
+import { SERVICE_PAGES } from '@/lib/siteContent'
+import { ServiceIcon } from '@/components/ServiceIcon'
+import { C } from '@/lib/theme'
 
 type PublicNavbarProps = {
   theme?: 'light' | 'dark'
@@ -17,7 +19,7 @@ const MEGA_CATEGORIES = (['visage', 'corps', 'techniques'] as const).map((cat) =
   items: SERVICE_PAGES.filter((p) => p.category === cat).map((p) => ({
     label: p.title,
     href: `/services/${p.slug}`,
-    icon: ICON_MAP[p.slug] || '',
+    slug: p.slug,
   })),
 }))
 
@@ -162,9 +164,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                 onClick={() => setOpenCategory(null)}
                                 className='group flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-secondary/72 transition-colors hover:bg-primary/8 hover:text-secondary'
                               >
-                                {item.icon ? (
-                                  <img src={item.icon} alt='' className='h-7 w-7 object-contain opacity-70 group-hover:opacity-100' loading='lazy' />
-                                ) : null}
+                                <ServiceIcon slug={item.slug} size={28} color={C.secondary} className='opacity-70' />
                                 <span>{item.label}</span>
                               </Link>
                             ))}
@@ -191,7 +191,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 sm:h-10 sm:w-10 lg:hidden ${iconButtonClass}`}
               aria-label='Toggle menu'
             >
-              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              {isMobileMenuOpen ? <X size={18} weight='duotone' /> : <Menu size={18} weight='duotone' />}
             </button>
             <button
               type='button'
@@ -199,7 +199,6 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               aria-label='Réserver une consultation'
               className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.98] ${ctaClass} ${isLight ? '' : 'hidden md:inline-flex'}`}
             >
-              <CalendarDays size={16} className='hidden sm:block' />
               Réserver
             </button>
           </div>
@@ -230,7 +229,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors ${isLight ? 'text-secondary/70 hover:bg-primary/7 hover:text-secondary' : 'text-white/72 hover:bg-white/10 hover:text-white'}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {item.icon ? <img src={item.icon} alt='' className='h-5 w-5 object-contain opacity-60' loading='lazy' /> : null}
+                        <ServiceIcon slug={item.slug} size={20} color={C.secondary} className='opacity-60' />
                         {item.label}
                       </Link>
                     ))}
@@ -248,9 +247,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     setIsMobileMenuOpen(false)
                     open()
                   }}
-                  className='mt-2 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-custom-white shadow-[0_14px_28px_rgba(46,144,192,0.24)]'
+                  className='mt-2 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-custom-white shadow-[0_14px_28px_rgba(46,144,192,0.24)]'
                 >
-                  <CalendarDays size={16} />
                   Réserver
                 </button>
               </div>

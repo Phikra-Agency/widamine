@@ -58,9 +58,7 @@ export default function CalendarControlBar({
   const todayButtonSide = getTodayButtonPlacement(viewMode, dateValue)
   const [filterModalOpen, setFilterModalOpen] = useState(false)
 
-  const todayLabel = todayButtonSide === 'left'
-    ? "Revenir à aujourd'hui"
-    : "Aller à aujourd'hui"
+  const todayLabel = 'Aujourd\'hui'
 
   const navGroup = (
     <div className='bo-segment inline-flex items-center'>
@@ -86,7 +84,7 @@ export default function CalendarControlBar({
             value={dateValue}
             label={pickerLabel}
             onChange={onDateChange}
-            triggerClassName='hidden sm:inline-flex'
+            triggerClassName='hidden sm:inline-flex min-w-[190px]'
           />
         </>
       )}
@@ -254,8 +252,8 @@ export default function CalendarControlBar({
           <div
             className='absolute top-1/2 -translate-y-1/2'
             style={todayButtonSide === 'left'
-              ? { right: 'calc(50% + 110px)' }
-              : { left: 'calc(50% + 110px)' }
+              ? { right: 'calc(50% + 130px)' }
+              : { left: 'calc(50% + 130px)' }
             }
           >
             <Button

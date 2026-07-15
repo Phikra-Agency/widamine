@@ -94,6 +94,7 @@ function ResourcesTable() {
 
   return (
     <DataTable.Root>
+      <DataTable.Toolbar className='max-lg:px-0' />
       {/* Mobile top search bar */}
       <div className='flex lg:hidden items-center gap-2 px-4 py-2.5'>
         <button
@@ -115,14 +116,16 @@ function ResourcesTable() {
           />
         </div>
       )}
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={SALLES_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucune salle trouvée'
-        stopClickOnColumns={[]}
-        onRowClick={openEditModal}
-      />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={SALLES_EMPTY_ILLUSTRATION}
+          emptyTitle='Aucune salle trouvée'
+          stopClickOnColumns={[]}
+          onRowClick={openEditModal}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>

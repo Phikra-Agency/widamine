@@ -125,17 +125,19 @@ function ContactsTable() {
         </div>
       )}
 
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={CONTACTS_EMPTY_ILLUSTRATION}
-        emptyTitle="Aucun message trouvé"
-        emptyDescription="Les messages reçus apparaîtront ici"
-        stopClickOnColumns={[]}
-        onRowClick={(contact) => {
-          useContactsStore.setState({ item: contact, openShowModal: true })
-        }}
-      />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={CONTACTS_EMPTY_ILLUSTRATION}
+          emptyTitle="Aucun message trouvé"
+          emptyDescription="Les messages reçus apparaîtront ici"
+          stopClickOnColumns={[]}
+          onRowClick={(contact) => {
+            useContactsStore.setState({ item: contact, openShowModal: true })
+          }}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>

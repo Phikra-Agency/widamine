@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import api from '@/lib/api'
 import clsx from 'clsx'
-import { Button } from '@/components/ui'
+import { Button, Card } from '@/components/ui'
 import {
   appointmentToScheduleLike,
   clearStashedAppointment,
@@ -591,14 +591,18 @@ function Planner() {
       )}
 
       {pageView === 'analytics' && (
-        <div className='flex-1 overflow-auto relative'>
-          <PractitionerAnalytics 
-            practitioners={doctors} 
-            viewMode={viewMode}
-            displayItems={displayItems}
-            monthItemsByDate={monthItemsByDate}
-            activeDayIdx={activeDayIdx}
-          />
+        <div className='flex-1 overflow-auto'>
+          <div className='bo-page-inner bo-section-stack'>
+            <Card className='bo-table-card'>
+              <PractitionerAnalytics 
+                practitioners={doctors} 
+                viewMode={viewMode}
+                displayItems={displayItems}
+                monthItemsByDate={monthItemsByDate}
+                activeDayIdx={activeDayIdx}
+              />
+            </Card>
+          </div>
         </div>
       )}
     </div>

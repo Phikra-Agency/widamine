@@ -267,13 +267,15 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
         </div>
       )}
 
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={PATIENTS_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucun patient trouvé'
-        onRowClick={openDrawer}
-      />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={PATIENTS_EMPTY_ILLUSTRATION}
+          emptyTitle='Aucun patient trouvé'
+          onRowClick={openDrawer}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>

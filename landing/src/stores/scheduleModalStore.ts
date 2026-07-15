@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import api from '@/lib/api'
-import { ICON_MAP } from '@/lib/siteContent'
 
 interface ScheduleModalStoreInterface {
   isOpen: boolean
@@ -67,11 +66,34 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
     set({ isLoadingMotifs: true, motifsError: null })
     try {
       const res = await api.get('public/motifs') 
+      const FALLBACK: [RegExp, string][] = [
+        [/urgences?|consultation/i, 'consultation'],
+        [/bilan|suivi|check/i, 'consultation'],
+        [/d[ée]tartrage|nettoyage/i, 'facial-aesthetics'],
+        [/peeling|gommage|exfoliation/i, 'facial-aesthetics'],
+        [/visage|facial/i, 'facial-aesthetics'],
+        [/corps/i, 'body-aesthetics'],
+        [/lip|l[èe]vre|bouche|injection|botox|acide/i, 'lip-aesthetics'],
+        [/laser/i, 'epilation-laser'],
+        [/poitrine|breast|sein/i, 'breast-aesthetics'],
+        [/bras|arm/i, 'arm-aesthetics'],
+        [/fesse|butt|fessier/i, 'butt-aesthetics'],
+        [/liposuccion|liposuction/i, 'liposuction'],
+        [/vaser/i, 'vaser-liposuction'],
+        [/oeil|eye|paupi[eè]re/i, 'eye-aesthetics'],
+        [/sourcil|eyebrow/i, 'eyebrow-aesthetics'],
+      ]
+      const KNOWN = ['facial-aesthetics','lip-aesthetics','eye-aesthetics','eyebrow-aesthetics','body-aesthetics','breast-aesthetics','butt-aesthetics','arm-aesthetics','liposuction','vaser-liposuction','epilation-laser','consultation']
       let data = res.data.map((item: any) => {
         const slug = item.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') || ''
+        let icon = KNOWN.includes(slug) ? slug : null
+        if (!icon) {
+          const match = FALLBACK.find(([re]) => re.test(item.name))
+          if (match) icon = match[1]
+        }
          return {
            ...item,
-           icon: ICON_MAP[slug as keyof typeof ICON_MAP] || null,
+           icon,
            practitioners: item.primaryDoctor ? [{ ...item.primaryDoctor, id: item.primaryDoctorId || item.primaryDoctor.name || 'doctor-1' }] : [],
            requiresPractitionerChoice: !!item.primaryDoctor
         }

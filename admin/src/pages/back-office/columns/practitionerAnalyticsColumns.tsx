@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { UserCircle } from '@phosphor-icons/react'
@@ -9,82 +10,63 @@ export interface PractitionerStatsRow {
   count: number
   percentage: number
   motifCounts: Record<string, number>
+  isTop: boolean
 }
 
-export function createPractitionerColumns(): ColumnDef<PractitionerStatsRow>[] {
+interface CellCallbacks {
+  onHover: (p: PractitionerStatsRow, rect: DOMRect) => void
+  onLeave: () => void
+}
+
+function PractitionerCell({ p, onHover, onLeave }: { p: PractitionerStatsRow } & CellCallbacks) {
+  const ref = useRef<HTMLDivElement>(null)
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
+
+  const show = useCallback(() => {
+    clearTimeout(leaveTimer.current)
+    const el = ref.current
+    if (!el) return
+    onHover(p, el.getBoundingClientRect())
+  }, [p, onHover])
+
+  const hide = useCallback(() => {
+    leaveTimer.current = setTimeout(onLeave, 200)
+  }, [onLeave])
+
+  return (
+    <div
+      ref={ref}
+      onMouseEnter={p.count > 0 ? show : undefined}
+      onMouseLeave={p.count > 0 ? hide : undefined}
+      className='flex items-center gap-3'
+    >
+      <div className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-control', p.isTop ? 'bg-amber-100 ring-2 ring-amber-300/60' : 'bg-secondary/5')}>
+        <UserCircle size={18} className={p.isTop ? 'text-amber-600' : 'text-secondary/40'} />
+      </div>
+
+      <div>
+        <span className='block text-sm font-semibold tracking-tight'>
+          {p.name}
+        </span>
+        {p.isTop && (
+          <span className='mt-0.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-100 to-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700 ring-1 ring-amber-300/40'>
+            Meilleur
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function createPractitionerColumns(cbs: CellCallbacks): ColumnDef<PractitionerStatsRow>[] {
   return [
     {
       id: 'name',
       accessorKey: 'name',
       header: ({ column, table }) => (
-        <DataTableColumnHeader column={column} table={table} title='Praticien' />
+        <DataTableColumnHeader column={column} table={table} title='Praticien' searchColumn={column} />
       ),
-      cell: ({ row }) => {
-        const p = row.original
-        const topMotifs = Object.entries(p.motifCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-
-        return (
-          <div className='group relative flex items-center gap-3'>
-            {/* Icon — matches Patient page exactly */}
-            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-secondary/5'>
-              <UserCircle size={18} className='text-secondary/40' />
-            </div>
-
-            <div>
-              <span className='block text-sm font-semibold tracking-tight'>
-                {p.name}
-              </span>
-              {/* Percentage badge — same style as gender badge in Patients */}
-              <span className='mt-1 inline-flex items-center rounded border border-primary/10 bg-primary/5 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary/70'>
-                {p.percentage.toFixed(1)}%
-              </span>
-            </div>
-
-            {/* Hover popover — positioned relative to this cell wrapper */}
-            {(p.count > 0) && (
-              <div
-                className={clsx(
-                  'pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2',
-                  'min-w-56 rounded-control border border-border bg-popover p-3 shadow-lg',
-                  'opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100',
-                )}
-              >
-                <div className='mb-2 flex items-center justify-between border-b border-border/50 pb-2'>
-                  <span className='text-[12px] font-semibold text-foreground'>
-                    Détails ({p.percentage.toFixed(1)}%)
-                  </span>
-                  <span className='text-[11px] text-muted-foreground'>{p.count} rés.</span>
-                </div>
-
-                {topMotifs.length > 0 ? (
-                  <div className='flex flex-col gap-1'>
-                    <span className='mb-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60'>
-                      Répartition par Motif
-                    </span>
-                    {topMotifs.map(([motif, count]) => (
-                      <div key={motif} className='flex items-center justify-between text-xs'>
-                        <span className='truncate pr-3 text-secondary/70'>{motif}</span>
-                        <span className='shrink-0 font-semibold text-foreground'>{count}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className='text-xs italic text-muted-foreground'>Aucun motif</p>
-                )}
-
-                <div className='mt-2.5 h-1 w-full overflow-hidden rounded-full bg-muted'>
-                  <div
-                    className='h-full rounded-full bg-primary'
-                    style={{ width: `${Math.min(p.percentage, 100)}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )
-      },
+      cell: (info) => <PractitionerCell p={info.row.original} {...cbs} />,
       meta: { width: 'wide' },
       enableSorting: true,
       enableHiding: false,
@@ -105,6 +87,31 @@ export function createPractitionerColumns(): ColumnDef<PractitionerStatsRow>[] {
             <span className='text-[10px] font-medium uppercase tracking-wider text-secondary/30'>
               RDV
             </span>
+          </div>
+        )
+      },
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      id: 'percentage',
+      accessorKey: 'percentage',
+      header: ({ column, table }) => (
+        <DataTableColumnHeader column={column} table={table} title='Charge' />
+      ),
+      cell: ({ row }) => {
+        const pct = row.getValue('percentage') as number
+        return (
+          <div className='flex items-center gap-2'>
+            <span className='min-w-[40px] text-xs font-semibold text-foreground'>
+              {pct.toFixed(1)}%
+            </span>
+            <div className='h-2 w-full max-w-[80px] overflow-hidden rounded-full bg-muted'>
+              <div
+                className='h-full rounded-full bg-primary transition-all'
+                style={{ width: `${Math.min(pct, 100)}%` }}
+              />
+            </div>
           </div>
         )
       },

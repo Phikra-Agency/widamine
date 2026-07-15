@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { CalendarBlank, EnvelopeSimple, Phone, Stethoscope, Door, User, Clock, CheckCircle, XCircle, Timer, ArrowRight, UserPlus, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import { useDebounce } from 'use-debounce'
 import type { ColumnFiltersState } from '@tanstack/react-table'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
@@ -31,6 +31,45 @@ const STATUS_FILTER_PILLS: FilterPillOption[] = [
   { value: 'EXPIRED', label: 'Expirée', color: 'sky' },
   { value: 'NO_SHOW', label: 'Absent', color: 'aqua' },
 ]
+
+const THEME_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  sand: {
+    bg: 'color-mix(in srgb, var(--color-fam-treatment) 18%, white)',
+    text: '#7a5a32',
+    border: 'color-mix(in srgb, var(--color-fam-treatment) 35%, white)',
+    dot: '#7a5a32',
+  },
+  sea: {
+    bg: 'color-mix(in srgb, var(--color-logo-sea) 14%, white)',
+    text: 'var(--color-logo-deep)',
+    border: 'color-mix(in srgb, var(--color-logo-sea) 35%, var(--color-logo-deep))',
+    dot: 'var(--color-logo-deep)',
+  },
+  coral: {
+    bg: 'color-mix(in srgb, var(--color-fam-urgent) 14%, white)',
+    text: '#8f4545',
+    border: 'color-mix(in srgb, var(--color-fam-urgent) 30%, white)',
+    dot: '#8f4545',
+  },
+  sage: {
+    bg: 'color-mix(in srgb, var(--color-fam-followup) 16%, white)',
+    text: '#2f6f66',
+    border: 'color-mix(in srgb, var(--color-fam-followup) 35%, white)',
+    dot: '#2f6f66',
+  },
+  mist: {
+    bg: 'color-mix(in srgb, var(--color-logo-mist) 72%, white)',
+    text: 'var(--color-logo-deep)',
+    border: 'color-mix(in srgb, var(--color-logo-mist) 55%, var(--color-logo-deep))',
+    dot: 'var(--color-logo-deep)',
+  },
+  aqua: {
+    bg: 'color-mix(in srgb, var(--color-logo-aqua) 22%, white)',
+    text: 'var(--color-secondary-800)',
+    border: 'color-mix(in srgb, var(--color-logo-aqua) 40%, var(--color-logo-deep))',
+    dot: 'var(--color-secondary-800)',
+  },
+}
 
 export default function Reservations() {
   return (
@@ -172,17 +211,19 @@ function ReservationsTable() {
         </div>
       )}
 
-      <TanStackDataTable
-        table={table}
-        loading={loading}
-        emptyIllustration={RESERVATIONS_EMPTY_ILLUSTRATION}
-        emptyTitle='Aucune réservation trouvée'
-        emptyDescription='Les réservations apparaîtront ici'
-        stopClickOnColumns={['status']}
-        onRowClick={(appointment) => {
-          useAppointmentsStore.setState({ item: appointment, openShowModal: true })
-        }}
-      />
+      <DataTable.Desktop>
+        <TanStackDataTable
+          table={table}
+          loading={loading}
+          emptyIllustration={RESERVATIONS_EMPTY_ILLUSTRATION}
+          emptyTitle='Aucune réservation trouvée'
+          emptyDescription='Les réservations apparaîtront ici'
+          stopClickOnColumns={['status']}
+          onRowClick={(appointment) => {
+            useAppointmentsStore.setState({ item: appointment, openShowModal: true })
+          }}
+        />
+      </DataTable.Desktop>
 
       <DataTable.Mobile>
         <DataTable.MobileList>
@@ -327,44 +368,57 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
     }
   }
 
+  const currentMeta = STATUS_META[current] || STATUS_META.PENDING
+  const currentTc = THEME_COLORS[currentMeta.theme]
+
   return (
-    <select
-      value={current}
-      onChange={(e) => handleChange(e.target.value)}
-      disabled={saving}
-      className={clsx(
-        'min-w-[140px] py-1 rounded-control text-xs font-medium border cursor-pointer appearance-none bg-no-repeat focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60', className,
-        current === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-        current === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-        current === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border-rose-100' :
-        current === 'COMPLETED' ? 'bg-sky-50 text-sky-700 border-sky-100' :
-        current === 'EXPIRED' ? 'bg-slate-50 text-slate-700 border-slate-100' :
-        current === 'NO_SHOW' ? 'bg-violet-50 text-violet-700 border-violet-100' :
-        'bg-secondary/5 text-secondary/70 border-secondary/20'
-      )}
-      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23043f50' opacity='0.4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 10px center', backgroundSize: '10px', paddingLeft: '16px', paddingRight: '34px' }}
-    >
-      {Object.entries(labels).map(([key, label]) => (
-        <option key={key} value={key}>{label}</option>
-      ))}
-    </select>
+    <Select value={current} onValueChange={handleChange} disabled={saving}>
+      <SelectTrigger
+        className={cn('h-9 min-w-[140px] text-xs font-medium', className)}
+        style={{
+          backgroundColor: currentTc.bg,
+          color: currentTc.text,
+          borderColor: currentTc.border,
+        }}
+      >
+        <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: currentTc.dot }} />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(labels).map(([key, label]) => {
+          const tc = THEME_COLORS[STATUS_META[key]?.theme || 'sand']
+          return (
+            <SelectItem key={key} value={key}>
+              <span className='flex items-center gap-2'>
+                <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: tc.dot }} />
+                {label}
+              </span>
+            </SelectItem>
+          )
+        })}
+      </SelectContent>
+    </Select>
   )
 }
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  PENDING: { label: 'En attente', color: 'text-amber-700', bg: 'bg-amber-50', icon: Timer },
-  CONFIRMED: { label: 'Confirmée', color: 'text-emerald-700', bg: 'bg-emerald-50', icon: CheckCircle },
-  CANCELLED: { label: 'Annulée', color: 'text-red-700', bg: 'bg-red-50', icon: XCircle },
-  COMPLETED: { label: 'Terminée', color: 'text-sky-700', bg: 'bg-sky-50', icon: CheckCircle },
-  EXPIRED: { label: 'Expirée', color: 'text-gray-700', bg: 'bg-gray-50', icon: Timer },
-  NO_SHOW: { label: 'Absent', color: 'text-violet-700', bg: 'bg-violet-50', icon: XCircle },
+const STATUS_META: Record<string, { label: string; theme: string; icon: React.ElementType }> = {
+  PENDING: { label: 'En attente', theme: 'sand', icon: Timer },
+  CONFIRMED: { label: 'Confirmée', theme: 'sea', icon: CheckCircle },
+  CANCELLED: { label: 'Annulée', theme: 'coral', icon: XCircle },
+  COMPLETED: { label: 'Terminée', theme: 'sage', icon: CheckCircle },
+  EXPIRED: { label: 'Expirée', theme: 'mist', icon: Timer },
+  NO_SHOW: { label: 'Absent', theme: 'aqua', icon: XCircle },
 }
 
 function Pill({ status }: { status: string }) {
   const m = STATUS_META[status] || STATUS_META.PENDING
+  const tc = THEME_COLORS[m.theme]
   const I = m.icon
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full ${m.bg} ${m.color} px-3 py-1 text-xs font-medium ring-1 ring-inset ring-transparent`}>
+    <span
+      className='inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ring-transparent'
+      style={{ backgroundColor: tc.bg, color: tc.text }}
+    >
       <I size={12} weight='fill' />
       {m.label}
     </span>

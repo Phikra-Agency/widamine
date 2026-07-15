@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { GraduationCap, Heart, MapPin, PhoneCall, Sparkle } from '@phosphor-icons/react'
+import { MapPin, PhoneCall } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import gsap from 'gsap'
@@ -397,16 +397,16 @@ const SERVICES_WITH_TESTIMONIALS = SERVICE_PAGES
   }))
 
 function TreatmentsSection() {
-  const imgRef = useRef<HTMLDivElement>(null)
+  const imgWrapperRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     const scrollerEl = document.getElementById('app-scroll')
-    if (!scrollerEl || !imgRef.current) return
+    if (!scrollerEl || !imgWrapperRef.current) return
     const ctx = gsap.context(() => {
-      gsap.fromTo(imgRef.current, { y: -80 }, {
-        y: 80, ease: 'none',
-        scrollTrigger: { trigger: imgRef.current.closest('section'), scroller: scrollerEl, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+      gsap.fromTo(imgWrapperRef.current, { y: -60 }, {
+        y: 60, ease: 'none',
+        scrollTrigger: { trigger: imgWrapperRef.current.closest('section'), scroller: scrollerEl, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
       })
     })
     return () => ctx.revert()
@@ -420,19 +420,35 @@ function TreatmentsSection() {
         <div className='grid gap-16 lg:grid-cols-[0.9fr_1fr] lg:items-center'>
           {/* Left — image */}
           <div className='relative flex items-center justify-center'>
-            <div
-              ref={imgRef}
-              className='h-[500px] w-full max-w-[420px] rounded-[2rem] bg-cover bg-center shadow-[0_30px_70px_rgba(30,30,30,0.18)]'
-              style={{ backgroundImage: "url('/images/dr-widad.jpg')" }}
-            />
-            <div className='pointer-events-none absolute -bottom-6 -right-6 h-[500px] w-full max-w-[420px] rounded-[2rem] border-2 opacity-20' style={{ borderColor: C.primary, translate: '12px 12px' }} />
+            {/* Blue offset backdrop */}
+            <div className='pointer-events-none absolute left-2 top-2 h-[500px] w-full max-w-[420px] select-none rounded-[2rem]' style={{ background: `${C.primary}15` }} />
+
+            {/* Photo card */}
+            <div ref={imgWrapperRef} className='relative h-[500px] w-full max-w-[420px] rounded-[2rem] shadow-[0_30px_70px_rgba(30,30,30,0.18)] ring-1 ring-[rgba(0,159,214,0.08)]'>
+              {/* Floral decorative at top-right corner */}
+              <img
+                src='/assets/square-moncey/concept-fleur.avif'
+                alt=''
+                className='pointer-events-none absolute -right-6 -top-6 z-10 w-28 select-none opacity-30 widamine-tint'
+                loading='lazy'
+              />
+
+              {/* The image */}
+              <div
+                className='h-full w-full bg-cover bg-center rounded-[2rem]'
+                style={{ backgroundImage: "url('/images/dr-widad.jpg')" }}
+              />
+            </div>
           </div>
 
           {/* Right — content */}
           <div className='max-w-xl'>
+            <p className='text-xs font-semibold uppercase tracking-[0.25em]' style={{ color: C.primary }}>
+              Rencontrez le docteur
+            </p>
             <h3
               ref={titleRef}
-              className='text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[1.05] tracking-[-0.03em]'
+              className='mt-2 text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[1.05] tracking-[-0.03em]'
               style={{ color: C.secondary, fontFamily: TYPE.headingFamily }}
             >
               {name.map((char, i) => (
@@ -455,18 +471,7 @@ function TreatmentsSection() {
               <p>Médecin dermatologue avec une expertise en médecine esthétique, laser et bodycontouring. Formation internationale et participation active aux congrès mondiaux, apportant les techniques les plus avancées et sécurisées de la dermatologie moderne.</p>
               <p className='mt-4'>Son approche est fondée sur un accompagnement personnalisé, recherchant toujours des résultats naturels, harmonieux et reflétant le bien-être de chaque patiente.</p>
             </div>
-            <div className='mt-8 flex items-center gap-4'>
-              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
-                <GraduationCap size={22} weight='duotone' />
-              </div>
-              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
-                <Heart size={22} weight='duotone' />
-              </div>
-              <div className='flex h-12 w-12 items-center justify-center rounded-xl' style={{ background: `${C.primary}12`, color: C.primary }}>
-                <Sparkle size={22} weight='duotone' />
-              </div>
-              <span className='text-xs font-medium' style={{ color: `${C.secondary}80` }}>Formation internationale · Laser · Bodycontouring</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -694,7 +699,7 @@ function ConsultSection() {
               <div className='mt-8 space-y-4'>
                 <div className='flex items-start gap-4'>
                   <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
-                    <PhoneCall className='h-5 w-5' style={{ color: C.primary }} />
+                    <PhoneCall className='h-5 w-5' weight='duotone' style={{ color: C.primary }} />
                   </div>
                   <div>
                     <p className='font-semibold'>Par téléphone</p>
@@ -703,7 +708,7 @@ function ConsultSection() {
                 </div>
                 <div className='flex items-start gap-4'>
                   <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
-                    <MapPin className='h-5 w-5' style={{ color: C.primary }} />
+                    <MapPin className='h-5 w-5' weight='duotone' style={{ color: C.primary }} />
                   </div>
                   <div>
                     <p className='font-semibold'>En personne</p>
