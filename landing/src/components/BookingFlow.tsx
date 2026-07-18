@@ -787,12 +787,13 @@ function ConsultationForm({
         <div className='flex flex-col gap-6 px-5 pb-5 sm:flex-row sm:px-6 sm:pb-6'>
           {/* Left — Dr. Widad */}
           <div className='flex shrink-0 flex-col items-center sm:w-[220px]'>
-            <motion.div
+            <motion.img
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
-              className='h-[200px] w-full overflow-hidden rounded-2xl bg-cover bg-center shadow-md sm:h-[240px]'
-              style={{ backgroundImage: "url('/images/dr-widad.jpg')" }}
+              src='/images/team/dr widad slaoui.jpg'
+              alt='Dr. Widad Slaoui'
+              className='h-[200px] w-full rounded-2xl object-cover object-center shadow-md sm:h-[270px]'
             />
             <motion.span
               initial={{ opacity: 0, y: 8 }}

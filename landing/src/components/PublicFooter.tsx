@@ -82,7 +82,7 @@ export default function PublicFooter() {
 
         <div className='relative mt-12 border-t pt-6' style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
           <div className='flex flex-col gap-5 text-sm sm:flex-row sm:items-center sm:justify-between'>
-            <p className='text-xs font-semibold pl-1' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
+            <p className='text-xs font-semibold pl-1 ml-[30px]' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
               Widamine Center — Tous droits réservés — {year}
             </p>
             <div className='flex items-center gap-5'>

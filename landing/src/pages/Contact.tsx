@@ -9,7 +9,7 @@ import { C } from '@/lib/theme'
 
 const SM = {
   contact: {
-    topLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66bdb3d4417f66a31d312431_contact-header-libellule.avif',
+    topLeft: '/images/leaf-top-left.png',
     topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66bdb37252963420db73fe16_contact-header-feuillage.avif',
   },
   consult: {
@@ -33,8 +33,9 @@ export default function Contact() {
 
       {/* ─── Hero + Form ─── */}
       <section className='relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-20 lg:pt-44'>
-        <img src={SM.contact.topLeft} alt='' className='absolute left-0 top-16 w-36 sm:w-52 lg:w-64 widamine-tint opacity-60' loading='lazy' />
-        <img src={SM.contact.topRight} alt='' className='absolute right-0 top-16 w-36 sm:w-52 lg:w-64 widamine-tint opacity-60' loading='lazy' />
+        <div className='absolute -left-20 top-32 h-56 w-56 rounded-full bg-white/70' />
+        <img src={SM.contact.topLeft} alt='' className='absolute left-0 top-0 w-36 sm:w-52 lg:w-64 widamine-tint opacity-60 scale-y-[-1] -rotate-[25deg] -mt-[50px]' loading='lazy' />
+        <img src={SM.contact.topRight} alt='' className='absolute right-0 top-0 w-36 sm:w-52 lg:w-64 widamine-tint opacity-60' loading='lazy' />
 
         <div className='relative mx-auto max-w-6xl px-5 sm:px-8'>
           <div className='mb-14 text-center'>

@@ -20,7 +20,7 @@ gsap.registerPlugin(ScrollTrigger)
 const SM = {
   hero: {
     logo: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af2514716ef72443f348bc_home-logo-middle.svg',
-    topLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abad49265e1cb980_header-top-left.avif',
+    topLeft: '/images/leaf-top-left.png',
     topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af35669264ecc82de0caaa_header-top-right.avif',
     midRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3566abad49265e1cb9a8_header-middle-right.avif',
     midLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abee64cc381d4b75_header-middle-left-vector.svg',
@@ -41,12 +41,12 @@ const SM = {
     bottomLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66b22d8caadf7a99405e08ed_team-bottom-left.avif',
     flamant: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66ba3959a7134def88b2861e_flammant.avif',
     members: [
-      { name: 'Dr Marie JOURDAN', role: 'Dermatologue esthétique', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e104783e18488c7040f1_maria-jourdan-photo.webp' },
-      { name: 'Dr Myriam BITBOL', role: 'Médecin', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/69538763755ad040d580afe9_474726d3-e7de-4756-8501-41a0d2035149.jpeg' },
-      { name: 'Dr Isabelle DUQUENNE', role: 'Médecin', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/69e1d6078dcf0b6a8a5efdc7_IMG_3136%20-%20Grande.jpeg' },
-      { name: 'Tan', role: 'Responsable Relation Patient', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e12de21066e1b7a3e461_tan-photo.webp' },
-      { name: 'Anaëlle', role: 'Assistante Laser', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/6818e151f8b8bb70e913332b_anaelle-photo.webp' },
-      { name: 'Sarah', role: 'Assistante Laser', img: 'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/68ea6759be37ce98f62a0b41_b89ddf20-4be8-4348-90ba-463f078747f3.jpeg' },
+      { name: 'Chaymae Ez Ouhri', role: 'Praticienne', img: '/images/team/chaymae ez ouhri .jpg' },
+      { name: 'Ihssan', role: 'Praticien', img: '/images/team/ihssan.jpg' },
+      { name: 'Ilham', role: 'Praticienne', img: '/images/team/ilham.jpg' },
+      { name: 'Loubna', role: 'Praticienne', img: '/images/team/loubna .jpg' },
+      { name: 'Najwa', role: 'Praticienne', img: '/images/team/najwa.jpg' },
+      { name: 'Nisrin', role: 'Praticienne', img: '/images/team/nisrin .jpg' },
     ],
   },
   gallery: [
@@ -216,7 +216,7 @@ const TESTIMONIALS = [
   { name: 'Nadia T.', text: 'Un centre où chaque détail a été pensé pour le bien-être des patients. Une équipe compétente qui sait allier expertise médicale et sens du service. Une vraie découverte.' },
 ]
 
-const TEAM_ICONS = ['#62bca1', '#62bca1', '#62bca1', '#ffb500', C.primary, C.primary]
+const TEAM_ICONS = ['#62bca1', '#62bca1', '#62bca1', '#ffb500', C.primary, C.primary, '#62bca1']
 
 /* ── Sections ─────────────────────────────────────────────────── */
 
@@ -284,7 +284,7 @@ function HeroSection() {
       <div className='absolute inset-0 pointer-events-none'>
         <div className='absolute -left-20 top-32 h-56 w-56 rounded-full bg-white/70' />
         <div className='absolute -right-10 top-0 h-28 w-52 rounded-bl-full bg-white/70' />
-        <img src={SM.hero.topLeft} alt='' className='absolute -left-8 top-0 w-48 opacity-65 widamine-tint sm:w-64' loading='lazy' />
+        <img src={SM.hero.topLeft} alt='' className='absolute -left-8 top-0 w-48 opacity-65 widamine-tint scale-y-[-1] -rotate-[25deg] -mt-[50px] sm:w-64' loading='lazy' />
         <img src={SM.hero.topRight} alt='' className='absolute right-0 top-0 w-36 opacity-65 widamine-tint sm:w-48' loading='lazy' />
         <img src={SM.hero.midRight} alt='' className='absolute right-0 top-[38%] w-36 opacity-55 widamine-tint sm:w-52' loading='lazy' />
         <img src={SM.hero.midLeft} alt='' className='absolute left-0 bottom-0 w-40 opacity-45 widamine-tint sm:w-56' loading='lazy' />
@@ -324,7 +324,7 @@ function ConceptSection() {
             <img
               src={SM.concept.flower}
               alt=''
-              className='pointer-events-none absolute right-16 top-0 z-20 w-28 select-none widamine-tint sm:w-36'
+              className='pointer-events-none absolute right-16 top-[22px] z-[1] w-28 select-none widamine-tint sm:w-36'
               loading='lazy'
             />
 
@@ -434,9 +434,10 @@ function TreatmentsSection() {
               />
 
               {/* The image */}
-              <div
-                className='h-full w-full bg-cover bg-center rounded-[2rem]'
-                style={{ backgroundImage: "url('/images/dr-widad.jpg')" }}
+              <img
+                src='/images/team/dr widad slaoui.jpg'
+                alt='Dr. Widad Slaoui'
+                className='h-full w-full object-cover object-center rounded-[2rem]'
               />
             </div>
           </div>
@@ -471,7 +472,6 @@ function TreatmentsSection() {
               <p>Médecin dermatologue avec une expertise en médecine esthétique, laser et bodycontouring. Formation internationale et participation active aux congrès mondiaux, apportant les techniques les plus avancées et sécurisées de la dermatologie moderne.</p>
               <p className='mt-4'>Son approche est fondée sur un accompagnement personnalisé, recherchant toujours des résultats naturels, harmonieux et reflétant le bien-être de chaque patiente.</p>
             </div>
-
           </div>
         </div>
       </div>
@@ -506,8 +506,8 @@ function TeamSection() {
             {SM.team.members.map((m, i) => (
               <SwiperSlide key={i}>
                 <article className='overflow-hidden rounded-[2rem] border border-black/5 bg-white transition-all duration-300 hover:-translate-y-1 h-full' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-                  <div className='relative h-72 overflow-hidden'>
-                    <img src={m.img} alt={m.name} className='h-full w-full object-cover' loading='lazy' />
+                  <div className='relative h-96 overflow-hidden'>
+                    <img src={m.img} alt={m.name} className='h-full w-full object-cover object-[center_10%]' loading='lazy' />
                   </div>
                   <div className='p-6 text-center'>
                     <div className='mx-auto mb-3 h-10 w-10 rounded-full flex items-center justify-center' style={{ background: TEAM_ICONS[i] }}>
@@ -520,7 +520,7 @@ function TeamSection() {
               </SwiperSlide>
             ))}
           </Swiper>
-          <div className='mt-6 flex justify-center gap-3'>
+          <div className='mt-6 hidden justify-center gap-3'>
             <button className='team-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
               <ArrowLeft />
             </button>

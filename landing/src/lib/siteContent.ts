@@ -11,6 +11,7 @@ export type ServicePageContent = {
   contraindications: string
   sections: { title: string; body: string }[]
   category: 'visage' | 'corps' | 'techniques'
+  reelUrl?: string
 }
 
 export const SERVICE_PAGES: ServicePageContent[] = [
@@ -127,6 +128,7 @@ export const SERVICE_PAGES: ServicePageContent[] = [
       { title: 'Suites opératoires', body: 'Un gonflement et des ecchymoses sont normaux pendant 2 à 3 semaines. Portez un soutien-gorge de maintien jour et nuit pendant 6 semaines. Évitez les efforts physiques et le port de charges lourdes pendant 4 à 6 semaines.' },
     ],
     category: 'corps',
+    reelUrl: 'https://www.instagram.com/reel/C668zfPtM5Q/',
   },
   {
     slug: 'butt-aesthetics',
