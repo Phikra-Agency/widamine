@@ -52,9 +52,6 @@ async function main() {
     data: { name: 'Dr. Fatima Zahra', email: 'fatima@widamine.com', password: docPw, role: 'DOCTOR', admin: false, gender: 'FEMALE' },
   })
 
-  const drYoussef = await prisma.user.create({
-    data: { name: 'Dr. Youssef El Amrani', email: 'youssef@widamine.com', password: docPw, role: 'DOCTOR', admin: false, gender: 'MALE' },
-  })
 
   const drNadia = await prisma.user.create({
     data: { name: 'Dr. Nadia Bennani', email: 'nadia@widamine.com', password: docPw, role: 'DOCTOR', admin: false, gender: 'FEMALE' },
@@ -66,98 +63,27 @@ async function main() {
 
   // ── Motifs ─────────────────────────────────────────────
   const motifConsultation = await prisma.motif.create({
-    data: {
-      name: 'Consultation', slug: 'consultation',
-      duration: 30, color: '#3b82f6', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Consultation générale',
-    },
-  })
-
-  const motifDetartrage = await prisma.motif.create({
-    data: {
-      name: 'Détartrage', slug: 'detartrage',
-      duration: 45, color: '#10b981', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Détartrage dentaire',
-    },
-  })
-
-  const motifUrgence = await prisma.motif.create({
-    data: {
-      name: 'Urgence', slug: 'urgence',
-      duration: 30, color: '#ef4444', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Consultation urgente',
-    },
+    data: { name: 'Consultation', slug: 'consultation', duration: 30, color: '#3b82f6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation générale' },
   })
 
   const motifSuivi = await prisma.motif.create({
-    data: {
-      name: 'Suivi', slug: 'suivi',
-      duration: 20, color: '#f59e0b', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Consultation de suivi',
-    },
+    data: { name: 'Suivi', slug: 'suivi', duration: 20, color: '#f59e0b', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation de suivi' },
   })
 
   const motifBilan = await prisma.motif.create({
-    data: {
-      name: 'Bilan', slug: 'bilan',
-      duration: 60, color: '#8b5cf6', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Bilan complet',
-    },
+    data: { name: 'Bilan', slug: 'bilan', duration: 60, color: '#8b5cf6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Bilan complet' },
   })
 
   const motifLaser = await prisma.motif.create({
-    data: {
-      name: 'Laser', slug: 'laser',
-      duration: 45, color: '#ec4899', isActive: true,
-      requiresPractitionerChoice: true, pendingTtlHours: 24,
-      description: 'Séance de laser',
-    },
+    data: { name: 'Épilation laser', slug: 'epilation-laser', duration: 45, color: '#ec4899', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Séance d\'épilation laser' },
   })
 
   const motifPeeling = await prisma.motif.create({
-    data: {
-      name: 'Peeling', slug: 'peeling',
-      duration: 30, color: '#14b8a6', isActive: true,
-      requiresPractitionerChoice: false, pendingTtlHours: 24,
-      description: 'Séance de peeling visage',
-    },
+    data: { name: 'Peeling', slug: 'peeling', duration: 30, color: '#14b8a6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Séance de peeling visage' },
   })
 
-  const motifFacial = await prisma.motif.create({
-    data: { name: 'Facial Aesthetics', slug: 'facial-aesthetics', duration: 45, color: '#14B8A6', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Soins esthétiques du visage' },
-  })
-
-  const motifLip = await prisma.motif.create({
-    data: { name: 'Lip Aesthetics', slug: 'lip-aesthetics', duration: 30, color: '#EC4899', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Esthétique des lèvres — acide hyaluronique' },
-  })
-
-  const motifEye = await prisma.motif.create({
-    data: { name: 'Eye Aesthetics', slug: 'eye-aesthetics', duration: 30, color: '#0EA5E9', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Esthétique de l\'œil — cernes, ridules' },
-  })
-
-  const motifBrow = await prisma.motif.create({
-    data: { name: 'Eyebrow Aesthetics', slug: 'eyebrow-aesthetics', duration: 30, color: '#10B981', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Esthétique des sourcils' },
-  })
-
-  const motifBody = await prisma.motif.create({
-    data: { name: 'Body Aesthetics', slug: 'body-aesthetics', duration: 60, color: '#2E90C0', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Chirurgie & esthétique corporelle' },
-  })
-
-  const motifBreast = await prisma.motif.create({
-    data: { name: 'Breast Aesthetics', slug: 'breast-aesthetics', duration: 90, color: '#F472B6', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Esthétique mammaire' },
-  })
-
-  const motifBBL = await prisma.motif.create({
-    data: { name: 'Brazilian Butt Lift', slug: 'bbl', duration: 120, color: '#F59E0B', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Lipofilling des fesses' },
-  })
-
-  const motifLipo = await prisma.motif.create({
-    data: { name: 'Liposuction', slug: 'liposuction', duration: 120, color: '#EF4444', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Liposuccion esthétique' },
+  const motifSculpSure = await prisma.motif.create({
+    data: { name: 'SculpSure', slug: 'sculpSure', duration: 25, color: '#2E90C0', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'SculpSure — traitement des bourrelets graisseux' },
   })
 
   // ── Sessions ───────────────────────────────────────────
@@ -165,12 +91,6 @@ async function main() {
   const sessionC2 = await prisma.session.create({ data: { number: 2, duration: 30, motifId: motifConsultation.id } })
   const sessionC3 = await prisma.session.create({ data: { number: 3, duration: 30, motifId: motifConsultation.id } })
   const sessionC4 = await prisma.session.create({ data: { number: 4, duration: 30, motifId: motifConsultation.id } })
-
-  const sessionD1 = await prisma.session.create({ data: { number: 1, duration: 45, motifId: motifDetartrage.id } })
-  const sessionD2 = await prisma.session.create({ data: { number: 2, duration: 45, motifId: motifDetartrage.id } })
-
-  const sessionU1 = await prisma.session.create({ data: { number: 1, duration: 30, motifId: motifUrgence.id } })
-  const sessionU2 = await prisma.session.create({ data: { number: 2, duration: 30, motifId: motifUrgence.id } })
 
   const sessionS1 = await prisma.session.create({ data: { number: 1, duration: 20, motifId: motifSuivi.id } })
   const sessionS2 = await prisma.session.create({ data: { number: 2, duration: 20, motifId: motifSuivi.id } })
@@ -180,14 +100,7 @@ async function main() {
 
   const sessionL1 = await prisma.session.create({ data: { number: 1, duration: 45, motifId: motifLaser.id } })
   const sessionP1 = await prisma.session.create({ data: { number: 1, duration: 30, motifId: motifPeeling.id } })
-  await prisma.session.create({ data: { number: 1, duration: 45, motifId: motifFacial.id } })
-  await prisma.session.create({ data: { number: 1, duration: 30, motifId: motifLip.id } })
-  await prisma.session.create({ data: { number: 1, duration: 30, motifId: motifEye.id } })
-  await prisma.session.create({ data: { number: 1, duration: 30, motifId: motifBrow.id } })
-  await prisma.session.create({ data: { number: 1, duration: 60, motifId: motifBody.id } })
-  await prisma.session.create({ data: { number: 1, duration: 90, motifId: motifBreast.id } })
-  await prisma.session.create({ data: { number: 1, duration: 120, motifId: motifBBL.id } })
-  await prisma.session.create({ data: { number: 1, duration: 120, motifId: motifLipo.id } })
+  const sessionSC1 = await prisma.session.create({ data: { number: 1, duration: 25, motifId: motifSculpSure.id } })
 
   // ── MotifPractitioner ──────────────────────────────────
   await prisma.motifPractitioner.createMany({
@@ -195,32 +108,18 @@ async function main() {
       { motifId: motifConsultation.id, practitionerId: drAhmed.id, priority: 1, isPreferred: true },
       { motifId: motifConsultation.id, practitionerId: drFatima.id, priority: 2 },
       { motifId: motifConsultation.id, practitionerId: drNadia.id, priority: 3 },
-      { motifId: motifDetartrage.id, practitionerId: drYoussef.id, priority: 1, isPreferred: true },
-      { motifId: motifUrgence.id, practitionerId: drYoussef.id, priority: 1, isPreferred: true },
-      { motifId: motifUrgence.id, practitionerId: drAhmed.id, priority: 2 },
       { motifId: motifSuivi.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
       { motifId: motifSuivi.id, practitionerId: drNadia.id, priority: 2 },
       { motifId: motifBilan.id, practitionerId: drAhmed.id, priority: 1, isPreferred: true },
       { motifId: motifLaser.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
       { motifId: motifPeeling.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
-      { motifId: motifFacial.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
-      { motifId: motifLip.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
-      { motifId: motifEye.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
-      { motifId: motifBrow.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
-      { motifId: motifBody.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
-      { motifId: motifBreast.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
-      { motifId: motifBBL.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
-      { motifId: motifLipo.id, practitionerId: drFatima.id, priority: 1, isPreferred: true },
+      { motifId: motifSculpSure.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
     ],
   })
 
   // ── Resources ──────────────────────────────────────────
   const salle1 = await prisma.resource.create({
     data: { name: 'Salle 1', slug: 'salle-1', type: 'ROOM', description: 'Salle de consultation principale', isActive: true },
-  })
-
-  const salle2 = await prisma.resource.create({
-    data: { name: 'Salle 2', slug: 'salle-2', type: 'ROOM', description: 'Salle de soins dentaires', isActive: true },
   })
 
   const salle3 = await prisma.resource.create({
@@ -241,7 +140,6 @@ async function main() {
       { resourceId: salle1.id, practitionerId: drAhmed.id, priority: 1, isPreferred: true },
       { resourceId: salle1.id, practitionerId: drFatima.id, priority: 2 },
       { resourceId: salle1.id, practitionerId: drNadia.id, priority: 3 },
-      { resourceId: salle2.id, practitionerId: drYoussef.id, priority: 1, isPreferred: true },
       { resourceId: salle3.id, practitionerId: drNadia.id, priority: 1, isPreferred: true },
       { resourceId: salle3.id, practitionerId: drFatima.id, priority: 2 },
       { resourceId: echo.id, practitionerId: drAhmed.id, priority: 1 },
@@ -253,22 +151,14 @@ async function main() {
   await prisma.motifResource.createMany({
     data: [
       { motifId: motifConsultation.id, resourceId: salle1.id, priority: 1, isPreferred: true },
-      { motifId: motifDetartrage.id, resourceId: salle2.id, priority: 1, isPreferred: true },
-      { motifId: motifUrgence.id, resourceId: salle2.id, priority: 1, isPreferred: true },
       { motifId: motifSuivi.id, resourceId: salle1.id, priority: 1, isPreferred: true },
       { motifId: motifBilan.id, resourceId: salle1.id, priority: 1, isPreferred: true },
       { motifId: motifBilan.id, resourceId: echo.id, priority: 1, isRequired: true },
       { motifId: motifLaser.id, resourceId: salle3.id, priority: 1, isPreferred: true },
       { motifId: motifLaser.id, resourceId: laser.id, priority: 1, isRequired: true },
       { motifId: motifPeeling.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifFacial.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifLip.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifEye.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifBrow.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifBody.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifBreast.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifBBL.id, resourceId: salle3.id, priority: 1, isPreferred: true },
-      { motifId: motifLipo.id, resourceId: salle3.id, priority: 1, isPreferred: true },
+      { motifId: motifSculpSure.id, resourceId: salle3.id, priority: 1, isPreferred: true },
+      { motifId: motifSculpSure.id, resourceId: laser.id, priority: 1, isRequired: true },
     ],
   })
 
@@ -279,7 +169,6 @@ async function main() {
       { practitionerId: drAhmed.id, startsAt: today(14, 0), endsAt: today(17, 0), isActive: true },
       { practitionerId: drFatima.id, startsAt: today(9, 0), endsAt: today(13, 0), isActive: true },
       { practitionerId: drFatima.id, startsAt: today(14, 30), endsAt: today(17, 30), isActive: true },
-      { practitionerId: drYoussef.id, startsAt: today(10, 0), endsAt: today(16, 0), isActive: true },
       { practitionerId: drNadia.id, startsAt: today(9, 0), endsAt: today(12, 30), isActive: true },
       { practitionerId: drNadia.id, startsAt: today(14, 0), endsAt: today(18, 0), isActive: true },
     ],
@@ -338,10 +227,10 @@ async function main() {
   await book({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'CONFIRMED', context: 'Suivi post-opératoire à 15 jours de l\'intervention — contrôle de la cicatrisation. J\'ai été opérée d\'une hernie inguinale et tout se passe bien globalement. La cicatrice semble bien propre mais j\'ai encore quelques douleurs quand je tousse ou je me penche.', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: today(11, 0), sessionId: sessionS2.id })
 
   // ─ Dr. Youssef — morning block ─
-  await book({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'CONFIRMED', context: 'Détartrage semestriel de routine avec contrôle des gencives. Mon dentiste m\'a recommandé de venir tous les six mois pour un suivi parodontal. J\'ai tendance à avoir des saignements quand je me brosse les dents.', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: today(10, 0), sessionId: sessionD1.id })
-  await book({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'PENDING', context: 'Douleur dentaire vive à la molaire inférieure droite, sensible au chaud et au froid. La douleur est apparue il y a trois jours et s\'intensifie quand je bois quelque chose de chaud. J\'ai regardé dans le miroir et j\'ai l\'impression qu\'il y a une petite fissure visible sur la dent.', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: today(10, 0), sessionId: sessionU1.id })
-  await book({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'CONFIRMED', context: 'Détartrage complet avec bilan parodontal demandé par mon dentiste. Il m\'a dit que j\'avais du tartre accumulé sous la gencive qui pouvait causer une parodontite. Je voudrais aussi en profiter pour un blanchiment doux si c\'est possible.', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: today(11, 0), sessionId: sessionD2.id })
-  await book({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'CONFIRMED', context: 'Urgence dentaire — un plombage est tombé et la dent est très sensible. C\'est une dent dévitalisée qui avait été soignée il y a deux ans. Je n\'ai pas mal mais j\'ai peur que l\'infection s\'installe si ça reste ouvert trop longtemps.', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: today(14, 0), sessionId: sessionU2.id })
+  await book({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'CONFIRMED', context: 'Détartrage semestriel de routine avec contrôle des gencives. Mon dentiste m\'a recommandé de venir tous les six mois pour un suivi parodontal. J\'ai tendance à avoir des saignements quand je me brosse les dents.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: today(10, 0), sessionId: sessionC1.id })
+  await book({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'PENDING', context: 'Douleur dentaire vive à la molaire inférieure droite, sensible au chaud et au froid. La douleur est apparue il y a trois jours et s\'intensifie quand je bois quelque chose de chaud. J\'ai regardé dans le miroir et j\'ai l\'impression qu\'il y a une petite fissure visible sur la dent.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: today(10, 0), sessionId: sessionC3.id })
+  await book({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'CONFIRMED', context: 'Détartrage complet avec bilan parodontal demandé par mon dentiste. Il m\'a dit que j\'avais du tartre accumulé sous la gencive qui pouvait causer une parodontite. Je voudrais aussi en profiter pour un blanchiment doux si c\'est possible.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: today(11, 0), sessionId: sessionC2.id })
+  await book({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'CONFIRMED', context: 'Urgence dentaire — un plombage est tombé et la dent est très sensible. C\'est une dent dévitalisée qui avait été soignée il y a deux ans. Je n\'ai pas mal mais j\'ai peur que l\'infection s\'installe si ça reste ouvert trop longtemps.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: today(14, 0), sessionId: sessionC4.id })
 
   // ─ Dr. Nadia — all day ─
   await book({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'CONFIRMED', context: 'Séance laser jambes — troisième séance du protocole d\'épilation définitive. Les deux premières séances ont donné de bons résultats, environ 60% de réduction de la pilosité. Je supporte bien le laser diode sans crème anesthésiante particulière.', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: today(9, 30), sessionId: sessionL1.id })
@@ -351,8 +240,8 @@ async function main() {
 
   // TOMORROW (Sat 2026-06-27)
   await book({ patientId: patKarim.id, name: 'Karim Bensouda', email: 'karim@email.com', phone: '+212600000001', status: 'PENDING', context: 'Contrôle de suivi pour le genou — les anti-inflammatoires ont bien réduit la douleur. Je peux maintenant monter les escaliers sans trop de difficulté. Je voudrais savoir si je dois continuer le traitement encore quelques semaines ou si je peux arrêter.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(1, 9, 0), sessionId: sessionC1.id })
-  await book({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'CONFIRMED', context: 'Nettoyage dentaire de routine avec détartrage et polissage. Cela fait un peu plus de six mois que mon dernier détartrage. Mes gencives saignent parfois quand je passe le fil dentaire, je voudrais vérifier que tout va bien.', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(1, 10, 0), sessionId: sessionD1.id })
-  await book({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'CONFIRMED', context: 'Urgence dentaire — abcès apparent sur la gencive avec gonflement de la joue. J\'ai commencé à sentir une boule sur la gencive hier matin et ce matin ma joue a gonflé. J\'ai un peu de fièvre également, 38°C, je crois qu\'il faut traiter rapidement.', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(1, 11, 30), sessionId: sessionU1.id })
+  await book({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'CONFIRMED', context: 'Nettoyage dentaire de routine avec détartrage et polissage. Cela fait un peu plus de six mois que mon dernier détartrage. Mes gencives saignent parfois quand je passe le fil dentaire, je voudrais vérifier que tout va bien.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(1, 10, 0), sessionId: sessionC1.id })
+  await book({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'CONFIRMED', context: 'Urgence dentaire — abcès apparent sur la gencive avec gonflement de la joue. J\'ai commencé à sentir une boule sur la gencive hier matin et ce matin ma joue a gonflé. J\'ai un peu de fièvre également, 38°C, je crois qu\'il faut traiter rapidement.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(1, 11, 30), sessionId: sessionC3.id })
   await book({ patientId: patHassan.id, name: 'Hassan Tazi', email: 'hassan@email.com', phone: '+212600000003', status: 'PENDING', context: 'Bilan de contrôle pour renouvellement du traitement antihypertenseur. Mon ordonnance arrive à expiration dans deux semaines et je dois refaire un bilan avant le renouvellement. Ma tension est bien équilibrée depuis le dernier ajustement de dose il y a trois mois.', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(1, 14, 0), sessionId: sessionB1.id })
   await book({ patientId: patOmar.id, name: 'Omar Idrissi', email: 'omar@email.com', phone: '+212600000005', status: 'PENDING', context: 'Séance laser première fois pour le dos — séance découverte. J\'ai beaucoup de poils dans le dos et ça me complexe depuis longtemps. Je voudrais d\'abord tester une petite zone pour voir comment ma peau réagit avant de m\'engager sur un protocole complet.', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(1, 9, 30), sessionId: sessionL1.id })
   await book({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'CONFIRMED', context: 'Peeling visage pour un teint plus uniforme — deuxième séance du protocole. La première séance a bien éliminé les couches superficielles et ma peau est plus lumineuse. Je n\'ai pas eu d\'effets secondaires notables, juste une légère rougeur pendant deux jours.', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(1, 11, 0), sessionId: sessionP1.id })
@@ -363,12 +252,12 @@ async function main() {
   await book({ patientId: patKarim.id, name: 'Karim Bensouda', email: 'karim@email.com', phone: '+212600000001', status: 'CONFIRMED', context: 'Consultation genou — retour des résultats d\'IRM et discussion sur la suite du traitement. L\'IRM que vous m\'avez prescrite a révélé une légère fissure du ménisque interne au niveau du compartiment médial, sans lésion ligamentaire associée. Le radiologue a mentionné que la fissure mesure environ 8 mm et qu\'elle est partielle, pas traversante. Je voudrais discuter des options car j\'espère vraiment éviter la chirurgie si possible. Mon ostéopathe m\'a dit que je pouvais peut-être me contenter de la rééducation et du renforcement musculaire, mais mon généraliste m\'a dit qu\'une fissure du ménisque ne guérissait pas toute seule et qu\'il faudrait probablement opérer. Je suis perdu entre les deux avis et j\'aimerais avoir votre expertise pour m\'aider à prendre la bonne décision. J\'ai 42 ans, je suis commercial et je marche énormément dans mon travail, environ 8 à 10 km par jour. Je fais aussi du vélo et du running trois fois par semaine, et j\'ai peur de devoir arrêter le sport si on m\'opère. J\'ai lu que la récupération après une méniscectomie partielle était d\'environ 4 à 6 semaines, mais que la rééducation après une suture méniscale pouvait prendre 4 à 6 mois. Est-ce que dans mon cas, avec une fissure partielle de 8 mm, on peut envisager une suture ou est-ce que la méniscectomie partielle est la seule option ? Je n\'ai pas de blocage articulaire mais j\'ai parfois des sensations d\'instabilité et une douleur quand je tourne sur ma jambe droite. La douleur est gérée avec du paracétamol et de la glace après l\'effort, mais elle revient systématiquement si je force un peu. Je n\'ai pas d\'antécédents de traumatisme direct, la douleur est apparue progressivement sur plusieurs semaines sans vraie raison. Je porte une genouillère simple depuis deux semaines et ça m\'aide un peu mais pas complètement. Je suis prêt à faire tout ce qu\'il faut : rééducation, changement de ma routine sportive, perte de poids si nécessaire. Dites-moi ce que vous pensez du traitement conservateur avant d\'envisager la chirurgie, et si on doit opérer, quelle technique recommandez-vous pour quelqu\'un qui veut reprendre le sport le plus tôt possible ? Merci docteur pour votre avis éclairé.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(3, 10, 0), sessionId: sessionC1.id })
   await book({ patientId: patKhalid.id, name: 'Khalid El Fassi', email: 'khalid@email.com', phone: '+212600000017', status: 'PENDING', context: 'Consultation cardiaque suite à des douleurs thoraciques intermittentes cette semaine. Les douleurs surviennent surtout après un effort ou en période de stress et durent quelques minutes. Mon père a eu un infarctus à 60 ans et je suis inquiet car j\'ai 55 ans maintenant.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(3, 10, 0), sessionId: sessionC2.id })
   await book({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'PENDING', context: 'Première séance laser pour le maquillage permanent — séance test. J\'ai un tatouage permanent des sourcils qui a viré au rouge avec le temps et je voudrais l\'effacer. On m\'a dit que le laser picosecond était efficace sur les pigments rouges.', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(3, 11, 0), sessionId: sessionL1.id })
-  await book({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'CONFIRMED', context: 'Détartrage annuel avec contrôle des gencives et détection précoce des caries. Je n\'ai pas consulté de dentiste depuis deux ans à cause de mon emploi du temps chargé. J\'ai remarqué une sensibilité sur une dent du fond quand je mâche du côté droit.', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(3, 14, 0), sessionId: sessionD1.id })
+  await book({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'CONFIRMED', context: 'Détartrage annuel avec contrôle des gencives et détection précoce des caries. Je n\'ai pas consulté de dentiste depuis deux ans à cause de mon emploi du temps chargé. J\'ai remarqué une sensibilité sur une dent du fond quand je mâche du côté droit.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(3, 14, 0), sessionId: sessionC1.id })
 
   // TUESDAY (2026-06-30)
   await book({ patientId: patRachid.id, name: 'Rachid El Amrani', email: 'rachid@email.com', phone: '+212600000011', status: 'CONFIRMED', context: 'Suivi diabète — contrôle de la glycémie et ajustement du traitement si nécessaire. Ma glycémie à jeun est remontée à 1,40 g/L ces dernières semaines malgré le régime. Je fais attention à mon alimentation mais je pense que ma metformine a besoin d\'être augmentée.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(4, 9, 0), sessionId: sessionC3.id })
   await book({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'CONFIRMED', context: 'Bilan annuel complet avec analyses sanguines et test d\'effort. Mon entreprise m\'offre un bilan de santé annuel et j\'ai choisi votre clinique pour le réaliser. Je n\'ai pas de symptômes particuliers mais je préfère être suivi régulièrement à 48 ans.', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(4, 10, 30), sessionId: sessionB1.id })
-  await book({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'PENDING', context: 'Douleur dentaire persistante depuis une semaine — traitée aux antalgiques sans amélioration. J\'ai pris de l\'amoxicilline et du paracétamol prescrits par mon généraliste mais la douleur persiste. La dent est sensible à la pression et je pense qu\'une carie profonde nécessite un traitement radicalaire.', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(4, 14, 0), sessionId: sessionU2.id })
+  await book({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'PENDING', context: 'Douleur dentaire persistante depuis une semaine — traitée aux antalgiques sans amélioration. J\'ai pris de l\'amoxicilline et du paracétamol prescrits par mon généraliste mais la douleur persiste. La dent est sensible à la pression et je pense qu\'une carie profonde nécessite un traitement radicalaire.', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(4, 14, 0), sessionId: sessionC4.id })
   await book({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'CONFIRMED', context: 'Séance laser aisselles — quatrième séance sur six du protocole complet. La pilosité a considérablement diminué, environ 80% de réduction depuis le début du protocole. Je recommande vivement cette méthode à mes amies, le résultat est vraiment satisfaisant.', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(4, 15, 0), sessionId: sessionL1.id })
 
   // ── Historical appointments for analytics ────────────────
@@ -387,8 +276,8 @@ async function main() {
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-1, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patImane.id, name: 'Imane El Khouli', email: 'imane@email.com', phone: '+212600000010', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-1, 11, 0), sessionId: sessionP1.id })
   // Dr. Youssef: 2 yesterday
-  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-1, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-1, 14, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-1, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-1, 14, 0), sessionId: sessionC3.id })
   // Dr. Nadia: 1 yesterday
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-1, 9, 30), sessionId: sessionL1.id })
 
@@ -397,28 +286,28 @@ async function main() {
   await bookQuick({ patientId: patKarim.id, name: 'Karim Bensouda', email: 'karim@email.com', phone: '+212600000001', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-7, 9, 0), sessionId: sessionC1.id })
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-7, 10, 0), sessionId: sessionB1.id })
   await bookQuick({ patientId: patOmar.id, name: 'Omar Idrissi', email: 'omar@email.com', phone: '+212600000005', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-7, 9, 0), sessionId: sessionS1.id })
-  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-7, 10, 0), sessionId: sessionD1.id })
+  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-7, 10, 0), sessionId: sessionC1.id })
   await bookQuick({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-7, 11, 0), sessionId: sessionL1.id })
   // Tuesday last week (-6)
   await bookQuick({ patientId: patHicham.id, name: 'Hicham Bennani', email: 'hicham@email.com', phone: '+212600000015', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-6, 9, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patKhalid.id, name: 'Khalid El Fassi', email: 'khalid@email.com', phone: '+212600000017', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-6, 14, 0), sessionId: sessionC4.id })
   await bookQuick({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-6, 9, 0), sessionId: sessionC1.id })
-  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-6, 10, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-6, 10, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drNadia.id, resourceId: salle1.id, datetime: todayPlusDays(-6, 15, 0), sessionId: sessionC2.id })
   // Wednesday last week (-5)
   await bookQuick({ patientId: patYounes.id, name: 'Younes El Fassi', email: 'younes@email.com', phone: '+212600000007', status: 'COMPLETED', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-5, 9, 0), sessionId: sessionB2.id })
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-5, 10, 0), sessionId: sessionP1.id })
-  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-5, 11, 0), sessionId: sessionD2.id })
+  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-5, 11, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-5, 14, 0), sessionId: sessionL1.id })
   // Thursday last week (-4)
   await bookQuick({ patientId: patHassan.id, name: 'Hassan Tazi', email: 'hassan@email.com', phone: '+212600000003', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-4, 9, 0), sessionId: sessionC1.id })
   await bookQuick({ patientId: patImane.id, name: 'Imane El Khouli', email: 'imane@email.com', phone: '+212600000010', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-4, 9, 0), sessionId: sessionS2.id })
-  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-4, 14, 0), sessionId: sessionU2.id })
+  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-4, 14, 0), sessionId: sessionC4.id })
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-4, 16, 0), sessionId: sessionL1.id })
   // Friday last week (-3)
   await bookQuick({ patientId: patRachid.id, name: 'Rachid El Amrani', email: 'rachid@email.com', phone: '+212600000011', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-3, 9, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-3, 9, 0), sessionId: sessionS1.id })
-  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-3, 10, 0), sessionId: sessionD1.id })
+  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-3, 10, 0), sessionId: sessionC1.id })
 
   // ─── LAST MONTH (week by week, -28 to -14 days) ────────
   // Week 1 of last month (-28 to -24)
@@ -427,8 +316,8 @@ async function main() {
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-27, 9, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patOmar.id, name: 'Omar Idrissi', email: 'omar@email.com', phone: '+212600000005', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-28, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-27, 10, 0), sessionId: sessionP1.id })
-  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-28, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-27, 14, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-28, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-27, 14, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-28, 14, 0), sessionId: sessionL1.id })
   await bookQuick({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drNadia.id, resourceId: salle1.id, datetime: todayPlusDays(-26, 11, 0), sessionId: sessionC1.id })
 
@@ -438,8 +327,8 @@ async function main() {
   await bookQuick({ patientId: patRachid.id, name: 'Rachid El Amrani', email: 'rachid@email.com', phone: '+212600000011', status: 'COMPLETED', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-20, 10, 0), sessionId: sessionB2.id })
   await bookQuick({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-21, 9, 0), sessionId: sessionC1.id })
   await bookQuick({ patientId: patImane.id, name: 'Imane El Khouli', email: 'imane@email.com', phone: '+212600000010', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-20, 9, 30), sessionId: sessionS2.id })
-  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-21, 10, 0), sessionId: sessionD2.id })
-  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-19, 14, 0), sessionId: sessionU2.id })
+  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-21, 10, 0), sessionId: sessionC2.id })
+  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-19, 14, 0), sessionId: sessionC4.id })
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-21, 16, 0), sessionId: sessionL1.id })
 
   // Week 3 of last month (-14 to -10)
@@ -448,8 +337,8 @@ async function main() {
   await bookQuick({ patientId: patHassan.id, name: 'Hassan Tazi', email: 'hassan@email.com', phone: '+212600000003', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-13, 14, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-14, 9, 0), sessionId: sessionC1.id })
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-13, 9, 0), sessionId: sessionS1.id })
-  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-14, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-12, 14, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-14, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-12, 14, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-14, 14, 0), sessionId: sessionL1.id })
   await bookQuick({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drNadia.id, resourceId: salle1.id, datetime: todayPlusDays(-11, 11, 0), sessionId: sessionC2.id })
 
@@ -462,9 +351,9 @@ async function main() {
   await bookQuick({ patientId: patOmar.id, name: 'Omar Idrissi', email: 'omar@email.com', phone: '+212600000005', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-60, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-59, 10, 0), sessionId: sessionP1.id })
   await bookQuick({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-58, 14, 0), sessionId: sessionC1.id })
-  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-60, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-59, 14, 0), sessionId: sessionU1.id })
-  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-58, 11, 0), sessionId: sessionD2.id })
+  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-60, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-59, 14, 0), sessionId: sessionC3.id })
+  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-58, 11, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-60, 14, 0), sessionId: sessionL1.id })
   await bookQuick({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drNadia.id, resourceId: salle1.id, datetime: todayPlusDays(-59, 15, 0), sessionId: sessionC2.id })
 
@@ -474,8 +363,8 @@ async function main() {
   await bookQuick({ patientId: patYounes.id, name: 'Younes El Fassi', email: 'younes@email.com', phone: '+212600000007', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-89, 14, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patImane.id, name: 'Imane El Khouli', email: 'imane@email.com', phone: '+212600000010', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-90, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patSamira.id, name: 'Samira Aït Ali', email: 'samira@email.com', phone: '+212600000006', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-89, 10, 0), sessionId: sessionP1.id })
-  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-90, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-89, 14, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-90, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-89, 14, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-90, 16, 0), sessionId: sessionL1.id })
 
   // ~4 months ago
@@ -484,8 +373,8 @@ async function main() {
   await bookQuick({ patientId: patLeila.id, name: 'Leila Benjelloun', email: 'leila@email.com', phone: '+212600000004', status: 'COMPLETED', motifId: motifBilan.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-119, 10, 0), sessionId: sessionB1.id })
   await bookQuick({ patientId: patOmar.id, name: 'Omar Idrissi', email: 'omar@email.com', phone: '+212600000005', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-120, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patAmina.id, name: 'Amina Berrada', email: 'amina@email.com', phone: '+212600000008', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-119, 10, 0), sessionId: sessionC1.id })
-  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-120, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifUrgence.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-119, 14, 0), sessionId: sessionU1.id })
+  await bookQuick({ patientId: patNadia.id, name: 'Nadia El Ouafi', email: 'nadia@email.com', phone: '+212600000002', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-120, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patMehdi.id, name: 'Mehdi Ouazzani', email: 'mehdi@email.com', phone: '+212600000009', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-119, 14, 0), sessionId: sessionC3.id })
   await bookQuick({ patientId: patFatimaZ.id, name: 'Fatima Zahra', email: 'fatima.z@email.com', phone: '+212600000014', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-120, 14, 0), sessionId: sessionL1.id })
 
   // ~5 months ago
@@ -494,8 +383,8 @@ async function main() {
   await bookQuick({ patientId: patRachid.id, name: 'Rachid El Amrani', email: 'rachid@email.com', phone: '+212600000011', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-149, 14, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patNawal.id, name: 'Nawal Bouchaib', email: 'nawal@email.com', phone: '+212600000018', status: 'COMPLETED', motifId: motifSuivi.id, practitionerId: drFatima.id, resourceId: salle1.id, datetime: todayPlusDays(-150, 9, 0), sessionId: sessionS1.id })
   await bookQuick({ patientId: patImane.id, name: 'Imane El Khouli', email: 'imane@email.com', phone: '+212600000010', status: 'COMPLETED', motifId: motifPeeling.id, practitionerId: drFatima.id, resourceId: salle3.id, datetime: todayPlusDays(-149, 10, 0), sessionId: sessionP1.id })
-  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-150, 10, 0), sessionId: sessionD1.id })
-  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifDetartrage.id, practitionerId: drYoussef.id, resourceId: salle2.id, datetime: todayPlusDays(-149, 11, 0), sessionId: sessionD2.id })
+  await bookQuick({ patientId: patSara.id, name: 'Sara Benabid', email: 'sara@email.com', phone: '+212600000012', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-150, 10, 0), sessionId: sessionC1.id })
+  await bookQuick({ patientId: patDriss.id, name: 'Driss Berrada', email: 'driss@email.com', phone: '+212600000013', status: 'COMPLETED', motifId: motifConsultation.id, practitionerId: drAhmed.id, resourceId: salle1.id, datetime: todayPlusDays(-149, 11, 0), sessionId: sessionC2.id })
   await bookQuick({ patientId: patMona.id, name: 'Mona Lahlou', email: 'mona@email.com', phone: '+212600000016', status: 'COMPLETED', motifId: motifLaser.id, practitionerId: drNadia.id, resourceId: salle3.id, datetime: todayPlusDays(-150, 14, 0), sessionId: sessionL1.id })
 
   // ── Contacts ───────────────────────────────────────────
