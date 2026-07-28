@@ -130,7 +130,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                   <button
                     type='button'
                     onClick={() => handleCategoryClick(cat.slug)}
-                    className={`inline-flex cursor-pointer items-center gap-1.5 capitalize transition-colors ${isCategoryActive ? activeClass : hoverClass}`}
+                    className={`inline-flex cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150 ${isCategoryActive ? activeClass : hoverClass}`}
                     aria-haspopup='menu'
                     aria-expanded={isOpen}
                   >
@@ -152,7 +152,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                           <Link
                             to={`/category/${cat.slug}`}
                             onClick={() => setOpenCategory(null)}
-                            className='mb-2 block rounded-2xl px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary transition hover:bg-primary/7'
+                            className='mb-2 block rounded-2xl px-3 py-2.5 text-xs font-semibold uppercase tracking-normal text-primary transition hover:bg-primary/7'
                           >
                             Tous les traitements {cat.label}
                           </Link>
@@ -162,7 +162,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                 key={item.label}
                                 to={item.href}
                                 onClick={() => setOpenCategory(null)}
-                                className='group flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-secondary/72 transition-colors hover:bg-primary/8 hover:text-secondary'
+                                className='group flex cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm text-secondary/72 transition-colors hover:bg-primary/8 hover:text-secondary'
                               >
                                 <ServiceIcon slug={item.slug} size={28} color={C.secondary} className='opacity-70' />
                                 <span>{item.label}</span>
@@ -181,30 +181,30 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
           <div className='flex items-center gap-1.5 sm:gap-2'>
             <Link
               to='/contact'
-              className={`hidden cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 md:inline-flex ${isLight ? 'border-secondary/70 text-secondary hover:bg-white/40' : 'border-white/35 text-white hover:bg-white/10'} ${isContact ? activeClass : ''}`}
+              className={`hidden cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition-[color,background-color,transform,border-color] duration-300 hover:-translate-y-0.5 md:inline-flex ${isLight ? 'border-secondary/70 text-secondary hover:bg-white/40' : 'border-white/35 text-white hover:bg-white/10'} ${isContact ? activeClass : ''}`}
             >
-              contacter nous
+              Contacter Nous
             </Link>
             <button
               type='button'
               onClick={() => setIsMobileMenuOpen((current) => !current)}
-              className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 sm:h-10 sm:w-10 lg:hidden ${iconButtonClass}`}
+              className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border transition-[color,background-color,border-color] duration-300 lg:hidden ${iconButtonClass}`}
               aria-label='Toggle menu'
             >
-              {isMobileMenuOpen ? <X size={18} weight='duotone' /> : <Menu size={18} weight='duotone' />}
+              {isMobileMenuOpen ? <X size={18} weight='regular' /> : <Menu size={18} weight='regular' />}
             </button>
             <button
               type='button'
               onClick={open}
-              aria-label='Réserver une consultation'
-              className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 active:scale-[0.98] ${ctaClass} ${isLight ? '' : 'hidden md:inline-flex'}`}
+              aria-label='Prendre rendez-vous'
+              className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-transform duration-150 active:scale-[0.96] ${ctaClass} ${isLight ? '' : 'hidden md:inline-flex'}`}
             >
-              Réserver
+              Rendez-vous
             </button>
           </div>
         </nav>
 
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {isMobileMenuOpen ? (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -214,19 +214,19 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               className={`relative z-[9999] mt-2 overflow-hidden rounded-[1.2rem] border shadow-[0_18px_50px_rgba(0,0,0,0.10)] backdrop-blur-[52px] lg:hidden ${isLight ? 'border-secondary/12 bg-custom-white/98' : 'border-white/14 bg-[rgba(11,28,43,0.82)] text-white'}`}
             >
               <div className='max-h-[78dvh] space-y-1 overflow-y-auto p-2.5 sm:p-4'>
-                <Link to='/' className={`block cursor-pointer rounded-xl px-4 py-3 transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to='/' className={`block cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
                   Accueil
                 </Link>
                 {MEGA_CATEGORIES.map((cat) => (
                   <div key={cat.slug}>
-                    <div className={`px-4 pt-3 pb-1 text-[10px] uppercase tracking-[0.26em] ${isLight ? 'text-primary/72' : 'text-white/60'}`}>
+                    <div className={`px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide ${isLight ? 'text-primary/72' : 'text-white/60'}`}>
                       {cat.label}
                     </div>
                     {cat.items.map((item) => (
                       <Link
                         key={item.label}
                         to={item.href}
-                        className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors ${isLight ? 'text-secondary/70 hover:bg-primary/7 hover:text-secondary' : 'text-white/72 hover:bg-white/10 hover:text-white'}`}
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm transition-colors ${isLight ? 'text-secondary/72 hover:bg-primary/8 hover:text-secondary' : 'text-white/72 hover:bg-white/10 hover:text-white'}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <ServiceIcon slug={item.slug} size={20} color={C.secondary} className='opacity-60' />
@@ -235,10 +235,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     ))}
                   </div>
                 ))}
-                <Link to='/appointment' className={`block cursor-pointer rounded-xl px-4 py-3 transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
-                  Rendez-vous
-                </Link>
-                <Link to='/contact' className={`block cursor-pointer rounded-xl px-4 py-3 transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to='/contact' className={`block cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
                   Contact
                 </Link>
                 <button
@@ -247,7 +244,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     setIsMobileMenuOpen(false)
                     open()
                   }}
-                  className='mt-2 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-custom-white shadow-[0_14px_28px_rgba(46,144,192,0.24)]'
+                  className='mt-2 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-semibold text-custom-white shadow-[0_14px_28px_rgba(46,144,192,0.24)]'
                 >
                   Réserver
                 </button>

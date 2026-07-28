@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, PhoneCall } from '@phosphor-icons/react'
+import { MapPin, PhoneCall, Star } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import gsap from 'gsap'
@@ -50,14 +50,10 @@ const SM = {
     ],
   },
   gallery: [
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66e9827c8084de52aefc84f6_Entre%CC%81e%20cabinet.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7daae31b9619c9a56fec2_2-salle-dattente.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7daf46da5094bf6d5334a_3-bureau.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dbb530eb7fe2c2e15bf5_4-jardin.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dbe7da29663d71b184ad_5-salle-vasculaire.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc0b733e8f8d49628eff_6-salle%20pigmentaire.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc20418ca91d088c449a_7-boudoir.webp',
-    'https://cdn.prod.website-files.com/669fe584884bb430eb37ac4e/66f7dc38a7350acde7713f8c_8-sous-sol.webp',
+    '/images/gallery/DSC01316.jpg',
+    '/images/gallery/DSC01374.jpg',
+    '/images/gallery/DSC01346.webp',
+    '/images/gallery/DSC01330.webp',
   ],
   consult: {
     branch: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66ba364172b57bbc64c50e1e_consult-branche-feuiille.avif',
@@ -216,8 +212,6 @@ const TESTIMONIALS = [
   { name: 'Nadia T.', text: 'Un centre où chaque détail a été pensé pour le bien-être des patients. Une équipe compétente qui sait allier expertise médicale et sens du service. Une vraie découverte.' },
 ]
 
-const TEAM_ICONS = ['#62bca1', '#62bca1', '#62bca1', '#ffb500', C.primary, C.primary, '#62bca1']
-
 /* ── Sections ─────────────────────────────────────────────────── */
 
 function HeroSection() {
@@ -236,7 +230,7 @@ function HeroSection() {
       <div className='relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 pt-44 sm:pt-52 lg:pt-60'>
         <h1
           data-fade
-          className='mx-auto max-w-[980px] leading-[0.98]'
+          className='mx-auto max-w-[980px] leading-[0.98] text-balance'
           style={{
             fontFamily: TYPE.headingFamily,
             fontSize: 'clamp(3rem, 6.4vw, 5.9rem)',
@@ -247,20 +241,20 @@ function HeroSection() {
           Une peau éclatante,{' '}
           <span style={{ color: C.primary, fontStyle: 'italic' }}>une confiance retrouvée</span>
         </h1>
-        <p className='mx-auto mt-4 max-w-[600px] text-sm font-semibold tracking-[0.08em] uppercase sm:text-base' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily }}>
+        <p className='mx-auto mt-4 max-w-[600px] text-sm font-semibold tracking-[0.08em] uppercase sm:text-base text-pretty' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily }}>
           Votre centre de dermato-esthétique de référence
         </p>
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(0,159,214,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(0,159,214,0.22)]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(0,159,214,0.18)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(0,159,214,0.22)] active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Recevoir le catalogue
           </button>
           <Link
             to='/appointment'
-            className='inline-flex min-h-14 items-center justify-center rounded-full border px-8 text-base font-semibold transition-all hover:-translate-y-0.5 hover:bg-primary/7'
+            className='inline-flex min-h-14 items-center justify-center rounded-full border px-8 text-base font-semibold transition-transform hover:-translate-y-0.5 hover:bg-primary/7 active:scale-[0.96]'
             style={{ borderColor: C.primary, color: C.secondary }}
           >
             Prendre rendez-vous
@@ -297,12 +291,14 @@ function IntroSection() {
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10'>
-        <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
-          Bienvenue à Widamine <span style={{ color: C.primary, fontStyle: 'italic' }}>Aesthetic Center</span>
+        <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+          Notre vision
         </h2>
-        <p className='mx-auto mt-8 max-w-[700px] text-base leading-8'>
-          Ici, chaque traitement est une promesse d'excellence. Grâce à une combinaison unique de technologies de pointe et de savoir-faire expert, nous vous aidons à redécouvrir votre beauté et à retrouver une peau saine et éclatante.
-        </p>
+        <div className='mx-auto mt-8 max-w-[700px] text-base leading-7 text-pretty'>
+          <p>
+            Chez Widamine, nous allions expertise dermatologique et approche globale du bien-être &mdash; science, technologie et élégance &mdash; pour offrir à chaque patient une prise en charge médicale personnalisée, respectueuse de sa peau et de ses besoins.
+          </p>
+        </div>
       </div>
       <img src={SM.intro.topLeft} alt='' data-parallax className='absolute left-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
       <img src={SM.intro.topRight} alt='' data-parallax className='absolute right-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
@@ -312,55 +308,68 @@ function IntroSection() {
 }
 
 
-function ConceptSection() {
+const ConceptSection = () => {
+  const { open } = useScheduleModalStore()
   return (
-    <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
-      <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <div className='grid gap-16 lg:grid-cols-[0.95fr_1fr] lg:items-center'>
-          <div className='relative mx-auto h-[560px] w-full max-w-[560px]'>
-            <div className='absolute -left-16 top-16 h-44 w-52 rounded-[48%] bg-white/60' />
-            <div className='absolute -bottom-10 left-8 h-72 w-56 rounded-[50%] bg-white/45' />
-            <div className='absolute bottom-0 right-12 h-80 w-44 rounded-[50%] bg-white/50' />
-            <img
-              src={SM.concept.flower}
-              alt=''
-              className='pointer-events-none absolute right-16 top-[22px] z-[1] w-28 select-none widamine-tint sm:w-36'
-              loading='lazy'
-            />
+    <section className="relative w-full overflow-hidden py-24 sm:py-32 lg:py-40" style={{ backgroundColor: C.bg }}>
+      <div className="pointer-events-none absolute left-10 top-24 h-64 w-64 rounded-[50%] bg-white/70 blur-[120px]" />
+      <div className="pointer-events-none absolute right-16 bottom-20 h-56 w-56 rounded-[50%] bg-white/60 blur-[120px]" />
 
-            <div className='absolute left-12 top-24 h-[390px] w-[350px] overflow-hidden rounded-[22px] shadow-[0_24px_55px_rgba(30,30,30,0.12)] sm:left-16 sm:w-[360px]'>
-              <img
-                src={SM.concept.image}
-                alt='Concept Widamine'
-                className='h-full w-full object-cover widamine-tint'
-                loading='lazy'
-              />
-            </div>
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_0.95fr] lg:gap-20">
 
-            <div className='absolute bottom-10 right-2 z-10 h-[350px] w-[235px] overflow-hidden rounded-[999px] border-[10px] border-white bg-white shadow-[0_26px_60px_rgba(30,30,30,0.14)] sm:right-8 sm:h-[365px] sm:w-[245px]'>
-              <img
-                src={SM.gallery[0]}
-                alt='Espace Widamine'
-                className='h-full w-full object-cover widamine-tint'
-                loading='lazy'
-              />
-            </div>
-          </div>
-
-          <div className='max-w-xl'>
-            <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
-              Notre <span style={{ color: C.primary, fontStyle: 'italic' }}>Objectif</span>
+          {/* LEFT — heading + text + CTA */}
+          <div className="flex flex-col items-start gap-7 lg:pr-8">
+            <h2
+              style={{
+                fontFamily: TYPE.headingFamily,
+                fontSize: TYPE.h2,
+                letterSpacing: TYPE.headingSpacing,
+                lineHeight: '0.95',
+              }}
+              className="text-[#1a3646] text-balance"
+            >
+              Notre <span style={{ color: C.primary }}>Objectif</span>
             </h2>
-            <p className='mt-8 text-base leading-8' style={{ fontWeight: 600 }}>
-              Nous visons à dépasser les attentes en offrant des soins dermatologiques et esthétiques exceptionnels, conçus pour chaque individu.
-            </p>
-            <p className='mt-4 text-base leading-8' style={{ fontWeight: 500 }}>
-              Notre priorité est d'utiliser les techniques les plus avancées pour assurer des résultats optimaux et durables.
-            </p>
-            <Link to='/contact' className='inline-flex items-center gap-2.5 mt-8 rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
-              Nous contacter
-            </Link>
+
+              <p
+                style={{ fontFamily: TYPE.bodyFamily }}
+                className="max-w-md text-base font-medium leading-[1.8] text-[#1a3646] text-pretty"
+              >
+                Notre objectif est de sublimer le naturel sans jamais le dénaturer. Chaque protocole est conçu sur mesure pour respecter votre physiologie, vos attentes et votre rythme de vie. Résultats harmonieux, confiance préservée.
+              </p>
+
+              <div className="pt-3">
+                <button
+                  onClick={open}
+                  className='inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.96]'
+                  style={{ background: C.primary }}
+                >
+                  Découvrir la clinique
+                </button>
+              </div>
           </div>
+
+          {/* RIGHT — Image */}
+          <div className="relative flex items-center justify-center">
+            <div className="relative w-full max-w-[420px]">
+              <div
+                className="pointer-events-none absolute -bottom-6 -left-6 h-[96%] w-[96%] rounded-[2rem]"
+                style={{ background: `${C.primary}15` }}
+              />
+
+              <div className="pointer-events-none absolute -right-10 top-12 h-32 w-32 rounded-[50%] bg-white/70 blur-[80px]" />
+
+              <div className="relative overflow-hidden rounded-[2rem] bg-[#efe9dc] shadow-[0_24px_64px_-24px_rgba(26,54,70,0.18)]">
+                <img
+                  src={SM.gallery[1]}
+                  alt="Notre objectif - Clinique Widamine"
+                  className="h-[500px] w-full rounded-[2rem] object-cover object-center"
+                />
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -400,56 +409,20 @@ function TreatmentsSection() {
   const imgWrapperRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
 
-  useEffect(() => {
-    const scrollerEl = document.getElementById('app-scroll')
-    if (!scrollerEl || !imgWrapperRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.fromTo(imgWrapperRef.current, { y: -60 }, {
-        y: 60, ease: 'none',
-        scrollTrigger: { trigger: imgWrapperRef.current.closest('section'), scroller: scrollerEl, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
-      })
-    })
-    return () => ctx.revert()
-  }, [])
-
   const name = 'Dr. Widad Slaoui'.split('')
 
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-16 lg:grid-cols-[0.9fr_1fr] lg:items-center'>
-          {/* Left — image */}
-          <div className='relative flex items-center justify-center'>
-            {/* Blue offset backdrop */}
-            <div className='pointer-events-none absolute left-2 top-2 h-[500px] w-full max-w-[420px] select-none rounded-[2rem]' style={{ background: `${C.primary}15` }} />
-
-            {/* Photo card */}
-            <div ref={imgWrapperRef} className='relative h-[500px] w-full max-w-[420px] rounded-[2rem] shadow-[0_30px_70px_rgba(30,30,30,0.18)] ring-1 ring-[rgba(0,159,214,0.08)]'>
-              {/* Floral decorative at top-right corner */}
-              <img
-                src='/assets/square-moncey/concept-fleur.avif'
-                alt=''
-                className='pointer-events-none absolute -right-6 -top-6 z-10 w-28 select-none opacity-30 widamine-tint'
-                loading='lazy'
-              />
-
-              {/* The image */}
-              <img
-                src='/images/team/dr widad slaoui.jpg'
-                alt='Dr. Widad Slaoui'
-                className='h-full w-full object-cover object-center rounded-[2rem]'
-              />
-            </div>
-          </div>
-
-          {/* Right — content */}
-          <div className='max-w-xl'>
+          {/* Right — content (first on mobile) */}
+          <div className='max-w-xl order-1 lg:order-2'>
             <p className='text-xs font-semibold uppercase tracking-[0.25em]' style={{ color: C.primary }}>
-              Rencontrez le docteur
+              Rencontrez la docteur
             </p>
             <h3
               ref={titleRef}
-              className='mt-2 text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[1.05] tracking-[-0.03em]'
+              className='mt-2 text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[1.05] tracking-[-0.03em] text-balance'
               style={{ color: C.secondary, fontFamily: TYPE.headingFamily }}
             >
               {name.map((char, i) => (
@@ -473,8 +446,24 @@ function TreatmentsSection() {
               <p className='mt-4'>Son approche est fondée sur un accompagnement personnalisé, recherchant toujours des résultats naturels, harmonieux et reflétant le bien-être de chaque patiente.</p>
             </div>
           </div>
+
+          {/* Left — image (second on mobile) */}
+          <div className='relative flex items-center justify-center order-2 lg:order-1'>
+            {/* Blue offset backdrop */}
+            <div className='pointer-events-none absolute left-2 top-2 h-[500px] w-full max-w-[420px] select-none rounded-[2rem]' style={{ background: `${C.primary}15` }} />
+
+            {/* Photo card */}
+            <div ref={imgWrapperRef} className='relative h-[500px] w-full max-w-[420px] rounded-[2rem] shadow-[0_30px_70px_rgba(30,30,30,0.18)] ring-1 ring-[rgba(0,159,214,0.08)]'>
+              {/* The image */}
+              <img
+                src='/images/team/dr widad slaoui.jpg'
+                alt='Dr. Widad Slaoui'
+                className='h-full w-full object-cover object-center rounded-[2rem]'
+              />
+            </div>
+          </div>
+          </div>
         </div>
-      </div>
       <img
         src={SM.energie.bubbles}
         alt=''
@@ -489,42 +478,50 @@ function TeamSection() {
   return (
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 className='text-center leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+        <h2 className='text-center leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           <span style={{ color: C.primary, fontStyle: 'italic' }}>L'équipe</span> du Widamine Center
         </h2>
         <div className='mt-14'>
           <Swiper
             modules={[Autoplay, Navigation]}
             navigation={{ prevEl: '.team-prev', nextEl: '.team-next' }}
-            autoplay={{ delay: 3000, disableOnInteraction: false }}
-            slidesPerView={3}
-            spaceBetween={24}
-            speed={600}
+            autoplay={{ delay: 2200, disableOnInteraction: false }}
+            slidesPerView={1}
+            breakpoints={{ 640: { slidesPerView: 3, spaceBetween: 12 } }}
+            spaceBetween={12}
+            speed={400}
             loop
-            className='team-swiper py-8'
+            className='team-swiper !overflow-visible py-8'
           >
             {SM.team.members.map((m, i) => (
-              <SwiperSlide key={i}>
-                <article className='overflow-hidden rounded-[2rem] border border-black/5 bg-white transition-all duration-300 hover:-translate-y-1 h-full' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-                  <div className='relative h-96 overflow-hidden'>
-                    <img src={m.img} alt={m.name} className='h-full w-full object-cover object-[center_10%]' loading='lazy' />
+              <SwiperSlide key={i} className='!overflow-visible py-3'>
+                <article className='group relative mx-auto w-[90%] h-[520px] overflow-hidden rounded-[2rem] bg-white transition-transform duration-500 hover:-translate-y-1.5' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+                  <div className='absolute inset-1 overflow-hidden rounded-[1.75rem]'>
+                    <img
+                      src={m.img}
+                      alt={m.name}
+                      className='h-full w-full object-cover object-[center_10%] transition-transform duration-700 ease-out group-hover:scale-[1.05]'
+                      loading='lazy'
+                    />
                   </div>
-                  <div className='p-6 text-center'>
-                    <div className='mx-auto mb-3 h-10 w-10 rounded-full flex items-center justify-center' style={{ background: TEAM_ICONS[i] }}>
-                      <svg width='20' height='20' viewBox='0 0 24 24' fill='white'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>
-                    </div>
-                    <h3 className='text-lg font-semibold' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, color: C.secondary }}>{m.name}</h3>
-                    <p className='mt-1 text-xs font-medium'>{m.role}</p>
+                  <div className='pointer-events-none absolute inset-x-1 bottom-1 h-[55%] rounded-b-[1.75rem] bg-gradient-to-t from-black/80 via-black/30 to-transparent' />
+                  <div className='absolute bottom-0 left-0 right-0 p-6 sm:p-7'>
+                    <h3 className='font-semibold leading-tight text-white' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, letterSpacing: '0.01em' }}>
+                      {m.name}
+                    </h3>
+                    <p className='mt-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/70'>
+                      {m.role}
+                    </p>
                   </div>
                 </article>
               </SwiperSlide>
             ))}
           </Swiper>
           <div className='mt-6 hidden justify-center gap-3'>
-            <button className='team-prev flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Précédent'>
+            <button className='team-prev flex h-10 w-10 items-center justify-center rounded-full text-white transition-transform hover:scale-105 active:scale-[0.96]' style={{ background: C.primary }} aria-label='Précédent'>
               <ArrowLeft />
             </button>
-            <button className='team-next flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105' style={{ background: C.primary }} aria-label='Suivant'>
+            <button className='team-next flex h-10 w-10 items-center justify-center rounded-full text-white transition-transform hover:scale-105 active:scale-[0.96]' style={{ background: C.primary }} aria-label='Suivant'>
               <ArrowRight />
             </button>
           </div>
@@ -573,7 +570,7 @@ function GallerySection() {
               return (
                 <div
                   key={src}
-                  className='absolute left-0 top-0 transition-all duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]'
+                  className='absolute left-0 top-0 transition-transform duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]'
                   style={{
                     width: 300,
                     height: 420,
@@ -590,7 +587,7 @@ function GallerySection() {
           </div>
           <button
             onClick={() => goTo(galleryIndex + 1)}
-            className='absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 translate-x-6 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105'
+            className='absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 translate-x-6 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 active:scale-[0.96]'
             style={{ background: C.primary }}
             aria-label='Suivant'
           >
@@ -599,28 +596,23 @@ function GallerySection() {
         </div>
 
         <div className='relative z-10 max-w-[620px]'>
-          <div className='mb-10 grid w-28 grid-cols-3 gap-4 opacity-25'>
-            {Array.from({ length: 9 }).map((_, i) => (
-              <span key={i} className='h-2.5 w-2.5 rounded-full' style={{ background: C.orange }} />
-            ))}
-          </div>
-          <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+          <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
             Un <span style={{ color: C.primary, fontStyle: 'italic' }}>aperçu</span> du
             <br />
             Widamine Center
           </h2>
-          <p className='mt-12 max-w-xl text-xl leading-8 font-bold'>
+          <p className='mt-12 max-w-xl text-xl leading-8 font-bold text-pretty'>
             Voici quelques photos des lieux, un centre dermato-esthétique pensé pour accueillir chaque patient avec calme et précision.
           </p>
-          <p className='mt-10 max-w-xl text-base leading-9' style={{ fontWeight: 500 }}>
+          <p className='mt-10 max-w-xl text-base leading-9 text-pretty' style={{ fontWeight: 500 }}>
             Un univers chaleureux qui vous accompagne depuis l'accueil jusqu'aux salles de traitement, avec une attention portée aux matières, à la lumière et au confort.
           </p>
-          <p className='mt-8 max-w-xl text-base leading-9' style={{ fontWeight: 500 }}>
+          <p className='mt-8 max-w-xl text-base leading-9 text-pretty' style={{ fontWeight: 500 }}>
             En photo c'est beau, mais l'expérience est encore plus agréable en vrai.
           </p>
           <Link
             to='/category/corps'
-            className='mt-10 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5'
+            className='mt-10 inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:-translate-y-0.5 active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Traitements du corps
@@ -637,7 +629,7 @@ function TestimonialsSection() {
   return (
     <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-        <h2 data-fade-scroll className='text-center leading-tight sm:text-4xl md:text-5xl mb-14' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+        <h2 data-fade-scroll className='text-center leading-tight sm:text-4xl md:text-5xl mb-14 text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
           Les <span style={{ color: C.orange, fontStyle: 'italic' }}>Témoignages</span> de nos patientes
         </h2>
       </div>
@@ -646,8 +638,8 @@ function TestimonialsSection() {
         <div className='marquee-left flex' onMouseEnter={() => setPaused('left')} onMouseLeave={() => setPaused(null)}>
           <div className={`marquee-track flex shrink-0 gap-6 ${paused === 'left' ? 'pause' : ''}`}>
             {items.map((t, i) => (
-              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] bg-white p-6 border border-black/5'>
-                <div className='text-[#ffb500] mb-3 shrink-0'><Stars5 /></div>
+              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] p-6 border border-[#f7a269]/30'>
+                <div className='mb-3 shrink-0' style={{ color: '#f5d6a8' }}><Stars5 /></div>
                 <p className='text-sm leading-6' style={{ color: C.secondary }}>"{t.text}"</p>
                 <p className='pt-3 text-sm font-semibold shrink-0' style={{ color: C.orange }}>{t.name}</p>
               </div>
@@ -658,8 +650,8 @@ function TestimonialsSection() {
         <div className='marquee-right flex' onMouseEnter={() => setPaused('right')} onMouseLeave={() => setPaused(null)}>
           <div className={`marquee-track flex shrink-0 gap-6 ${paused === 'right' ? 'pause' : ''}`}>
             {items.map((t, i) => (
-              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] bg-white p-6 border border-black/5'>
-                <div className='text-[#ffb500] mb-3 shrink-0'><Stars5 /></div>
+              <div key={i} className='flex w-[340px] shrink-0 flex-col rounded-[1.5rem] p-6 border border-[#f7a269]/30'>
+                <div className='mb-3 shrink-0' style={{ color: '#f5d6a8' }}><Stars5 /></div>
                 <p className='text-sm leading-6' style={{ color: C.secondary }}>"{t.text}"</p>
                 <p className='pt-3 text-sm font-semibold shrink-0' style={{ color: C.orange }}>{t.name}</p>
               </div>
@@ -690,16 +682,16 @@ function ConsultSection() {
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
           <div>
-              <h2 className='leading-tight sm:text-4xl md:text-5xl' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
+              <h2 className='leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
                 Comment <span style={{ color: C.primary, fontStyle: 'italic' }}>prendre rendez-vous</span> au Widamine Center ?
               </h2>
-              <p className='mt-4 text-base leading-8'>
+              <p className='mt-4 text-base leading-8 text-pretty'>
                 La consultation en présentiel ou la visio-consultation (qui permet souvent de diminuer le délai).
               </p>
               <div className='mt-8 space-y-4'>
                 <div className='flex items-start gap-4'>
-                  <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
-                    <PhoneCall className='h-5 w-5' weight='duotone' style={{ color: C.primary }} />
+                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
+                    <PhoneCall className='h-5 w-5' weight='regular' style={{ color: C.primary }} />
                   </div>
                   <div>
                     <p className='font-semibold'>Par téléphone</p>
@@ -707,8 +699,8 @@ function ConsultSection() {
                   </div>
                 </div>
                 <div className='flex items-start gap-4'>
-                  <div className='flex h-10 w-10 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
-                    <MapPin className='h-5 w-5' weight='duotone' style={{ color: C.primary }} />
+                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full' style={{ background: `${C.primary}1a` }}>
+                    <MapPin className='h-5 w-5' weight='regular' style={{ color: C.primary }} />
                   </div>
                   <div>
                     <p className='font-semibold'>En personne</p>
@@ -716,7 +708,7 @@ function ConsultSection() {
                   </div>
                 </div>
               </div>
-            <button onClick={open} className='mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl' style={{ background: C.primary }}>
+            <button onClick={open} className='mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.96]' style={{ background: C.primary }}>
               Prendre rendez-vous
             </button>
           </div>

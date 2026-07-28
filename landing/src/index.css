@@ -87,8 +87,11 @@
 
 html, body, #root {
 	background-color: #FBF7EF;
-	font-family: 'Poppins Thin', 'Chambora', 'Poppins Light', sans-serif;
+	font-family: 'Poppins Light', 'Chambora', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
+
 
 h1, h2, h3, h4, h5, h6 {
 	font-family: 'Chambora', serif;
@@ -147,19 +150,19 @@ h1, h2, h3, h4, h5, h6 {
 	}
 
 	.bo-primary-btn {
-		@apply flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-white shadow-lg shadow-primary/10 transition-all duration-200 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98];
+		@apply flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-white shadow-lg shadow-primary/10 transition-transform duration-150 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.96];
 	}
 
 	.bo-fab {
-		@apply fixed bottom-6 right-6 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-105 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 active:scale-95;
+		@apply fixed bottom-6 right-6 z-40 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-transform duration-150 hover:scale-105 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/40 active:scale-[0.96];
 	}
 
 	.bo-input {
-		@apply w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
+		@apply w-full rounded-lg border border-black/[0.06] bg-white px-4 py-2.5 text-sm text-secondary placeholder:text-secondary/40 transition-[border-color,box-shadow] focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
 	}
 
 	.bo-select {
-		@apply w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
+		@apply w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-[border-color,box-shadow] cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20;
 	}
 }
 
