@@ -7,11 +7,10 @@ import { cn } from '@/lib/utils'
 import { FormDialog, FieldError } from '@/components/bo'
 import { motifSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable } from '@/components/data-table'
+import { DataTable, DataTablePagination, TanStackDataTable, useDataTable } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createSallesMotifsColumns, SALLES_MOTIFS_EMPTY_ILLUSTRATION } from './columns/sallesMotifsColumns'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
 
@@ -63,7 +62,6 @@ function Heading() {
 function MotifsTable() {
   const { items, fetchItems, setOperation, openModal, setItem, clearItem } = useMotifsStore()
   const [loading, setLoading] = useState(true)
-  const debouncedSearch = useDebouncedGlobalSearch()
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -76,9 +74,6 @@ function MotifsTable() {
     columns,
     enablePagination: true,
     pageSize: 10,
-    globalFilter: debouncedSearch,
-    globalFilterFn: (row, columnId, filterValue) =>
-      globalSearchFilter(row, columnId, filterValue, ['name']),
   })
   const rows = table.getRowModel().rows
   const isEmpty = !loading && rows.length === 0

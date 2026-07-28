@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { useDebounce } from 'use-debounce'
 import type { ColumnFiltersState } from '@tanstack/react-table'
-import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
+import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import api from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { APPOINTMENTS_EMPTY_ILLUSTRATION, createAppointmentsColumns } from './columns/appointmentsColumns'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
+
 
 const STATUS_FILTER_PILLS: FilterPillOption[] = [
   { value: 'all', label: 'Tous', color: 'mist' },
@@ -61,7 +61,6 @@ function AppointmentsTable() {
   const { items, filters, setFilters, fetchItems, setItem, toggleOpenShowModal, setOpenShowModal } = useAppointmentsStore()
   const [loading, setLoading] = useState(true)
   const [debouncedStatus] = useDebounce(filters.status, 300)
-  const debouncedSearch = useDebouncedGlobalSearch()
   const [searchParams] = useSearchParams()
   const hasOpenedFromUrl = useRef(false)
 
@@ -111,10 +110,7 @@ function AppointmentsTable() {
     columns,
     enablePagination: true,
     pageSize: 10,
-    globalFilter: debouncedSearch,
     columnFilters,
-    globalFilterFn: (row, columnId, filterValue) =>
-      globalSearchFilter(row, columnId, filterValue, ['name', 'email', 'phone']),
   })
 
   const rows = table.getRowModel().rows

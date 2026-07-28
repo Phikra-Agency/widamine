@@ -25,6 +25,7 @@ See `.env.docker.example`:
 - `JWT_SECRET` — required in production
 - `API_PORT`, `ADMIN_PORT`, `LANDING_PORT` — host port overrides
 - `VITE_ADMIN_URL` — staff link target baked into landing build
+- `GROQ_API_KEY` — required for chatbot
 - `BREVO_API_KEY`, `SMTP_FROM_*` — optional email
 
 ## First-time database seed

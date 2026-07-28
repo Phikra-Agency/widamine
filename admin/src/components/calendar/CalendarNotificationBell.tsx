@@ -69,9 +69,11 @@ export default function CalendarNotificationBell() {
                       item.read ? 'bg-transparent' : 'bg-primary',
                     )} />
                     <div className='min-w-0 flex-1'>
-                      <p className='text-foreground'>{item.message}</p>
-                      <p className='text-[10px] text-muted-foreground/50 mt-0.5'>
-                        {format(new Date(item.createdAt), "HH:mm", { locale: fr })}
+                      <p className='truncate text-foreground'>
+                        {item.message}
+                        <span className='ml-1.5 text-[10px] text-muted-foreground/50'>
+                          {format(new Date(item.createdAt), "HH:mm", { locale: fr })}
+                        </span>
                       </p>
                     </div>
                   </div>

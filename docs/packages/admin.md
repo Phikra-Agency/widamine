@@ -1,6 +1,6 @@
 # Admin (`admin/`)
 
-Staff back-office — Vite + React + shadcn/ui.
+Staff back-office — Vite + React + shadcn/ui + Zustand.
 
 ## Dev
 
@@ -11,26 +11,31 @@ npm run dev --workspace=widamine-admin
 
 Login: `admin@widamine.com` / `admin123`
 
-Routes are at app root (`/calendar`, `/patients`, `/login`, …).
+## Pages
+
+| Route | Page | Roles |
+|-------|------|-------|
+| `/login` | Login | All |
+| `/calendar` | Weekly calendar | ADMIN, RECEPTIONIST, DOCTOR |
+| `/appointments` | Appointment queue | ADMIN, RECEPTIONIST, DOCTOR |
+| `/patients` | Patient records | ADMIN, RECEPTIONIST |
+| `/users` | User management | ADMIN |
+| `/motifs` | Motif definitions | ADMIN |
+| `/resources` | Room management | ADMIN |
+| `/contacts` | Contact submissions | ADMIN, RECEPTIONIST |
 
 ## Conventions
 
 - **UI kit**: shadcn/ui v4 — `@/components/ui`
 - **Forms**: `FormDialog` from `@/components/bo/FormDialog`
-- **Layout CSS**: `bo-page`, `bo-page-inner`, `bo-title`, `bo-chip`, … in `index.css`
-- **No entrance animations** — avoid `transition-all`, framer-motion
-- **Fonts**: DM Sans (body), Amoria (logo)
+- **Layout CSS**: `bo-page`, `bo-chip`, etc. in `index.css`
+- **No entrance animations**
 - **Add components**: `cd admin && npx shadcn add <name> -y`
 
-## Structure
+## Calendar
 
-```
-admin/src/
-├── components/       UI, calendar, layouts
-├── pages/back-office/   Feature pages
-└── stores/           Zustand
-```
+Weekly view with colored motif blocks. Room auto-assignment on confirm. Drag-free, modal-based scheduling.
 
 ## Docker
 
-nginx serves static build and proxies `/api` → `api:3000`. See `admin/Dockerfile`.
+nginx serves static build, proxies `/api` → `api:3000`. See `admin/Dockerfile`.

@@ -1,359 +1,155 @@
-# Widamine - Prisma Schema Documentation
+# Prisma Schema Reference
 
-## Database Overview
+> **Note**: This doc has been updated to reflect the current MongoDB schema.  
+> The old SQLite schema (Service, Category, etc.) has been removed.
 
-- **Database**: SQLite (`dev.db`)
-- **Location**: `/home/alan/widamine/backend/prisma/`
+## Database
 
----
+- **Provider**: MongoDB
+- **Connection**: `mongodb://127.0.0.1:27017/widamine?replicaSet=rs0`
 
 ## Models
 
 ### User
-Represents system users (admins, doctors, receptionists).
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key, auto-increment |
-| name | String | User's full name |
-| email | String | Unique email |
-| password | String | Hashed password |
-| role | String | `ADMIN`, `DOCTOR`, `RECEPTIONIST` |
+Staff accounts.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | String @db.ObjectId | Auto-generated |
+| name | String | Full name |
+| email | String | Unique |
+| password | String | Hashed (bcrypt) |
+| role | String | ADMIN, DOCTOR, RECEPTIONIST, PRACTITIONER |
 | admin | Boolean | Admin flag |
-| services | Service[] | Services this doctor provides (relation: DoctorServices) |
-| motifAssignments | MotifPractitioner[] | Motifs assigned to this doctor |
-| assignedAppointments | Appointment[] | Appointments assigned to this doctor |
-| availabilityBlocks | AvailabilityBlock[] | Doctor's availability blocks |
+| image | String? | Profile photo URL |
+| gender | String? | MALE / FEMALE |
 
----
-
-### Category
-Service categories for grouping.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| category | String | Category name |
-| services | Service[] | Services in this category |
-
----
-
-### Service
-Medical/aesthetic services offered by the center.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| name | String | Service name |
-| slug | String? | URL-friendly slug |
-| price | Float | Price in MAD |
-| categoryId | Int | Foreign key to Category |
-| category | Category | Relation |
-| sessions | Session[] | Available time slots/sessions |
-| appointments | Appointment[] | Appointments for this service |
-| motifs | Motif[] | Motifs linked to service |
-| doctorId | Int | Primary doctor (fallback) |
-| doctor | User | Relation (DoctorServices) |
-| allowedDoctorIds | String? | JSON array of doctor IDs who can perform this service |
-| allowedSalleIds | String? | JSON array of salle IDs where this service can be performed |
-
----
-
-### Session
-Defines time slots for a service.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| session | Int | Session number (1, 2, 3...) |
-| duration | Int | Duration in minutes |
-| serviceId | Int | Foreign key to Service |
-| service | Service | Relation |
-| schedules | Schedule[] | Scheduled appointments |
-
----
-
-### Patient
-Patient records.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| firstName | String | First name |
-| lastName | String | Last name |
-| email | String | Unique email |
-| phone | String | Phone number |
-| dateOfBirth | DateTime | Birth date |
-| gender | String | Gender |
-| address | String | Address |
-| city | String | City |
-| postalCode | String | Postal code |
-| country | String | Country |
-| medicalHistory | String? | Medical history notes |
-| createdAt | DateTime | Creation timestamp |
-| updatedAt | DateTime | Last update |
-
----
-
-### Appointment
-Client bookings/appointments.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| name | String | Client name |
-| email | String | Client email |
-| phone | String | Client phone |
-| context | String? | Notes/context |
-| status | String | `PENDING`, `CONFIRMED`, `CANCELLED`, `COMPLETED` |
-| timezone | String | Timezone (default: Africa/Casablanca) |
-| expiresAt | DateTime? | Expiration time |
-| confirmedAt | DateTime? | Confirmation timestamp |
-| cancelledAt | DateTime? | Cancellation timestamp |
-| completedAt | DateTime? | Completion timestamp |
-| serviceId | Int | Foreign key to Service |
-| service | Service | Relation |
-| motifId | Int? | Foreign key to Motif |
-| motif | Motif? | Relation |
-| practitionerId | Int? | Assigned doctor |
-| practitioner | User? | Relation (AssignedPractitionerAppointments) |
-| resourceId | Int? | Salle/room assigned |
-| resource | Resource? | Relation |
-| schedules | Schedule[] | Scheduled sessions |
-| notifications | NotificationLog[] | Notification history |
-| createdAt | DateTime | Creation timestamp |
-| updatedAt | DateTime | Last update |
-
----
-
-### Schedule
-Links appointments to specific session times.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| datetime | DateTime | Scheduled time |
-| sessionId | Int | Foreign key to Session |
-| session | Session | Relation |
-| appointmentId | Int | Foreign key to Appointment |
-| appointment | Appointment | Relation |
-
----
-
-### Contact
-Contact form submissions from public site.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| name | String | Visitor name |
-| email | String | Visitor email |
-| phone | String | Visitor phone |
-| context | String | Message |
-| read | Boolean | Read status (default: false) |
-
----
+Relations: `MotifPractitioner[]`, `Appointment[]`, `AvailabilityBlock[]`, `ResourcePractitioner[]`
 
 ### Motif
-Reasons for consultation/booking types.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| name | String | Unique motif name |
-| slug | String | URL-friendly slug |
-| bookingType | String | Type of booking |
-| description | String? | Description |
-| duration | Int | Default duration in minutes |
-| isActive | Boolean | Active status |
-| requiresPractitionerChoice | Boolean | Client must pick doctor |
-| pendingTtlHours | Int | Hours before pending expires |
-| serviceId | Int | Primary Service |
-| service | Service | Relation |
-| practitionerAssignments | MotifPractitioner[] | Assigned doctors |
-| resourceAssignments | MotifResource[] | Assigned rooms |
-| appointments | Appointment[] | Appointments with this motif |
-| createdAt | DateTime | Creation timestamp |
-| updatedAt | DateTime | Last update |
+A treatment/service definition — the core domain entity.
 
----
+| Field | Type | Notes |
+|-------|------|-------|
+| id | String @db.ObjectId | |
+| name | String | Unique |
+| slug | String | Unique, URL-safe |
+| description | String? | |
+| duration | Int | Minutes (default 30) |
+| numberOfSessions | Int | Default 1 |
+| isActive | Boolean | |
+| isOnlineBookable | Boolean | Visible on landing |
+| color | String | Hex for calendar |
+| pendingTtlHours | Int | Auto-expiry (default 24) |
 
-### MotifPractitioner
-Many-to-many: which doctors can handle which motifs.
+### Patient
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| motifId | Int | Foreign key to Motif |
-| motif | Motif | Relation |
-| practitionerId | Int | Foreign key to User |
-| practitioner | User | Relation |
-| priority | Int | Priority order |
-| isPreferred | Boolean | Preferred doctor |
-| isActive | Boolean | Active status |
+| Field | Type | Notes |
+|-------|------|-------|
+| id | String @db.ObjectId | |
+| firstName | String | |
+| lastName | String | |
+| email | String? | |
+| phone | String | Unique, used for dedup |
+| gender | String? | |
+| medicalHistory | String? | |
 
-**Unique Constraint**: `[motifId, practitionerId]`
+### Appointment
 
----
+| Field | Type | Notes |
+|-------|------|-------|
+| id | String @db.ObjectId | |
+| patientId | ObjectId | → Patient |
+| name | String | Patient name (denormalized) |
+| email | String | |
+| phone | String | |
+| status | String | PENDING / CONFIRMED / COMPLETED / CANCELLED / EXPIRED |
+| sessionNumber | Int | Auto-calculated |
+| motifId | ObjectId | → Motif |
+| practitionerId | ObjectId? | → User |
+| resourceId | ObjectId? | → Resource |
+| expiresAt | DateTime? | Auto-expiry timestamp |
+
+### Session
+
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| number | Int |
+| duration | Int |
+| motifId | ObjectId → Motif |
+
+### Schedule
+
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| datetime | DateTime |
+| sessionId | ObjectId → Session |
+| appointmentId | ObjectId → Appointment |
 
 ### Resource
-Rooms/salles available for appointments.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| name | String | Room name |
-| slug | String | URL-friendly slug |
-| type | String | Room type |
-| description | String? | Description |
-| isActive | Boolean | Active status |
-| motifAssignments | MotifResource[] | Motifs assigned to this room |
-| appointments | Appointment[] | Appointments in this room |
-| availabilityBlocks | AvailabilityBlock[] | Blocked time slots |
-| createdAt | DateTime | Creation timestamp |
-| updatedAt | DateTime | Last update |
+Rooms and equipment.
 
----
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| name | String |
+| slug | String (unique) |
+| type | String |
+| priority | Int |
+| isActive | Boolean |
 
-### MotifResource
-Many-to-many: which motifs can use which rooms.
+### Contact
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| motifId | Int | Foreign key to Motif |
-| motif | Motif | Relation |
-| resourceId | Int | Foreign key to Resource |
-| resource | Resource | Relation |
-| priority | Int | Priority order |
-| isPreferred | Boolean | Preferred room |
-| isRequired | Boolean | Required for this motif |
+Form submissions from landing page.
 
-**Unique Constraint**: `[motifId, resourceId]`
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| name | String |
+| email | String |
+| phone | String |
+| context | String |
+| read | Boolean |
 
----
+### ChatLead
 
-### AvailabilityBlock
-Blocks specific time slots (vacations, meetings, etc.).
+Chatbot visitor info.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| startsAt | DateTime | Block start time |
-| endsAt | DateTime | Block end time |
-| reason | String? | Reason for block |
-| isActive | Boolean | Active status |
-| practitionerId | Int? | Doctor (if blocked) |
-| practitioner | User? | Relation |
-| resourceId | Int? | Room (if blocked) |
-| resource | Resource? | Relation |
-| createdAt | DateTime | Creation timestamp |
-| updatedAt | DateTime | Last update |
-
----
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| name | String |
+| email | String |
+| createdAt | DateTime |
 
 ### NotificationLog
-Tracks notifications sent to clients.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Int | Primary key |
-| appointmentId | Int | Foreign key to Appointment |
-| appointment | Appointment | Relation |
-| channel | String | `EMAIL`, `SMS` |
-| recipientType | String | `CLIENT`, `PRACTITIONER` |
-| recipient | String | Email or phone |
-| provider | String? | Provider used (SendGrid, Twilio, etc.) |
-| status | String | `PENDING`, `SENT`, `FAILED` |
-| message | String? | Message sent |
-| externalId | String? | External provider message ID |
-| error | String? | Error message if failed |
-| sentAt | DateTime? | Sent timestamp |
-| createdAt | DateTime | Creation timestamp |
+Delivery log for emails/notifications.
 
----
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| appointmentId | ObjectId → Appointment |
+| channel | String (email, sms, etc.) |
+| recipient | String |
+| status | String |
+| sentAt | DateTime? |
 
-## Relationships Diagram
+### AppSettings
 
-```
-User (DOCTOR)
-  ├── Service (primary doctor) ← doctorId
-  ├── MotifPractitioner ← motif assignments
-  ├── Appointment (practitioner) ← practitionerId
-  └── AvailabilityBlock ← for doctors
+| Field | Type |
+|-------|------|
+| id | String @db.ObjectId |
+| smsEnabled | Boolean |
+| emailEnabled | Boolean |
+| inAppEnabled | Boolean |
+| ... notification toggles | |
 
-Category
-  └── Service ← categoryId
+### Join Tables
 
-Service
-  ├── Category
-  ├── User (doctor)
-  ├── Session ← serviceId
-  ├── Motif ← serviceId
-  ├── Appointment ← serviceId
-  └── allowedDoctorIds, allowedSalleIds (JSON arrays)
-
-Session
-  └── Service
-  └── Schedule ← sessionId
-
-Motif
-  ├── Service
-  ├── MotifPractitioner ← motif assignments
-  ├── MotifResource ← resource assignments
-  └── Appointment (via motifId)
-
-MotifPractitioner
-  ├── Motif
-  └── User (doctor)
-
-Resource (Salle)
-  ├── MotifResource ← assignments
-  ├── Appointment (resourceId)
-  └── AvailabilityBlock
-
-Appointment
-  ├── Service
-  ├── Motif (optional)
-  ├── User (practitioner, optional)
-  ├── Resource (salle, optional)
-  ├── Schedule[]
-  └── NotificationLog[]
-
-Schedule
-  ├── Session
-  └── Appointment
-```
-
----
-
-## Roles & Permissions
-
-| Role | Access |
-|------|--------|
-| ADMIN | Full access - all pages |
-| RECEPTIONIST | Appointments, Calendar, Dashboard |
-| DOCTOR | Appointments, Calendar, Dashboard |
-
----
-
-## Backend API Endpoints
-
-| Method | Endpoint | Description |
-|-------|----------|-------------|
-| GET | `/services` | List all services |
-| POST | `/services` | Create service |
-| GET | `/services/:id` | Get single service |
-| PUT | `/services/:id` | Update service |
-| DELETE | `/services/:id` | Delete service |
-| GET | `/appointments/availability` | Get available slots |
-| GET | `/appointments` | List appointments |
-| POST | `/appointments` | Create appointment |
-| GET | `/users` | List users |
-| GET | `/users/doctors` | List only doctors |
-| GET | `/resources` | List rooms/salles |
-| GET | `/motifs` | List motifs |
-| GET | `/categories` | List categories |
-| POST | `/auth/login` | Login |
-| POST | `/auth/logout` | Logout |
-| POST | `/auth/refresh` | Refresh token |
+`MotifPractitioner`, `MotifResource`, `ResourcePractitioner`, `AvailabilityBlock` — many-to-many relations with priority/active flags.

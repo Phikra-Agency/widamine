@@ -4,10 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent } from '@/components/ui'
 import { CONTACTS_EMPTY_ILLUSTRATION, createContactsColumns } from './columns/contactsColumns'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
+import { useDebounce } from 'use-debounce'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 
 const READ_FILTER_PILLS: FilterPillOption[] = [
   { value: '0', label: 'Non lus', color: 'coral' },
@@ -42,10 +41,9 @@ function Heading() {
 function ContactsTable() {
   const { items, filters, fetchItems, setItem, readItem, setFilters } = useContactsStore()
   const [loading, setLoading] = useState(true)
-  const debouncedSearch = useDebouncedGlobalSearch()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch] = useDebounce(searchTerm, 300)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const searchTerm = useGlobalSearchStore((s) => s.term)
-  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     setLoading(true)

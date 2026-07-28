@@ -19,9 +19,8 @@ import { useFormValidation } from '@/hooks/useFormValidation'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
+import { useDebounce } from 'use-debounce'
 import { createUsersColumns, RoleBadge, USERS_EMPTY_ILLUSTRATION } from './columns/usersColumns'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
 
@@ -78,10 +77,9 @@ function UsersTable() {
   const [loading, setLoading] = useState(true)
   const [roleFilter, setRoleFilter] = useState<Role | 'all'>('all')
   const [sorting, setSorting] = useState<SortingState>([])
-  const debouncedSearch = useDebouncedGlobalSearch()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch] = useDebounce(searchTerm, 300)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const searchTerm = useGlobalSearchStore((s) => s.term)
-  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
   useSearchHighlight('users')
 
   useEffect(() => {

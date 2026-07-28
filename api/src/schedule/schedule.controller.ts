@@ -21,7 +21,7 @@ export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Post()
-  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   create(@Body() data: CreateScheduleDto) {
     return this.scheduleService.create(data);
   }
@@ -44,13 +44,13 @@ export class ScheduleController {
   }
 
   @Get("get-available-time/:date")
-  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   getOpenTime(@Param("date") date: string) {
     return this.scheduleService.getOpenTime(new Date(date));
   }
 
   @Put(":id")
-  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST"))
+  @UseGuards(RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
   update(@Param("id") id: string, @Body() data: UpdateScheduleDto) {
     return this.scheduleService.update(id, data);
   }

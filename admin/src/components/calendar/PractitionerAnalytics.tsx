@@ -32,7 +32,66 @@ interface PractitionerAnalyticsProps {
   viewMode: CalendarViewMode
   displayItems: CalendarDaySlots[]
   monthItemsByDate: Map<string, CalendarDaySlots>
+  rawMonthItemsByDate?: Map<string, CalendarDaySlots>
   activeDayIdx: number
+  rawItems: CalendarDaySlots[]
+  filterPractitionerIds: string[]
+}
+
+/* ─── Deterministic color per motif name ─────────────────────── */
+
+const MOTIF_COLORS = [
+  '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b',
+  '#ef4444', '#06b6d4', '#f97316', '#84cc16',
+  '#d946ef', '#0ea5e9', '#e11d48', '#14b8a6',
+]
+
+function getMotifColor(motif: string): string {
+  let hash = 0
+  for (let i = 0; i < motif.length; i++) {
+    hash = (hash * 31 + motif.charCodeAt(i)) >>> 0
+  }
+  return MOTIF_COLORS[hash % MOTIF_COLORS.length]
+}
+
+/* ─── Minimal detail card ────────────────────────────────────── */
+
+function MinimalCard({ p }: { p: PractitionerStatsRow }) {
+  const sorted = useMemo(() =>
+    Object.entries(p.motifCounts).sort((a, b) => b[1] - a[1]),
+    [p.motifCounts],
+  )
+
+  return (
+    <div className='rounded-surface border border-border bg-card p-5 shadow-bo-card ring-1 ring-border'>
+      <p className='text-sm font-semibold tracking-tight text-foreground'>{p.name}</p>
+      <div className='mt-4 flex items-center gap-2'>
+        <span className='inline-flex h-6 min-w-[24px] items-center justify-center rounded-element border border-border-subtle bg-secondary/5 px-1.5 text-xs font-bold text-secondary/60'>
+          {p.count}
+        </span>
+        <span className='text-[10px] font-medium uppercase tracking-wider text-secondary/30'>RDV</span>
+        <span className='ml-auto min-w-[40px] text-xs font-semibold text-foreground'>
+          {p.percentage.toFixed(1)}%
+        </span>
+      </div>
+      <div className='mt-2 h-2 w-full max-w-[80px] overflow-hidden rounded-full bg-muted'>
+        <div className='h-full rounded-full bg-primary' style={{ width: `${Math.min(p.percentage, 100)}%` }} />
+      </div>
+      {sorted.length > 0 && (
+        <div className='mt-4 space-y-2'>
+          {sorted.map(([motif, count]) => (
+            <div key={motif} className='flex items-center justify-between'>
+              <div className='flex min-w-0 items-center gap-2'>
+                <span className='h-1.5 w-1.5 shrink-0 rounded-full' style={{ backgroundColor: getMotifColor(motif) }} />
+                <span className='truncate text-sm text-secondary/80'>{motif}</span>
+              </div>
+              <span className='shrink-0 text-xs tabular-nums text-secondary/60'>{count}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 /* ─── Main component ──────────────────────────────────────────── */
@@ -42,7 +101,10 @@ export default function PractitionerAnalytics({
   viewMode,
   displayItems,
   monthItemsByDate,
+  rawMonthItemsByDate,
   activeDayIdx,
+  rawItems,
+  filterPractitionerIds,
 }: PractitionerAnalyticsProps) {
   const [error, setError] = useState<string | null>(null)
   const [hovered, setHovered] = useState<{ p: PractitionerStatsRow; style: React.CSSProperties } | null>(null)
@@ -66,22 +128,19 @@ export default function PractitionerAnalytics({
     leaveTimer.current = setTimeout(() => setHovered(null), 200)
   }, [])
 
-  // Reset error when props change
   useEffect(() => { setError(null) }, [viewMode, displayItems, monthItemsByDate, activeDayIdx])
 
-  // Extract appointments from current calendar view
-  const appointments = useMemo(() => {
+  // Extract appointments from raw (unfiltered) data for accurate total percentages
+  const allAppointments = useMemo(() => {
     try {
       let days: CalendarDaySlots[] = []
-
       if (viewMode === 'day') {
-        if (displayItems[activeDayIdx]) days = [displayItems[activeDayIdx]]
+        if (rawItems[activeDayIdx]) days = [rawItems[activeDayIdx]]
       } else if (viewMode === 'week') {
-        days = displayItems.filter(Boolean)
+        days = rawItems.filter(Boolean)
       } else if (viewMode === 'month') {
-        days = Array.from(monthItemsByDate.values())
+        days = Array.from((rawMonthItemsByDate ?? monthItemsByDate).values())
       }
-
       const appts: ScheduleAppointment[] = []
       days.forEach((day) => {
         if (!day) return
@@ -89,21 +148,19 @@ export default function PractitionerAnalytics({
           if (slot?.appointment) appts.push(slot.appointment)
         })
       })
-
       return appts
     } catch (err) {
       setError('Erreur lors du chargement des données.')
       return []
     }
-  }, [viewMode, displayItems, monthItemsByDate, activeDayIdx])
+  }, [viewMode, rawItems, monthItemsByDate, rawMonthItemsByDate, activeDayIdx])
 
-  // Aggregate per practitioner
-  const stats = useMemo(() => {
+  // Aggregate per practitioner (unfiltered — accurate team percentage)
+  const allStats = useMemo(() => {
     try {
-      const total = appointments.length
-
+      const total = allAppointments.length
       const rows: PractitionerStatsRow[] = practitioners.map((p) => {
-        const practitionerAppts = appointments.filter((a) => a.practitionerId === p.id)
+        const practitionerAppts = allAppointments.filter((a) => a.practitionerId === p.id)
         const count = practitionerAppts.length
         const percentage = total > 0 ? (count / total) * 100 : 0
         const motifCounts = practitionerAppts.reduce((acc, a) => {
@@ -111,20 +168,22 @@ export default function PractitionerAnalytics({
           acc[name] = (acc[name] || 0) + 1
           return acc
         }, {} as Record<string, number>)
-
         return { ...p, count, percentage, motifCounts, isTop: false }
       })
-
       const sorted = rows.sort((a, b) => b.count - a.count)
-      if (sorted.length > 0) {
-        sorted[0].isTop = true
-      }
+      if (sorted.length > 0) sorted[0].isTop = true
       return sorted
     } catch (err) {
       setError('Erreur lors du calcul des statistiques.')
       return []
     }
-  }, [appointments, practitioners])
+  }, [allAppointments, practitioners])
+
+  // Filtered stats for table view (always computed — Rules of Hooks)
+  const stats = useMemo(() => {
+    if (filterPractitionerIds.length === 0) return allStats
+    return allStats.filter((s) => filterPractitionerIds.includes(s.id))
+  }, [allStats, filterPractitionerIds])
 
   const columns = useMemo(() => createPractitionerColumns({ onHover, onLeave }), [onHover, onLeave])
   const table = useDataTable({
@@ -132,9 +191,12 @@ export default function PractitionerAnalytics({
     columns,
     enablePagination: true,
     pageSize: 10,
+    getRowId: (row) => row.id,
   })
 
-  /* Error state */
+  /* ─── Detail mode: 1-2 selected via filter ─── */
+  const isDetailMode = filterPractitionerIds.length === 1 || filterPractitionerIds.length === 2
+
   if (error) {
     return (
       <div className='flex h-full flex-col items-center justify-center gap-3 p-8 text-center'>
@@ -144,9 +206,25 @@ export default function PractitionerAnalytics({
     )
   }
 
+  if (isDetailMode) {
+    const selected = filterPractitionerIds
+      .map((id) => allStats.find((s) => s.id === id))
+      .filter(Boolean) as PractitionerStatsRow[]
+
+    return (
+      <div className='animate-in fade-in-0 duration-200'>
+        <div className={selected.length === 2 ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'grid grid-cols-1'}>
+          {selected.map((p) => (
+            <MinimalCard key={p.id} p={p} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  /* ─── Table view ─── */
   const rows = table.getRowModel().rows
 
-  /* Table view */
   return (
     <DataTable.Root>
       <DataTable.Desktop>
@@ -158,7 +236,6 @@ export default function PractitionerAnalytics({
           className='lg:overflow-visible'
         />
       </DataTable.Desktop>
-
       <DataTable.Mobile>
         <DataTable.MobileList>
           {rows.length === 0 && (
@@ -188,7 +265,6 @@ export default function PractitionerAnalytics({
           })}
         </DataTable.MobileList>
       </DataTable.Mobile>
-
       {hovered && (
         <div
           style={hovered.style}
@@ -197,17 +273,12 @@ export default function PractitionerAnalytics({
           className='min-w-56 rounded-surface bg-popover p-3 shadow-bo-elevated ring-1 ring-border outline-none'
         >
           <div className='mb-2 flex items-center justify-between border-b border-border/50 pb-2'>
-            <span className='text-[12px] font-semibold text-foreground'>
-              Détails ({hovered.p.percentage.toFixed(1)}%)
-            </span>
+            <span className='text-[12px] font-semibold text-foreground'>Détails ({hovered.p.percentage.toFixed(1)}%)</span>
             <span className='text-[11px] text-muted-foreground'>{hovered.p.count} rés.</span>
           </div>
-
           {Object.keys(hovered.p.motifCounts).length > 0 ? (
             <div className='flex flex-col gap-1'>
-              <span className='mb-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60'>
-                Répartition par Motif
-              </span>
+              <span className='mb-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60'>Répartition par Motif</span>
               {Object.entries(hovered.p.motifCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5)
@@ -221,12 +292,8 @@ export default function PractitionerAnalytics({
           ) : (
             <p className='text-xs italic text-muted-foreground'>Aucun motif</p>
           )}
-
           <div className='mt-2.5 h-1 w-full overflow-hidden rounded-full bg-muted'>
-            <div
-              className='h-full rounded-full bg-primary'
-              style={{ width: `${Math.min(hovered.p.percentage, 100)}%` }}
-            />
+            <div className='h-full rounded-full bg-primary' style={{ width: `${Math.min(hovered.p.percentage, 100)}%` }} />
           </div>
         </div>
       )}

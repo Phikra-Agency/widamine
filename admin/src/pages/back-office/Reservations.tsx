@@ -18,9 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RESERVATIONS_EMPTY_ILLUSTRATION, createReservationsColumns } from './columns/reservationsColumns'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 
 const STATUS_FILTER_PILLS: FilterPillOption[] = [
   { value: 'all', label: 'Toutes', color: 'mist' },
@@ -102,12 +100,11 @@ function ReservationsTable() {
   const [loading, setLoading] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const { 0: debouncedStatus } = useDebounce(filters.status || 'PENDING', 300)
-  const debouncedSearch = useDebouncedGlobalSearch()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch] = useDebounce(searchTerm, 300)
   const [searchParams] = useSearchParams()
   const hasOpenedFromUrl = useRef(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const searchTerm = useGlobalSearchStore((s) => s.term)
-  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     setColumnFilters(prev => {

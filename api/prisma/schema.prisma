@@ -228,6 +228,13 @@ model NotificationLog {
   @@index([status])
 }
 
+model ChatLead {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  createdAt DateTime @default(now())
+}
+
 model AppSettings {
   id                  String   @id @default(auto()) @map("_id") @db.ObjectId
   singletonKey        String   @unique @default("default")

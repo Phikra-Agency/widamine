@@ -35,7 +35,6 @@ import {
   type CalendarDaySlots,
 } from '@/components/calendar/views/CalendarGridCells'
 import CalendarMonthGrid from '@/components/calendar/views/CalendarMonthGrid'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
 import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
 
 import { Funnel, User, Tag, CaretDown, CalendarBlank } from '@phosphor-icons/react'
@@ -142,18 +141,16 @@ function Planner() {
   const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([])
   const [motifOptions, setMotifOptions] = useState<MotifItem[]>([])
   const [monthItemsByDate, setMonthItemsByDate] = useState<Map<string, CalendarDaySlots>>(new Map())
+  const [rawMonthItemsByDate, setRawMonthItemsByDate] = useState<Map<string, CalendarDaySlots>>(new Map())
 
   useEffect(() => {
     api.get('users/doctors').then((res) => setDoctors(res.data || [])).catch(() => {})
     api.get('motifs').then((res) => setMotifOptions(res.data || [])).catch(() => {})
   }, [])
 
-  const debouncedSearch = useDebouncedGlobalSearch()
-  const searchLower = debouncedSearch.trim().toLowerCase()
-
   const applyFiltersToDay = useCallback(
     (day: (typeof items)[0]): CalendarDaySlots => {
-      const hasFilter = filterPractitionerIds.length > 0 || filterStatuses.length > 0 || filterMotifIds.length > 0 || searchLower
+      const hasFilter = filterPractitionerIds.length > 0 || filterStatuses.length > 0 || filterMotifIds.length > 0
       const filterPeriod = (schedules: typeof day.morning) =>
         schedules.filter((s) => {
           const a = s.appointment
@@ -162,16 +159,6 @@ function Planner() {
           if (filterPractitionerIds.length > 0 && !filterPractitionerIds.includes(a.practitionerId)) return false
           if (filterStatuses.length > 0 && !filterStatuses.includes(a.status)) return false
           if (filterMotifIds.length > 0 && !filterMotifIds.includes(a.motif?.id || '')) return false
-
-          if (searchLower) {
-            const patientName = a.patient
-              ? `${a.patient.firstName} ${a.patient.lastName}`.toLowerCase()
-              : (a.name || '').toLowerCase()
-            const motifName = (a.motif?.name || '').toLowerCase()
-            const resourceName = (a.resource?.name || '').toLowerCase()
-            const haystack = [patientName, motifName, resourceName].join(' ')
-            if (!haystack.includes(searchLower)) return false
-          }
 
           return true
         })
@@ -182,7 +169,7 @@ function Planner() {
         evening: filterPeriod(day.evening),
       }
     },
-    [filterMotifIds, filterPractitionerIds, filterStatuses, searchLower],
+    [filterMotifIds, filterPractitionerIds, filterStatuses],
   )
 
   const filteredItems = useMemo(
@@ -229,6 +216,7 @@ function Planner() {
     if (viewMode !== 'month') return
     const mondays = getMonthFetchMondays(filters.date)
     const map = new Map<string, CalendarDaySlots>()
+    const rawMap = new Map<string, CalendarDaySlots>()
     let cancelled = false
 
     mondays.forEach((m) => {
@@ -241,8 +229,10 @@ function Planner() {
           d.setDate(mondayDate.getDate() + i)
           const key = formatLocalDate(d)
           map.set(key, applyFiltersToDay(weekData[i]))
+          rawMap.set(key, weekData[i])
         }
         setMonthItemsByDate(new Map(map))
+        setRawMonthItemsByDate(new Map(rawMap))
       }).catch(() => {})
     })
 
@@ -346,6 +336,8 @@ function Planner() {
     </div>
   )
 
+
+
   useEffect(() => {
     const next = new URLSearchParams(searchParams)
     const current = next.get('view')
@@ -434,7 +426,6 @@ function Planner() {
         >
           <CaretDown size={13} className={`shrink-0 text-secondary/40 transition-transform ${open ? '' : '-rotate-90'}`} />
           <p className='text-[13px] font-semibold uppercase tracking-wider text-secondary/40'>{label}</p>
-          <span className='text-[11px] text-secondary/25'>({schedules.length})</span>
         </button>
         {open && (
           <div className='space-y-1.5 pt-0.5'>
@@ -587,21 +578,37 @@ function Planner() {
               />
             )}
           </div>
+
         </>
       )}
 
       {pageView === 'analytics' && (
         <div className='flex-1 overflow-auto'>
           <div className='bo-page-inner bo-section-stack'>
-            <Card className='bo-table-card'>
+            {filterPractitionerIds.length === 1 || filterPractitionerIds.length === 2 ? (
               <PractitionerAnalytics 
                 practitioners={doctors} 
                 viewMode={viewMode}
                 displayItems={displayItems}
                 monthItemsByDate={monthItemsByDate}
+                rawMonthItemsByDate={rawMonthItemsByDate}
                 activeDayIdx={activeDayIdx}
+                rawItems={items}
+                filterPractitionerIds={filterPractitionerIds}
               />
-            </Card>
+            ) : (
+              <Card className='bo-table-card'>
+                <PractitionerAnalytics 
+                  practitioners={doctors} 
+                  viewMode={viewMode}
+                  displayItems={displayItems}
+                  monthItemsByDate={monthItemsByDate}
+                  activeDayIdx={activeDayIdx}
+                  rawItems={items}
+                  filterPractitionerIds={filterPractitionerIds}
+                />
+              </Card>
+            )}
           </div>
         </div>
       )}
@@ -679,3 +686,5 @@ function MobileMonthGrid({
     </div>
   )
 }
+
+

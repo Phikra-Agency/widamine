@@ -31,18 +31,18 @@ export default function NotificationToast() {
       {toasts.map((item) => (
         <div
           key={item.id}
-          className='animate-slide-in pointer-events-auto flex items-start gap-3 rounded-lg border border-border bg-popover p-2.5 shadow-lg'
-          style={{ minHeight: 150, maxWidth: 360 }}
+          className='animate-slide-in pointer-events-auto flex items-center gap-2 rounded-lg border border-border bg-popover px-3 py-2 shadow-lg'
+          style={{ maxWidth: 360 }}
         >
-            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10'>
-              <Bell size={16} className='text-primary' />
+            <div className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10'>
+              <Bell size={12} className='text-primary' />
             </div>
-            <div className='min-w-0 flex-1'>
-              <p className='text-xs font-medium text-foreground'>{item.message}</p>
-              <p className='mt-0.5 text-[10px] text-muted-foreground/50'>
+            <p className='min-w-0 flex-1 truncate text-xs font-medium text-foreground'>
+              {item.message}
+              <span className='ml-1.5 text-[10px] text-muted-foreground/50'>
                 {format(new Date(item.createdAt), 'HH:mm', { locale: fr })}
-              </p>
-            </div>
+              </span>
+            </p>
         </div>
       ))}
     </div>

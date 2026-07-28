@@ -4,7 +4,7 @@ import { useSchedulesStore } from '@/stores/schedulesStore'
 import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, MagnifyingGlass, CalendarBlank, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
+import { useDebounce } from 'use-debounce'
 import { cn } from '@/lib/utils'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useSearchHighlight } from '@/hooks/useSearchHighlight'
@@ -140,9 +140,8 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
   const { user } = useAuthStore()
   const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const searchTerm = useGlobalSearchStore((s) => s.term)
-  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
   useSearchHighlight('patients')
 
   const cities = useMemo(() => {

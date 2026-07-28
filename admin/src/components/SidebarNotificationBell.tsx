@@ -94,9 +94,11 @@ export default function SidebarNotificationBell({ collapsed = false }: Props) {
                       )}
                     />
                     <div className='min-w-0 flex-1'>
-                      <p className='text-foreground'>{item.message}</p>
-                      <p className='mt-0.5 text-[10px] text-muted-foreground/50'>
-                        {format(new Date(item.createdAt), 'HH:mm', { locale: fr })}
+                      <p className='truncate text-foreground'>
+                        {item.message}
+                        <span className='ml-1.5 text-[10px] text-muted-foreground/50'>
+                          {format(new Date(item.createdAt), 'HH:mm', { locale: fr })}
+                        </span>
                       </p>
                     </div>
                   </div>

@@ -258,7 +258,7 @@ export default function ScheduleShowModal() {
         role='dialog'
         aria-modal='true'
         aria-label={`Réservation de ${name}`}
-        className={`fixed inset-x-2 top-[5%] z-50 w-auto max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-0 shadow-xl shadow-black/10 transition-all duration-200 ease-out sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 ${
+        className={`fixed inset-x-2 top-[5%] z-50 w-auto max-h-[90vh] rounded-2xl border border-border bg-card p-0 shadow-xl shadow-black/10 transition-all duration-200 ease-out sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 ${
           entered ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
       >

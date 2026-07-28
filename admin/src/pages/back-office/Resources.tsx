@@ -21,8 +21,7 @@ import {
 } from '@/components/ui/dialog'
 import { createSallesColumns, SALLES_EMPTY_ILLUSTRATION } from './columns/sallesColumns'
 import { PRIORITY_CONFIG } from './columns/shared/priorityBadge'
-import { useDebouncedGlobalSearch } from '@/hooks/useDebouncedGlobalSearch'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
+import { useDebounce } from 'use-debounce'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
 
@@ -69,10 +68,9 @@ function Heading() {
 function ResourcesTable() {
   const { items, fetchItems, openEditModal, openDeleteModal, openCreateModal } = useResourcesStore()
   const [loading, setLoading] = useState(true)
-  const debouncedSearch = useDebouncedGlobalSearch()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch] = useDebounce(searchTerm, 300)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const searchTerm = useGlobalSearchStore((s) => s.term)
-  const setSearchTerm = useGlobalSearchStore((s) => s.setTerm)
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))

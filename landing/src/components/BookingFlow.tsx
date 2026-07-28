@@ -621,7 +621,7 @@ function BookingTypeChoice({
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
         <button
           onClick={() => onSelect('traitement')}
-          className='group flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg'
+          className='group flex cursor-pointer flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg'
           style={{ borderColor: `${C.primary}20`, backgroundColor: `${C.primary}04` }}
         >
           <div
@@ -642,7 +642,7 @@ function BookingTypeChoice({
 
         <button
           onClick={() => onSelect('consultation')}
-          className='group flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg'
+          className='group flex cursor-pointer flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg'
           style={{ borderColor: `${C.primary}20`, backgroundColor: `${C.primary}04` }}
         >
           <div

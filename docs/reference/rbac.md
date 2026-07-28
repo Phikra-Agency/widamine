@@ -1,5 +1,7 @@
 # Role-Based Access Control (RBAC) — Design Document
 
+> **Note**: This is a design document/proposal. The `Service` and `Category` models mentioned here have been removed from the codebase — Motif replaces them. The RBAC role definitions (ADMIN/DOCTOR/RECEPTIONIST) and guard architecture are implemented, but some data scoping from this doc is not yet fully applied.
+
 ## 1. Current State
 
 ### Backend

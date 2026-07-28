@@ -3,7 +3,6 @@ import { MagnifyingGlass, X, User, CalendarBlank, Envelope, UserCircle } from '@
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useDebouncedCallback } from 'use-debounce'
-import { useGlobalSearchStore } from '@/stores/globalSearchStore'
 import api from '@/lib/api'
 
 interface SearchResults {
@@ -56,7 +55,6 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
   const wrapperRef = useRef<HTMLDivElement>(null)
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const navigate = useNavigate()
-  const setGlobalTerm = useGlobalSearchStore((state) => state.setTerm)
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) { setResults(null); setLoading(false); return }
@@ -75,7 +73,6 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
 
   const handleChange = (value: string) => {
     setTerm(value)
-    setGlobalTerm(value)
     setActiveIndex(-1)
     if (value.trim()) {
       setOpen(true)
@@ -88,7 +85,6 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
 
   const clear = () => {
     setTerm('')
-    setGlobalTerm('')
     setResults(null)
     setActiveIndex(-1)
     inputRef.current?.focus()

@@ -1,6 +1,6 @@
 # Landing (`landing/`)
 
-Public marketing site and future patient booking entry point.
+Public marketing site for Widamine Aesthetic Center. Built with Vite + React + Tailwind + Framer Motion.
 
 ## Dev
 
@@ -9,9 +9,29 @@ npm run dev --workspace=widamine-landing
 # http://localhost:5173
 ```
 
-## Status
+## Sections
 
-Placeholder shell — hero copy and staff link. Public pages and booking flow to be ported here.
+| Section | Description |
+|---------|-------------|
+| Hero | Title, subtitle, CTA buttons |
+| IntroSection | "Notre vision" — single paragraph |
+| ConceptSection | "Notre Objectif" — image + text, teal backdrop |
+| DoctorSection | Dr. Widad Slaoui bio |
+| TeamSection | Team member cards |
+| GallerySection | Photo carousel |
+| TestimonialsSection | Patient reviews carousel |
+| AppointmentSection | Booking info + CTA |
+| Footer | Links, socials, legal |
+
+## Chatbot
+
+A floating chatbot button at bottom-right corner of every page.
+
+- **Component**: `src/components/Chatbot.tsx`
+- **Endpoint**: `POST /api/chatbot/message` (Vite proxies `/api` → `:3000`)
+- **Lead capture**: Collects name + email before answering
+- **Quick actions**: "Nos soins visage", "Prendre rendez-vous", "Où vous situez-vous ?", "Équipe du centre"
+- **Popup triggers**: Booking modal or contact form via `scheduleModalStore` / `contactPopupStore`
 
 ## Environment
 
@@ -22,4 +42,4 @@ Placeholder shell — hero copy and staff link. Public pages and booking flow to
 
 ## Docker
 
-nginx on port **8081** by default. Set `VITE_ADMIN_URL` at build time via compose args.
+nginx on port **8081**. Set `VITE_ADMIN_URL` at build time via compose args.

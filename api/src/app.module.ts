@@ -15,6 +15,7 @@ import { SettingsModule } from "./settings/settings.module";
 import { CronModule } from "./cron/cron.module";
 import { ChatbotModule } from "./chatbot/chatbot.module";
 import { SearchModule } from "./search/search.module";
+import { ClinicInfoModule } from "./clinic-info/clinic-info.module";
 
 console.log("[AppModule] Loading modules...");
 
@@ -36,6 +37,7 @@ console.log("[AppModule] Loading modules...");
     CronModule,
     ChatbotModule,
     SearchModule,
+    ClinicInfoModule,
   ],
 })
 export class AppModule {}

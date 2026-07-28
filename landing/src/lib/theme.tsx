@@ -19,7 +19,7 @@ export const TYPE = {
   /* Headings use Chambora */
   headingFamily: "'Chambora', serif",
   /* Body uses Poppins Thin */
-  bodyFamily: "'Poppins Thin', sans-serif",
+  bodyFamily: "'Poppins Light', sans-serif",
   /* Fluid heading sizes */
   h1: 'clamp(1.76rem, 1.242rem + 2.59vw, 4.347rem)',
   h2: 'clamp(1.57rem, 1.228rem + 1.71vw, 3.283rem)',
