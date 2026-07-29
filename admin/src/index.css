@@ -219,15 +219,15 @@
 	}
 
 	.bo-page-inner {
-		@apply relative h-full p-4 sm:p-5 lg:p-6;
+		@apply relative h-full p-2.5 sm:p-3 lg:p-4;
 	}
 
 	.bo-page-stack {
-		@apply relative flex h-full min-h-0 flex-col gap-4;
+		@apply relative flex h-full min-h-0 flex-col gap-2.5 sm:gap-3;
 	}
 
 	.bo-section-stack {
-		@apply relative flex min-h-0 flex-col gap-4;
+		@apply relative flex min-h-0 flex-col gap-2.5 sm:gap-3;
 	}
 
 	.bo-section-stack > .bo-page-heading {

@@ -70,7 +70,6 @@ function ResourcesTable() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch] = useDebounce(searchTerm, 300)
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -92,28 +91,33 @@ function ResourcesTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar className='max-lg:px-0' />
-      {/* Mobile top search bar */}
-      <div className='flex lg:hidden items-center gap-2 px-4 py-2.5'>
-        <button
-          onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-          className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
-          aria-label='Rechercher'
-        >
-          <MagnifyingGlass size={16} />
-        </button>
-      </div>
-      {mobileSearchOpen && (
-        <div className='px-4 pb-2 lg:hidden'>
-          <Input
-            placeholder='Rechercher...'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className='h-9 text-xs'
-            autoFocus
-          />
+      <DataTable.Toolbar>
+        {/* Mobile search */}
+        <div className='flex lg:hidden items-center gap-2 w-full'>
+          <div className='relative flex-1 min-w-0'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher une salle...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
         </div>
-      )}
+
+        {/* Desktop search */}
+        <div className='hidden lg:flex items-center gap-2 ml-auto'>
+          <div className='relative w-64'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher une salle...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
+        </div>
+      </DataTable.Toolbar>
       <DataTable.Desktop>
         <TanStackDataTable
           table={table}

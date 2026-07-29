@@ -61,14 +61,14 @@ export default function CalendarControlBar({
   const todayLabel = 'Aujourd\'hui'
 
   const navGroup = (
-    <div className='bo-segment inline-flex items-center'>
+    <div className='bo-segment inline-flex items-center gap-0.5'>
       <button
         type='button'
         onClick={onPrev}
-        className='flex shrink-0 cursor-pointer items-center justify-center rounded-[calc(var(--radius)-2px)] p-1 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:p-1.5'
+        className='flex shrink-0 cursor-pointer items-center justify-center rounded-[calc(var(--radius)-2px)] p-1.5 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground'
         aria-label='Période précédente'
       >
-        <CaretLeft size={14} />
+        <CaretLeft size={16} weight='bold' />
       </button>
 
       {!compact && (
@@ -92,10 +92,10 @@ export default function CalendarControlBar({
       <button
         type='button'
         onClick={onNext}
-        className='flex shrink-0 cursor-pointer items-center justify-center rounded-[calc(var(--radius)-2px)] p-1 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:p-1.5'
+        className='flex shrink-0 cursor-pointer items-center justify-center rounded-[calc(var(--radius)-2px)] p-1.5 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground'
         aria-label='Période suivante'
       >
-        <CaretRight size={14} />
+        <CaretRight size={16} weight='bold' />
       </button>
     </div>
   )
@@ -162,24 +162,24 @@ export default function CalendarControlBar({
   )
 
   return (
-    <div className='shrink-0 border-b border-border-subtle bg-card px-3 py-2.5 sm:px-6 sm:py-3'>
+    <div className='shrink-0 border-b border-border-subtle bg-card px-2.5 py-1.5 sm:px-6 sm:py-3'>
       {/* Mobile layout - single row */}
-      <div className='flex items-center justify-between gap-2 sm:hidden'>
+      <div className='flex items-center justify-between gap-1 sm:hidden'>
         {/* Left: nav controls */}
-        <div className='flex items-center gap-1.5 min-w-0'>
+        <div className='flex items-center min-w-0 flex-1'>
           {navGroup}
         </div>
 
         {/* Right: filters + view selector + analytics */}
-        <div className='flex items-center gap-1.5 shrink-0'>
+        <div className='flex items-center gap-0.5 shrink-0'>
           <Sheet open={filterModalOpen} onOpenChange={setFilterModalOpen}>
             <button
               type='button'
               onClick={() => setFilterModalOpen(true)}
-              className='min-h-touch flex items-center justify-center rounded-lg px-2 py-1.5 text-muted-foreground hover:bg-muted/50 transition-colors'
+              className='flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-muted/50 transition-colors active:bg-muted'
               aria-label='Filtres'
             >
-              <Funnel size={18} weight='duotone' />
+              <Funnel size={17} weight='duotone' />
             </button>
             <SheetContent side='bottom' className='rounded-t-2xl border-t-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))]'>
               <div className='mx-auto mb-5 h-1 w-12 shrink-0 rounded-full bg-border' />
@@ -199,7 +199,7 @@ export default function CalendarControlBar({
             <button
               type='button'
               onClick={onToggleAnalytics}
-              className='min-h-touch flex items-center justify-center rounded-lg px-2 py-1.5 text-[13px] font-medium whitespace-nowrap text-muted-foreground hover:bg-muted/50 transition-colors'
+              className='flex items-center justify-center rounded-lg px-2 py-1.5 text-[11px] font-semibold whitespace-nowrap text-muted-foreground hover:bg-muted/50 transition-colors active:bg-muted'
             >
               {isAnalytics ? 'Cal' : 'Tab'}
             </button>
@@ -208,7 +208,7 @@ export default function CalendarControlBar({
           {children}
           
           <Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
-            <SelectTrigger size='sm' className='min-h-touch h-8 shrink-0 gap-1 rounded-lg border-border bg-card px-2 text-[13px] font-medium text-foreground hover:bg-muted/50 transition-colors'>
+            <SelectTrigger size='sm' className='h-8 shrink-0 gap-1 rounded-lg border-border bg-card px-2 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted/50 transition-colors'>
               <SelectValue placeholder={CALENDAR_VIEW_OPTIONS.find(o => o.value === viewMode)?.label} />
             </SelectTrigger>
             <SelectContent>

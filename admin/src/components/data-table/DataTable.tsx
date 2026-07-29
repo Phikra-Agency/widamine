@@ -17,7 +17,7 @@ function DataTableRoot({ className, children }: { className?: string; children: 
 
 function DataTableToolbar({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('bo-table-toolbar flex flex-wrap items-center gap-2 px-4 py-2.5', className)}>
+    <div className={cn('bo-table-toolbar flex flex-wrap items-center gap-2 px-2.5 py-2 sm:px-3', className)}>
       {children}
     </div>
   )

@@ -207,12 +207,12 @@ function SidebarContent({
         </div>
       </nav>
 
-      <div className={cn('shrink-0 px-4 py-2', collapsed && 'px-2 pb-4', mobile && 'border-t border-white/10 px-4 py-3', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
+      <div className={cn('shrink-0 px-4 py-2', collapsed && 'px-2 pb-4', mobile && 'border-t border-border-subtle px-4 py-3', (user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER') && 'xl:hidden')}>
         {mobile ? (
           user ? (
-            <UserAccountMenu onNavigate={onNavigate} variant='compact' className='hover:bg-transparent text-white [&_*]:text-white' />
+            <UserAccountMenu onNavigate={onNavigate} variant='compact' className='hover:bg-muted text-foreground' />
           ) : (
-            <Link to='/login' onClick={onNavigate} className='bo-nav-link text-xs border-transparent bg-transparent text-white/65'>
+            <Link to='/login' onClick={onNavigate} className='bo-nav-link text-xs border-transparent bg-transparent text-foreground'>
               <LogIn size={18} weight='duotone' className='bo-nav-icon' />
               Se connecter
             </Link>
@@ -361,8 +361,8 @@ export default function BackOfficeLayout() {
         </Button>
 
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side='right' showCloseButton className='flex w-[280px] max-w-[85vw] flex-col gap-0 border-0 bg-secondary p-0 text-white xl:hidden'>
-            <div className='flex min-h-0 flex-1 flex-col text-white [&_.bo-nav-link]:text-white/65 [&_.bo-nav-link:hover]:text-white [&_.bo-nav-link[data-active="true"]]:text-white [&_.bo-nav-link[data-active="true"]]:bg-white/10 [&_.bo-nav-icon]:text-white/50 [&_.bo-nav-link:hover_.bo-nav-icon]:text-white [&_.bo-nav-link[data-active="true"]_.bo-nav-icon]:text-white [&_.bo-sidebar-group-label]:text-white/40 [&_.bo-sidebar-header]:border-white/10 [&_.bo-sidebar-brand-row]:pt-2'>
+          <SheetContent side='right' showCloseButton className='flex w-[280px] max-w-[85vw] flex-col gap-0 border-0 bg-card p-0 text-foreground xl:hidden'>
+            <div className='flex min-h-0 flex-1 flex-col [&_.bo-nav-link]:text-foreground [&_.bo-nav-link:hover]:bg-muted/50 [&_.bo-nav-link[data-active="true"]]:bg-primary/10 [&_.bo-nav-link[data-active="true"]]:text-primary [&_.bo-nav-icon]:text-muted-foreground [&_.bo-nav-link:hover_.bo-nav-icon]:text-foreground [&_.bo-nav-link[data-active="true"]_.bo-nav-icon]:text-primary [&_.bo-sidebar-group-label]:text-muted-foreground [&_.bo-sidebar-header]:border-border-subtle [&_.bo-sidebar-brand-row]:pt-2'>
               <SidebarContent onNavigate={() => setSidebarOpen(false)} collapsed={false} mobile />
             </div>
           </SheetContent>

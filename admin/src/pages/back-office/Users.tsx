@@ -120,21 +120,24 @@ function UsersTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar className='max-lg:px-0'>
-        <div className='hidden lg:flex flex-wrap items-center gap-1.5'>
+      <DataTable.Toolbar>
+        {/* Desktop filters */}
+        <div className='hidden lg:flex flex-wrap items-center gap-2'>
           <DataTableFilterPills
             options={ROLE_FILTER_PILLS}
             value={roleFilter}
             onChange={(value) => setRoleFilter(value as Role | 'all')}
           />
         </div>
-        <div className='flex lg:hidden items-center gap-2 flex-1'>
+
+        {/* Mobile filters */}
+        <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
             value={roleFilter}
             onValueChange={(value) => setRoleFilter(value as Role | 'all')}
           >
-            <SelectTrigger size='sm' className='h-9 flex-1 text-xs font-medium'>
-              <SelectValue placeholder="Filtrer" />
+            <SelectTrigger size='sm' className='h-8 w-[100px] text-[13px] font-medium shrink-0'>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {ROLE_FILTER_PILLS.map((opt) => (
@@ -144,27 +147,31 @@ function UsersTable() {
               ))}
             </SelectContent>
           </Select>
-          <button
-            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border bg-transparent text-muted-foreground hover:bg-muted/35'
-            aria-label='Rechercher'
-          >
-            <MagnifyingGlass size={16} />
-          </button>
+
+          <div className='relative flex-1 min-w-0'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
+        </div>
+
+        {/* Desktop search */}
+        <div className='hidden lg:flex items-center gap-2 ml-auto'>
+          <div className='relative w-64'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
         </div>
       </DataTable.Toolbar>
-
-      {mobileSearchOpen && (
-        <div className='px-4 pb-2 lg:hidden'>
-          <Input
-            placeholder='Rechercher...'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className='h-9 text-xs'
-            autoFocus
-          />
-        </div>
-      )}
 
       <DataTable.Desktop>
         <TanStackDataTable

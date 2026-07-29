@@ -1,16 +1,17 @@
 import { useMotifsStore, getRandomMotifColor, normalizeMotifColor } from '@/stores/motifsStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { Plus, Trash as Trash2 } from '@phosphor-icons/react'
+import { Plus, Trash as Trash2, MagnifyingGlass } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { cn } from '@/lib/utils'
 import { FormDialog, FieldError } from '@/components/bo'
 import { motifSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTablePagination, TanStackDataTable, useDataTable } from '@/components/data-table'
+import { DataTable, DataTablePagination, TanStackDataTable, useDataTable, globalSearchFilter } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent, DialogFooter, Input, Label } from '@/components/ui'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createSallesMotifsColumns, SALLES_MOTIFS_EMPTY_ILLUSTRATION } from './columns/sallesMotifsColumns'
+import { useDebounce } from 'use-debounce'
 
 const FAB_CLASSES = 'fixed bottom-6 right-6 z-40 size-14 rounded-full shadow-bo-fab'
 
@@ -62,6 +63,8 @@ function Heading() {
 function MotifsTable() {
   const { items, fetchItems, setOperation, openModal, setItem, clearItem } = useMotifsStore()
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch] = useDebounce(searchTerm, 300)
 
   useEffect(() => {
     void fetchItems().finally(() => setLoading(false))
@@ -74,6 +77,9 @@ function MotifsTable() {
     columns,
     enablePagination: true,
     pageSize: 10,
+    globalFilter: debouncedSearch,
+    globalFilterFn: (row, columnId, filterValue) =>
+      globalSearchFilter(row, columnId, filterValue, ['name']),
   })
   const rows = table.getRowModel().rows
   const isEmpty = !loading && rows.length === 0
@@ -86,7 +92,33 @@ function MotifsTable() {
 
   return (
     <DataTable.Root>
-      <DataTable.Toolbar className='max-lg:px-0' />
+      <DataTable.Toolbar>
+        {/* Mobile search */}
+        <div className='flex lg:hidden items-center gap-2 w-full'>
+          <div className='relative flex-1 min-w-0'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher un traitement...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
+        </div>
+
+        {/* Desktop search */}
+        <div className='hidden lg:flex items-center gap-2 ml-auto'>
+          <div className='relative w-64'>
+            <MagnifyingGlass size={16} weight='bold' className='absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+            <Input
+              placeholder='Rechercher un traitement...'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className='h-8 pl-8 text-[13px] bg-background border-border'
+            />
+          </div>
+        </div>
+      </DataTable.Toolbar>
       <DataTable.Desktop>
         <TanStackDataTable
           table={table}
