@@ -162,74 +162,63 @@ export default function CalendarControlBar({
   )
 
   return (
-    <div className='shrink-0 border-b border-border bg-muted/35 px-4 py-3 sm:px-6 sm:py-3'>
-      {/* Mobile layout */}
-      <div className='flex flex-col gap-3 sm:hidden'>
-        {/* Row 1: nav + today button + view mode */}
-        <div className='flex items-center justify-between gap-2'>
-          <div className='flex items-center gap-2 min-w-0'>
-            {navGroup}
-            {showTodayButton && (
-              <Button
-                type='button'
-                variant='link'
-                onClick={onToday}
-                className='shrink-0 px-0 text-[12px] font-medium whitespace-nowrap min-h-touch'
-              >
-                {todayLabel}
-              </Button>
-            )}
-          </div>
-          <div className='flex items-center gap-2 shrink-0'>
-            {children}
-            <Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
-              <SelectTrigger size='sm' className='min-h-touch bo-filter-pill shrink-0 gap-1 !rounded-full border-transparent bg-transparent px-3 py-1.5 text-[13px] font-medium text-muted-foreground hover:bg-muted/35'>
-                <SelectValue placeholder={CALENDAR_VIEW_OPTIONS.find(o => o.value === viewMode)?.label} />
-              </SelectTrigger>
-              <SelectContent>
-                {CALENDAR_VIEW_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className='shrink-0 border-b border-border-subtle bg-card px-3 py-2.5 sm:px-6 sm:py-3'>
+      {/* Mobile layout - single row */}
+      <div className='flex items-center justify-between gap-2 sm:hidden'>
+        {/* Left: nav controls */}
+        <div className='flex items-center gap-1.5 min-w-0'>
+          {navGroup}
         </div>
 
-        {/* Row 2: filters trigger + analytics toggle */}
-        <div className='flex items-center gap-2 overflow-x-auto pb-1'>
+        {/* Right: filters + view selector + analytics */}
+        <div className='flex items-center gap-1.5 shrink-0'>
           <Sheet open={filterModalOpen} onOpenChange={setFilterModalOpen}>
             <button
               type='button'
               onClick={() => setFilterModalOpen(true)}
-              className='min-h-touch bo-filter-pill shrink-0 gap-1 !rounded-full border-transparent bg-transparent px-3 py-1.5 text-[13px] font-medium text-muted-foreground hover:bg-muted/35'
+              className='min-h-touch flex items-center justify-center rounded-lg px-2 py-1.5 text-muted-foreground hover:bg-muted/50 transition-colors'
+              aria-label='Filtres'
             >
-              <Funnel size={13} />
-              <span>Filtres</span>
+              <Funnel size={18} weight='duotone' />
             </button>
-            <SheetContent side='bottom' className='rounded-t-2xl pb-[calc(1rem+env(safe-area-inset-bottom))]'>
-              <div className='mx-auto mb-4 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/20' />
-              <div className='flex items-center justify-between'>
-                <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground/60'>Filtres</p>
-                <SheetClose className='min-h-touch min-w-touch flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground'>
-                  <XIcon size={16} weight='bold' />
+            <SheetContent side='bottom' className='rounded-t-2xl border-t-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))]'>
+              <div className='mx-auto mb-5 h-1 w-12 shrink-0 rounded-full bg-border' />
+              <div className='flex items-center justify-between mb-5'>
+                <p className='bo-label text-muted-foreground'>Filtres</p>
+                <SheetClose className='min-h-touch min-w-touch flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors'>
+                  <XIcon size={18} weight='bold' />
                 </SheetClose>
               </div>
-              <div className='mt-4 space-y-3 [&_.bo-filter-pill]:flex [&_.bo-filter-pill]:w-full [&_.flex-wrap]:flex-col [&_.flex-wrap]:w-full'>
+              <div className='space-y-3 [&_.bo-filter-pill]:flex [&_.bo-filter-pill]:w-full [&_.flex-wrap]:flex-col [&_.flex-wrap]:w-full [&_.flex-wrap]:gap-2'>
                 {filters}
               </div>
             </SheetContent>
           </Sheet>
+
           {onToggleAnalytics && (
             <button
               type='button'
               onClick={onToggleAnalytics}
-              className='min-h-touch shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium whitespace-nowrap cursor-pointer text-muted-foreground hover:bg-muted/35 transition-colors'
+              className='min-h-touch flex items-center justify-center rounded-lg px-2 py-1.5 text-[13px] font-medium whitespace-nowrap text-muted-foreground hover:bg-muted/50 transition-colors'
             >
-              {isAnalytics ? 'Calendrier' : 'Tableau'}
+              {isAnalytics ? 'Cal' : 'Tab'}
             </button>
           )}
+
+          {children}
+          
+          <Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
+            <SelectTrigger size='sm' className='min-h-touch h-8 shrink-0 gap-1 rounded-lg border-border bg-card px-2 text-[13px] font-medium text-foreground hover:bg-muted/50 transition-colors'>
+              <SelectValue placeholder={CALENDAR_VIEW_OPTIONS.find(o => o.value === viewMode)?.label} />
+            </SelectTrigger>
+            <SelectContent>
+              {CALENDAR_VIEW_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

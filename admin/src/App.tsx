@@ -27,6 +27,9 @@ function App() {
             <Route element={<BackOfficeLayout />}>
               <Route element={<RoleWrapper roles={['ADMIN', 'RECEPTIONIST']} />}>
                 <Route path='users' element={<Suspense fallback={null}><Users /></Suspense>} />
+              </Route>
+
+              <Route element={<RoleWrapper roles={['ADMIN']} />}>
                 <Route path='motifs' element={<Suspense fallback={null}><Motifs /></Suspense>} />
                 <Route path='resources' element={<Suspense fallback={null}><Resources /></Suspense>} />
                 <Route path='settings' element={<Suspense fallback={null}><Settings /></Suspense>} />

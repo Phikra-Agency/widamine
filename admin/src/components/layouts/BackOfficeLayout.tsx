@@ -15,6 +15,7 @@ import {
   ChatCircleDots,
   List,
   X,
+  GearSix,
 } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -70,8 +71,9 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Administration',
     links: [
       { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
-      { to: 'resources', label: 'Salles', icon: Door, roles: ['ADMIN', 'RECEPTIONIST'] },
-      { to: 'motifs', label: 'Traitements', icon: Stethoscope, roles: ['ADMIN', 'RECEPTIONIST'] },
+      { to: 'resources', label: 'Salles', icon: Door, roles: ['ADMIN'] },
+      { to: 'motifs', label: 'Traitements', icon: Stethoscope, roles: ['ADMIN'] },
+      { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN'] },
     ],
   },
 ]
@@ -250,6 +252,7 @@ function SidebarContent({
 
 export default function BackOfficeLayout() {
   const { pathname } = useLocation()
+  const { user } = useAuthStore()
   const isFullBleedPage = pathname.endsWith('/calendar')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -308,19 +311,20 @@ export default function BackOfficeLayout() {
 
   return (
     <main className='flex h-dvh flex-col overflow-hidden bg-sidebar text-foreground'>
-      <div className='flex items-center justify-between border-b border-border-subtle bg-sidebar px-4 py-3 xl:hidden'>
-        <Link to='/calendar' aria-label='Widamine'>
-          <img src='/logo-long.svg' alt='Widamine' className='h-10 w-auto object-contain' />
+      <div className='flex items-center justify-between border-b border-border-subtle bg-card px-4 py-2.5 xl:hidden'>
+        <Link to='/calendar' aria-label='Widamine' className='flex items-center'>
+          <img src='/logo-long.svg' alt='Widamine' className='h-11 w-auto object-contain' />
         </Link>
         <Button
           type='button'
-          variant='outline'
+          variant='ghost'
           size='icon'
           onClick={() => setSidebarOpen((open) => !open)}
           aria-label={sidebarOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           aria-expanded={sidebarOpen}
+          className='h-10 w-10 text-foreground hover:bg-muted hover:text-primary'
         >
-          {sidebarOpen ? <X size={18} /> : <List size={18} />}
+          {sidebarOpen ? <X size={20} weight='bold' /> : <List size={20} weight='bold' />}
         </Button>
       </div>
 
@@ -364,7 +368,7 @@ export default function BackOfficeLayout() {
           </SheetContent>
         </Sheet>
 
-        <section className='relative z-10 flex h-full min-h-0 min-w-0 flex-1 flex-col p-2 pr-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 xl:pl-1'>
+        <section className='relative z-10 flex h-full min-h-0 min-w-0 flex-1 flex-col p-2 pr-3 pb-3 pt-2 xl:pl-1'>
           <div className='bo-content-shell'>
             <div
               className={

@@ -556,10 +556,10 @@ function GallerySection() {
           className='relative select-none'
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
-          style={{ touchAction: 'pan-y', height: 420 }}
+          style={{ touchAction: 'pan-y' }}
         >
           <div className='pointer-events-none absolute -left-36 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
-          <div className='relative mx-auto' style={{ width: 300, height: 420 }}>
+          <div className='relative mx-auto w-[55vw] max-w-[300px] aspect-[5/7]'>
             {SM.gallery.map((src, i) => {
               let x = 0, rot = 0, z = 0
               const d = (i - galleryIndex + total) % total
@@ -570,10 +570,8 @@ function GallerySection() {
               return (
                 <div
                   key={src}
-                  className='absolute left-0 top-0 transition-transform duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]'
+                  className='absolute left-0 top-0 size-full transition-transform duration-500 ease-[cubic-bezier(0.45,0,0.2,1)]'
                   style={{
-                    width: 300,
-                    height: 420,
                     transform: `translateX(${x}px) rotateZ(${rot}deg)`,
                     zIndex: z,
                   }}

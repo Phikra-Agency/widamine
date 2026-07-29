@@ -449,7 +449,7 @@ function ShowModal() {
                               <Button onClick={() => {
                                   setEditingSessions({})
                                   const currentDate = item.schedules?.find((currentSchedule) => currentSchedule.sessionId === session.id)?.datetime
-                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) }}
+                                  setSessionDates({ ...sessionDates, [session.id]: toDateTimeLocal(currentDate) })
                                 }}
                                 type='button' variant='ghost'
                               >
@@ -499,8 +499,8 @@ function ShowModal() {
                     ))}
                   </div>
                 </div>
-              </div>
             </ScrollArea>
+          </>
         )}
 
         <div className='flex shrink-0 items-center justify-end border-t border-border-subtle/40 px-5 py-3'>

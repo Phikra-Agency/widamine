@@ -1,13 +1,17 @@
+import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useEffect } from 'react'
 
 export default function NotificationBadge() {
   const { count, startPolling, stopPolling } = useNotificationsStore()
+  const { user } = useAuthStore()
+  const canPoll = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
 
   useEffect(() => {
+    if (!canPoll) return
     startPolling()
     return () => stopPolling()
-  }, [startPolling, stopPolling])
+  }, [startPolling, stopPolling, canPoll])
 
   if (count === 0) return null
 

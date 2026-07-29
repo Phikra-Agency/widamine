@@ -190,7 +190,7 @@ function ReservationSteps({
       className={`shadow-xl ${
         embedded
           ? 'relative flex w-full max-w-full flex-col min-h-[24rem] sm:max-w-[720px] sm:min-h-[30rem]'
-          : 'pointer-events-auto relative flex w-full flex-col'
+          : 'pointer-events-auto relative flex w-full flex-col max-h-[calc(100dvh-2rem)]'
       } ${cardBase}`}
       style={embedded ? undefined : { width: `min(calc(100vw - 1.5rem), ${getPanelWidth(step)}px)` }}
     >
@@ -200,7 +200,7 @@ function ReservationSteps({
         </h2>
         {embedded ? null : (
           <button onClick={handleDismiss} style={{ color: C.secondary }}>
-            <X size={20} weight='duotone' opacity={0.4} />
+            <X size={20} weight='regular' opacity={0.4} />
           </button>
         )}
       </div>
@@ -238,7 +238,7 @@ function ReservationSteps({
                       <ServiceIcon slug={motif.icon} size={22} color={C.primary} />
                     </div>
                     <span className='min-w-0 text-sm font-medium' style={{ color: C.secondary }}>{motif.name}</span>
-                    {selectedMotif?.id === motif.id ? <CheckIcon size={14} weight='duotone' className='ml-auto shrink-0' style={{ color: C.primary }} /> : null}
+                    {selectedMotif?.id === motif.id ? <CheckIcon size={14} weight='regular' className='ml-auto shrink-0' style={{ color: C.primary }} /> : null}
                   </button>
                 ))}
               </div>
@@ -610,7 +610,7 @@ function BookingTypeChoice({
           Prendre rendez-vous
         </h2>
         <button onClick={onClose} style={{ color: C.secondary }}>
-          <X size={20} weight='duotone' opacity={0.4} />
+          <X size={20} weight='regular' opacity={0.4} />
         </button>
       </div>
 
@@ -737,11 +737,11 @@ function ConsultationForm({
       >
         <div className='relative mb-6'>
           <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
-            <CheckIcon size={40} weight='duotone' style={{ color: C.primary }} />
+            <CheckIcon size={40} weight='regular' style={{ color: C.primary }} />
           </div>
         </div>
         <h3 className='mb-2 text-xl' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
-          Réservation reçue ✅
+Réservation reçue
         </h3>
         <p className='mb-6 text-sm leading-relaxed' style={{ color: `${C.secondary}80` }}>
           Votre demande de consultation avec Dr. Widad Slaoui a bien été reçue. Nous vous recontacterons rapidement.
@@ -1053,15 +1053,15 @@ function SuccessStep({ onClose, embedded }: { onClose: () => void; embedded: boo
     >
       <div className='relative mb-6'>
         <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
-            <CheckIcon size={40} weight='duotone' style={{ color: C.primary }} />
+            <CheckIcon size={40} weight='regular' style={{ color: C.primary }} />
         </div>
       </div>
 
       <h3 className='mb-2 text-xl' style={{ fontFamily: TYPE.headingFamily, color: C.secondary }}>
-        Réservation reçue ✅
+        Réservation reçue
       </h3>
       <p className='mb-6 text-sm leading-relaxed' style={{ color: `${C.secondary}80` }}>
-        Yo on a bien reçu ta réservation et on revient vers toi rapidement !
+        Votre demande a bien été reçue. Le cabinet vous recontactera sous 24h pour confirmer votre rendez-vous.
       </p>
 
       <button
