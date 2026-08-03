@@ -148,7 +148,7 @@ export default function Chatbot() {
               border: '1px solid rgba(26,54,70,0.06)',
             }}
           >
-            <Header onClose={() => setOpen(false)} />
+            <Header />
 
             <div
               ref={listRef}
@@ -299,7 +299,7 @@ export default function Chatbot() {
   )
 }
 
-function Header({ onClose }: { onClose: () => void }) {
+function Header() {
   return (
     <div
       className='relative shrink-0 flex items-center justify-between px-5 py-4'
@@ -329,13 +329,6 @@ function Header({ onClose }: { onClose: () => void }) {
           </p>
         </div>
       </div>
-      <button
-        onClick={onClose}
-        className='flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition'
-        style={{ color: `${C.secondary}40` }}
-      >
-        <X size={14} weight='bold' />
-      </button>
     </div>
   )
 }

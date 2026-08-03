@@ -1,7 +1,7 @@
 import { usePatientStore } from '@/stores/patientsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSchedulesStore } from '@/stores/schedulesStore'
-import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, MagnifyingGlass, CalendarBlank, X, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
+import { PencilSimple as Pen, Plus, Trash as Trash2, User, EnvelopeSimple, Phone, MapPin, MagnifyingGlass, CalendarBlank, ArrowRight, CalendarDots as CalendarClock } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
 import { useDebounce } from 'use-debounce'
@@ -29,7 +29,7 @@ import {
 import { FormDialog, FieldError } from '@/components/bo'
 import { patientSchema } from '@/lib/formSchemas'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
+import { DataTable, DataTableFilterPills, DataTablePagination, TanStackDataTable, useDataTable, globalSearchFilter, type FilterPillOption } from '@/components/data-table'
 import type { ColumnFiltersState, OnChangeFn } from '@tanstack/react-table'
 import {
   createPatientsColumns,
@@ -209,6 +209,10 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
     columns,
     enablePagination: true,
     pageSize: 10,
+    globalFilter: searchTerm,
+    globalFilterFn: (row, columnId, filterValue) =>
+      globalSearchFilter(row, columnId, filterValue, ['firstName', 'lastName', 'email', 'phone']) ||
+      `${row.original.firstName} ${row.original.lastName}`.toLowerCase().includes(String(filterValue ?? '').trim().toLowerCase()),
     columnFilters,
     onColumnFiltersChange: handleColumnFiltersChange,
     initialColumnVisibility: { gender: false, city: false },
@@ -253,7 +257,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
               placeholder='Rechercher...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='h-8 pl-8 text-[13px] bg-background border-border'
+              className='h-8 pl-8 text-[13px] bg-background border-border focus-visible:ring-0! focus-visible:border-border-strong!'
             />
           </div>
         </div>
@@ -266,7 +270,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
               placeholder='Rechercher...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='h-8 pl-8 text-[13px] bg-background border-border'
+              className='h-8 pl-8 text-[13px] bg-background border-border focus-visible:ring-0! focus-visible:border-border-strong!'
             />
           </div>
         </div>
@@ -676,16 +680,8 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
                   </div>
                 </div>
               </div>
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon-sm'
-                onClick={onClose}
-                className='shrink-0 text-secondary/30 hover:text-secondary/60'
-              >
-                <X size={16} />
-              </Button>
             </div>
+          </div>
 
             <div className='flex-1 min-h-0 overflow-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
               {/* Contact */}

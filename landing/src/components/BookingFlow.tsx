@@ -553,6 +553,13 @@ function DoctorSelection({
             img = null  // Force fallback to ui-avatars
           }
 
+          // Special case: For consultation, always show Dr. Widad's photo
+          const isConsultation = selectedMotif?.slug === 'consultation' || 
+                                 selectedMotif?.name?.toLowerCase().includes('consultation')
+          if (isConsultation) {
+            img = '/images/team/widad.jpg'
+          }
+
           return (
             <button
               key={`${slot.startsAt}-${slot.doctorId ?? 'none'}`}
