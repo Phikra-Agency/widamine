@@ -87,17 +87,19 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
         <nav
           className='relative flex items-center justify-between rounded-full px-6 py-4 transition-all duration-300'
           style={{
-            background: C.secondary,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            background: 'white',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+            border: `1px solid ${C.primary}15`,
           }}
         >
           <Link to='/' className='flex shrink-0 cursor-pointer items-center'>
-            <img src='/logo.svg' alt='Widamine' className='h-10 w-auto object-contain brightness-0 invert' />
+            <img src='/logo.svg' alt='Widamine' className='h-10 w-auto object-contain' style={{ filter: `brightness(0) saturate(100%) invert(22%) sepia(28%) saturate(1679%) hue-rotate(159deg) brightness(93%) contrast(91%)` }} />
           </Link>
 
-          {/* Desktop Nav Links */}
-          <div ref={megaRef} className='hidden items-center gap-8 lg:flex'>
+          {/* Desktop Nav Links - Centered */}
+          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden items-center gap-8 lg:flex'>
             <div
+              ref={megaRef}
               className='relative'
               onMouseEnter={handleServicesEnter}
               onMouseLeave={handleServicesLeave}
@@ -105,31 +107,38 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className={`inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium text-white/90 transition-colors duration-200 hover:text-white ${isServicesActive ? 'text-white' : ''}`}
+                className='inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium transition-colors duration-200'
+                style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+                onMouseLeave={(e) => { if (!isServicesActive) e.currentTarget.style.opacity = '0.85' }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
               >
                 Services
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} weight='bold' className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
                 {isServicesOpen ? (
                   <motion.div
-                    initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                    transition={{ type: 'spring', visualDuration: 0.3, bounce: 0 }}
-                    className='absolute left-1/2 top-full z-[999] mt-6 hidden w-[min(92vw,800px)] -translate-x-1/2 lg:block'
+                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className='absolute left-1/2 top-full z-[999] mt-4 hidden -translate-x-1/2 lg:block'
+                    style={{ width: '850px' }}
                   >
-                    <div className='relative overflow-hidden rounded-3xl border border-secondary/8 bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl'>
-                      <div className='grid grid-cols-3 gap-6'>
+                    <div className='relative overflow-hidden rounded-3xl bg-white p-8' style={{ 
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+                      border: `1px solid ${C.primary}10`
+                    }}>
+                      <div className='grid grid-cols-3 gap-8'>
                         {MEGA_CATEGORIES.map((cat) => (
                           <div key={cat.slug} className='space-y-3'>
                             <Link
                               to={`/category/${cat.slug}`}
                               onClick={() => setIsServicesOpen(false)}
-                              className='group mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-wide transition-all hover:bg-primary/5'
+                              className='group mb-5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold uppercase tracking-wide transition-all hover:bg-primary/5'
                               style={{ color: C.primary }}
                             >
                               {cat.label}
@@ -143,11 +152,11 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   key={item.label}
                                   to={item.href}
                                   onClick={() => setIsServicesOpen(false)}
-                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-all hover:bg-primary/6 hover:pl-5'
+                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all group-hover:scale-110' style={{ background: `${C.primary}08` }}>
-                                    <ServiceIcon slug={item.slug} size={22} color={C.primary} />
+                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all group-hover:scale-110' style={{ background: `${C.primary}10` }}>
+                                    <ServiceIcon slug={item.slug} size={20} color={C.primary} />
                                   </div>
                                   <span className='truncate font-medium opacity-85 transition-opacity group-hover:opacity-100'>{item.label}</span>
                                 </Link>
@@ -158,7 +167,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                       </div>
                       
                       {/* Bottom CTA bar */}
-                      <div className='mt-6 flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/5 px-6 py-4'>
+                      <div className='mt-8 flex items-center justify-between rounded-2xl px-6 py-4' style={{ background: `${C.primary}08`, border: `1px solid ${C.primary}15` }}>
                         <div>
                           <div className='text-sm font-semibold' style={{ color: C.secondary }}>Besoin d'aide pour choisir ?</div>
                           <div className='text-xs opacity-70' style={{ color: C.secondary }}>Contactez-nous pour une consultation gratuite</div>
@@ -167,7 +176,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                           to='/contact'
                           onClick={() => setIsServicesOpen(false)}
                           className='inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95'
-                          style={{ background: C.primary }}
+                          style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
                         >
                           Contactez-nous
                         </Link>
@@ -180,14 +189,20 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className={`text-[15px] font-medium transition-colors duration-200 ${pathname === '/about' ? 'text-white' : 'text-white/90 hover:text-white'}`}
+              className='text-[15px] font-medium transition-colors duration-200'
+              style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+              onMouseLeave={(e) => { if (pathname !== '/about') e.currentTarget.style.opacity = '0.85' }}
             >
               À propos
             </Link>
 
             <Link
               to='/contact'
-              className={`text-[15px] font-medium transition-colors duration-200 ${isContact ? 'text-white' : 'text-white/90 hover:text-white'}`}
+              className='text-[15px] font-medium transition-colors duration-200'
+              style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+              onMouseLeave={(e) => { if (!isContact) e.currentTarget.style.opacity = '0.85' }}
             >
               Contact
             </Link>
@@ -198,7 +213,10 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
             <button
               type='button'
               onClick={() => setIsMobileMenuOpen((current) => !current)}
-              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden'
+              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors lg:hidden'
+              style={{ color: C.secondary, background: `${C.primary}08` }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}12` }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = `${C.primary}08` }}
               aria-label='Toggle menu'
             >
               {isMobileMenuOpen ? <X size={20} weight='regular' /> : <Menu size={20} weight='regular' />}
@@ -208,8 +226,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               type='button'
               onClick={open}
               aria-label='Prendre rendez-vous'
-              className='hidden cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-[15px] font-semibold transition-all hover:scale-105 active:scale-95 lg:inline-flex'
-              style={{ color: C.primary }}
+              className='hidden cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-2.5 text-[15px] font-semibold text-white transition-all hover:scale-105 active:scale-95 lg:inline-flex'
+              style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
             >
               Rendez-vous
             </button>
@@ -223,30 +241,36 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className='relative z-[9999] mt-3 overflow-hidden rounded-3xl shadow-xl backdrop-blur-xl lg:hidden'
-              style={{ background: C.secondary, border: `1px solid ${C.secondary}` }}
+              className='relative z-[9999] mt-3 overflow-hidden rounded-3xl shadow-xl lg:hidden'
+              style={{ background: 'white', border: `1px solid ${C.primary}15` }}
             >
               <div className='max-h-[78dvh] space-y-1 overflow-y-auto p-4'>
                 <Link 
                   to='/' 
-                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white' 
+                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors' 
+                  style={{ color: C.secondary, opacity: 0.85 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}08`; e.currentTarget.style.opacity = '1' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Accueil
                 </Link>
                 {MEGA_CATEGORIES.map((cat) => (
                   <div key={cat.slug}>
-                    <div className='px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-white/60'>
+                    <div className='px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide' style={{ color: C.primary, opacity: 0.7 }}>
                       {cat.label}
                     </div>
                     {cat.items.map((item) => (
                       <Link
                         key={item.label}
                         to={item.href}
-                        className='flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white'
+                        className='flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors'
+                        style={{ color: C.secondary, opacity: 0.85 }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}08`; e.currentTarget.style.opacity = '1' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <ServiceIcon slug={item.slug} size={20} color='white' className='opacity-70' />
+                        <ServiceIcon slug={item.slug} size={20} color={C.primary} className='opacity-70' />
                         {item.label}
                       </Link>
                     ))}
@@ -254,14 +278,20 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                 ))}
                 <Link 
                   to='/about' 
-                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white' 
+                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors' 
+                  style={{ color: C.secondary, opacity: 0.85 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}08`; e.currentTarget.style.opacity = '1' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   À propos
                 </Link>
                 <Link 
                   to='/contact' 
-                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white' 
+                  className='block cursor-pointer rounded-xl px-4 py-3 text-sm font-medium transition-colors' 
+                  style={{ color: C.secondary, opacity: 0.85 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}08`; e.currentTarget.style.opacity = '1' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Contact
@@ -272,8 +302,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     setIsMobileMenuOpen(false)
                     open()
                   }}
-                  className='mt-3 inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold transition-all active:scale-95'
-                  style={{ color: C.primary }}
+                  className='mt-3 inline-flex w-full cursor-pointer items-center justify-center rounded-full px-4 py-3 text-sm font-semibold text-white transition-all active:scale-95'
+                  style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
                 >
                   Réserver un rendez-vous
                 </button>
