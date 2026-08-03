@@ -1,0 +1,719 @@
+import { useEffect, useRef } from 'react'
+import { PhoneCall, Clock, MapPin, Star, Certificate, Users, TrendUp, Sparkles, ArrowRight, Check } from '@phosphor-icons/react'
+import { useScheduleModalStore } from '@/stores/scheduleModalStore'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import PublicNavbar from '@/components/PublicNavbar'
+import PublicFooter from '@/components/PublicFooter'
+import { C, TYPE } from '@/lib/theme'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const TEAM_MEMBERS = [
+  { name: 'Dr. Widad Slaoui', role: 'Médecin Esthétique', specialty: 'Fondatrice & Directrice', img: '/images/team/widad.jpg' },
+  { name: 'Chaymae Ez Ouhri', role: 'Praticienne Certifiée', specialty: 'Soins du Visage', img: '/images/team/chaymae ez ouhri .jpg' },
+  { name: 'Ihssan', role: 'Praticien Expert', specialty: 'Injections', img: '/images/team/ihssan.jpg' },
+  { name: 'Ilham', role: 'Praticienne Senior', specialty: 'Soins Corporels', img: '/images/team/ilham.jpg' },
+  { name: 'Loubna', role: 'Praticienne', specialty: 'Esthétique Avancée', img: '/images/team/loubna .jpg' },
+  { name: 'Najwa', role: 'Praticienne', specialty: 'Dermatologie', img: '/images/team/najwa.jpg' },
+]
+
+const WHY_CHOOSE_US = [
+  { icon: Certificate, title: 'Expertise Certifiée', desc: 'Équipe formée aux dernières techniques internationales' },
+  { icon: Sparkles, title: 'Technologie de Pointe', desc: 'Équipements médicaux dernière génération' },
+  { icon: Users, title: 'Suivi Personnalisé', desc: 'Accompagnement dédié avant, pendant et après' },
+  { icon: Star, title: '98% Satisfaction', desc: 'Plus de 2000 patients nous font confiance' },
+]
+
+export default function About() {
+  const heroRef = useRef<HTMLElement>(null)
+  const { openScheduleModal } = useScheduleModalStore()
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('[data-hero-fade]', {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+      })
+    }, heroRef)
+    return () => ctx.revert()
+  }, [])
+
+  return (
+    <div style={{ background: C.bg, minHeight: '100vh' }}>
+      <PublicNavbar />
+      
+      {/* Modern Hero with Image Composition */}
+      <section ref={heroRef} className='relative pt-32 pb-20 overflow-hidden'>
+        {/* Background decoration */}
+        <div className='absolute top-0 right-0 w-1/2 h-full opacity-5'>
+          <svg viewBox='0 0 400 400' className='w-full h-full'>
+            <circle cx='200' cy='200' r='150' fill={C.primary} />
+          </svg>
+        </div>
+
+        <div className='max-w-7xl mx-auto px-4 sm:px-6'>
+          <div className='grid lg:grid-cols-2 gap-12 items-center'>
+            {/* Left: Content */}
+            <div data-hero-fade className='space-y-8'>
+              <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full' style={{ background: `${C.primary}15` }}>
+                <Sparkles size={18} weight='duotone' style={{ color: C.primary }} />
+                <span className='text-sm font-medium' style={{ color: C.primary }}>Expertise Médicale depuis 2019</span>
+              </div>
+
+              <h1 className='font-amoria leading-[1.1]' style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', color: C.secondary }}>
+                Sublimez votre <br/>
+                <span style={{ color: C.primary, fontStyle: 'italic' }}>beauté naturelle</span>
+              </h1>
+
+              <p className='text-lg leading-relaxed max-w-xl' style={{ color: C.secondary, opacity: 0.75 }}>
+                Widamine, votre centre d'excellence en médecine esthétique à Casablanca. 
+                Des traitements personnalisés, des résultats naturels, une équipe d'experts à votre écoute.
+              </p>
+
+              <div className='flex flex-wrap gap-4'>
+                <button
+                  onClick={openScheduleModal}
+                  className='group inline-flex items-center gap-3 px-8 py-4 rounded-full text-white font-medium transition-all active:scale-95'
+                  style={{ background: C.primary, boxShadow: '0 4px 20px rgba(0,159,214,0.25)' }}
+                >
+                  Réserver une consultation
+                  <ArrowRight size={20} weight='bold' className='transition-transform group-hover:translate-x-1' />
+                </button>
+
+                <a
+                  href='tel:+212522365247'
+                  className='inline-flex items-center gap-3 px-8 py-4 rounded-full font-medium border-2 transition-all active:scale-95'
+                  style={{ borderColor: C.primary, color: C.primary }}
+                >
+                  <PhoneCall size={20} weight='duotone' />
+                  05 22 36 52 47
+                </a>
+              </div>
+
+              {/* Quick Info */}
+              <div className='flex flex-wrap gap-6 pt-4'>
+                <div className='flex items-center gap-2'>
+                  <Clock size={20} weight='duotone' style={{ color: C.primary }} />
+                  <span className='text-sm' style={{ color: C.secondary, opacity: 0.7 }}>Lun - Sam: 9h - 19h</span>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <MapPin size={20} weight='duotone' style={{ color: C.primary }} />
+                  <span className='text-sm' style={{ color: C.secondary, opacity: 0.7 }}>Casablanca, Maroc</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Image Composition */}
+            <div data-hero-fade className='relative lg:h-[600px]'>
+              {/* Main Image */}
+              <div className='relative h-full rounded-3xl overflow-hidden' style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+                <img 
+                  src='/images/gallery/DSC01316.jpg' 
+                  alt='Centre Widamine'
+                  className='w-full h-full object-cover'
+                  style={{ outline: '1px solid oklch(0 0 0 / 0.1)', outlineOffset: '-1px' }}
+                />
+              </div>
+
+              {/* Floating Stats Card */}
+              <div 
+                className='absolute bottom-8 -left-8 bg-white p-6 rounded-2xl'
+                style={{ boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }}
+              >
+                <div className='flex items-center gap-4'>
+                  <div className='w-14 h-14 rounded-full flex items-center justify-center' style={{ background: `${C.primary}15` }}>
+                    <Star size={28} weight='duotone' style={{ color: C.primary }} />
+                  </div>
+                  <div>
+                    <div className='font-amoria text-3xl font-bold' style={{ color: C.secondary }}>2000+</div>
+                    <div className='text-sm' style={{ color: C.secondary, opacity: 0.6 }}>Patients satisfaits</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative element */}
+              <div className='absolute -top-6 -right-6 w-32 h-32 rounded-full opacity-20' style={{ background: C.orange }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us - 4 Column Grid */}
+      <section className='py-20' style={{ background: 'white' }}>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6'>
+          <div className='text-center mb-16'>
+            <h2 className='font-amoria mb-4' style={{ fontSize: 'clamp(2rem, 3vw, 3.5rem)', color: C.secondary }}>
+              Pourquoi choisir <span style={{ color: C.primary, fontStyle: 'italic' }}>Widamine</span> ?
+            </h2>
+            <p className='text-lg max-w-2xl mx-auto' style={{ color: C.secondary, opacity: 0.7 }}>
+              Une approche complète de la médecine esthétique
+            </p>
+          </div>
+
+          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-8'>
+            {WHY_CHOOSE_US.map((item, i) => (
+              <div key={i} className='text-center group'>
+                <div 
+                  className='w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center transition-transform group-hover:scale-110'
+                  style={{ background: `${C.primary}10` }}
+                >
+                  <item.icon size={36} weight='duotone' style={{ color: C.primary }} />
+                </div>
+                <h3 className='font-semibold text-lg mb-2' style={{ color: C.secondary }}>{item.title}</h3>
+                <p className='text-sm leading-relaxed' style={{ color: C.secondary, opacity: 0.65 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Story - Asymmetric Layout */}
+      <section className='py-24' style={{ background: C.bg }}>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6'>
+          <div className='grid lg:grid-cols-5 gap-16 items-center'>
+            <div className='lg:col-span-2 space-y-6'>
+              <div className='inline-block px-4 py-2 rounded-full text-sm font-medium' style={{ background: `${C.orange}15`, color: C.orange }}>
+                Notre Histoire
+              </div>
+              <h2 className='font-amoria leading-tight' style={{ fontSize: 'clamp(2rem, 3vw, 3rem)', color: C.secondary }}>
+                Une expertise <br/>au <span style={{ color: C.primary, fontStyle: 'italic' }}>service</span> <br/>de votre beauté
+              </h2>
+              <p className='text-base leading-relaxed' style={{ color: C.secondary, opacity: 0.75 }}>
+                Fondé en 2019 par <strong>Dr. Widad Slaoui</strong>, Widamine est né d'une vision claire : 
+                créer un espace où la médecine esthétique rencontre l'art et l'humanité.
+              </p>
+              <ul className='space-y-3'>
+                {['Traitements personnalisés', 'Résultats naturels', 'Suivi post-traitement'].map((item, i) => (
+                  <li key={i} className='flex items-center gap-3'>
+                    <Check size={20} weight='bold' style={{ color: C.primary }} />
+                    <span style={{ color: C.secondary }}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className='lg:col-span-3'>
+              <div className='grid grid-cols-2 gap-6'>
+                <div className='space-y-6'>
+                  <div className='rounded-3xl overflow-hidden h-64' style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                    <img src='/images/gallery/DSC01316.jpg' alt='' className='w-full h-full object-cover' />
+                  </div>
+                  <div className='bg-white p-8 rounded-3xl' style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+                    <div className='font-amoria text-4xl font-bold mb-2' style={{ color: C.primary }}>5+</div>
+                    <div className='text-sm' style={{ color: C.secondary, opacity: 0.7 }}>Années d'expérience</div>
+                  </div>
+                </div>
+                <div className='space-y-6 pt-12'>
+                  <div className='bg-white p-8 rounded-3xl' style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+                    <div className='font-amoria text-4xl font-bold mb-2' style={{ color: C.primary }}>98%</div>
+                    <div className='text-sm' style={{ color: C.secondary, opacity: 0.7 }}>Taux de satisfaction</div>
+                  </div>
+                  <div className='rounded-3xl overflow-hidden h-64' style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                    <img src='/images/gallery/DSC01316.jpg' alt='' className='w-full h-full object-cover' />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+            <img 
+              src='/logo.svg' 
+              alt='Widamine' 
+              data-fade 
+              className='mx-auto mb-8 w-16 sm:w-20' 
+              style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))' }}
+            />
+            <h1 
+              data-fade 
+              className='mx-auto max-w-4xl font-amoria leading-[1.1]' 
+              style={{ 
+                color: C.secondary,
+                fontSize: 'clamp(2rem, 4vw + 1rem, 4.5rem)',
+                letterSpacing: '-0.02em',
+                textWrap: 'balance',
+              }}
+            >
+              Votre centre d'excellence en <span style={{ color: C.primary, fontStyle: 'italic' }}>médecine esthétique</span>
+            </h1>
+            <p 
+              data-fade 
+              className='mx-auto mt-6 max-w-2xl leading-relaxed' 
+              style={{ 
+                fontFamily: TYPE.bodyFamily, 
+                color: C.secondary, 
+                opacity: 0.75,
+                fontSize: 'clamp(0.95rem, 1vw + 0.75rem, 1.125rem)',
+                textWrap: 'pretty',
+              }}
+            >
+              À Widamine, nous croyons que chaque personne mérite de se sentir bien dans sa peau. 
+              Notre mission est de vous accompagner dans votre quête de beauté et de bien-être avec expertise, 
+              écoute et bienveillance.
+            </p>
+            <div data-fade className='mt-10 flex flex-wrap items-center justify-center gap-4'>
+              <button
+                onClick={openScheduleModal}
+                className='group inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-4 text-base font-medium text-white transition-all active:scale-[0.96]'
+                style={{ 
+                  background: C.primary,
+                  minWidth: '200px',
+                  minHeight: '52px',
+                  boxShadow: '0 2px 12px rgba(0, 159, 214, 0.25), 0 8px 24px rgba(0, 159, 214, 0.15)',
+                  transitionProperty: 'transform, box-shadow',
+                  transitionDuration: '200ms',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 159, 214, 0.3), 0 12px 32px rgba(0, 159, 214, 0.2)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 159, 214, 0.25), 0 8px 24px rgba(0, 159, 214, 0.15)'
+                }}
+              >
+                Prendre rendez-vous
+                <svg className='transition-transform duration-200 ease-out group-hover:translate-x-1' width='16' height='16' viewBox='0 0 16 16' fill='none'>
+                  <path d='M6 3L11 8L6 13' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+              </button>
+              <Link
+                to='/contact'
+                className='inline-flex items-center justify-center gap-2.5 rounded-full border-2 px-8 py-4 text-base font-medium transition-all active:scale-[0.96]'
+                style={{ 
+                  borderColor: C.primary, 
+                  color: C.primary,
+                  minWidth: '180px',
+                  minHeight: '52px',
+                  transitionProperty: 'transform, background-color, box-shadow',
+                  transitionDuration: '200ms',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${C.primary}08`
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 159, 214, 0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                Nous contacter
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className='py-16 sm:py-20' style={{ background: C.primary }}>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+          <div className='grid grid-cols-2 gap-8 sm:gap-12 lg:grid-cols-4'>
+            {ACHIEVEMENTS.map((item, i) => (
+              <div key={i} data-slide-up className='text-center'>
+                <div 
+                  className='font-amoria font-bold text-white mb-2 tabular-nums' 
+                  style={{ 
+                    fontSize: 'clamp(2.5rem, 4vw + 1rem, 4rem)',
+                    letterSpacing: '-0.02em',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {item.number}
+                </div>
+                <div 
+                  className='text-white/80' 
+                  style={{ 
+                    fontFamily: TYPE.bodyFamily,
+                    fontSize: 'clamp(0.875rem, 1vw + 0.5rem, 1rem)',
+                  }}
+                >
+                  {item.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Story */}
+      <section className='py-20 sm:py-28'>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+          <div className='grid lg:grid-cols-2 gap-12 lg:gap-16 items-center'>
+            <div data-slide-up>
+              <div 
+                className='inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider mb-6' 
+                style={{ 
+                  background: `${C.primary}15`, 
+                  color: C.primary,
+                  letterSpacing: '0.08em',
+                }}
+              >
+                Notre Histoire
+              </div>
+              <h2 
+                className='font-amoria leading-tight mb-6' 
+                style={{ 
+                  color: C.secondary,
+                  fontSize: 'clamp(1.75rem, 3vw + 1rem, 3rem)',
+                  letterSpacing: '-0.02em',
+                  textWrap: 'balance',
+                }}
+              >
+                Une vision, une passion : <span style={{ color: C.primary, fontStyle: 'italic' }}>votre beauté</span>
+              </h2>
+              <div 
+                className='space-y-4 leading-relaxed' 
+                style={{ 
+                  fontFamily: TYPE.bodyFamily, 
+                  color: C.secondary, 
+                  opacity: 0.8,
+                  fontSize: 'clamp(0.95rem, 1vw + 0.75rem, 1.0625rem)',
+                  textWrap: 'pretty',
+                }}
+              >
+                <p>
+                  Fondé par <strong style={{ fontWeight: 600 }}>Dr. Widad Slaoui</strong>, Widamine est né d'une vision claire : créer un espace où la médecine esthétique 
+                  rencontre l'art et l'humanité. Avec plus de 5 ans d'expérience, notre clinique s'est imposée comme une référence 
+                  en matière de soins esthétiques au Maroc.
+                </p>
+                <p>
+                  Notre approche se distingue par l'écoute attentive de chaque patient, une expertise technique irréprochable, 
+                  et un engagement sans faille pour des résultats naturels et harmonieux. Nous croyons que la beauté ne se force pas, 
+                  elle se révèle.
+                </p>
+                <p>
+                  Aujourd'hui, <strong style={{ fontWeight: 600 }}>Widamine</strong> c'est une équipe de praticiens passionnés, des équipements de pointe, 
+                  et surtout, la confiance de plus de 2000 patients qui nous ont choisis pour les accompagner dans leur parcours beauté.
+                </p>
+              </div>
+            </div>
+            <div data-slide-up className='relative'>
+              <div 
+                className='overflow-hidden' 
+                style={{ 
+                  borderRadius: RADIUS.card,
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), 0 12px 40px rgba(0, 0, 0, 0.12)',
+                }}
+              >
+                <img 
+                  src='/images/gallery/DSC01316.jpg' 
+                  alt='Centre Widamine' 
+                  className='w-full h-[500px] object-cover'
+                  style={{
+                    outline: '1px solid oklch(0 0 0 / 0.1)',
+                    outlineOffset: '-1px',
+                  }}
+                />
+              </div>
+              {/* Floating decoration with concentric radius */}
+              <div 
+                className='absolute -bottom-6 -right-6 w-32 h-32 opacity-20 pointer-events-none' 
+                style={{ 
+                  background: C.orange,
+                  borderRadius: RADIUS.card,
+                }} 
+              />
+              <div 
+                className='absolute -top-6 -left-6 w-24 h-24 opacity-15 pointer-events-none' 
+                style={{ 
+                  background: C.primary,
+                  borderRadius: RADIUS.main,
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Values */}
+      <section className='py-20 sm:py-28' style={{ background: C.bg }}>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+          <div className='text-center mb-16'>
+            <div 
+              data-slide-up 
+              className='inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase mb-6' 
+              style={{ 
+                background: `${C.primary}15`, 
+                color: C.primary,
+                letterSpacing: '0.08em',
+              }}
+            >
+              Nos Valeurs
+            </div>
+            <h2 
+              data-slide-up 
+              className='font-amoria leading-tight mb-6' 
+              style={{ 
+                color: C.secondary,
+                fontSize: 'clamp(1.75rem, 3vw + 1rem, 3rem)',
+                letterSpacing: '-0.02em',
+                textWrap: 'balance',
+              }}
+            >
+              Ce qui nous <span style={{ color: C.primary, fontStyle: 'italic' }}>anime</span>
+            </h2>
+          </div>
+
+          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8'>
+            {VALUES.map((value, i) => {
+              const innerRadius = 16 // 1rem = 16px for icon container
+              const padding = 32 // 2rem = 32px card padding
+              const outerRadius = innerRadius + padding // 48px total
+
+              return (
+                <div 
+                  key={i} 
+                  data-slide-up 
+                  className='group text-center p-8 transition-all'
+                  style={{ 
+                    background: 'white',
+                    borderRadius: `${outerRadius}px`,
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                    transitionProperty: 'transform, box-shadow',
+                    transitionDuration: '250ms',
+                    transitionTimingFunction: 'cubic-bezier(0.2, 0, 0, 1)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 24px rgba(0, 0, 0, 0.12)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08)'
+                  }}
+                >
+                  <div 
+                    className='inline-flex items-center justify-center w-16 h-16 mb-6 transition-transform duration-300 ease-out'
+                    style={{ 
+                      background: `${C.primary}10`, 
+                      color: C.primary,
+                      borderRadius: `${innerRadius}px`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)'
+                    }}
+                  >
+                    <value.icon size={32} weight='duotone' />
+                  </div>
+                  <h3 
+                    className='font-amoria mb-3' 
+                    style={{ 
+                      color: C.secondary,
+                      fontSize: 'clamp(1.125rem, 1.5vw + 0.75rem, 1.25rem)',
+                      letterSpacing: '-0.01em',
+                    }}
+                  >
+                    {value.title}
+                  </h3>
+                  <p 
+                    className='leading-relaxed' 
+                    style={{ 
+                      fontFamily: TYPE.bodyFamily, 
+                      color: C.secondary, 
+                      opacity: 0.7,
+                      fontSize: 'clamp(0.875rem, 1vw + 0.5rem, 0.9375rem)',
+                      textWrap: 'pretty',
+                    }}
+                  >
+                    {value.description}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Team */}
+      <section className='py-20 sm:py-28'>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+          <div className='text-center mb-16'>
+            <div 
+              data-slide-up 
+              className='inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase mb-6' 
+              style={{ 
+                background: `${C.primary}15`, 
+                color: C.primary,
+                letterSpacing: '0.08em',
+              }}
+            >
+              Notre Équipe
+            </div>
+            <h2 
+              data-slide-up 
+              className='font-amoria leading-tight mb-6' 
+              style={{ 
+                color: C.secondary,
+                fontSize: 'clamp(1.75rem, 3vw + 1rem, 3rem)',
+                letterSpacing: '-0.02em',
+                textWrap: 'balance',
+              }}
+            >
+              Des experts à votre <span style={{ color: C.primary, fontStyle: 'italic' }}>écoute</span>
+            </h2>
+            <p 
+              data-slide-up 
+              className='mx-auto max-w-2xl leading-relaxed' 
+              style={{ 
+                fontFamily: TYPE.bodyFamily, 
+                color: C.secondary, 
+                opacity: 0.75,
+                fontSize: 'clamp(0.95rem, 1vw + 0.75rem, 1.0625rem)',
+                textWrap: 'pretty',
+              }}
+            >
+              Une équipe pluridisciplinaire de praticiens passionnés, formés aux dernières techniques 
+              de médecine esthétique pour vous offrir les meilleurs soins.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8'>
+            {TEAM_MEMBERS.map((member, i) => (
+              <div key={i} data-slide-up className='group text-center'>
+                <div 
+                  className='relative mb-4 overflow-hidden transition-transform duration-300 ease-out'
+                  style={{ 
+                    borderRadius: RADIUS.card,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08), 0 6px 16px rgba(0, 0, 0, 0.1)',
+                    transitionProperty: 'transform, box-shadow',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px)'
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.12), 0 12px 32px rgba(0, 0, 0, 0.14)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08), 0 6px 16px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  <img 
+                    src={member.img} 
+                    alt={member.name}
+                    className='w-full aspect-[3/4] object-cover'
+                    style={{
+                      outline: '1px solid oklch(0 0 0 / 0.1)',
+                      outlineOffset: '-1px',
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.name) + '&background=009fd6&color=fff&size=400'
+                    }}
+                  />
+                  <div 
+                    className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 ease-out'
+                    style={{
+                      transitionProperty: 'opacity',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '1'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '0'
+                    }}
+                  />
+                </div>
+                <h3 
+                  className='font-semibold mb-1' 
+                  style={{ 
+                    color: C.secondary,
+                    fontSize: 'clamp(0.9375rem, 1vw + 0.5rem, 1rem)',
+                  }}
+                >
+                  {member.name}
+                </h3>
+                <p 
+                  style={{ 
+                    color: C.primary,
+                    fontSize: 'clamp(0.875rem, 1vw + 0.5rem, 0.9375rem)',
+                    fontFamily: TYPE.bodyFamily,
+                  }}
+                >
+                  {member.role}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className='py-20 sm:py-28' style={{ background: `linear-gradient(135deg, ${C.primary} 0%, ${C.secondary} 100%)` }}>
+        <div className='mx-auto max-w-4xl px-4 sm:px-6 text-center'>
+          <h2 
+            data-slide-up 
+            className='font-amoria leading-tight mb-6 text-white' 
+            style={{ 
+              fontSize: 'clamp(1.75rem, 3vw + 1rem, 3rem)',
+              letterSpacing: '-0.02em',
+              textWrap: 'balance',
+            }}
+          >
+            Prêt à commencer votre transformation ?
+          </h2>
+          <p 
+            data-slide-up 
+            className='leading-relaxed mb-10 text-white/90' 
+            style={{ 
+              fontFamily: TYPE.bodyFamily,
+              fontSize: 'clamp(0.95rem, 1vw + 0.75rem, 1.125rem)',
+              textWrap: 'pretty',
+            }}
+          >
+            Prenez rendez-vous dès aujourd'hui et découvrez comment nous pouvons vous aider 
+            à atteindre vos objectifs esthétiques en toute confiance.
+          </p>
+          <div data-slide-up className='flex flex-wrap items-center justify-center gap-4'>
+            <button
+              onClick={openScheduleModal}
+              className='group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-8 py-4 text-base font-medium transition-all active:scale-[0.96]'
+              style={{ 
+                color: C.primary,
+                minWidth: '240px',
+                minHeight: '52px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.2)',
+                transitionProperty: 'transform, box-shadow',
+                transitionDuration: '200ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.25)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              Prendre rendez-vous maintenant
+              <svg className='transition-transform duration-200 ease-out group-hover:translate-x-1' width='16' height='16' viewBox='0 0 16 16' fill='none'>
+                <path d='M6 3L11 8L6 13' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+              </svg>
+            </button>
+            <a
+              href='tel:+212522365247'
+              className='inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white px-8 py-4 text-base font-medium text-white transition-all active:scale-[0.96]'
+              style={{
+                minWidth: '200px',
+                minHeight: '52px',
+                transitionProperty: 'transform, background-color',
+                transitionDuration: '200ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <PhoneCall size={20} weight='duotone' />
+              05 22 36 52 47
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <PublicFooter />
+    </div>
+  )
+}

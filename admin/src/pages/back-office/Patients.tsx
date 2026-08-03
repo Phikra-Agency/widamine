@@ -651,7 +651,7 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
 
   return (
     <Dialog open={open && !!patient} onOpenChange={(next) => { if (!next) onClose() }}>
-      <DialogContent showCloseButton className='max-h-[90vh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
+      <DialogContent showCloseButton className='max-h-[70dvh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
         {patient && (
           <>
             <div className='flex items-start justify-between gap-3 border-b border-border px-5 py-4 shrink-0'>

@@ -15,6 +15,44 @@ import { C, TYPE } from '@/lib/theme'
 
 gsap.registerPlugin(ScrollTrigger)
 
+function downloadCatalogue() {
+  const pdf = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 0 >>
+stream
+
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000052 00000 n 
+0000000101 00000 n 
+0000000179 00000 n 
+trailer
+<< /Size 5 /Root 1 0 R >>
+startxref
+272
+%%EOF`
+  const blob = new Blob([pdf], { type: 'application/pdf' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'widamine-catalogue.pdf'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 /* ── Square Moncey CDN images ────────────────────────────────── */
 
 const SM = {
@@ -246,19 +284,19 @@ function HeroSection() {
         </p>
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
-            onClick={open}
+            onClick={downloadCatalogue}
             className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(0,159,214,0.18)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(0,159,214,0.22)] active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Recevoir le catalogue
           </button>
-          <Link
-            to='/appointment'
-            className='inline-flex min-h-14 items-center justify-center rounded-full border px-8 text-base font-semibold transition-transform hover:-translate-y-0.5 hover:bg-primary/7 active:scale-[0.96]'
+          <button
+            onClick={open}
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-transform hover:-translate-y-0.5 hover:bg-primary/7 active:scale-[0.96]'
             style={{ borderColor: C.primary, color: C.secondary }}
           >
             Prendre rendez-vous
-          </Link>
+          </button>
         </div>
       </div>
 

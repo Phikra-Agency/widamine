@@ -26,7 +26,7 @@ const MEGA_CATEGORIES = (['visage', 'corps', 'techniques'] as const).map((cat) =
 export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const { pathname } = useLocation()
   const { open } = useScheduleModalStore()
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
+  const [isServicesOpen, setIsServicesOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -35,9 +35,15 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const isLight = theme === 'light'
   const isContact = pathname === '/contact'
 
+  const isServicesActive =
+    pathname === '/category/visage' ||
+    pathname === '/category/corps' ||
+    pathname === '/category/techniques' ||
+    MEGA_CATEGORIES.some((cat) => cat.items.some((item) => pathname === item.href))
+
   useEffect(() => {
     setIsMobileMenuOpen(false)
-    setOpenCategory(null)
+    setIsServicesOpen(false)
   }, [pathname])
 
   useEffect(() => {
@@ -58,7 +64,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (megaRef.current && !megaRef.current.contains(e.target as Node)) {
-        setOpenCategory(null)
+        setIsServicesOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -67,24 +73,24 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenCategory(null)
+      if (e.key === 'Escape') setIsServicesOpen(false)
     }
     document.addEventListener('keydown', handleEsc)
     return () => document.removeEventListener('keydown', handleEsc)
   }, [])
 
-  const handleCategoryClick = (slug: string) => {
+  const handleServicesClick = () => {
     if (megaTimeout.current) clearTimeout(megaTimeout.current)
-    setOpenCategory((current) => current === slug ? null : slug)
+    setIsServicesOpen((current) => !current)
   }
 
-  const handleMouseEnter = (slug: string) => {
+  const handleServicesEnter = () => {
     if (megaTimeout.current) clearTimeout(megaTimeout.current)
-    setOpenCategory(slug)
+    setIsServicesOpen(true)
   }
 
-  const handleMouseLeave = () => {
-    megaTimeout.current = setTimeout(() => setOpenCategory(null), 150)
+  const handleServicesLeave = () => {
+    megaTimeout.current = setTimeout(() => setIsServicesOpen(false), 150)
   }
 
   const navShellClass = isLight
@@ -121,61 +127,86 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
           </Link>
 
           <div ref={megaRef} className={`hidden items-center gap-5 text-sm lg:flex ${textClass}`}>
-            {MEGA_CATEGORIES.map((cat) => {
-              const isCategoryActive = pathname === `/category/${cat.slug}` || cat.items.some((item) => pathname === item.href)
-              const isOpen = openCategory === cat.slug
+            <div
+              className='relative'
+              onMouseEnter={handleServicesEnter}
+              onMouseLeave={handleServicesLeave}
+            >
+              <button
+                type='button'
+                onClick={handleServicesClick}
+                className={`inline-flex cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150 ${isServicesActive ? activeClass : hoverClass}`}
+                aria-haspopup='menu'
+                aria-expanded={isServicesOpen}
+              >
+                Services
+                <ChevronDown size={13} className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-              return (
-                <div key={cat.slug} className='relative' onMouseEnter={() => handleMouseEnter(cat.slug)} onMouseLeave={handleMouseLeave}>
-                  <button
-                    type='button'
-                    onClick={() => handleCategoryClick(cat.slug)}
-                    className={`inline-flex cursor-pointer items-center gap-1.5 capitalize transition-colors duration-150 ${isCategoryActive ? activeClass : hoverClass}`}
-                    aria-haspopup='menu'
-                    aria-expanded={isOpen}
+              <AnimatePresence>
+                {isServicesOpen ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ type: 'spring', visualDuration: 0.3, bounce: 0 }}
+                    className='absolute left-1/2 top-full z-[999] mt-6 hidden w-[min(92vw,800px)] -translate-x-1/2 lg:block'
                   >
-                    {cat.label}
-                    <ChevronDown size={13} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {isOpen ? (
-                      <motion.div
-                        key={cat.slug}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        transition={{ type: 'spring', visualDuration: 0.38, bounce: 0.14 }}
-                        className='absolute left-1/2 top-full z-[999] mt-5 hidden w-[min(84vw,430px)] -translate-x-1/2 lg:block'
-                      >
-                        <div className='relative overflow-hidden rounded-[22px] border border-secondary/12 bg-custom-white/98 p-3 shadow-[0_28px_70px_rgba(0,0,0,0.13)] backdrop-blur-[56px]'>
-                          <Link
-                            to={`/category/${cat.slug}`}
-                            onClick={() => setOpenCategory(null)}
-                            className='mb-2 block rounded-2xl px-3 py-2.5 text-xs font-semibold uppercase tracking-normal text-primary transition hover:bg-primary/7'
-                          >
-                            Tous les traitements {cat.label}
-                          </Link>
-                          <div className='grid gap-1'>
-                            {cat.items.map((item) => (
-                              <Link
-                                key={item.label}
-                                to={item.href}
-                                onClick={() => setOpenCategory(null)}
-                                className='group flex cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm text-secondary/72 transition-colors hover:bg-primary/8 hover:text-secondary'
-                              >
-                                <ServiceIcon slug={item.slug} size={28} color={C.secondary} className='opacity-70' />
-                                <span>{item.label}</span>
-                              </Link>
-                            ))}
+                    <div className='relative overflow-hidden rounded-3xl border border-secondary/8 bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl'>
+                      <div className='grid grid-cols-3 gap-6'>
+                        {MEGA_CATEGORIES.map((cat) => (
+                          <div key={cat.slug} className='space-y-3'>
+                            <Link
+                              to={`/category/${cat.slug}`}
+                              onClick={() => setIsServicesOpen(false)}
+                              className='group mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-wide transition-all hover:bg-primary/5'
+                              style={{ color: C.primary }}
+                            >
+                              {cat.label}
+                              <svg className='h-4 w-4 transition-transform group-hover:translate-x-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M9 5l7 7-7 7' />
+                              </svg>
+                            </Link>
+                            <div className='space-y-1'>
+                              {cat.items.map((item) => (
+                                <Link
+                                  key={item.label}
+                                  to={item.href}
+                                  onClick={() => setIsServicesOpen(false)}
+                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-all hover:bg-primary/6 hover:pl-5'
+                                  style={{ color: C.secondary }}
+                                >
+                                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all group-hover:scale-110' style={{ background: `${C.primary}08` }}>
+                                    <ServiceIcon slug={item.slug} size={22} color={C.primary} />
+                                  </div>
+                                  <span className='truncate font-medium opacity-85 transition-opacity group-hover:opacity-100'>{item.label}</span>
+                                </Link>
+                              ))}
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                      
+                      {/* Bottom CTA bar */}
+                      <div className='mt-6 flex items-center justify-between rounded-2xl border border-primary/15 bg-primary/5 px-6 py-4'>
+                        <div>
+                          <div className='text-sm font-semibold' style={{ color: C.secondary }}>Besoin d'aide pour choisir ?</div>
+                          <div className='text-xs opacity-70' style={{ color: C.secondary }}>Contactez-nous pour une consultation gratuite</div>
                         </div>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                </div>
-              )
-            })}
+                        <Link
+                          to='/contact'
+                          onClick={() => setIsServicesOpen(false)}
+                          className='inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95'
+                          style={{ background: C.primary }}
+                        >
+                          Contactez-nous
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
           </div>
 
           <div className='flex items-center gap-1.5 sm:gap-2'>
