@@ -545,7 +545,13 @@ function DoctorSelection({
           const rawName = (slot.doctorName ?? '').trim()
           const nameWithoutPrefix = rawName.replace(/^dr\.?\s+/i, '').trim()
           const fullName = nameWithoutPrefix ? `Dr. ${nameWithoutPrefix}` : 'Dr.'
-          const img = slot.doctorImage
+          
+          // Sanitize image URL - block file:/// protocol
+          let img = slot.doctorImage
+          if (img && img.startsWith('file:///')) {
+            console.warn('Blocked file:// protocol for doctor image:', img)
+            img = null  // Force fallback to ui-avatars
+          }
 
           return (
             <button
