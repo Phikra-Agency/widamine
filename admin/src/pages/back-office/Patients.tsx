@@ -560,9 +560,9 @@ function UpcomingAppointmentRow({
           </div>
         </div>
         <span className='shrink-0 text-xs font-medium text-secondary/40'>—</span>
-    </div>
-  )
-}
+      </div>
+    )
+  }
 
   return (
     <button
@@ -681,10 +681,8 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
                 </div>
               </div>
             </div>
-          </div>
 
             <div className='flex-1 min-h-0 overflow-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
-              {/* Contact */}
               <div className='rounded-surface border border-border p-4'>
                 <div className='flex items-center justify-between mb-3'>
                   <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>Contact</p>
