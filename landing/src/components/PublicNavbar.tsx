@@ -180,6 +180,12 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
           <div className='flex items-center gap-1.5 sm:gap-2'>
             <Link
+              to='/about'
+              className={`hidden cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition-[color,background-color,transform,border-color] duration-300 hover:-translate-y-0.5 md:inline-flex ${isLight ? 'border-secondary/70 text-secondary hover:bg-white/40' : 'border-white/35 text-white hover:bg-white/10'} ${pathname === '/about' ? activeClass : ''}`}
+            >
+              À propos
+            </Link>
+            <Link
               to='/contact'
               className={`hidden cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition-[color,background-color,transform,border-color] duration-300 hover:-translate-y-0.5 md:inline-flex ${isLight ? 'border-secondary/70 text-secondary hover:bg-white/40' : 'border-white/35 text-white hover:bg-white/10'} ${isContact ? activeClass : ''}`}
             >
@@ -235,6 +241,9 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     ))}
                   </div>
                 ))}
+                <Link to='/about' className={`block cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
+                  À propos
+                </Link>
                 <Link to='/contact' className={`block cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${isLight ? 'text-secondary/80 hover:bg-primary/7 hover:text-secondary' : 'text-white/82 hover:bg-white/10 hover:text-white'}`} onClick={() => setIsMobileMenuOpen(false)}>
                   Contact
                 </Link>

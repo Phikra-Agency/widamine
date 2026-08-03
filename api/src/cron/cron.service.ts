@@ -37,7 +37,7 @@ export class CronService {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async sendReminders() {
     this.logger.log("Sending 24h reminders...");
     const tomorrow = new Date();
