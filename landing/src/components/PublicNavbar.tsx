@@ -107,42 +107,77 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium transition-colors duration-200'
+                className='inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium transition-all duration-300 ease-out'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-                onMouseLeave={(e) => { if (!isServicesActive) e.currentTarget.style.opacity = '0.85' }}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.opacity = '1'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => { 
+                  if (!isServicesActive) e.currentTarget.style.opacity = '0.85'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
               >
                 Services
-                <ChevronDown size={14} weight='bold' className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} weight='bold' className={`transition-all duration-300 ease-out ${isServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
                 {isServicesOpen ? (
                   <motion.div
-                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className='absolute left-1/2 top-full z-[999] mt-4 hidden -translate-x-1/2 lg:block'
-                    style={{ width: '850px' }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ 
+                      duration: 0.3,
+                      ease: [0.16, 1, 0.3, 1],
+                      scale: { duration: 0.25 }
+                    }}
+                    className='absolute left-1/2 top-[calc(100%+8px)] z-[999] hidden -translate-x-1/2 lg:block'
+                    style={{ 
+                      width: '850px',
+                      transformOrigin: 'top center'
+                    }}
                   >
-                    <div className='relative overflow-hidden rounded-3xl bg-white p-8' style={{ 
-                      boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
-                      border: `1px solid ${C.primary}10`
-                    }}>
+                    <div 
+                      className='relative overflow-hidden rounded-3xl bg-white p-8' 
+                      style={{ 
+                        boxShadow: '0 20px 70px rgba(0,0,0,0.15), 0 4px 20px rgba(0,159,214,0.08)',
+                        border: `1px solid ${C.primary}12`
+                      }}
+                    >
+                      {/* Top connecting line effect */}
+                      <div 
+                        className='absolute top-0 left-1/2 -translate-x-1/2 h-1 w-32 rounded-full'
+                        style={{ 
+                          background: `linear-gradient(90deg, transparent, ${C.primary}30, transparent)`,
+                          top: '-4px'
+                        }}
+                      />
+                      
                       <div className='grid grid-cols-3 gap-8'>
-                        {MEGA_CATEGORIES.map((cat) => (
-                          <div key={cat.slug} className='space-y-3'>
+                        {MEGA_CATEGORIES.map((cat, catIndex) => (
+                          <motion.div 
+                            key={cat.slug} 
+                            className='space-y-3'
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ 
+                              delay: catIndex * 0.05,
+                              duration: 0.3,
+                              ease: [0.16, 1, 0.3, 1]
+                            }}
+                          >
                             <Link
                               to={`/category/${cat.slug}`}
                               onClick={() => setIsServicesOpen(false)}
-                              className='group mb-5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold uppercase tracking-wide transition-all hover:bg-primary/5'
+                              className='group mb-5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold uppercase tracking-wide transition-all duration-300 hover:bg-primary/5'
                               style={{ color: C.primary }}
                             >
                               {cat.label}
-                              <svg className='h-4 w-4 transition-transform group-hover:translate-x-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                              <svg className='h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M9 5l7 7-7 7' />
                               </svg>
                             </Link>
@@ -152,22 +187,28 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   key={item.label}
                                   to={item.href}
                                   onClick={() => setIsServicesOpen(false)}
-                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all hover:bg-primary/6 hover:pl-4'
+                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all group-hover:scale-110' style={{ background: `${C.primary}10` }}>
+                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${C.primary}10` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={C.primary} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85 transition-opacity group-hover:opacity-100'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                       
                       {/* Bottom CTA bar */}
-                      <div className='mt-8 flex items-center justify-between rounded-2xl px-6 py-4' style={{ background: `${C.primary}08`, border: `1px solid ${C.primary}15` }}>
+                      <motion.div 
+                        className='mt-8 flex items-center justify-between rounded-2xl px-6 py-4' 
+                        style={{ background: `${C.primary}08`, border: `1px solid ${C.primary}15` }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      >
                         <div>
                           <div className='text-sm font-semibold' style={{ color: C.secondary }}>Besoin d'aide pour choisir ?</div>
                           <div className='text-xs opacity-70' style={{ color: C.secondary }}>Contactez-nous pour une consultation gratuite</div>
@@ -175,12 +216,12 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         <Link
                           to='/contact'
                           onClick={() => setIsServicesOpen(false)}
-                          className='inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95'
+                          className='inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:scale-105 hover:shadow-lg active:scale-95'
                           style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
                         >
                           Contactez-nous
                         </Link>
-                      </div>
+                      </motion.div>
                     </div>
                   </motion.div>
                 ) : null}
@@ -189,20 +230,32 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[15px] font-medium transition-colors duration-200'
+              className='text-[15px] font-medium transition-all duration-300 ease-out'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-              onMouseLeave={(e) => { if (pathname !== '/about') e.currentTarget.style.opacity = '0.85' }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.opacity = '1'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => { 
+                if (pathname !== '/about') e.currentTarget.style.opacity = '0.85'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
             >
               À propos
             </Link>
 
             <Link
               to='/contact'
-              className='text-[15px] font-medium transition-colors duration-200'
+              className='text-[15px] font-medium transition-all duration-300 ease-out'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
-              onMouseLeave={(e) => { if (!isContact) e.currentTarget.style.opacity = '0.85' }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.opacity = '1'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => { 
+                if (!isContact) e.currentTarget.style.opacity = '0.85'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
             >
               Contact
             </Link>
@@ -213,10 +266,16 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
             <button
               type='button'
               onClick={() => setIsMobileMenuOpen((current) => !current)}
-              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors lg:hidden'
+              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ease-out lg:hidden'
               style={{ color: C.secondary, background: `${C.primary}08` }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = `${C.primary}12` }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = `${C.primary}08` }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.background = `${C.primary}15`
+                e.currentTarget.style.transform = 'scale(1.05)'
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.background = `${C.primary}08`
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
               aria-label='Toggle menu'
             >
               {isMobileMenuOpen ? <X size={20} weight='regular' /> : <Menu size={20} weight='regular' />}
@@ -226,7 +285,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               type='button'
               onClick={open}
               aria-label='Prendre rendez-vous'
-              className='hidden cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-2.5 text-[15px] font-semibold text-white transition-all hover:scale-105 active:scale-95 lg:inline-flex'
+              className='hidden cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-2.5 text-[15px] font-semibold text-white transition-all duration-300 ease-out hover:scale-105 hover:shadow-lg active:scale-95 lg:inline-flex'
               style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
             >
               Rendez-vous
