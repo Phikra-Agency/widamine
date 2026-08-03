@@ -3,25 +3,15 @@ import { Link, useLocation } from 'react-router-dom'
 import { CaretDown as ChevronDown, List as Menu, X } from '@phosphor-icons/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
-import { SERVICE_PAGES } from '@/lib/siteContent'
 import { ServiceIcon } from '@/components/ServiceIcon'
 import { C } from '@/lib/theme'
+import { useServices } from '@/hooks/useServices'
 
 type PublicNavbarProps = {
   theme?: 'light' | 'dark'
 }
 
 const CATEGORY_LABELS: Record<string, string> = { visage: 'Visage', corps: 'Corps', techniques: 'Techniques' }
-
-const MEGA_CATEGORIES = (['visage', 'corps', 'techniques'] as const).map((cat) => ({
-  slug: cat,
-  label: CATEGORY_LABELS[cat],
-  items: SERVICE_PAGES.filter((p) => p.category === cat).map((p) => ({
-    label: p.title,
-    href: `/services/${p.slug}`,
-    slug: p.slug,
-  })),
-}))
 
 export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const { pathname } = useLocation()
@@ -30,6 +20,40 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const megaRef = useRef<HTMLDivElement>(null)
+
+  // Fetch services dynamically from API
+  const { byCategory, loading } = useServices()
+
+  // Build dynamic categories
+  const MEGA_CATEGORIES = [
+    {
+      slug: 'visage',
+      label: 'Visage',
+      items: byCategory.visage.map(s => ({
+        label: s.name,
+        href: `/services/${s.slug}`,
+        slug: s.slug,
+      }))
+    },
+    {
+      slug: 'corps',
+      label: 'Corps',
+      items: byCategory.corps.map(s => ({
+        label: s.name,
+        href: `/services/${s.slug}`,
+        slug: s.slug,
+      }))
+    },
+    {
+      slug: 'techniques',
+      label: 'Techniques',
+      items: byCategory.techniques.map(s => ({
+        label: s.name,
+        href: `/services/${s.slug}`,
+        slug: s.slug,
+      }))
+    },
+  ]
 
   const isContact = pathname === '/contact'
 
