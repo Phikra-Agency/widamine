@@ -133,6 +133,7 @@ function UsersTable() {
         {/* Mobile filters */}
         <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
+            items={{ all: 'Tous', RECEPTIONIST: 'Réception', ADMIN: 'Admin', DOCTOR: 'Médecin', PRACTITIONER: 'Praticien' }}
             value={roleFilter}
             onValueChange={(value) => setRoleFilter(value as Role | 'all')}
           >

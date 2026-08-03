@@ -25,19 +25,18 @@ interface CalendarFilterSelectProps {
   showSearch?: boolean
 }
 
-export function CalendarFilterSelect({
-  placeholder,
+export function CalendarFilterOptions({
   options,
   value,
   onChange,
-  color = 'mist',
-  icon: Icon,
-  className,
   showSearch = true,
-}: CalendarFilterSelectProps) {
-  const [open, setOpen] = useState(false)
+}: {
+  options: FilterOption[]
+  value: string[]
+  onChange: (value: string[]) => void
+  showSearch?: boolean
+}) {
   const [search, setSearch] = useState('')
-  const hasFilter = value.length > 0
 
   const filteredOptions = useMemo(
     () => options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase())),
@@ -52,11 +51,73 @@ export function CalendarFilterSelect({
     }
   }
 
-  const clearAll = () => {
-    onChange([])
-    setSearch('')
-    setOpen(false)
-  }
+  return (
+    <>
+      {showSearch && (
+        <div className='relative mb-1'>
+          <MagnifyingGlass size={13} className='pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40' />
+          <input
+            type='search'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            placeholder='Rechercher…'
+            autoComplete='off'
+            spellCheck={false}
+            className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
+          />
+        </div>
+      )}
+      {filteredOptions.length === 0 ? (
+        <div className='px-2 py-4 text-center text-xs text-muted-foreground/50'>Aucun résultat</div>
+      ) : (
+        filteredOptions.map((option) => (
+          <DropdownMenuItem
+            key={option.value}
+            onClick={() => toggleOption(option.value)}
+            className={cn(
+              value.includes(option.value) && 'bg-muted/60 font-medium',
+            )}
+          >
+            <span className='flex size-4 shrink-0 items-center justify-center'>
+              {value.includes(option.value) && (
+                <Check size={13} weight='bold' className='text-primary' />
+              )}
+            </span>
+            <span>{option.label}</span>
+          </DropdownMenuItem>
+        ))
+      )}
+      {value.length > 0 && (
+        <>
+          <div className='-mx-1 my-1 h-px bg-border' />
+          <DropdownMenuItem
+            onClick={() => onChange([])}
+            className='text-muted-foreground'
+          >
+            <X size={13} />
+            <span>Effacer le filtre</span>
+          </DropdownMenuItem>
+        </>
+      )}
+    </>
+  )
+}
+
+export function CalendarFilterSelect({
+  placeholder,
+  options,
+  value,
+  onChange,
+  color = 'mist',
+  icon: Icon,
+  className,
+  showSearch = true,
+}: CalendarFilterSelectProps) {
+  const [open, setOpen] = useState(false)
+  const hasFilter = value.length > 0
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -89,12 +150,14 @@ export function CalendarFilterSelect({
             tabIndex={0}
             onClick={(e) => {
               e.stopPropagation()
-              clearAll()
+              onChange([])
+              setOpen(false)
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
-                clearAll()
+                onChange([])
+                setOpen(false)
               }
             }}
             className='flex size-4 shrink-0 items-center justify-center rounded-full text-current/40 hover:bg-black/10 hover:text-current'
@@ -104,55 +167,7 @@ export function CalendarFilterSelect({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align='start' sideOffset={4} className='min-w-56 p-1'>
-        {showSearch && (
-          <div className='relative mb-1'>
-            <MagnifyingGlass size={13} className='pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40' />
-            <input
-              type='search'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-              placeholder='Rechercher…'
-              autoComplete='off'
-              spellCheck={false}
-              className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
-            />
-          </div>
-        )}
-        {filteredOptions.length === 0 ? (
-          <div className='px-2 py-4 text-center text-xs text-muted-foreground/50'>Aucun résultat</div>
-        ) : (
-          filteredOptions.map((option) => (
-            <DropdownMenuItem
-              key={option.value}
-              onClick={() => toggleOption(option.value)}
-              className={cn(
-                value.includes(option.value) && 'bg-muted/60 font-medium',
-              )}
-            >
-              <span className='flex size-4 shrink-0 items-center justify-center'>
-                {value.includes(option.value) && (
-                  <Check size={13} weight='bold' className='text-primary' />
-                )}
-              </span>
-              <span>{option.label}</span>
-            </DropdownMenuItem>
-          ))
-        )}
-        {hasFilter && (
-          <>
-            <div className='-mx-1 my-1 h-px bg-border' />
-            <DropdownMenuItem
-              onClick={clearAll}
-              className='text-muted-foreground'
-            >
-              <X size={13} />
-              <span>Effacer le filtre</span>
-            </DropdownMenuItem>
-          </>
-        )}
+        <CalendarFilterOptions options={options} value={value} onChange={onChange} showSearch={showSearch} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

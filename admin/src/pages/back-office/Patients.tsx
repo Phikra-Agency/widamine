@@ -236,6 +236,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
         {/* Mobile filters */}
         <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
+            items={{ all: 'Tous', MALE: 'Homme', FEMALE: 'Femme', OTHER: 'Autre' }}
             value={filters.gender || 'all'}
             onValueChange={(value) => setFilters({ ...filters, gender: value === 'all' ? '' : value })}
           >
@@ -458,6 +459,7 @@ function Modal({ onAfterSave }: { onAfterSave?: () => void }) {
         <div className='space-y-2'>
           <Label className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Genre</Label>
           <Select
+            items={{ MALE: 'Homme', FEMALE: 'Femme', OTHER: 'Autre' }}
             value={item.gender || ''}
             onValueChange={(value) => {
               if (value == null) return

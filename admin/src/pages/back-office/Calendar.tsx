@@ -35,9 +35,18 @@ import {
   type CalendarDaySlots,
 } from '@/components/calendar/views/CalendarGridCells'
 import CalendarMonthGrid from '@/components/calendar/views/CalendarMonthGrid'
-import { CalendarFilterSelect } from '@/components/calendar/CalendarFilterSelect'
+import { CalendarFilterSelect, CalendarFilterOptions } from '@/components/calendar/CalendarFilterSelect'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-import { Funnel, User, Tag, CaretDown, CalendarBlank } from '@phosphor-icons/react'
+import { Funnel, User, Tag, CaretDown, CalendarBlank, X } from '@phosphor-icons/react'
 
 const STATUS_OPTIONS = [
   { value: 'PENDING', label: 'En attente' },
@@ -336,6 +345,72 @@ function Planner() {
     </div>
   )
 
+  const activeFilterCount = filterStatuses.length + filterPractitionerIds.length + filterMotifIds.length
+
+  const mobileFiltersMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className='relative flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-muted/50 transition-colors active:bg-muted'
+        aria-label='Filtres'
+      >
+        <Funnel size={17} weight={activeFilterCount > 0 ? 'fill' : 'duotone'} />
+        {activeFilterCount > 0 && (
+          <span className='absolute right-1 top-1 size-1.5 rounded-full bg-primary' />
+        )}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='end' sideOffset={4} className='min-w-56 p-1'>
+        {activeFilterCount > 0 && (
+          <p className='px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60'>
+            {activeFilterCount} filtre{activeFilterCount > 1 ? 's' : ''} actif{activeFilterCount > 1 ? 's' : ''}
+          </p>
+        )}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Funnel size={13} />
+            <span>Statut</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className='max-h-72 overflow-y-auto'>
+            <CalendarFilterOptions options={STATUS_OPTIONS} value={filterStatuses} onChange={setFilterStatuses} showSearch={false} />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <User size={13} />
+            <span>Praticien</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className='max-h-72 overflow-y-auto'>
+            <CalendarFilterOptions options={practitionerOptions} value={filterPractitionerIds} onChange={setFilterPractitionerIds} />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Tag size={13} />
+            <span>Traitement</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className='max-h-72 overflow-y-auto'>
+            <CalendarFilterOptions options={motifSelectOptions} value={filterMotifIds} onChange={setFilterMotifIds} />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        {activeFilterCount > 0 && (
+          <>
+            <div className='-mx-1 my-1 h-px bg-border' />
+            <DropdownMenuItem
+              onClick={() => {
+                setFilterStatuses([])
+                setFilterPractitionerIds([])
+                setFilterMotifIds([])
+              }}
+              className='text-muted-foreground'
+            >
+              <X size={13} />
+              <span>Effacer les filtres</span>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+
 
 
   useEffect(() => {
@@ -455,6 +530,7 @@ function Planner() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         filters={filterToolbar}
+        mobileFilters={mobileFiltersMenu}
         showTodayButton={showTodayButton}
         onPrev={() => handleNavigate(-1)}
         onNext={() => handleNavigate(1)}

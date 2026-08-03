@@ -89,6 +89,7 @@ function ContactsTable() {
         {/* Mobile filters */}
         <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
+            items={{ 'non-lus': 'Non lus', lus: 'Lus' }}
             value={filters.read ? 'lus' : 'non-lus'}
             onValueChange={(value) => setFilters({ read: value === 'lus' })}
           >

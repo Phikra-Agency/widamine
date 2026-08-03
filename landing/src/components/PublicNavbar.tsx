@@ -161,7 +161,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     }}
                     className='absolute left-1/2 top-[calc(100%+8px)] z-[999] hidden -translate-x-1/2 lg:block'
                     style={{ 
-                      width: '850px',
+                      width: MEGA_CATEGORIES.length === 1 ? '320px' : MEGA_CATEGORIES.length === 2 ? '580px' : '850px',
                       transformOrigin: 'top center'
                     }}
                   >
@@ -181,7 +181,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         }}
                       />
                       
-                      <div className='grid grid-cols-3 gap-8'>
+                      <div className={`grid gap-8 ${MEGA_CATEGORIES.length === 1 ? 'grid-cols-1' : MEGA_CATEGORIES.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                         {MEGA_CATEGORIES.map((cat, catIndex) => (
                           <motion.div 
                             key={cat.slug} 

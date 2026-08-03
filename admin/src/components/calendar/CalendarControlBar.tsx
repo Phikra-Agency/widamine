@@ -1,12 +1,9 @@
 import {
   CaretLeft,
   CaretRight,
-  Funnel,
-  X as XIcon,
 } from '@phosphor-icons/react'
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet'
 import CalendarDatePicker from '@/components/calendar/CalendarDatePicker'
 import { cn } from '@/lib/utils'
 import {
@@ -27,6 +24,7 @@ interface CalendarControlBarProps {
   viewMode: CalendarViewMode
   onViewModeChange: (mode: CalendarViewMode) => void
   filters?: ReactNode
+  mobileFilters?: ReactNode
   showTodayButton?: boolean
   onPrev: () => void
   onNext: () => void
@@ -43,6 +41,7 @@ export default function CalendarControlBar({
   viewMode,
   onViewModeChange,
   filters,
+  mobileFilters,
   showTodayButton = false,
   onPrev,
   onNext,
@@ -56,7 +55,6 @@ export default function CalendarControlBar({
 }: CalendarControlBarProps) {
   const pickerLabel = formatCalendarPickerLabel(dateValue, viewMode)
   const todayButtonSide = getTodayButtonPlacement(viewMode, dateValue)
-  const [filterModalOpen, setFilterModalOpen] = useState(false)
 
   const todayLabel = 'Aujourd\'hui'
 
@@ -170,30 +168,9 @@ export default function CalendarControlBar({
           {navGroup}
         </div>
 
-        {/* Right: filters + view selector + analytics */}
+        {/* Right: view selector + analytics */}
         <div className='flex items-center gap-0.5 shrink-0'>
-          <Sheet open={filterModalOpen} onOpenChange={setFilterModalOpen}>
-            <button
-              type='button'
-              onClick={() => setFilterModalOpen(true)}
-              className='flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-muted/50 transition-colors active:bg-muted'
-              aria-label='Filtres'
-            >
-              <Funnel size={17} weight='duotone' />
-            </button>
-            <SheetContent side='bottom' className='rounded-t-2xl border-t-0 pb-[calc(1.5rem+env(safe-area-inset-bottom))]'>
-              <div className='mx-auto mb-5 h-1 w-12 shrink-0 rounded-full bg-border' />
-              <div className='flex items-center justify-between mb-5'>
-                <p className='bo-label text-muted-foreground'>Filtres</p>
-                <SheetClose className='min-h-touch min-w-touch flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors'>
-                  <XIcon size={18} weight='bold' />
-                </SheetClose>
-              </div>
-              <div className='space-y-3 [&_.bo-filter-pill]:flex [&_.bo-filter-pill]:w-full [&_.flex-wrap]:flex-col [&_.flex-wrap]:w-full [&_.flex-wrap]:gap-2'>
-                {filters}
-              </div>
-            </SheetContent>
-          </Sheet>
+          {mobileFilters}
 
           {onToggleAnalytics && (
             <button
@@ -207,7 +184,7 @@ export default function CalendarControlBar({
 
           {children}
           
-          <Select value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
+          <Select items={{ day: 'Jour', week: 'Semaine', month: 'Mois' }} value={viewMode} onValueChange={(v) => onViewModeChange(v as CalendarViewMode)}>
             <SelectTrigger size='sm' className='h-8 shrink-0 gap-1 rounded-lg border-border bg-card px-2 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted/50 transition-colors'>
               <SelectValue placeholder={CALENDAR_VIEW_OPTIONS.find(o => o.value === viewMode)?.label} />
             </SelectTrigger>

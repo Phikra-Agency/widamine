@@ -174,6 +174,7 @@ function ReservationsTable() {
         {/* Mobile filters */}
         <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
+            items={{ all: 'Toutes', PENDING: 'En attente', CONFIRMED: 'Confirmée', CANCELLED: 'Annulée', COMPLETED: 'Terminée', EXPIRED: 'Expirée', NO_SHOW: 'Absent' }}
             value={filters.status || 'all'}
             onValueChange={(value) => setFilters({ ...filters, status: value === 'all' ? '' : value })}
           >
@@ -375,7 +376,7 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
   const currentTc = THEME_COLORS[currentMeta.theme]
 
   return (
-    <Select value={current} onValueChange={handleChange} disabled={saving}>
+    <Select value={current} items={labels} onValueChange={handleChange} disabled={saving}>
       <SelectTrigger
         className={cn('h-9 min-w-[140px] text-xs font-medium', className)}
         style={{
