@@ -207,18 +207,20 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                             </Link>
                             <div className='space-y-1'>
                               {cat.items.map((item) => (
-                                <Link
+                                <button
                                   key={item.label}
-                                  to={item.href}
-                                  onClick={() => setIsServicesOpen(false)}
-                                  className='group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
+                                  onClick={() => {
+                                    setIsServicesOpen(false)
+                                    open()
+                                  }}
+                                  className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
                                   <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${C.primary}10` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={C.primary} />
                                   </div>
                                   <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>
-                                </Link>
+                                </button>
                               ))}
                             </div>
                           </motion.div>
