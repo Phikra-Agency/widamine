@@ -24,7 +24,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   // Fetch services dynamically from API
   const { byCategory, loading } = useServices()
 
-  // Build dynamic categories
+  // Build dynamic categories - filter out empty ones
   const MEGA_CATEGORIES = [
     {
       slug: 'visage',
@@ -53,7 +53,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
         slug: s.slug,
       }))
     },
-  ]
+  ].filter(cat => cat.items.length > 0) // Hide empty categories
 
   const isContact = pathname === '/contact'
 
@@ -117,7 +117,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
           }}
         >
           <Link to='/' className='flex shrink-0 cursor-pointer items-center'>
-            <img src='/logo.svg' alt='Widamine' className='h-10 w-auto object-contain' style={{ filter: `brightness(0) saturate(100%) invert(22%) sepia(28%) saturate(1679%) hue-rotate(159deg) brightness(93%) contrast(91%)` }} />
+            <img src='/logo.svg' alt='Widamine' className='h-10 w-auto object-contain' />
           </Link>
 
           {/* Desktop Nav Links - Centered */}
