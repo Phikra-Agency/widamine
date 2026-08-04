@@ -21,8 +21,8 @@ type ResultItem = { id: string; label: string; subtitle: string; route: string; 
 
 const GROUP_CONFIG = [
   { key: 'patients', icon: UserCircle, label: 'Patients', route: '/patients' },
-  { key: 'appointments', icon: CalendarBlank, label: 'Rendez-vous', route: '/calendar' },
-  { key: 'contacts', icon: Envelope, label: 'Contacts' },
+  { key: 'appointments', icon: CalendarBlank, label: 'Rendez-vous', route: '/reservations' },
+  { key: 'contacts', icon: Envelope, label: 'Contacts', route: '/contacts' },
   { key: 'users', icon: User, label: 'Utilisateurs', route: '/users' },
 ]
 
@@ -95,7 +95,21 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
 
   const handleSelect = (item: ResultItem) => {
     setOpen(false)
-    navigate(item.route, { state: { sh: `${item.type}:${item.id}` } })
+    setTerm('')
+    setResults(null)
+    
+    // Navigate with proper query parameters based on type
+    if (item.type === 'patients') {
+      navigate(`/patients?patientId=${item.id}`)
+    } else if (item.type === 'appointments') {
+      navigate(`/reservations?id=${item.id}`)
+    } else if (item.type === 'contacts') {
+      navigate(`/contacts?contactId=${item.id}`)
+    } else if (item.type === 'users') {
+      navigate(`/users?userId=${item.id}`)
+    } else {
+      navigate(item.route)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
