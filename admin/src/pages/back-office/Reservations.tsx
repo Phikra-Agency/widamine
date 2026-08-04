@@ -96,7 +96,7 @@ function ReservationsTable() {
   const { items, filters, setFilters, fetchItems, setItem, toggleOpenShowModal, setOpenShowModal } = useAppointmentsStore()
   const [loading, setLoading] = useState(true)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const { 0: debouncedStatus } = useDebounce(filters.status || 'PENDING', 300)
+  const { 0: debouncedStatus } = useDebounce(filters.status || '', 300)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch] = useDebounce(searchTerm, 300)
   const [searchParams] = useSearchParams()
