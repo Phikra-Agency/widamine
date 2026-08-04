@@ -100,7 +100,7 @@ function ResourcesTable() {
               placeholder='Rechercher une salle...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='h-8 pl-8 text-[13px] bg-background border-border'
+              className='h-8 pl-8 text-[13px] bg-background border-border focus-visible:ring-0! focus-visible:border-border-strong!'
             />
           </div>
         </div>
@@ -113,7 +113,7 @@ function ResourcesTable() {
               placeholder='Rechercher une salle...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='h-8 pl-8 text-[13px] bg-background border-border'
+              className='h-8 pl-8 text-[13px] bg-background border-border focus-visible:ring-0! focus-visible:border-border-strong!'
             />
           </div>
         </div>

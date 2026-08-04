@@ -1,0 +1,10 @@
+2026/08/04-11:49:09.196 9a736 Reusing MANIFEST /home/alae/Documents/repos/widamine/api/_IGNORE_widamine-session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/08/04-11:49:09.196 9a736 Recovering log #33
+2026/08/04-11:49:09.217 9a736 Reusing old log /home/alae/Documents/repos/widamine/api/_IGNORE_widamine-session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000033.log 
+2026/08/04-11:49:29.476 9a736 Level-0 table #38: started
+2026/08/04-11:49:29.489 9a736 Level-0 table #38: 1028432 bytes OK
+2026/08/04-11:49:29.492 9a736 Delete type=0 #33
+2026/08/04-11:49:30.299 9a736 Compacting 1@1 + 1@2 files
+2026/08/04-11:49:30.309 9a736 Generated table #39@1: 8823 keys, 283624 bytes
+2026/08/04-11:49:30.309 9a736 Compacted 1@1 + 1@2 files => 283624 bytes
+2026/08/04-11:49:30.311 9a736 compacted to: files[ 0 0 1 0 0 0 0 ]

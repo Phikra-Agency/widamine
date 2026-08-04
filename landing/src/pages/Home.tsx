@@ -750,7 +750,7 @@ function ConsultSection() {
           </div>
           <div className='w-full overflow-hidden rounded-[2rem] relative' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
             <iframe
-              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3303.2!2d-4.9794!3d34.0364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd9f8b6f5f5f5f5f%3A0x0!2zQm91bGV2YXJkIFNsYW91aSwgRsOocw!5e0!3m2!1sfr!2sma!4v1'
+              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3303!2d-4.9794!3d34.0364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2zQm91bGV2YXJkIFNsYW91aSwgRsOocw!5e0!3m2!1sfr!2sma!4v1'
               width='100%'
               height='380'
               style={{ border: 0 }}

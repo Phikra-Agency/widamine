@@ -1,8 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { PrismaService } from "@/prisma/prisma.service";
-import { MailService } from "@/mail/mail.service";
-import { SmsService } from "@/sms/sms.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { MailService } from "../mail/mail.service";
+import { SmsService } from "../sms/sms.service";
 
 @Injectable()
 export class CronService {
@@ -40,6 +40,17 @@ export class CronService {
   @Cron(CronExpression.EVERY_HOUR)
   async sendReminders() {
     this.logger.log("Sending 24h reminders...");
+
+    // ponytail: same gate as canSendEmail() — the "Rappel" toggle in Paramètres controls this cron
+    const settings = await this.prisma.appSettings.findUnique({
+      where: { singletonKey: "default" },
+      select: { emailEnabled: true, emailReminder: true },
+    });
+    if (settings && (!settings.emailEnabled || !settings.emailReminder)) {
+      this.logger.log("Reminders skipped — email reminders disabled in settings");
+      return;
+    }
+
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const startOfDay = new Date(tomorrow);
@@ -93,17 +104,21 @@ export class CronService {
       }).catch(() => {});
 
       if (appt.phone) {
-        await this.smsService.sendWhatsApp(appt.phone, "Rappel de rendez-vous demain.").catch(() => {});
-        await this.prisma.notificationLog.create({
-          data: {
-            appointmentId: appt.id,
-            channel: "WHATSAPP",
-            recipientType: "PATIENT",
-            recipient: appt.phone,
-            status: "SENT",
-            sentAt: new Date(),
-          },
-        }).catch(() => {});
+        const waResult = await this.smsService.sendWhatsApp(appt.phone, `Bonjour ${appt.name}, rappel de votre rendez-vous pour ${appt.motif?.name || ""} demain à ${date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`).catch((e: any) => ({ success: false, error: e?.message }));
+        if (waResult.success) {
+          await this.prisma.notificationLog.create({
+            data: {
+              appointmentId: appt.id,
+              channel: "WHATSAPP",
+              recipientType: "PATIENT",
+              recipient: appt.phone,
+              status: "SENT",
+              sentAt: new Date(),
+            },
+          }).catch(() => {});
+        } else {
+          this.logger.warn(`Reminder WhatsApp not sent to ${appt.phone}: ${waResult.error || "unknown"}`);
+        }
       }
     }
 

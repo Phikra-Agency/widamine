@@ -1,6 +1,6 @@
 import api from '@/lib/api'
 import axios from 'axios'
-import { EnvelopeSimple, Phone } from '@phosphor-icons/react'
+import { EnvelopeSimple } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -51,6 +51,7 @@ export default function Settings() {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savingRef = useRef(false)
+  const pendingRef = useRef<NotificationSettings | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -66,7 +67,10 @@ export default function Settings() {
   }, [])
 
   const persistSettings = async (next: NotificationSettings) => {
-    if (savingRef.current) return
+    if (savingRef.current) {
+      pendingRef.current = next
+      return
+    }
     savingRef.current = true
     setSaving(true)
 
@@ -87,6 +91,11 @@ export default function Settings() {
     } finally {
       savingRef.current = false
       setSaving(false)
+      if (pendingRef.current) {
+        const pending = pendingRef.current
+        pendingRef.current = null
+        void persistSettings(pending)
+      }
     }
   }
 
@@ -146,15 +155,6 @@ export default function Settings() {
 
                     <div className='space-y-3'>
                       <ChannelRow
-                        name='SMS'
-                        enabled={settings.smsEnabled}
-                        disabled
-                        unavailable
-                        onToggleEnabled={() => undefined}
-                        types={settings.smsTypes}
-                        onToggleType={() => undefined}
-                      />
-                      <ChannelRow
                         name='Email'
                         enabled={settings.emailEnabled}
                         disabled={saving}
@@ -198,7 +198,6 @@ function ChannelRow({
   onToggleType: (type: NotificationType) => void
 }) {
   const channelMeta = {
-    SMS: { icon: Phone, subtitle: 'Canal SMS' },
     Email: { icon: EnvelopeSimple, subtitle: 'Canal email' },
   } as const
 

@@ -14,6 +14,8 @@ interface NotificationsStore {
   count: number
   items: NotificationItem[]
   loading: boolean
+  inAppEnabled: boolean
+  inAppConfirmation: boolean
   lastFetchedAt: number | null
   pollInterval: ReturnType<typeof setInterval> | null
   fetch: () => Promise<void>
@@ -28,6 +30,8 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   count: 0,
   items: [],
   loading: false,
+  inAppEnabled: true,
+  inAppConfirmation: true,
   lastFetchedAt: null,
   pollInterval: null,
 
@@ -35,6 +39,17 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
     if (get().loading) return
     set({ loading: true })
     try {
+      const settingsRes = await api.get<{ inAppEnabled?: boolean; inAppTypes?: { confirmation?: boolean } }>('settings/notifications')
+      const inAppEnabled = settingsRes.data.inAppEnabled ?? true
+      const inAppConfirmation = settingsRes.data.inAppTypes?.confirmation ?? true
+      set({ inAppEnabled, inAppConfirmation })
+
+      // ponytail: in-app channel gated by settings; reminder/cancellation have no in-app surface yet
+      if (!inAppEnabled || !inAppConfirmation) {
+        set({ count: 0, items: [], lastFetchedAt: Date.now(), loading: false })
+        return
+      }
+
       const res = await api.get<{ id: number; name: string; createdAt: string }[]>('appointments/queue')
       const now = Date.now()
       const last = get().lastFetchedAt ?? now

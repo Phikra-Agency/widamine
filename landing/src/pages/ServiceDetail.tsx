@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PublicNavbar from '@/components/PublicNavbar'
-import { getServicePage, SERVICE_PAGES, type ServicePageContent } from '@/lib/siteContent'
+import { getServicePage, serviceToContent, type ServicePageContent } from '@/lib/siteContent'
+import { useServices } from '@/hooks/useServices'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C, TYPE, SPACING } from '@/lib/theme'
 import { Phone, Envelope } from '@phosphor-icons/react'
@@ -35,7 +36,10 @@ function ReelCard({ service }: { service: ServicePageContent }) {
 
 export default function ServiceDetail() {
   const { slug = '' } = useParams()
-  const service = getServicePage(slug)
+  const staticService = getServicePage(slug)
+  const { services, loading } = useServices()
+  const dynamicService = services.find((s) => s.slug === slug)
+  const service: ServicePageContent | null = staticService ?? (dynamicService ? serviceToContent(dynamicService) : null)
   const { openWithMotif } = useScheduleModalStore()
 
   if (!service) {
@@ -43,11 +47,11 @@ export default function ServiceDetail() {
       <div className='min-h-screen' style={{ background: C.bg }}>
         <PublicNavbar />
         <section className={`${SPACING.container} pt-40 pb-16 text-center`}>
-          <p className='text-lg' style={{ fontFamily: TYPE.bodyFamily }}>Service introuvable.</p>
+          <p className='text-lg' style={{ fontFamily: TYPE.bodyFamily }}>{loading ? 'Chargement…' : 'Service introuvable.'}</p>
         </section>
       </div>
     )
-}
+  }
 
 const FAQS = [
   { q: 'Comment prendre rendez-vous ?', a: 'Pour une consultation, deux solutions s\'offrent à vous : la consultation en présentiel ou la visio-consultation. Vous pouvez nous contacter par téléphone du lundi au samedi de 9h à 19h, ou par email.' },

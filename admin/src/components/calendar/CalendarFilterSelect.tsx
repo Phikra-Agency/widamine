@@ -66,7 +66,7 @@ export function CalendarFilterOptions({
             placeholder='Rechercher…'
             autoComplete='off'
             spellCheck={false}
-            className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-primary/30'
+            className='w-full rounded-md border border-border/50 bg-transparent py-1.5 pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground/30 focus:border-border-strong'
           />
         </div>
       )}

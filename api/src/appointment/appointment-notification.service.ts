@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { MailService } from "../mail/mail.service";
+import { SmsService } from "../sms/sms.service";
 
 @Injectable()
 export class AppointmentNotificationService {
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
+    private smsService: SmsService,
   ) {}
 
   private async canSendEmail(type: "confirmation" | "reminder" | "cancellation") {
@@ -33,6 +35,13 @@ export class AppointmentNotificationService {
     });
     if (!settings) return true;
     return settings.emailEnabled;
+  }
+
+  private async sendWhatsAppToAppointment(appt: { phone: string | null }, message: string) {
+    if (!appt.phone) return;
+    await this.smsService.sendWhatsApp(appt.phone, message).catch((e: any) => {
+      console.error(`[WhatsApp] Failed to send to ${appt.phone}: ${e?.message || e}`);
+    });
   }
 
   private readonly COLORS = {
@@ -177,6 +186,7 @@ export class AppointmentNotificationService {
   // ════════════════════════════════════════════════════════════════
 
   async sendNewBookingAcknowledgment(appointmentId: string) {
+    if (!(await this.canSendAnyEmail())) return;
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { motif: true },
@@ -197,6 +207,10 @@ export class AppointmentNotificationService {
     `);
 
     await this.mailService.sendMail(appt.email, 'Réservation reçue — Widamine', html);
+    await this.sendWhatsAppToAppointment(
+      appt,
+      `Bonjour ${appt.name}, votre demande de rendez-vous (${appt.motif?.name || 'Consultation'}) a bien été enregistrée. Notre équipe vous recontactera rapidement pour confirmer. — Widamine`,
+    );
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -226,6 +240,10 @@ export class AppointmentNotificationService {
     `, this.COLORS.success);
 
     await this.mailService.sendMail(appt.email, `Confirmation — ${appt.motif?.name || 'Widamine'}`, html);
+    await this.sendWhatsAppToAppointment(
+      appt,
+      `Bonjour ${appt.name}, votre rendez-vous pour ${appt.motif?.name || '—'} est CONFIRMÉ. ${this.dateStr(appt.schedules[0]?.datetime)}. Merci de confirmer votre présence. — Widamine`,
+    );
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -252,6 +270,10 @@ export class AppointmentNotificationService {
     `, this.COLORS.danger);
 
     await this.mailService.sendMail(appt.email, 'Annulation — Widamine', html);
+    await this.sendWhatsAppToAppointment(
+      appt,
+      `Bonjour ${appt.name}, votre rendez-vous${date ? ` du ${date}` : ''}${appt.motif ? ` pour ${appt.motif.name}` : ''} a été annulé. Si vous souhaitez reprendre rendez-vous, contactez-nous. — Widamine`,
+    );
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -281,6 +303,10 @@ export class AppointmentNotificationService {
     `, this.COLORS.warning);
 
     await this.mailService.sendMail(appt.email, `Rappel — ${appt.motif?.name || 'Widamine'}`, html);
+    await this.sendWhatsAppToAppointment(
+      appt,
+      `Bonjour ${appt.name}, rappel de votre rendez-vous demain (${appt.motif?.name || '—'} — ${this.dateStr(appt.schedules[0]?.datetime)}). Merci de confirmer votre présence. — Widamine`,
+    );
   }
 
   // ════════════════════════════════════════════════════════════════

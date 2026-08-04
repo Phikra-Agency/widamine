@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { GearSix, SignOut as LogOut, CaretUp, CaretLeft, User, EnvelopeSimple, DeviceMobile, Bell } from '@phosphor-icons/react'
+import { GearSix, SignOut as LogOut, CaretUp, CaretLeft, User, EnvelopeSimple, Bell } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useRef } from 'react'
@@ -74,6 +74,7 @@ export default function UserAccountMenu({
   const [saving, setSaving] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savingRef = useRef(false)
+  const pendingRef = useRef<NotificationSettings | null>(null)
 
   if (!user) return null
 
@@ -93,7 +94,10 @@ export default function UserAccountMenu({
   }
 
   const persistSettings = async (next: NotificationSettings) => {
-    if (savingRef.current) return
+    if (savingRef.current) {
+      pendingRef.current = next
+      return
+    }
     savingRef.current = true
     setSaving(true)
     try {
@@ -103,6 +107,11 @@ export default function UserAccountMenu({
     } finally {
       savingRef.current = false
       setSaving(false)
+      if (pendingRef.current) {
+        const pending = pendingRef.current
+        pendingRef.current = null
+        void persistSettings(pending)
+      }
     }
   }
 
@@ -139,7 +148,6 @@ export default function UserAccountMenu({
   const iconBox = collapsed || variant === 'compact' ? 'h-8 w-8' : 'h-9 w-9'
 
   const channels = [
-    { key: 'sms' as const, label: 'SMS', icon: DeviceMobile },
     { key: 'email' as const, label: 'Email', icon: EnvelopeSimple },
     { key: 'inApp' as const, label: 'In-App', icon: Bell },
   ]

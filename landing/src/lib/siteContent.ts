@@ -1,3 +1,5 @@
+import type { DynamicService } from '@/hooks/useServices'
+
 export type ServicePageContent = {
   slug: string
   navLabel: string
@@ -58,6 +60,25 @@ export const SERVICE_PAGES: ServicePageContent[] = [
 
 export function getServicePage(slug: string) {
   return SERVICE_PAGES.find((item) => item.slug === slug)
+}
+
+// Fallback page built from live API motif data when no hand-written page exists.
+export function serviceToContent(s: DynamicService): ServicePageContent {
+  const category = (s.service?.category?.slug as ServicePageContent['category']) ?? 'techniques'
+  return {
+    slug: s.slug,
+    navLabel: s.name,
+    title: s.name,
+    eyebrow: s.service?.category?.name ?? '',
+    heroDescription: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.`,
+    image: '',
+    color: s.color,
+    intro: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.`,
+    highlights: [`Séance d'environ ${s.duration} minutes`],
+    contraindications: "Une consultation préalable est nécessaire pour évaluer votre éligibilité à ce traitement.",
+    sections: [{ title: `À propos de ${s.name}`, body: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.` }],
+    category,
+  }
 }
 
 /* ── Unique vector per service (square-moncey CDN icons) ─────── */

@@ -38,6 +38,10 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         disableSpins: true,
         logConsole: false,
         popup: false,
+        defaultViewport: null,
+        cacheEnabled: true,
+        killProcessOnBrowserClose: true,
+        customUserAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       } as any);
 
       this.logger.log(`✅ WhatsApp client initialized and ready!`);
@@ -113,13 +117,36 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     try {
       const chatId = this.formatPhoneNumber(phone);
       this.logger.log(`📱 Sending WhatsApp to ${chatId}: ${message.substring(0, 50)}...`);
-      
+
       const result: any = await client.sendText(chatId as any, message);
-      
+
       this.logger.log(`✅ WhatsApp sent successfully — id: ${result}`);
       return { success: true, messageId: String(result) };
-      
+
     } catch (error: any) {
+      // Transient failures: WhatsApp Web occasionally reloads/reinjects its
+      // page ("detached Frame", window.Store not ready → undefined.get).
+      // Refresh re-resolves the page when the frame is stale, then retry once.
+      const isDetachedFrame = error?.message?.includes('detached Frame');
+      if (this.client) {
+        if (isDetachedFrame) {
+          this.logger.warn(`🔁 Detached frame detected, refreshing session...`);
+          try { await this.client.refresh(); } catch (e: any) {
+            this.logger.error(`❌ Session refresh failed: ${e.message}`);
+          }
+        } else {
+          await new Promise(r => setTimeout(r, 2500));
+        }
+        try {
+          const chatId = this.formatPhoneNumber(phone);
+          const result: any = await this.client.sendText(chatId as any, message);
+          this.logger.log(`✅ WhatsApp sent successfully after retry — id: ${result}`);
+          return { success: true, messageId: String(result) };
+        } catch (retryError: any) {
+          this.logger.error(`❌ WhatsApp retry failed: ${retryError.message}`);
+          return { success: false, error: retryError.message };
+        }
+      }
       this.logger.error(`❌ Failed to send WhatsApp to ${phone}: ${error.message}`);
       return { success: false, error: error.message };
     }

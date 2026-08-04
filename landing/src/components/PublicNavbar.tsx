@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { ServiceIcon } from '@/components/ServiceIcon'
 import { C } from '@/lib/theme'
+import { SERVICE_PAGES } from '@/lib/siteContent'
 import { useServices } from '@/hooks/useServices'
 
 type PublicNavbarProps = {
@@ -12,6 +13,13 @@ type PublicNavbarProps = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = { visage: 'Visage', corps: 'Corps', techniques: 'Techniques' }
+
+// ponytail: API motifs carry no category; static SERVICE_PAGES is the category source of truth.
+const CATEGORY_KEYWORDS: Record<string, RegExp> = {
+  visage: /visage|facial|lip|l[èe]vres|eye|yeux|paupi[èe]re|sourcil|peeling|bilan/i,
+  corps: /corps|body|breast|poitrine|bbl|liposuccion|sculpsure|fesse/i,
+  techniques: /laser|epilation|technique/i,
+}
 
 export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const { pathname } = useLocation()
@@ -22,38 +30,39 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const megaRef = useRef<HTMLDivElement>(null)
 
   // Fetch services dynamically from API
-  const { byCategory, loading } = useServices()
+  const { services, loading } = useServices()
 
-  // Build dynamic categories - filter out empty ones
-  const MEGA_CATEGORIES = [
-    {
-      slug: 'visage',
-      label: 'Visage',
-      items: byCategory.visage.map(s => ({
-        label: s.name,
-        href: `/services/${s.slug}`,
-        slug: s.slug,
-      }))
-    },
-    {
-      slug: 'corps',
-      label: 'Corps',
-      items: byCategory.corps.map(s => ({
-        label: s.name,
-        href: `/services/${s.slug}`,
-        slug: s.slug,
-      }))
-    },
-    {
-      slug: 'techniques',
-      label: 'Techniques',
-      items: byCategory.techniques.map(s => ({
-        label: s.name,
-        href: `/services/${s.slug}`,
-        slug: s.slug,
-      }))
-    },
-  ].filter(cat => cat.items.length > 0) // Hide empty categories
+  // Build categories: start with 3 empty categories, then populate from API services
+  const knownSlugs = new Set<string>()
+  const dynamicCategories = (['visage', 'corps', 'techniques'] as const).map((cat) => ({
+    slug: cat,
+    label: CATEGORY_LABELS[cat],
+    items: [] as { label: string; href: string; slug: string }[],
+  }))
+
+  // First, add static SERVICE_PAGES items
+  SERVICE_PAGES.forEach((p) => {
+    const target = dynamicCategories.find((c) => c.slug === p.category)
+    if (target) {
+      target.items.push({ label: p.title, href: `/services/${p.slug}`, slug: p.slug })
+      knownSlugs.add(p.slug)
+    }
+  })
+
+  // Then, add API services (skip duplicates by slug)
+  services.forEach((s) => {
+    if (knownSlugs.has(s.slug)) return
+    // Use the category from API response directly
+    const apiCategory = s.service?.category?.slug as 'visage' | 'corps' | 'techniques' | undefined
+    const target = dynamicCategories.find((c) => c.slug === apiCategory)
+    if (target) {
+      target.items.push({ label: s.name, href: `/services/${s.slug}`, slug: s.slug })
+      knownSlugs.add(s.slug)
+    }
+  })
+
+  // Filter out empty categories and only show categories that have services
+  const MEGA_CATEGORIES = dynamicCategories.filter(cat => cat.items.length > 0)
 
   const isContact = pathname === '/contact'
 
@@ -102,26 +111,27 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
   return (
     <motion.header
-      className='fixed left-0 right-0 top-6 z-[180]'
+      className='fixed left-0 right-0 top-3 z-[180]'
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className='mx-auto w-full max-w-6xl px-4'>
+      <div className='mx-auto w-full max-w-4xl px-4 relative'>
         <nav
-          className='relative flex items-center justify-between rounded-full px-6 py-4 transition-all duration-300'
+          className='relative flex items-center justify-between rounded-full px-6 py-3 transition-all duration-300 border'
           style={{
-            background: 'white',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-            border: `1px solid ${C.primary}15`,
+            background: '#fbf7ef',
+            borderColor: C.primary,
+            position: 'relative',
+            zIndex: 200,
           }}
         >
           <Link to='/' className='flex shrink-0 cursor-pointer items-center'>
-            <img src='/logo.svg' alt='Widamine' className='h-10 w-auto object-contain' />
+            <img src='/logo-widamine.svg' alt='Widamine' className='h-11 w-auto object-contain' />
           </Link>
 
           {/* Desktop Nav Links - Centered */}
-          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden items-center gap-8 lg:flex'>
+          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden items-center gap-5 lg:flex'>
             <div
               ref={megaRef}
               className='relative'
@@ -131,21 +141,13 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1.5 text-[15px] font-medium transition-all duration-300 ease-out'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[13px] font-medium whitespace-nowrap'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.opacity = '1'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={(e) => { 
-                  if (!isServicesActive) e.currentTarget.style.opacity = '0.85'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
               >
                 Services
-                <ChevronDown size={14} weight='bold' className={`transition-all duration-300 ease-out ${isServicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={11} weight='bold' className={`transition-all duration-300 ease-out ${isServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -159,7 +161,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                       ease: [0.16, 1, 0.3, 1],
                       scale: { duration: 0.25 }
                     }}
-                    className='absolute left-1/2 top-[calc(100%+8px)] z-[999] hidden -translate-x-1/2 lg:block'
+                    className='absolute left-1/2 top-full mt-4 z-[150] hidden -translate-x-1/2 lg:block'
                     style={{ 
                       width: MEGA_CATEGORIES.length === 1 ? '320px' : MEGA_CATEGORIES.length === 2 ? '580px' : '850px',
                       transformOrigin: 'top center'
@@ -207,12 +209,10 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                             </Link>
                             <div className='space-y-1'>
                               {cat.items.map((item) => (
-                                <button
+                                <Link
                                   key={item.label}
-                                  onClick={() => {
-                                    setIsServicesOpen(false)
-                                    open()
-                                  }}
+                                  to={item.href}
+                                  onClick={() => setIsServicesOpen(false)}
                                   className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
@@ -220,7 +220,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                     <ServiceIcon slug={item.slug} size={20} color={C.primary} />
                                   </div>
                                   <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>
-                                </button>
+                                </Link>
                               ))}
                             </div>
                           </motion.div>
@@ -256,32 +256,16 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[15px] font-medium transition-all duration-300 ease-out'
+              className='text-[13px] font-medium'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.opacity = '1'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={(e) => { 
-                if (pathname !== '/about') e.currentTarget.style.opacity = '0.85'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
             >
               À propos
             </Link>
 
             <Link
               to='/contact'
-              className='text-[15px] font-medium transition-all duration-300 ease-out'
+              className='text-[13px] font-medium'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.opacity = '1'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-              }}
-              onMouseLeave={(e) => { 
-                if (!isContact) e.currentTarget.style.opacity = '0.85'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
             >
               Contact
             </Link>
@@ -292,7 +276,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
             <button
               type='button'
               onClick={() => setIsMobileMenuOpen((current) => !current)}
-              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ease-out lg:hidden'
+              className='flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ease-out lg:hidden'
               style={{ color: C.secondary, background: `${C.primary}08` }}
               onMouseEnter={(e) => { 
                 e.currentTarget.style.background = `${C.primary}15`
@@ -311,8 +295,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               type='button'
               onClick={open}
               aria-label='Prendre rendez-vous'
-              className='hidden cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-2.5 text-[15px] font-semibold text-white transition-all duration-300 ease-out hover:scale-105 hover:shadow-lg active:scale-95 lg:inline-flex'
-              style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
+              className='hidden cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold border-2 transition-all duration-300 hover:bg-primary/10 lg:inline-flex'
+              style={{ borderColor: C.primary, color: C.primary, background: 'transparent' }}
             >
               Rendez-vous
             </button>
@@ -326,7 +310,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className='relative z-[9999] mt-3 overflow-hidden rounded-3xl shadow-xl lg:hidden'
+              className='relative z-[100] mt-3 overflow-hidden rounded-3xl shadow-xl lg:hidden'
               style={{ background: 'white', border: `1px solid ${C.primary}15` }}
             >
               <div className='max-h-[78dvh] space-y-1 overflow-y-auto p-4'>

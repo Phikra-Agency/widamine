@@ -943,8 +943,8 @@ Réservation reçue
       </div>
 
       <div className='relative mb-6 flex items-center gap-3 rounded-xl border p-3' style={{ borderColor: `${C.primary}20`, backgroundColor: `${C.primary}06` }}>
-        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
-          <Heart size={16} weight='duotone' style={{ color: C.primary }} />
+        <div className='h-10 w-10 shrink-0 overflow-hidden rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
+          <img src='/images/team/dr widad slaoui.jpg' alt='Dr. Widad Slaoui' className='h-full w-full object-cover object-top' />
         </div>
         <div className='flex-1'>
           <div className='text-sm font-semibold' style={{ color: C.secondary }}>Dr. Widad Slaoui</div>

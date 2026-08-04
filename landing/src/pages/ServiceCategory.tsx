@@ -1,11 +1,18 @@
 import { Link, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PublicNavbar from '@/components/PublicNavbar'
-import { SERVICE_PAGES } from '@/lib/siteContent'
+import { useServices } from '@/hooks/useServices'
+import { serviceToContent } from '@/lib/siteContent'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C, TYPE, SPACING } from '@/lib/theme'
 
 const CATEGORY_DATA: Record<string, { title: string; subtitle: string; description: string; color: string }> = {
+  tous: {
+    title: 'Nos soins',
+    subtitle: 'Tous les traitements',
+    description: "L'ensemble des soins et protocoles du Widamine Aesthetic Center.",
+    color: C.primary,
+  },
   visage: {
     title: 'Traitements du visage',
     subtitle: 'Soins & Protocoles',
@@ -29,10 +36,11 @@ const CATEGORY_DATA: Record<string, { title: string; subtitle: string; descripti
 export default function ServiceCategory() {
   const { category = 'visage' } = useParams<{ category: string }>()
   const { open } = useScheduleModalStore()
-  const cat = CATEGORY_DATA[category] || CATEGORY_DATA['visage']
-  const services = SERVICE_PAGES.filter((p) => p.category === category)
+  const { services: dynamicServices, loading } = useServices()
+  const cat = CATEGORY_DATA[category] || CATEGORY_DATA['tous']
+  const services = (cat === CATEGORY_DATA['tous'] ? dynamicServices : dynamicServices.filter((s) => s.service?.category?.slug === category)).map(serviceToContent)
 
-  if (services.length === 0) {
+  if (!loading && services.length === 0) {
     return (
       <div className='min-h-screen' style={{ background: C.bg }}>
         <PublicNavbar />
