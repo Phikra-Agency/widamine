@@ -61,6 +61,12 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
     }
   })
 
+  // DEBUG: Log to console
+  if (!loading && services.length > 0) {
+    console.log('[Navbar] Total API services:', services.length)
+    console.log('[Navbar] Categories:', dynamicCategories.map(c => `${c.label}: ${c.items.length} items`))
+  }
+
   // Filter out empty categories and only show categories that have services
   const MEGA_CATEGORIES = dynamicCategories.filter(cat => cat.items.length > 0)
 
@@ -118,15 +124,19 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
     >
       <div className='mx-auto w-full max-w-4xl px-4 relative'>
         <nav
-          className='relative flex items-center justify-between rounded-full px-6 py-3 transition-all duration-300 border'
+          className='relative flex items-center justify-between rounded-full px-6 py-3 transition-all duration-300'
           style={{
             background: '#fbf7ef',
-            borderColor: C.primary,
+            border: `0.5px solid ${C.primary}`,
             position: 'relative',
             zIndex: 200,
           }}
         >
-          <Link to='/' className='flex shrink-0 cursor-pointer items-center'>
+          <Link 
+            to='/' 
+            className='flex shrink-0 cursor-pointer items-center'
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <img src='/logo-widamine.svg' alt='Widamine' className='h-11 w-auto object-contain' />
           </Link>
 
@@ -141,7 +151,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[13px] font-medium whitespace-nowrap'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[13px] font-medium whitespace-nowrap transition-all duration-300 hover:opacity-100 hover:scale-105'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
@@ -256,7 +266,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[13px] font-medium'
+              className='text-[13px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
             >
               À propos
@@ -264,7 +274,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/contact'
-              className='text-[13px] font-medium'
+              className='text-[13px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
             >
               Contact
@@ -295,8 +305,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               type='button'
               onClick={open}
               aria-label='Prendre rendez-vous'
-              className='hidden cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold border-2 transition-all duration-300 hover:bg-primary/10 lg:inline-flex'
-              style={{ borderColor: C.primary, color: C.primary, background: 'transparent' }}
+              className='hidden cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold text-white transition-all duration-300 border-2 hover:!bg-transparent hover:!text-primary lg:inline-flex'
+              style={{ background: C.primary, borderColor: C.primary }}
             >
               Rendez-vous
             </button>

@@ -588,7 +588,6 @@ function GallerySection() {
   return (
     <section className='relative overflow-hidden py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='pointer-events-none absolute -left-28 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
-      <img src={SM.hero.topRight} alt='' className='pointer-events-none absolute right-0 top-0 w-44 opacity-80 widamine-tint' loading='lazy' />
       <div className='mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-[1fr_0.92fr] lg:items-center'>
         <div
           className='relative select-none'
@@ -596,7 +595,6 @@ function GallerySection() {
           onPointerUp={handlePointerUp}
           style={{ touchAction: 'pan-y' }}
         >
-          <div className='pointer-events-none absolute -left-36 top-0 h-96 w-60 rounded-[50%] bg-white/45' />
           <div className='relative mx-auto w-[55vw] max-w-[300px] aspect-[5/7]'>
             {SM.gallery.map((src, i) => {
               let x = 0, rot = 0, z = 0
