@@ -51,9 +51,8 @@ export default function PublicFooter() {
           </div>
 
           <FooterColumn title='Widamine Center'>
-            <FooterLink to='/contact'>Le concept</FooterLink>
-            <FooterLink to='/about-us'>Dr. Widad Slaoui</FooterLink>
-            <FooterLink to='/services/consultation'>Consultation</FooterLink>
+            <FooterLink to='/about'>À propos</FooterLink>
+            <FooterLink to='/contact'>Contact</FooterLink>
           </FooterColumn>
 
           <FooterColumn title='Services'>
@@ -85,32 +84,27 @@ export default function PublicFooter() {
             <p className='text-xs font-semibold' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
               Widamine Center — Tous droits réservés — {year}
             </p>
-            <div className='flex items-center gap-5'>
-              <a href='/mentions-legales' className='text-xs font-semibold transition-opacity hover:opacity-70' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
-                Mentions légales
-              </a>
-              <div className='flex items-center gap-2'>
-                {SOCIAL.map((s) => {
-                  const Icon = s.icon
-                  return (
-                    <a
-                      key={s.name}
-                      href={s.href}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      aria-label={s.name}
-                      className='flex h-10 w-10 items-center justify-center rounded-lg transition-transform hover:-translate-y-0.5 active:scale-[0.96]'
-                      style={{ color: C.primary }}
-                    >
-                      {Icon ? <Icon size={18} weight='regular' /> : (
-                        <svg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                          <path d='M16.6 5.82S15.5 4.5 15.5 2H12v13.31a2.25 2.25 0 0 1-2.25 2.19C8.56 17.5 7.5 16.44 7.5 15.12c0-1.46 1.2-2.64 2.64-2.64.4 0 .78.1 1.11.26V9.42c-3.72-.32-6.72 2.7-6.72 6.45a6.46 6.46 0 0 0 6.47 6.45c3.56 0 6.46-2.89 6.46-6.45v-3.8c1.3.94 2.88 1.5 4.54 1.5V9.72c-.9.02-1.75-.2-2.5-.57' fill='currentColor'/>
-                        </svg>
-                      )}
-                    </a>
-                  )
-                })}
-              </div>
+            <div className='flex items-center gap-2'>
+              {SOCIAL.map((s) => {
+                const Icon = s.icon
+                return (
+                  <a
+                    key={s.name}
+                    href={s.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label={s.name}
+                    className='flex h-10 w-10 items-center justify-center rounded-lg transition-transform hover:-translate-y-0.5 active:scale-[0.96]'
+                    style={{ color: C.primary }}
+                  >
+                    {Icon ? <Icon size={18} weight='regular' /> : (
+                      <svg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                        <path d='M16.6 5.82S15.5 4.5 15.5 2H12v13.31a2.25 2.25 0 0 1-2.25 2.19C8.56 17.5 7.5 16.44 7.5 15.12c0-1.46 1.2-2.64 2.64-2.64.4 0 .78.1 1.11.26V9.42c-3.72-.32-6.72 2.7-6.72 6.45a6.46 6.46 0 0 0 6.47 6.45c3.56 0 6.46-2.89 6.46-6.45v-3.8c1.3.94 2.88 1.5 4.54 1.5V9.72c-.9.02-1.75-.2-2.5-.57' fill='currentColor'/>
+                      </svg>
+                    )}
+                  </a>
+                )
+              })}
             </div>
           </div>
         </div>
