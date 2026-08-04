@@ -24,10 +24,7 @@ const STATUS_FILTER_PILLS: FilterPillOption[] = [
   { value: 'all', label: 'Toutes', color: 'mist' },
   { value: 'PENDING', label: 'En attente', color: 'sand' },
   { value: 'CONFIRMED', label: 'Confirmée', color: 'sea' },
-  { value: 'COMPLETED', label: 'Terminée', color: 'sage' },
   { value: 'CANCELLED', label: 'Annulée', color: 'coral' },
-  { value: 'EXPIRED', label: 'Expirée', color: 'sky' },
-  { value: 'NO_SHOW', label: 'Absent', color: 'aqua' },
 ]
 
 const THEME_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
@@ -174,7 +171,7 @@ function ReservationsTable() {
         {/* Mobile filters */}
         <div className='flex lg:hidden items-center gap-2 w-full'>
           <Select
-            items={{ all: 'Toutes', PENDING: 'En attente', CONFIRMED: 'Confirmée', CANCELLED: 'Annulée', COMPLETED: 'Terminée', EXPIRED: 'Expirée', NO_SHOW: 'Absent' }}
+            items={{ all: 'Toutes', PENDING: 'En attente', CONFIRMED: 'Confirmée', CANCELLED: 'Annulée' }}
             value={filters.status || 'all'}
             onValueChange={(value) => setFilters({ ...filters, status: value === 'all' ? '' : value })}
           >
@@ -340,32 +337,25 @@ function StatusBadge({ status }: { status: string }) {
 
 function StatusSelect({ appointmentId, status, className }: { appointmentId: number; status: string; className?: string }) {
   const { fetchItems } = useAppointmentsStore()
-  const { user } = useAuthStore()
-  const isPractitioner = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [current, setCurrent] = useState(status)
   const [saving, setSaving] = useState(false)
 
-  const allLabels: Record<string, string> = {
+  // Only 3 statuses allowed
+  const statusOptions: Record<string, string> = {
     PENDING: 'En attente',
     CONFIRMED: 'Confirmée',
     CANCELLED: 'Annulée',
-    COMPLETED: 'Terminée',
-    EXPIRED: 'Expirée',
-    NO_SHOW: 'Absent',
   }
 
-  const labels = isPractitioner
-    ? { CONFIRMED: allLabels.CONFIRMED, COMPLETED: allLabels.COMPLETED, NO_SHOW: allLabels.NO_SHOW }
-    : allLabels
-
   async function handleChange(newStatus: string) {
-    if (newStatus === current) return
+    if (newStatus === current || saving) return
     setSaving(true)
     try {
       await api.put(`appointments/${appointmentId}`, { status: newStatus })
       setCurrent(newStatus)
-      fetchItems()
-    } catch {
+      await fetchItems()
+    } catch (error) {
+      console.error('Failed to update status:', error)
       setCurrent(current)
     } finally {
       setSaving(false)
@@ -376,7 +366,7 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
   const currentTc = THEME_COLORS[currentMeta.theme]
 
   return (
-    <Select value={current} items={labels} onValueChange={handleChange} disabled={saving}>
+    <Select value={current} items={statusOptions} onValueChange={handleChange} disabled={saving}>
       <SelectTrigger
         className={cn('h-9 min-w-[140px] text-xs font-medium', className)}
         style={{
@@ -388,8 +378,8 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
         <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: currentTc.dot }} />
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
-        {Object.entries(labels).map(([key, label]) => {
+      <SelectContent align="start" side="bottom" sideOffset={4}>
+        {Object.entries(statusOptions).map(([key, label]) => {
           const tc = THEME_COLORS[STATUS_META[key]?.theme || 'sand']
           return (
             <SelectItem key={key} value={key}>
