@@ -340,6 +340,11 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
   const [current, setCurrent] = useState(status)
   const [saving, setSaving] = useState(false)
 
+  // Sync with prop changes
+  useEffect(() => {
+    setCurrent(status)
+  }, [status])
+
   // Only 3 statuses allowed
   const statusOptions: Record<string, string> = {
     PENDING: 'En attente',
@@ -349,14 +354,32 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
 
   async function handleChange(newStatus: string) {
     if (newStatus === current || saving) return
+    
+    // Update UI immediately (optimistic update)
+    const previousStatus = current
+    setCurrent(newStatus)
+    
+    // Update in store immediately
+    useAppointmentsStore.setState(state => ({
+      items: state.items.map(item => 
+        item.id === appointmentId ? { ...item, status: newStatus } : item
+      )
+    }))
+    
     setSaving(true)
     try {
       await api.put(`appointments/${appointmentId}`, { status: newStatus })
-      setCurrent(newStatus)
+      // Fetch to ensure consistency
       await fetchItems()
     } catch (error) {
       console.error('Failed to update status:', error)
-      setCurrent(current)
+      // Rollback on error
+      setCurrent(previousStatus)
+      useAppointmentsStore.setState(state => ({
+        items: state.items.map(item => 
+          item.id === appointmentId ? { ...item, status: previousStatus } : item
+        )
+      }))
     } finally {
       setSaving(false)
     }
