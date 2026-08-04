@@ -1,0 +1,95 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: widamine_main
+      POSTGRES_USER: widamine
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U widamine -d widamine_main"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # NestJS Backend (PostgreSQL)
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://widamine:${POSTGRES_PASSWORD:-changeme}@postgres:5432/widamine_main
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-info@widamineaestheticcenter.com}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8081}
+      ADMIN_URL: ${ADMIN_URL:-http://localhost:8080}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+
+  # Admin Panel
+  admin:
+    build:
+      context: .
+      dockerfile: admin/Dockerfile
+      args:
+        VITE_PUBLIC_API_URL: /api
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${ADMIN_PORT:-8080}:80"
+    environment:
+      - BACKEND_URL=http://backend:3001
+
+  # Landing Page
+  landing:
+    build:
+      context: .
+      dockerfile: landing/Dockerfile
+      args:
+        VITE_PUBLIC_API_URL: /api
+        VITE_ADMIN_URL: ${VITE_ADMIN_URL:-http://localhost:8080}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${LANDING_PORT:-8081}:80"
+    environment:
+      - BACKEND_URL=http://backend:3001
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - admin
+      - landing
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: widamine_network
