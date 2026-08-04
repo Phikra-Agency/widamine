@@ -13,3 +13,7 @@ backend/
 mongodb_data/
 mongod.*
 .turbo/
+_IGNORE_widamine-session/
+widamine-session/
+api/_IGNORE_widamine-session/
+.node-persist/
