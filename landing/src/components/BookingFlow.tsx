@@ -281,6 +281,7 @@ function ReservationSteps({
                     availability={availability}
                     selectedPractitionerId={selectedPractitionerId}
                     selectedHour={selectedHour}
+                    selectedMotif={selectedMotif}
                     setSelectedHour={setSelectedHour}
                     setSelectedPractitionerId={setSelectedPractitionerId}
                     onContinue={() => {
@@ -506,6 +507,7 @@ function DoctorSelection({
   availability,
   selectedPractitionerId,
   selectedHour,
+  selectedMotif,
   setSelectedHour,
   setSelectedPractitionerId,
   onContinue,
@@ -515,6 +517,7 @@ function DoctorSelection({
   availability: { morning: any[]; afternoon: any[]; evening: any[] }
   selectedPractitionerId: number | null
   selectedHour: string | null
+  selectedMotif: any
   setSelectedHour: (hour: string, doctorId?: number) => void
   setSelectedPractitionerId: (id: number | null) => void
   onContinue: () => void

@@ -8,15 +8,12 @@ export type DynamicService = {
   description?: string
   duration: number
   color: string
+  category?: string | null
   service: {
     id: string
     name: string
     slug: string
-    category: {
-      id: string
-      name: string
-      slug: string
-    }
+    category?: string | null
   } | null
 }
 
@@ -48,9 +45,9 @@ export function useServices() {
 
   // Group by category
   const byCategory = {
-    visage: services.filter(s => s.service?.category?.slug === 'visage'),
-    corps: services.filter(s => s.service?.category?.slug === 'corps'),
-    techniques: services.filter(s => s.service?.category?.slug === 'techniques'),
+    visage: services.filter(s => s.category === 'visage'),
+    corps: services.filter(s => s.category === 'corps'),
+    techniques: services.filter(s => s.category === 'techniques'),
   }
 
   return { services, byCategory, loading, error }

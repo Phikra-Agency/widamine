@@ -20,7 +20,7 @@ function ReelCard({ service }: { service: ServicePageContent }) {
       href={reelUrl}
       target='_blank'
       rel='noopener noreferrer'
-      className='group relative flex items-center justify-center w-full rounded-2xl overflow-hidden shadow-lg h-[380px] sm:h-[420px] max-w-[240px]'
+      className='group relative flex items-center justify-center w-full rounded-2xl overflow-hidden shadow-lg aspect-video'
       style={{ background: `linear-gradient(160deg, ${C.primary}, ${C.secondary})` }}
     >
       <div className='absolute inset-0 bg-black/10' />

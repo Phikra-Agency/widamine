@@ -53,7 +53,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   services.forEach((s) => {
     if (knownSlugs.has(s.slug)) return
     // Use the category from API response directly
-    const apiCategory = s.service?.category?.slug as 'visage' | 'corps' | 'techniques' | undefined
+    const apiCategory = s.category as 'visage' | 'corps' | 'techniques' | undefined
     const target = dynamicCategories.find((c) => c.slug === apiCategory)
     if (target) {
       target.items.push({ label: s.name, href: `/services/${s.slug}`, slug: s.slug })

@@ -42,7 +42,7 @@ export default function ServiceCategory() {
   // Filter by category and remove duplicates by slug
   const filteredServices = cat === CATEGORY_DATA['tous'] 
     ? dynamicServices 
-    : dynamicServices.filter((s) => s.service?.category?.slug === category)
+    : dynamicServices.filter((s) => s.category === category)
   
   // Deduplicate by slug (keep first occurrence)
   const uniqueServices = filteredServices.filter((service, index, self) => 

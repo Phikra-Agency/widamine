@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { C, TYPE } from '@/lib/theme'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { useContactPopupStore } from '@/stores/contactPopupStore'
+import { API_BASE_URL } from '@/lib/api'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -52,7 +53,7 @@ export default function Chatbot() {
       setLoading(true)
       try {
         const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }))
-        const res = await fetch('/api/chatbot/message', {
+        const res = await fetch(`${API_BASE_URL}/chatbot/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: msg, history }),
@@ -79,7 +80,7 @@ export default function Chatbot() {
 
     try {
       const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }))
-      const res = await fetch('/api/chatbot/message', {
+      const res = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history }),
