@@ -29,7 +29,7 @@ COPY --from=build /app/api/prisma ./api/prisma
 
 # Generate Prisma client for the production platform
 WORKDIR /app/api
-RUN npx prisma generate
+RUN npx --yes prisma@5.22.0 generate
 
 WORKDIR /app/api
 EXPOSE 3000
