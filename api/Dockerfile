@@ -26,8 +26,10 @@ RUN npm ci --omit=dev --workspace=widamine-api
 
 COPY --from=build /app/api/dist ./api/dist
 COPY --from=build /app/api/prisma ./api/prisma
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+
+# Generate Prisma client for the production platform
+WORKDIR /app/api
+RUN npx prisma generate
 
 WORKDIR /app/api
 EXPOSE 3000
