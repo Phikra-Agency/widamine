@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PublicNavbar from '@/components/PublicNavbar'
 import { useServices } from '@/hooks/useServices'
-import { serviceToContent } from '@/lib/siteContent'
+import { serviceToContent, ICON_MAP } from '@/lib/siteContent'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C, TYPE, SPACING } from '@/lib/theme'
 
@@ -38,7 +38,18 @@ export default function ServiceCategory() {
   const { open } = useScheduleModalStore()
   const { services: dynamicServices, loading } = useServices()
   const cat = CATEGORY_DATA[category] || CATEGORY_DATA['tous']
-  const services = (cat === CATEGORY_DATA['tous'] ? dynamicServices : dynamicServices.filter((s) => s.service?.category?.slug === category)).map(serviceToContent)
+  
+  // Filter by category and remove duplicates by slug
+  const filteredServices = cat === CATEGORY_DATA['tous'] 
+    ? dynamicServices 
+    : dynamicServices.filter((s) => s.service?.category?.slug === category)
+  
+  // Deduplicate by slug (keep first occurrence)
+  const uniqueServices = filteredServices.filter((service, index, self) => 
+    index === self.findIndex((s) => s.slug === service.slug)
+  )
+  
+  const services = uniqueServices.map(serviceToContent)
 
   if (!loading && services.length === 0) {
     return (
@@ -94,7 +105,18 @@ export default function ServiceCategory() {
                   className='group flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 py-8 sm:py-10 md:py-14 border-b transition-colors hover:bg-white/40 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 rounded-2xl'
                   style={{ borderColor: 'rgba(26,54,70,0.08)' }}
                 >
-                  <div className='md:w-1/2'>
+                  {/* Service Icon */}
+                  {ICON_MAP[service.slug] && (
+                    <div className='shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-[rgba(26,54,70,0.08)] bg-white/50 transition-all group-hover:border-[#009FD6]/30 group-hover:shadow-lg'>
+                      <img 
+                        src={ICON_MAP[service.slug]} 
+                        alt={service.title}
+                        className='w-full h-full object-cover transition-transform group-hover:scale-105'
+                      />
+                    </div>
+                  )}
+
+                  <div className='md:flex-1'>
                     <div className='mb-3 sm:mb-4 flex flex-wrap gap-2 sm:gap-3'>
                       {service.highlights.slice(0, 2).map((h, i) => (
                         <span key={i} className='text-[10px] font-semibold uppercase tracking-widest' style={{ color: service.color }}>
@@ -107,7 +129,7 @@ export default function ServiceCategory() {
                     </h2>
                   </div>
                   
-                  <div className='md:w-1/2 flex items-center gap-4 md:gap-8'>
+                  <div className='md:flex-1 flex items-center gap-4 md:gap-8'>
                     <p className='text-sm sm:text-[15px] leading-relaxed flex-1' style={{ color: `${C.secondary}aa`, fontWeight: 300 }}>
                       {service.intro || service.heroDescription}
                     </p>

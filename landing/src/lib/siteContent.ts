@@ -23,7 +23,7 @@ export const SERVICE_PAGES: ServicePageContent[] = [
     title: 'Épilation laser',
     eyebrow: 'Techniques',
     heroDescription: 'L\'épilation laser est une solution durable pour une peau lisse. Une technique moderne et efficace pour éliminer durablement les poils indésirables.',
-    image: '/services/epilation.jpg',
+    image: '/images/services/epilation-laser.webp',
     color: '#ec4899',
     intro: 'L\'épilation laser est une technique moderne et efficace pour éliminer durablement les poils indésirables. Contrairement aux méthodes classiques comme le rasage ou la cire, le laser agit directement à la racine du poil, en ciblant le bulbe pileux afin d\'en prévenir la repousse. Ce traitement s\'adresse à toutes les zones du corps : jambes, bras, aisselles, dos, maillot, visage… En moyenne, 8 à 10 séances sont nécessaires pour obtenir une diminution progressive et durable de la pilosité.',
     highlights: ['Épilation définitive', 'Toutes zones', 'Tous phototypes', 'Réduction 70–90%', 'Séances rapides'],
@@ -43,7 +43,7 @@ export const SERVICE_PAGES: ServicePageContent[] = [
     title: 'SculpSure — Bourrelets graisseux',
     eyebrow: 'Corps',
     heroDescription: 'Une solution non invasive et sans chirurgie pour redessiner votre silhouette. SculpSure, le laser qui cible les bourrelets résistants.',
-    image: '/services/sculpSure.jpg',
+    image: '/images/services/sculpsure.webp',
     color: '#2E90C0',
     intro: 'Vous avez beau faire attention à votre alimentation ou pratiquer une activité physique régulière… certains bourrelets résistent toujours. Ces zones rebelles — abdomen, hanches, cuisses ou dos — stockent la graisse de manière tenace. Grâce à une énergie laser contrôlée, SculpSure cible la graisse en profondeur sans abîmer la peau. En seulement 25 minutes par zone, dites adieu à ces bourrelets résistants.',
     highlights: ['Non invasif', '25 min par zone', 'Sans chirurgie', 'Résultats durables', 'Sans éviction sociale'],
@@ -71,7 +71,7 @@ export function serviceToContent(s: DynamicService): ServicePageContent {
     title: s.name,
     eyebrow: s.service?.category?.name ?? '',
     heroDescription: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.`,
-    image: '',
+    image: ICON_MAP[s.slug] || '',
     color: s.color,
     intro: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.`,
     highlights: [`Séance d'environ ${s.duration} minutes`],
@@ -81,10 +81,16 @@ export function serviceToContent(s: DynamicService): ServicePageContent {
   }
 }
 
-/* ── Unique vector per service (square-moncey CDN icons) ─────── */
+/* ── Service icon illustrations (generated with make-service-icons.py) ─────── */
 export const ICON_MAP: Record<string, string> = {
-  'epilation-laser': '/assets/icons/epilation-laser.svg',
-  'sculpSure': '/assets/icons/sculpSure.svg',
+  'consultation': '/images/services/consultation.webp',
+  'peeling-visage': '/images/services/peeling-visage.webp',
+  'suivi': '/images/services/suivi.webp',
+  'bilan': '/images/services/bilan.webp',
+  'sculpsure': '/images/services/sculpsure.webp',
+  'sculpSure': '/images/services/sculpsure.webp', // alias
+  'epilation-laser-complete': '/images/services/epilation-laser.webp',
+  'epilation-laser': '/images/services/epilation-laser.webp', // alias
 }
 
 export const MEGA_CATEGORIES = [

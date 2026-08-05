@@ -70,55 +70,64 @@ export class SettingsService {
   }
 
   async getNotificationSettings() {
-    const result = await this.prisma.$runCommandRaw({
-      find: this.COLLECTION,
-      filter: { singletonKey: this.key },
-      limit: 1,
+    let settings = await this.prisma.appSettings.findUnique({
+      where: { singletonKey: this.key },
     });
 
-    const batch = (result as any).cursor?.firstBatch ?? [];
-    let settings = batch[0] as Record<string, unknown> | undefined;
-
     if (!settings) {
-      const defaultData = this.flatDoc({
-        smsEnabled: false,
-        emailEnabled: true,
-        inAppEnabled: true,
-        smsTypes: { confirmation: true, reminder: true, cancellation: false },
-        emailTypes: { confirmation: true, reminder: true, cancellation: true },
-        inAppTypes: { confirmation: true, reminder: true, cancellation: false },
+      settings = await this.prisma.appSettings.create({
+        data: {
+          singletonKey: this.key,
+          smsEnabled: false,
+          emailEnabled: true,
+          inAppEnabled: true,
+          smsConfirmation: true,
+          smsReminder: true,
+          smsCancellation: false,
+          emailConfirmation: true,
+          emailReminder: true,
+          emailCancellation: true,
+          inAppConfirmation: true,
+          inAppReminder: true,
+          inAppCancellation: false,
+          whatsappEnabled: false,
+          whatsappConfirmation: false,
+          whatsappReminder: false,
+          whatsappCancellation: false,
+        },
       });
-
-      await this.prisma.$runCommandRaw({
-        insert: this.COLLECTION,
-        documents: [defaultData],
-      });
-
-      const result2 = await this.prisma.$runCommandRaw({
-        find: this.COLLECTION,
-        filter: { singletonKey: this.key },
-        limit: 1,
-      });
-
-      settings = ((result2 as any).cursor?.firstBatch ?? [])[0] as Record<string, unknown> | undefined;
     }
 
-    return this.toResponse(settings!);
+    return this.toResponse(settings as unknown as Record<string, unknown>);
   }
 
   async updateNotificationSettings(dto: UpdateNotificationSettingsDto) {
     const data = this.flatDoc(dto);
 
-    const result = await this.prisma.$runCommandRaw({
-      findAndModify: this.COLLECTION,
-      query: { singletonKey: this.key },
-      update: { $set: data },
-      upsert: true,
-      new: true,
+    const updated = await this.prisma.appSettings.upsert({
+      where: { singletonKey: this.key },
+      update: data,
+      create: {
+        smsEnabled: false,
+        emailEnabled: true,
+        inAppEnabled: true,
+        smsConfirmation: true,
+        smsReminder: true,
+        smsCancellation: false,
+        emailConfirmation: true,
+        emailReminder: true,
+        emailCancellation: true,
+        inAppConfirmation: true,
+        inAppReminder: true,
+        inAppCancellation: false,
+        whatsappEnabled: false,
+        whatsappConfirmation: false,
+        whatsappReminder: false,
+        whatsappCancellation: false,
+        ...data,
+      },
     });
 
-    const updated = (result as any).value as Record<string, unknown> | null;
-    if (!updated) return this.getNotificationSettings();
-    return this.toResponse(updated);
+    return this.toResponse(updated as unknown as Record<string, unknown>);
   }
 }
