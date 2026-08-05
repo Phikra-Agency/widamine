@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils'
 import { useState, useEffect, useRef } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import NotificationBadge from '@/components/NotificationBadge'
 import api from '@/lib/api'
 import axios from 'axios'
 
@@ -173,7 +172,6 @@ export default function UserAccountMenu({
           )}
         >
           <User size={iconSize} weight={variant === 'sidebar' ? 'duotone' : 'regular'} />
-          <NotificationBadge />
         </div>
         {!collapsed && (
           <>
