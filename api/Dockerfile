@@ -14,6 +14,9 @@ RUN npm run build --workspace=widamine-api
 FROM node:22-alpine AS runner
 WORKDIR /app/api
 
+# Install OpenSSL 3 for Prisma
+RUN apk add --no-cache openssl openssl-dev
+
 ENV NODE_ENV=production
 
 COPY package.json package-lock.json .npmrc /app/
