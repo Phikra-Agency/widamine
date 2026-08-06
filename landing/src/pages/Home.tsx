@@ -400,7 +400,7 @@ const ConceptSection = () => {
 
               <div className="relative overflow-hidden rounded-[2rem] bg-[#efe9dc] shadow-[0_24px_64px_-24px_rgba(26,54,70,0.18)]">
                 <img
-                  src={SM.gallery[1]}
+                  src="https://lh3.googleusercontent.com/gps-cs-s/AHRPTWm0qq2Muw9CAT1J6Nf19dk-_jkWN-mVPsIB5P30DyBszvhA4US7dzn0XE4rs0M_SfI8Seew9T1QJm_kYxWCUmx13pNrLf5vqljDJdieO30teAmttjAwbNgh47GZWuWC49E5C15TcIkcMzDa=s680-w680-h510"
                   alt="Notre objectif - Clinique Widamine"
                   className="h-[500px] w-full rounded-[2rem] object-cover object-center"
                 />

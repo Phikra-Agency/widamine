@@ -36,4 +36,6 @@ RUN npx --yes prisma@5.22.0 generate
 
 WORKDIR /app/api
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+
+# Run migrations and start the app
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
