@@ -37,6 +37,7 @@ model Motif {
   requiresPractitionerChoice Boolean             @default(false)
   pendingTtlHours            Int                 @default(24)
   color                      String              @default("#3b82f6")
+  category                   String?
   sessions                   Session[]
   practitionerAssignments    MotifPractitioner[]
   resourceAssignments        MotifResource[]
