@@ -8,8 +8,8 @@ export class PublicMotifController {
   @Get()
   async findAll() {
     const motifs = await this.motifService.findAll();
-    return motifs.map(({ id, name, slug, description, color, duration }) => ({
-      id, name, slug, description, color, duration,
+    return motifs.map(({ id, name, slug, description, color, duration, category }) => ({
+      id, name, slug, description, color, duration, category,
     }));
   }
 }
