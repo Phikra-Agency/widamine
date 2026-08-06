@@ -169,47 +169,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className='pb-20 sm:pb-28'>
-        <div className='mx-auto max-w-7xl px-6 sm:px-8'>
-          <div className='grid lg:grid-cols-2 gap-6 lg:gap-8'>
-            <motion.div 
-              className='group overflow-hidden rounded-3xl bg-white'
-              style={{ boxShadow: '0 25px 70px -20px rgba(0,0,0,0.15)' }}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className='aspect-[4/3] overflow-hidden'>
-                <img 
-                  src='/images/gallery/clinic-interior.jpg' 
-                  alt='Centre Widamine' 
-                  className='w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110'
-                />
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className='group overflow-hidden rounded-3xl bg-white'
-              style={{ boxShadow: '0 25px 70px -20px rgba(0,0,0,0.15)' }}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className='aspect-[4/3] overflow-hidden'>
-                <img 
-                  src='/images/gallery/DSC01374.jpg' 
-                  alt='Soins Widamine' 
-                  className='w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110'
-                />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* Vision Section - Clean Redesign */}
       <section className='py-24 sm:py-32 relative' style={{ background: 'white' }}>
         <div className='mx-auto max-w-7xl px-6 sm:px-8'>
