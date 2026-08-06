@@ -83,6 +83,38 @@ export class AppointmentService {
     }
   }
 
+  private async checkTimeSlotConflict(
+    motifId: string,
+    practitionerId: string | undefined,
+    resourceId: string | undefined,
+    datetime: string
+  ): Promise<boolean> {
+    const motif = await this.prisma.motif.findUnique({
+      where: { id: motifId },
+      select: { duration: true },
+    });
+    const duration = motif?.duration || 30;
+    const slotStart = new Date(datetime);
+    const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
+
+    const conflictingAppointment = await this.prisma.appointment.findFirst({
+      where: {
+        OR: [
+          ...(practitionerId ? [{ practitionerId }] : []),
+          ...(resourceId ? [{ resourceId }] : []),
+        ],
+        status: { notIn: ["CANCELLED", "COMPLETED"] },
+        schedules: {
+          some: {
+            datetime: { gte: slotStart, lt: slotEnd },
+          },
+        },
+      },
+    });
+
+    return !!conflictingAppointment;
+  }
+
   async create(data: {
     name: string;
     email: string;
@@ -99,6 +131,24 @@ export class AppointmentService {
 
     const sessionNumber = data.sessionNumber ?? 1;
     await this.validateSessionSequence(data.motifId, sessionNumber);
+
+    // CHECK FOR TIME SLOT CONFLICT BEFORE CREATING APPOINTMENT
+    if (data.datetime) {
+      const hasConflict = await this.checkTimeSlotConflict(
+        data.motifId,
+        data.practitionerId,
+        data.resourceId,
+        data.datetime
+      );
+      
+      if (hasConflict) {
+        throw new BadRequestException({
+          message: "Ce créneau horaire n'est plus disponible. Veuillez choisir un autre créneau.",
+          code: "time_slot_taken",
+          datetime: data.datetime,
+        });
+      }
+    }
 
     const patient = await this.patientService.findOrCreateByPhone({
       firstName: data.name.split(" ")[0] || data.name,
@@ -369,14 +419,16 @@ export class AppointmentService {
             }
           }
 
-          if (!practitionerConflict && hasFreeResource) {
-            slots.push({
-              time: slotTime.toISOString(),
-              practitionerId: practitioner.id,
-              practitionerName: practitioner.name,
-              practitionerImage: practitioner.image || initialsAvatar(practitioner.name),
-            });
-          }
+          const isAvailable = !practitionerConflict && hasFreeResource;
+
+          // CHANGED: Return ALL slots, marking unavailable ones
+          slots.push({
+            time: slotTime.toISOString(),
+            practitionerId: practitioner.id,
+            practitionerName: practitioner.name,
+            practitionerImage: practitioner.image || initialsAvatar(practitioner.name),
+            available: isAvailable, // NEW: availability flag
+          });
         }
       }
     }

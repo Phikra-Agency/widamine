@@ -473,7 +473,7 @@ function TimeSection({
   onSelectTime,
 }: {
   title: string
-  slots: { label: string; startsAt: string }[]
+  slots: { label: string; startsAt: string; available?: boolean }[]
   onSelectTime: (timeLabel: string) => void
 }) {
   const uniqueTimes = Array.from(new Map(slots.map((s) => [s.label, s])).values())
@@ -486,17 +486,25 @@ function TimeSection({
         <div className='h-px flex-1' style={{ backgroundColor: '#e5e7eb' }} />
       </div>
       <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
-        {uniqueTimes.map((slot) => (
-          <button
-            key={slot.label}
-            type='button'
-            onClick={() => onSelectTime(slot.label)}
-            className='flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-sm'
-            style={{ borderColor: '#e5e7eb', color: `${C.secondary}99` }}
-          >
-            {slot.label}
-          </button>
-        ))}
+        {uniqueTimes.map((slot) => {
+          const isAvailable = slot.available !== false
+          return (
+            <button
+              key={slot.label}
+              type='button'
+              onClick={() => isAvailable && onSelectTime(slot.label)}
+              disabled={!isAvailable}
+              className='flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-none'
+              style={{ 
+                borderColor: isAvailable ? '#e5e7eb' : '#f3f4f6', 
+                color: isAvailable ? `${C.secondary}99` : `${C.secondary}40`,
+                backgroundColor: isAvailable ? '#ffffff' : '#fafafa'
+              }}
+            >
+              {slot.label}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
@@ -524,7 +532,7 @@ function DoctorSelection({
   onBack: () => void
 }) {
   const allSlots = [...availability.morning, ...availability.afternoon, ...availability.evening]
-  const doctorsForTime = allSlots.filter((s) => s.label === viewingDoctorsFor)
+  const doctorsForTime = allSlots.filter((s) => s.label === viewingDoctorsFor && s.available !== false)
 
   return (
     <div className='space-y-4'>

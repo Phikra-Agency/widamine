@@ -186,13 +186,13 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         const slotData = {
           label: `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
           startsAt: slot.time,
-          doctorId: slot.doctorId,
-          doctorName: slot.doctorName,
-          doctorImage: slot.doctorImage,
-          available: true,
+          doctorId: slot.practitionerId,
+          doctorName: slot.practitionerName,
+          doctorImage: slot.practitionerImage,
+          available: slot.available !== false, // NEW: Check availability flag
           capacity: 1
         }
-        if (slot.time === selectedHour) hourStillAvailable = true
+        if (slot.time === selectedHour && slot.available) hourStillAvailable = true
         if (hour < 12) morning.push(slotData)
         else if (hour < 17) afternoon.push(slotData)
         else evening.push(slotData)
