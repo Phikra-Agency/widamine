@@ -76,15 +76,13 @@ export class MotifService {
   }
 
   async findAll() {
-    const motifs = await this.prisma.motif.findMany({
+    return this.prisma.motif.findMany({
       include: { 
         practitionerAssignments: true,
         resourceAssignments: true,
         sessions: { orderBy: { number: "asc" } },
       },
     });
-    console.log('[MotifService] Raw Prisma result (first motif):', JSON.stringify(motifs[0], null, 2));
-    return motifs;
   }
 
   async findOne(id: string) {

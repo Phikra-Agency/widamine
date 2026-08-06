@@ -5,27 +5,17 @@ import { MotifService } from "./motif.service";
 export class PublicMotifController {
   constructor(private readonly motifService: MotifService) {}
 
-  @Get("version")
-  getVersion() {
-    return { version: "2.0-with-category", timestamp: new Date().toISOString() };
-  }
-
   @Get()
   async findAll() {
     const motifs = await this.motifService.findAll();
-    console.log('[PublicMotifController] Sample motif from service:', JSON.stringify(motifs[0], null, 2));
-    return motifs.map((motif) => {
-      const result = {
-        id: motif.id,
-        name: motif.name,
-        slug: motif.slug,
-        description: motif.description,
-        color: motif.color,
-        duration: motif.duration,
-        category: motif.category,
-      };
-      console.log('[PublicMotifController] Mapping result:', JSON.stringify(result, null, 2));
-      return result;
-    });
+    return motifs.map((motif) => ({
+      id: motif.id,
+      name: motif.name,
+      slug: motif.slug,
+      description: motif.description,
+      color: motif.color,
+      duration: motif.duration,
+      category: motif.category,
+    }));
   }
 }
