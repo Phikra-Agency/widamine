@@ -5,6 +5,11 @@ import { MotifService } from "./motif.service";
 export class PublicMotifController {
   constructor(private readonly motifService: MotifService) {}
 
+  @Get("version")
+  getVersion() {
+    return { version: "2.0-with-category", timestamp: new Date().toISOString() };
+  }
+
   @Get()
   async findAll() {
     const motifs = await this.motifService.findAll();
