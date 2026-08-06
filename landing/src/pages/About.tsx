@@ -41,7 +41,7 @@ export default function About() {
     <div style={{ background: C.bg, minHeight: '100vh' }}>
       <PublicNavbar />
 
-      {/* Hero Section */}
+      {/* Hero Section - Premium Two Column */}
       <section className='relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden'>
         {/* Decorative flower top-right */}
         <motion.div 
@@ -55,45 +55,116 @@ export default function About() {
         </motion.div>
         
         <div className='mx-auto max-w-7xl px-6 sm:px-8 relative z-10'>
-          <div className='max-w-4xl'>
-            <motion.p 
-              className='text-xs font-bold tracking-[0.25em] uppercase mb-6'
-              style={{ color: C.primary }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+          <div className='grid lg:grid-cols-2 gap-12 lg:gap-16 items-center'>
+            {/* Left Column - Text Content */}
+            <div>
+              <motion.p 
+                className='text-xs font-bold tracking-[0.25em] uppercase mb-6'
+                style={{ color: C.primary }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                À PROPOS DE WIDAMINE
+              </motion.p>
+              
+              <motion.h1 
+                className='leading-[1.05] mb-8'
+                style={{ 
+                  fontFamily: TYPE.headingFamily,
+                  fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)',
+                  color: C.secondary,
+                  letterSpacing: '-0.02em',
+                }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                Une vision, une{' '}
+                <span style={{ color: C.primary, fontStyle: 'italic' }}>passion</span>, 
+                <br/>une expertise
+              </motion.h1>
+              
+              <motion.p 
+                className='text-lg leading-relaxed mb-10'
+                style={{ color: `${C.secondary}cc`, fontFamily: TYPE.bodyFamily }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                Depuis 2018, le Widamine Aesthetic Center combine expertise médicale, 
+                innovation technologique et approche humaine pour sublimer la beauté 
+                naturelle de chaque patient.
+              </motion.p>
+
+              <motion.div 
+                className='flex flex-wrap gap-4'
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <button
+                  onClick={open}
+                  className='inline-flex items-center rounded-full px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95'
+                  style={{ background: C.primary }}
+                >
+                  Prendre rendez-vous
+                </button>
+                
+                <a
+                  href='tel:+212535624696'
+                  className='inline-flex items-center rounded-full border-2 px-8 py-4 text-sm font-semibold transition-all duration-300 hover:-translate-y-1'
+                  style={{ 
+                    borderColor: C.primary, 
+                    color: C.secondary,
+                    background: 'transparent',
+                  }}
+                >
+                  +212 535 624 696
+                </a>
+              </motion.div>
+            </div>
+
+            {/* Right Column - Image */}
+            <motion.div 
+              className='relative group'
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
-              À PROPOS DE WIDAMINE
-            </motion.p>
-            
-            <motion.h1 
-              className='leading-[1.05] mb-8 text-balance'
-              style={{ 
-                fontFamily: TYPE.headingFamily,
-                fontSize: 'clamp(2.5rem, 6vw, 5.5rem)',
-                color: C.secondary,
-                letterSpacing: '-0.02em',
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Une vision, une{' '}
-              <span style={{ color: C.primary, fontStyle: 'italic' }}>passion</span>, 
-              <br/>une expertise
-            </motion.h1>
-            
-            <motion.p 
-              className='text-lg sm:text-xl leading-relaxed max-w-2xl'
-              style={{ color: `${C.secondary}dd`, fontFamily: TYPE.bodyFamily }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              Depuis 2018, le Widamine Aesthetic Center combine expertise médicale, 
-              innovation technologique et approche humaine pour sublimer la beauté 
-              naturelle de chaque patient.
-            </motion.p>
+              <div 
+                className='relative overflow-hidden'
+                style={{ 
+                  borderRadius: '2rem',
+                  boxShadow: '0 40px 100px -20px rgba(0,0,0,0.25)',
+                }}
+              >
+                <div className='aspect-[4/5] lg:aspect-[3/4] overflow-hidden'>
+                  <img 
+                    src='https://lh3.googleusercontent.com/gps-cs-s/AHRPTWk-C-bpX_xlt-IoVZClvZEDvooFgooE2MXE2ziwjHH1TUfWrxzanvJivhmVZkorFBaVCIUQ2w-NIGkQEWe9Cdz8seQy78ZxZlZy0Ejt5ob9Cg53uYqci7xYvDJ-funph8EUEYYXXcdGh3I=s680-w680-h510' 
+                    alt='Centre Widamine - Cabinet médical' 
+                    className='w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105'
+                  />
+                </div>
+                
+                {/* Elegant overlay accent */}
+                <div 
+                  className='absolute inset-0 pointer-events-none'
+                  style={{
+                    background: `linear-gradient(135deg, ${C.primary}00 0%, ${C.primary}15 100%)`,
+                  }}
+                />
+              </div>
+
+              {/* Decorative element */}
+              <div 
+                className='absolute -bottom-6 -right-6 w-32 h-32 rounded-3xl -z-10 hidden lg:block'
+                style={{ 
+                  background: C.primary,
+                  opacity: 0.1,
+                }}
+              />
+            </motion.div>
           </div>
         </div>
       </section>
@@ -378,72 +449,6 @@ export default function About() {
                   </p>
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Timeline Section */}
-      <section className='py-24 sm:py-32' style={{ background: 'white' }}>
-        <div className='mx-auto max-w-7xl px-6 sm:px-8'>
-          <div className='mb-20 max-w-3xl'>
-            <p 
-              className='text-xs font-bold tracking-[0.25em] uppercase mb-6'
-              style={{ color: C.primary }}
-            >
-              NOTRE PARCOURS
-            </p>
-            
-            <h2 
-              className='leading-[1.1]'
-              style={{ 
-                fontFamily: TYPE.headingFamily,
-                fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-                color: C.secondary,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Une croissance fondée sur l'<span style={{ color: C.primary, fontStyle: 'italic' }}>excellence</span>
-            </h2>
-          </div>
-
-          <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12'>
-            {[
-              { year: '2018', label: 'Fondation du centre', desc: 'Ouverture du premier centre de dermato-esthétique à Fès' },
-              { year: '2020', label: 'Expansion technique', desc: 'Acquisition de technologies laser de dernière génération' },
-              { year: '2022', label: 'Reconnaissance internationale', desc: 'Participation aux congrès mondiaux de dermatologie' },
-              { year: '2024', label: 'Leadership régional', desc: 'Plus de 5000 patients satisfaits' },
-            ].map((m, i) => (
-              <div key={i} className='group relative'>
-                {/* Vertical connector line */}
-                {i < 3 && (
-                  <div 
-                    className='hidden lg:block absolute top-8 left-full w-12 h-0.5 opacity-20'
-                    style={{ background: C.primary }}
-                  />
-                )}
-                
-                <div 
-                  className='text-5xl sm:text-6xl font-light mb-6 transition-all duration-500 group-hover:scale-110'
-                  style={{ fontFamily: TYPE.headingFamily, color: C.primary }}
-                >
-                  {m.year}
-                </div>
-                
-                <h4 
-                  className='text-lg sm:text-xl font-semibold mb-3'
-                  style={{ color: C.secondary, fontFamily: TYPE.headingFamily }}
-                >
-                  {m.label}
-                </h4>
-                
-                <p 
-                  className='text-sm sm:text-base leading-relaxed'
-                  style={{ color: `${C.secondary}99`, fontFamily: TYPE.bodyFamily }}
-                >
-                  {m.desc}
-                </p>
-              </div>
             ))}
           </div>
         </div>
