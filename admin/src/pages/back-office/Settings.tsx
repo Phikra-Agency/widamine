@@ -1,6 +1,6 @@
 import api from '@/lib/api'
 import axios from 'axios'
-import { EnvelopeSimple } from '@phosphor-icons/react'
+import { EnvelopeSimple, Bell } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,8 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 
 type NotificationType = 'confirmation' | 'reminder' | 'cancellation'
-type EnabledKey = 'smsEnabled' | 'emailEnabled'
-type TypesKey = 'smsTypes' | 'emailTypes'
+type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'inAppEnabled'
+type TypesKey = 'smsTypes' | 'emailTypes' | 'inAppTypes'
 
 interface ChannelTypes {
   confirmation: boolean
@@ -148,7 +148,7 @@ export default function Settings() {
                       <div>
                         <p className='text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/40'>Canaux de notification</p>
                         <p className='mt-1 text-sm text-secondary/70'>
-                          Les e-mails de confirmation, rappel et annulation respectent ces réglages.
+                          Les notifications de confirmation, rappel et annulation respectent ces réglages.
                         </p>
                       </div>
                     </div>
@@ -161,6 +161,14 @@ export default function Settings() {
                         onToggleEnabled={(checked) => setChannelEnabled('emailEnabled', checked)}
                         types={settings.emailTypes}
                         onToggleType={(type) => toggleType('emailTypes', type)}
+                      />
+                      <ChannelRow
+                        name='In-App'
+                        enabled={settings.inAppEnabled}
+                        disabled={saving}
+                        onToggleEnabled={(checked) => setChannelEnabled('inAppEnabled', checked)}
+                        types={settings.inAppTypes}
+                        onToggleType={(type) => toggleType('inAppTypes', type)}
                       />
                     </div>
 
@@ -199,6 +207,7 @@ function ChannelRow({
 }) {
   const channelMeta = {
     Email: { icon: EnvelopeSimple, subtitle: 'Canal email' },
+    'In-App': { icon: Bell, subtitle: 'Notifications dans le back-office' },
   } as const
 
   const meta = channelMeta[name as keyof typeof channelMeta] || channelMeta.Email
