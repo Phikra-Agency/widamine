@@ -1,18 +1,29 @@
-import { Bell } from '@phosphor-icons/react'
+import { Bell, X } from '@phosphor-icons/react'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export default function NotificationToast() {
-  const { items } = useNotificationsStore()
+  const { items, markRead, startPolling, stopPolling } = useNotificationsStore()
+  const { user } = useAuthStore()
   const [visible, setVisible] = useState<number[]>([])
+  const [dismissed, setDismissed] = useState<number[]>([])
+  const canPoll = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
+
+  useEffect(() => {
+    if (!canPoll) return
+    startPolling()
+    return () => stopPolling()
+  }, [canPoll, startPolling, stopPolling])
 
   useEffect(() => {
     if (items.length === 0) return
     const latest = items[0]
     if (!latest || latest.read) return
     if (visible.includes(latest.id)) return
+    if (dismissed.includes(latest.id)) return
 
     setVisible((prev) => [...prev, latest.id])
     const timer = setTimeout(() => {
@@ -20,7 +31,7 @@ export default function NotificationToast() {
     }, 5000)
 
     return () => clearTimeout(timer)
-  }, [items, visible])
+  }, [items, visible, dismissed])
 
   const toasts = items.filter((item) => visible.includes(item.id) && !item.read)
 
@@ -43,6 +54,18 @@ export default function NotificationToast() {
                 {format(new Date(item.createdAt), 'HH:mm', { locale: fr })}
               </span>
             </p>
+            <button
+              type='button'
+              aria-label='Fermer la notification'
+              onClick={() => {
+                markRead(item.id)
+                setDismissed((prev) => [...prev, item.id])
+                setVisible((prev) => prev.filter((id) => id !== item.id))
+              }}
+              className='flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground'
+            >
+              <X size={10} />
+            </button>
         </div>
       ))}
     </div>
