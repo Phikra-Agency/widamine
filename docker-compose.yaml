@@ -13,8 +13,11 @@ services:
       BREVO_API_KEY: ${BREVO_API_KEY:-}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Widamine}
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
-    ports:
-      - "${API_PORT:-3000}:3000"
+    expose:
+      - "3000"
+    labels:
+      - "coolify.managed=true"
+      - "coolify.fqdn=https://api.widamineaestheticcenter.com"
 
   admin:
     build:
@@ -25,8 +28,8 @@ services:
     restart: unless-stopped
     depends_on:
       - api
-    ports:
-      - "${ADMIN_PORT:-8080}:80"
+    expose:
+      - "80"
     labels:
       - "coolify.managed=true"
       - "coolify.fqdn=https://new.widamineaestheticcenter.com"
@@ -41,5 +44,8 @@ services:
     restart: unless-stopped
     depends_on:
       - api
-    ports:
-      - "${LANDING_PORT:-8081}:80"
+    expose:
+      - "80"
+    labels:
+      - "coolify.managed=true"
+      - "coolify.fqdn=https://widamineaestheticcenter.com"
