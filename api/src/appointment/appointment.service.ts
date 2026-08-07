@@ -395,7 +395,7 @@ export class AppointmentService {
       if (appt?.resourceId) conflicts.add(`resource_${appt.resourceId}_${timeKey}`);
     }
 
-    const slots: { time: string; practitionerId: string; practitionerName: string; practitionerImage: string | null }[] = [];
+    const slots: { time: string; practitionerId: string; practitionerName: string; practitionerImage: string | null; available: boolean }[] = [];
     const duration = motif.duration || 30;
     const initialsAvatar = (name: string) => {
       const initials = name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase();
