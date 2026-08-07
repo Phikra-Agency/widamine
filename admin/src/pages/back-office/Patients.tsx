@@ -657,7 +657,7 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
 
   return (
     <Dialog open={open && !!patient} onOpenChange={(next) => { if (!next) onClose() }}>
-      <DialogContent showCloseButton className='max-h-[70dvh] w-[95vw] max-w-[560px] gap-0 overflow-y-auto p-0 shadow-bo-elevated'>
+      <DialogContent showCloseButton className='flex flex-col h-[600px] max-h-[85vh] w-[95vw] max-w-[560px] gap-0 p-0 shadow-bo-elevated'>
         {patient && (
           <>
             <div className='flex items-start justify-between gap-3 border-b border-border px-5 py-4 shrink-0'>
@@ -684,7 +684,7 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
               </div>
             </div>
 
-            <div className='flex-1 min-h-0 overflow-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
+            <div className='flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-4'>
               <div className='rounded-surface border border-border p-4'>
                 <div className='flex items-center justify-between mb-3'>
                   <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>Contact</p>
@@ -767,16 +767,13 @@ function PatientDrawer({ open, patient, onClose, onEdit }: { open: boolean; pati
                     <p className='text-[10px] uppercase tracking-[0.22em] text-secondary/40'>Historique ({appts.past.length})</p>
                   </div>
                   <div className='space-y-2'>
-                    {appts.past.slice(0, 8).map((a: any) => (
+                    {appts.past.map((a: any) => (
                       <UpcomingAppointmentRow
                         key={normalizeAppointmentId(a) ?? `past-${a._dt}-${a.name}`}
                         appt={a}
                         onOpenCalendar={openOnCalendar}
                       />
                     ))}
-                    {appts.past.length > 8 && (
-                      <p className='text-xs text-secondary/30 text-center pt-1'>+ {appts.past.length - 8} précédents</p>
-                    )}
                   </div>
                 </div>
               )}

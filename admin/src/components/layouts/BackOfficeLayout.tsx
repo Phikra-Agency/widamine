@@ -63,6 +63,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
+      // { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'] }, // DISABLED - Feature not ready
     ],
   },
   {
@@ -119,7 +120,7 @@ function SidebarContent({
   const { user } = useAuthStore()
 
   const navGroups = useMemo(() => visibleNavGroups(user?.role as LinkRole | undefined), [user?.role])
-  const { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount } = useSidebarCounts()
+  const { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount, unavailabilitiesCount } = useSidebarCounts()
 
   function getCounter(to: string): number | null {
     if (to === '/calendar') return calendarCount
@@ -129,6 +130,7 @@ function SidebarContent({
     if (to === '/users') return usersCount
     if (to === '/resources') return resourcesCount
     if (to === '/motifs') return motifsCount
+    if (to === '/unavailabilities') return unavailabilitiesCount
     return null
   }
 

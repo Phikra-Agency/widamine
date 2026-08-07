@@ -36,6 +36,7 @@ export interface SidebarCounts {
   usersCount: number | null
   resourcesCount: number | null
   motifsCount: number | null
+  unavailabilitiesCount: number | null
 }
 
 const EMPTY_COUNTS: SidebarCounts = {
@@ -46,6 +47,7 @@ const EMPTY_COUNTS: SidebarCounts = {
   usersCount: null,
   resourcesCount: null,
   motifsCount: null,
+  unavailabilitiesCount: null,
 }
 
 export function useSidebarCounts(): SidebarCounts {
@@ -57,6 +59,7 @@ export function useSidebarCounts(): SidebarCounts {
   const [usersCount, setUsersCount] = useState<number | null>(null)
   const [resourcesCount, setResourcesCount] = useState<number | null>(null)
   const [motifsCount, setMotifsCount] = useState<number | null>(null)
+  const [unavailabilitiesCount, setUnavailabilitiesCount] = useState<number | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const path = location.pathname
@@ -87,6 +90,10 @@ export function useSidebarCounts(): SidebarCounts {
       if (path === '/motifs') {
         api.get('motifs/count').then((r) => setMotifsCount(r.data.count ?? r.data)).catch(() => {})
       }
+      // DISABLED - Indisponibilités feature not ready
+      // if (path === '/unavailabilities') {
+      //   api.get('unavailabilities/statistics').then((r) => setUnavailabilitiesCount(r.data.pendingRequests ?? 0)).catch(() => {})
+      // }
     }
 
     fetch()
@@ -98,5 +105,5 @@ export function useSidebarCounts(): SidebarCounts {
     }
   }, [path, view])
 
-  return { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount }
+  return { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount, unavailabilitiesCount }
 }
