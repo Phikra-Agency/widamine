@@ -48,7 +48,7 @@ services:
       context: .
       dockerfile: admin/Dockerfile
       args:
-        VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL:-/api}
+        VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL:-https://api.widamineaestheticcenter.com}
     restart: unless-stopped
     depends_on:
       - api
@@ -56,6 +56,7 @@ services:
       - "${ADMIN_PORT:-8080}:80"
     labels:
       - "coolify.managed=true"
+      - "coolify.fqdn=https://new.widamineaestheticcenter.com"
 
   landing:
     build:
