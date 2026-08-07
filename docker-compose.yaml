@@ -32,7 +32,13 @@ services:
       - "80"
     labels:
       - "coolify.managed=true"
-      - "coolify.fqdn=https://new.widamineaestheticcenter.com"
+      - "coolify.name=admin"
+      - "coolify.type=service"
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin-tyfa0ow9za5ohqn69dh9zhh4.rule=Host(`new.widamineaestheticcenter.com`)"
+      - "traefik.http.routers.admin-tyfa0ow9za5ohqn69dh9zhh4.entrypoints=https"
+      - "traefik.http.routers.admin-tyfa0ow9za5ohqn69dh9zhh4.tls.certresolver=letsencrypt"
+      - "traefik.http.services.admin-tyfa0ow9za5ohqn69dh9zhh4.loadbalancer.server.port=80"
 
   landing:
     build:
