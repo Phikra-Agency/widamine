@@ -9,18 +9,21 @@ export interface EventCardSchedule {
     id: number
     session: number
     duration: number
-    motif: { id: string; name: string }
   }
   appointment?: {
+    id?: string
+    name?: string
+    status?: string
+    practitionerId?: string
     motif?: {
       id: string
       name: string
       color?: string
+      duration?: number
     }
-    practitioner?: { name: string }
-    resource?: { name: string }
-    patient?: { firstName: string; lastName: string }
-    status?: string
+    practitioner?: { id?: string; name: string }
+    resource?: { id?: string; name: string }
+    patient?: { id?: string; firstName: string; lastName: string }
   }
 }
 

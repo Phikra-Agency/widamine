@@ -75,18 +75,17 @@ RÈGLES STRICTES :
     const tools = [
       {
         type: 'function' as const,
-        function: {
-          name: 'store_lead',
-          description: 'Enregistre le prénom et l\'email du visiteur en base de données',
-          parameters: {
-            type: 'object',
-            properties: {
-              name: { type: 'string', description: 'Le prénom du visiteur' },
-              email: { type: 'string', description: 'L\'email du visiteur' },
+function: {
+            name: 'store_lead',
+            description: 'Enregistre le prénom et l\'email du visiteur en base de données',
+            parameters: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', description: 'Le prénom du visiteur' },
+                email: { type: 'string', description: 'L\'email du visiteur' },
+              },
             },
-            required: ['name', 'email'],
           },
-        },
       },
       {
         type: 'function' as const,
@@ -241,7 +240,7 @@ RÈGLES STRICTES :
 
   private async executeTool(tc: ToolCall) {
     const { name, arguments: argsStr } = tc.function
-    const args = JSON.parse(argsStr || '{}')
+    const args = JSON.parse(argsStr || '{}') || {}
 
     switch (name) {
       case 'store_lead':
@@ -302,7 +301,10 @@ RÈGLES STRICTES :
     }
   }
 
-  private async storeLead(toolId: string, name: string, email: string) {
+  private async storeLead(toolId: string, name?: string, email?: string) {
+    if (!name || !email) {
+      return { id: toolId, result: { stored: false, awaiting: true, message: 'En attente du prénom et email du visiteur' }, sources: [] }
+    }
     await this.prisma.chatLead.create({ data: { name, email } })
     return { id: toolId, result: { stored: true, name, email }, sources: [] }
   }

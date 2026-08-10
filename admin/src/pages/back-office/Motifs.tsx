@@ -70,7 +70,22 @@ function MotifsTable() {
     void fetchItems().finally(() => setLoading(false))
   }, [fetchItems])
 
-  const columns = useMemo(() => createSallesMotifsColumns(), [])
+  const openEdit = (item: (typeof items)[number]) => {
+    setItem(item)
+    setOperation('edit')
+    openModal()
+  }
+
+  const openDelete = (item: (typeof items)[number]) => {
+    setItem(item)
+    setOperation('delete')
+    openModal()
+  }
+
+  const columns = useMemo(
+    () => createSallesMotifsColumns({ onEdit: openEdit, onDelete: openDelete }),
+    [openEdit, openDelete],
+  )
 
   const table = useDataTable({
     data: items,
@@ -83,12 +98,6 @@ function MotifsTable() {
   })
   const rows = table.getRowModel().rows
   const isEmpty = !loading && rows.length === 0
-
-  const openEdit = (item: (typeof items)[number]) => {
-    setItem(item)
-    setOperation('edit')
-    openModal()
-  }
 
   return (
     <DataTable.Root>
@@ -125,7 +134,7 @@ function MotifsTable() {
           loading={loading}
           emptyIllustration={SALLES_MOTIFS_EMPTY_ILLUSTRATION}
           emptyTitle='Aucun traitement trouvé'
-          stopClickOnColumns={[]}
+          stopClickOnColumns={["actions"]}
           onRowClick={openEdit}
         />
       </DataTable.Desktop>
@@ -152,6 +161,17 @@ function MotifsTable() {
                         </span>
                       </div>
                     </div>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openDelete(item)
+                      }}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors'
+                      aria-label='Supprimer le traitement'
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </DataTable.MobileCard>
               )

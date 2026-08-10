@@ -1,5 +1,5 @@
 import { useContactsStore } from '@/stores/contactsStore'
-import { EnvelopeSimple, Phone, User, CheckCircle, X, ArrowRight, MagnifyingGlass } from '@phosphor-icons/react'
+import { EnvelopeSimple, Phone, User, CheckCircle, X, ArrowRight, MagnifyingGlass, Trash as Trash2 } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import { DataTable, DataTableFilterPills, DataTablePagination, globalSearchFilter, TanStackDataTable, useDataTable, type FilterPillOption } from '@/components/data-table'
 import { Button, Card, Dialog, DialogContent } from '@/components/ui'
@@ -26,6 +26,7 @@ export default function Contacts() {
         </Card>
       </div>
       <ShowModal />
+      <ConfirmDelete />
     </div>
   )
 }
@@ -39,7 +40,7 @@ function Heading() {
 }
 
 function ContactsTable() {
-  const { items, filters, fetchItems, setItem, readItem, setFilters } = useContactsStore()
+  const { items, filters, fetchItems, setItem, readItem, setFilters, setShowConfirm } = useContactsStore()
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch] = useDebounce(searchTerm, 300)
@@ -57,8 +58,12 @@ function ContactsTable() {
           setItem(item)
           void readItem()
         },
+        onDelete: (item) => {
+          setItem(item)
+          setShowConfirm(true)
+        },
       }),
-    [filters.read, readItem, setItem],
+    [filters.read, readItem, setItem, setShowConfirm],
   )
 
   const table = useDataTable({
@@ -137,7 +142,7 @@ function ContactsTable() {
           emptyIllustration={CONTACTS_EMPTY_ILLUSTRATION}
           emptyTitle="Aucun message trouvé"
           emptyDescription="Les messages reçus apparaîtront ici"
-          stopClickOnColumns={[]}
+          stopClickOnColumns={["actions"]}
           onRowClick={(contact) => {
             useContactsStore.setState({ item: contact, openShowModal: true })
           }}
@@ -198,6 +203,18 @@ function ContactsTable() {
                     {filters.read && <div className='flex-1' />}
                     <button
                       type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setItem(contact)
+                        setShowConfirm(true)
+                      }}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors'
+                      aria-label='Supprimer le message'
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                    <button
+                      type='button'
                       onClick={() => useContactsStore.setState({ item: contact, openShowModal: true })}
                       className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-secondary/50 hover:bg-secondary/[0.08] hover:text-secondary transition-colors'
                     >
@@ -217,6 +234,41 @@ function ContactsTable() {
         <DataTablePagination table={table} />
       </div>
     </DataTable.Root>
+  )
+}
+
+function ConfirmDelete() {
+  const confirmOpen = useContactsStore((s) => s.confirmOpen)
+  const setShowConfirm = useContactsStore((s) => s.setShowConfirm)
+  const item = useContactsStore((s) => s.item)
+  const deleteItem = useContactsStore((s) => s.deleteItem)
+
+  if (!confirmOpen) return null
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && setShowConfirm(false)}>
+      <DialogContent showCloseButton className='gap-0 overflow-hidden p-0 sm:max-w-md'>
+        <div className='flex items-center gap-3 p-5'>
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600'>
+            <Trash2 size={18} />
+          </div>
+          <div>
+            <h2 className='text-base font-semibold text-secondary'>Supprimer ce message ?</h2>
+            <p className='mt-1 text-sm text-muted-foreground'>
+              Le message de <span className='font-medium text-foreground'>{item.name}</span> sera définitivement supprimé.
+            </p>
+          </div>
+        </div>
+        <div className='flex items-center justify-end gap-2 border-t border-border-subtle/40 px-5 py-3'>
+          <Button variant='ghost' size='sm' type='button' onClick={() => setShowConfirm(false)}>
+            Annuler
+          </Button>
+          <Button variant='destructive' size='sm' type='button' onClick={() => void deleteItem()}>
+            Supprimer
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

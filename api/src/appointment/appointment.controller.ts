@@ -175,7 +175,10 @@ export class AppointmentController {
 
   @Delete(":id")
   @UseGuards(AuthGuard, RoleGuard("ADMIN"))
-  remove(@Param("id") id: string) {
-    return this.appointmentService.remove(id);
+  async remove(@Param("id") id: string) {
+    const appt = await this.appointmentService.findOne(id);
+    const result = await this.appointmentService.remove(id);
+    if (appt) this.patientService.deleteIfNoAppointments(appt.patientId).catch(() => {});
+    return result;
   }
 }

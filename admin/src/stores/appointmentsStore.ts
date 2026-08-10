@@ -18,6 +18,7 @@ export interface Appointment {
     id?: string
     name: string
     color?: string
+    duration?: number
     sessions?: { id: string; session: number; duration: number }[]
   }
   practitioner?: {
@@ -128,11 +129,12 @@ export const useAppointmentsStore = create<AppointmentStoreInterface>()(
     }),
     {
       name: 'appointments-storage',
+      version: 2,
       partialize: (state) => ({
         items: state.items,
         filters: state.filters,
-        lastFetchedAt: state.lastFetchedAt,
       }),
+      migrate: (persisted: any) => ({ ...persisted, lastFetchedAt: null }),
     }
   )
 )

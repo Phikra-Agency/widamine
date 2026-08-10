@@ -165,8 +165,8 @@ function Planner() {
           const a = s.appointment
           if (!a) return false
           if (!hasFilter && (a.status === 'CANCELLED' || a.status === 'COMPLETED')) return false
-          if (filterPractitionerIds.length > 0 && !filterPractitionerIds.includes(a.practitionerId)) return false
-          if (filterStatuses.length > 0 && !filterStatuses.includes(a.status)) return false
+          if (filterPractitionerIds.length > 0 && (a.practitionerId == null || !filterPractitionerIds.includes(a.practitionerId))) return false
+          if (filterStatuses.length > 0 && (a.status == null || !filterStatuses.includes(a.status))) return false
           if (filterMotifIds.length > 0 && !filterMotifIds.includes(a.motif?.id || '')) return false
 
           return true

@@ -204,7 +204,7 @@ function ContactForm() {
       const parsed = obj.safeParse(contactData)
       if (!parsed.success) {
         const fieldErrors: typeof errors = {}
-        parsed.error.errors.forEach((err) => {
+        parsed.error.issues.forEach((err) => {
           const field = err.path[0] as keyof typeof errors
           fieldErrors[field] = err.message
         })

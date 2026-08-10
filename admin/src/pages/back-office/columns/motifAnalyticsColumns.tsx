@@ -1,7 +1,21 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table'
-import { pctChange, TrendPill } from './practitionerAnalyticsColumns'
 import { cn } from '@/lib/utils'
+
+function pctChange(current: number, previous: number): number | null {
+  if (!previous) return null
+  return ((current - previous) / previous) * 100
+}
+
+function TrendPill({ value }: { value: number | null }) {
+  if (value === null) return <span className='text-xs text-secondary/30'>—</span>
+  const up = value >= 0
+  return (
+    <span className={cn('inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold', up ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700')}>
+      {up ? '↑' : '↓'} {Math.abs(value).toFixed(0)}%
+    </span>
+  )
+}
 
 export interface MotifRow {
   id: string

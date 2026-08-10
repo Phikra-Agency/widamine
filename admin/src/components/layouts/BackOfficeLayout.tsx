@@ -15,6 +15,7 @@ import {
   ChatCircleDots,
   List,
   X,
+  GearSix,
 } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -73,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
       { to: 'resources', label: 'Salles', icon: Door, roles: ['ADMIN'] },
       { to: 'motifs', label: 'Traitements', icon: Stethoscope, roles: ['ADMIN'] },
+      { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN'] },
     ],
   },
 ]

@@ -1,6 +1,8 @@
 import { EmptyMotifIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
+import { PencilSimple as Pen, Trash as Trash2 } from '@phosphor-icons/react'
 import { DataTable, DataTableColumnHeader } from '@/components/data-table'
+import { Button } from '@/components/ui'
 
 export type SallesMotifRow = {
   id?: string
@@ -9,7 +11,12 @@ export type SallesMotifRow = {
   color?: string
 }
 
-export function createSallesMotifsColumns(): ColumnDef<SallesMotifRow>[] {
+type SallesMotifsColumnsDeps = {
+  onEdit: (item: SallesMotifRow) => void
+  onDelete: (item: SallesMotifRow) => void
+}
+
+export function createSallesMotifsColumns({ onEdit, onDelete }: SallesMotifsColumnsDeps): ColumnDef<SallesMotifRow>[] {
   return [
     {
       id: 'name',
@@ -37,6 +44,32 @@ export function createSallesMotifsColumns(): ColumnDef<SallesMotifRow>[] {
           {row.original.duration || 30} min
         </span>
       ),
+    },
+    {
+      id: 'actions',
+      header: () => <span className='sr-only'>Actions</span>,
+      enableSorting: false,
+      cell: ({ row }) => (
+        <DataTable.RowActions>
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            onClick={() => onEdit(row.original)}
+            className='text-muted-foreground hover:bg-amber-50 hover:text-amber-600'
+          >
+            <Pen size={16} />
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            onClick={() => onDelete(row.original)}
+            className='text-muted-foreground hover:bg-red-50 hover:text-red-600'
+          >
+            <Trash2 size={16} />
+          </Button>
+        </DataTable.RowActions>
+      ),
+      meta: { align: 'right', width: 'actions' },
     },
   ]
 }

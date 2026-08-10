@@ -735,11 +735,15 @@ function ConsultationForm({
     setSubmitting(true)
     setSubmitError(null)
     try {
+      const store = useScheduleModalStore.getState()
+      if (store.motifs.length === 0) await store.loadMotifs()
+      const motifId = useScheduleModalStore.getState().motifs.find((m) => m.name?.toLowerCase() === 'consultation')?.id
       await api.post('appointments', {
         name: `${prenom} ${nom}`,
         email,
         phone,
         context: `Consultation avec Dr. Widad Slaoui. ${note}`,
+        motifId,
         datetime: date && selectedHour ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}T${selectedHour}:00` : undefined,
       })
       setSubmitted(true)

@@ -8,41 +8,9 @@ import {
 } from '@/lib/scheduleNavigation'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { EventCardSchedule } from '@/components/calendar/EventCard'
 
-interface Schedule {
-  id: string
-  datetime: string
-  session: {
-    id: number
-    session: number
-    duration: number
-  }
-  appointment?: {
-    id: string
-    name?: string
-    status: string
-    practitionerId?: string
-    patient?: {
-      id: string
-      firstName: string
-      lastName: string
-    }
-    practitioner?: {
-      id: string
-      name: string
-    }
-    resource?: {
-      id: string
-      name: string
-    }
-    motif?: {
-      id: string
-      name: string
-      color: string
-      duration?: number
-    }
-  }
-}
+type Schedule = EventCardSchedule
 
 interface Day {
   morning: Schedule[]

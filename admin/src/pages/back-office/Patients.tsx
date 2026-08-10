@@ -238,7 +238,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
           <Select
             items={{ all: 'Tous', MALE: 'Homme', FEMALE: 'Femme', OTHER: 'Autre' }}
             value={filters.gender || 'all'}
-            onValueChange={(value) => setFilters({ ...filters, gender: value === 'all' ? '' : value })}
+            onValueChange={(value) => setFilters({ ...filters, gender: value === null || value === 'all' ? '' : value })}
           >
             <SelectTrigger size='sm' className='h-8 w-[90px] text-[13px] font-medium shrink-0'>
               <SelectValue />

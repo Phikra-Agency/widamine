@@ -207,11 +207,12 @@ export const usePatientStore = create<PatientStoreInterface>()(
     }),
     {
       name: 'patients-storage',
+      version: 2,
       partialize: (state) => ({
         items: state.items,
         filters: state.filters,
-        lastFetchedAt: state.lastFetchedAt,
       }),
+      migrate: (persisted: any) => ({ ...persisted, lastFetchedAt: null }),
     }
   )
 )

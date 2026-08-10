@@ -40,7 +40,7 @@ export function getScheduleKey(schedule: ScheduleLike): string {
 export function normalizeAppointmentId(appt: {
   id?: string | number
   _id?: string
-  schedules?: { appointmentId?: string }[]
+  schedules?: Array<{ appointmentId?: string; [key: string]: unknown }>
 }) {
   const raw = appt.id ?? appt._id ?? appt.schedules?.[0]?.appointmentId
   if (raw == null || raw === '') return null
@@ -75,10 +75,11 @@ export function appointmentToScheduleLike(appt: {
   if (!appointmentId || !datetime) return null
 
   const slot = appt.schedules?.[0]
-  const sessionNumber = slot?.session?.number ?? slot?.session?.session ?? 1
+  if (!slot) return null
+  const sessionNumber = slot.session?.number ?? 1
 
   return {
-    id: slot?.id,
+    id: slot.id,
     datetime,
     session: {
       id: slot.session?.id ?? 0,

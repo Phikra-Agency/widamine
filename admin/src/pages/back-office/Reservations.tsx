@@ -173,7 +173,7 @@ function ReservationsTable() {
           <Select
             items={{ all: 'Toutes', PENDING: 'En attente', CONFIRMED: 'Confirmée', CANCELLED: 'Annulée' }}
             value={filters.status || 'all'}
-            onValueChange={(value) => setFilters({ ...filters, status: value === 'all' ? '' : value })}
+            onValueChange={(value) => setFilters({ ...filters, status: value === null || value === 'all' ? '' : value })}
           >
             <SelectTrigger size='sm' className='h-8 w-[120px] text-[13px] font-medium shrink-0'>
               <SelectValue />
@@ -352,8 +352,8 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
     CANCELLED: 'Annulée',
   }
 
-  async function handleChange(newStatus: string) {
-    if (newStatus === current || saving) return
+  async function handleChange(newStatus: string | null) {
+    if (!newStatus || newStatus === current || saving) return
     
     // Update UI immediately (optimistic update)
     const previousStatus = current
@@ -399,7 +399,7 @@ function StatusSelect({ appointmentId, status, className }: { appointmentId: num
         }}
       >
         <span className='h-1.5 w-1.5 rounded-full' style={{ backgroundColor: currentTc.dot }} />
-        <SelectValue />
+        <SelectValue>{currentMeta.label}</SelectValue>
       </SelectTrigger>
       <SelectContent align="start" side="bottom" sideOffset={4}>
         {Object.entries(statusOptions).map(([key, label]) => {

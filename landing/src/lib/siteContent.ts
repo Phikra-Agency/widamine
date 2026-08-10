@@ -64,12 +64,12 @@ export function getServicePage(slug: string) {
 
 // Fallback page built from live API motif data when no hand-written page exists.
 export function serviceToContent(s: DynamicService): ServicePageContent {
-  const category = (s.service?.category?.slug as ServicePageContent['category']) ?? 'techniques'
+  const category = (s.category as ServicePageContent['category']) ?? 'techniques'
   return {
     slug: s.slug,
     navLabel: s.name,
     title: s.name,
-    eyebrow: s.service?.category?.name ?? '',
+    eyebrow: s.category ?? '',
     heroDescription: s.description ?? `Découvrez ${s.name} au Widamine Aesthetic Center.`,
     image: ICON_MAP[s.slug] || '',
     color: s.color,

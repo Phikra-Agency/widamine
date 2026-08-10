@@ -3,6 +3,7 @@ import api from '@/lib/api'
 import { formatLocalDate, getMondayOfWeek } from '@/lib/date'
 import { useSchedulesStore } from '@/stores/schedulesStore'
 import type { NavigateFunction } from 'react-router-dom'
+import type { EventCardSchedule } from '@/components/calendar/EventCard'
 
 const RETURN_STORAGE_KEY = 'widamine-calendar-return'
 const OPEN_APPOINTMENT_STORAGE_KEY = 'widamine-open-appointment'
@@ -14,25 +15,12 @@ export type CalendarReturnContext = {
 }
 
 export type DaySchedules = {
-  morning: ScheduleLike[]
-  afternoon: ScheduleLike[]
-  evening: ScheduleLike[]
+  morning: EventCardSchedule[]
+  afternoon: EventCardSchedule[]
+  evening: EventCardSchedule[]
 }
 
-export type ScheduleLike = {
-  id?: string
-  datetime: string
-  session: { id: number; session: number; duration: number }
-  appointment?: {
-    id?: string
-    status?: string
-    name?: string
-    patient?: { id: string; firstName: string; lastName: string }
-    practitioner?: { id: string; name: string }
-    resource?: { id: string; name: string }
-    motif?: { id: string; name: string; color: string; duration?: number }
-  }
-}
+export type ScheduleLike = EventCardSchedule
 
 export function getScheduleKey(schedule: ScheduleLike): string {
   return schedule.id || `${schedule.datetime}-${schedule.session.id}`
@@ -165,7 +153,7 @@ export function clearStashedAppointment() {
   sessionStorage.removeItem(OPEN_APPOINTMENT_STORAGE_KEY)
 }
 
-export function saveCalendarReturnContext(schedule: ScheduleLike) {
+export function saveCalendarReturnContext(schedule: { datetime: string; appointment?: { id?: string } }) {
   if (!schedule.appointment?.id) return
   sessionStorage.setItem(
     RETURN_STORAGE_KEY,

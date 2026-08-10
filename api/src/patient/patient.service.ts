@@ -175,13 +175,10 @@ export class PatientService {
   }
 
   async deleteIfNoAppointments(patientId: string) {
-    const remaining = await this.prismaService.appointment.count({
-      where: {
-        patientId,
-        status: { notIn: ['CANCELLED', 'COMPLETED'] },
-      },
+    const any = await this.prismaService.appointment.count({
+      where: { patientId },
     })
-    if (remaining === 0) {
+    if (any === 0) {
       await this.remove(patientId)
     }
   }

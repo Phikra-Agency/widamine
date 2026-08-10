@@ -6,10 +6,12 @@ interface Service {
   name: string
   price: number
   _count?: { sessions: number }
-  category?: { name: string }
+  category?: { category: string }
   categoryId?: string
-	primaryDoctor?: { name: string }
-	primaryDoctorId?: string
+  doctor?: { name: string }
+  doctorId?: string
+  primaryDoctor?: { name: string }
+  primaryDoctorId?: string
   allowedDoctorIds?: string[]
   allowedSalleIds?: string[]
   sessions?: { id: string; session: number; duration: number }[]
@@ -45,8 +47,8 @@ interface ServiceStoreInterface {
   fetchItem: () => Promise<void>
   saveItem: () => Promise<void>
   deleteItem: () => Promise<void>
-  saveSession: (session: { id?: number; session: number; duration: number }, editing: boolean) => Promise<void>
-  deleteSession: (sessionId: number) => Promise<void>
+  saveSession: (session: { id?: string; session: number; duration: number }, editing: boolean) => Promise<void>
+  deleteSession: (sessionId: string) => Promise<void>
 }
 
 export const useServicesStore = create<ServiceStoreInterface>((set, get) => ({

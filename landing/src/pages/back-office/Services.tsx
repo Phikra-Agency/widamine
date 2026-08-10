@@ -84,7 +84,7 @@ function Filters() {
 			</div>
 			<div className="relative min-w-[180px]">
 				<select
-					onChange={(e) => setFilters({ ...filters, categoryId: +e.target.value })}
+					onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })}
 					className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
 				>
 					<option value="0">Toutes les catégories</option>
@@ -108,7 +108,7 @@ function Table() {
 	}, [])
 
 	useEffect(() => {
-		setFiltered(items.filter((i) => i.name.includes(debouncedFilters.term) && (i.categoryId === debouncedFilters.categoryId || debouncedFilters.categoryId === 0)))
+		setFiltered(items.filter((i) => i.name.includes(debouncedFilters.term) && (i.categoryId === debouncedFilters.categoryId || debouncedFilters.categoryId === '' || debouncedFilters.categoryId === '0')))
 	}, [items, debouncedFilters])
 
   return (
@@ -312,7 +312,7 @@ function Modal() {
 	}, [modalOpen, operation])
 
 	// Toggle helper for multi-select arrays
-	const toggleDoctor = (doctorId: number) => {
+	const toggleDoctor = (doctorId: string) => {
 		const current = item.allowedDoctorIds || []
 		const updated = current.includes(doctorId)
 			? current.filter(id => id !== doctorId)
@@ -320,7 +320,7 @@ function Modal() {
 		setItem({ ...item, allowedDoctorIds: updated })
 	}
 
-	const toggleSalle = (salleId: number) => {
+	const toggleSalle = (salleId: string) => {
 		const current = item.allowedSalleIds || []
 		const updated = current.includes(salleId)
 			? current.filter(id => id !== salleId)
@@ -371,7 +371,7 @@ function Modal() {
 					<div className="space-y-2">
 						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Catégorie</label>
 						<div className="relative">
-							<select value={item.categoryId} onChange={(e) => setItem({ ...item, categoryId: +e.target.value })}
+							<select value={item.categoryId || ''} onChange={(e) => setItem({ ...item, categoryId: e.target.value })}
 								className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20">
 								<option value={0}>Sélectionnez une catégorie</option>
 								{categories.map((cat) => (
@@ -385,7 +385,7 @@ function Modal() {
 					<div className="space-y-2">
 						<label className="text-xs font-semibold uppercase tracking-wider text-secondary/40">Médecin principal</label>
 						<div className="relative">
-							<select value={item.doctorId} onChange={(e) => setItem({ ...item, doctorId: +e.target.value })}
+							<select value={item.doctorId || ''} onChange={(e) => setItem({ ...item, doctorId: e.target.value })}
 								className="w-full appearance-none rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 pr-10 text-sm text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all cursor-pointer focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20">
 								<option value={0}>Sélectionnez un médecin</option>
 								{doctors.map((doc) => (
@@ -448,7 +448,7 @@ function Modal() {
 	)
 }
 
-function SessionModal({ open, onClose, editing, session, setSession }: { open: boolean; onClose: () => void; editing: boolean; session: { id: number; session: number; duration: number }; setSession: (session: { id: number; session: number; duration: number }) => void }) {
+function SessionModal({ open, onClose, editing, session, setSession }: { open: boolean; onClose: () => void; editing: boolean; session: { id: string; session: number; duration: number }; setSession: React.Dispatch<React.SetStateAction<{ id: string; session: number; duration: number }>> }) {
 	const { saveSession } = useServicesStore()
 
 	return (
@@ -492,12 +492,12 @@ function SessionModal({ open, onClose, editing, session, setSession }: { open: b
 
 function ShowModal() {
 	const { operation, modalOpen, closeModal, fetchItem, item, deleteSession } = useServicesStore()
-	const [sessionData, setSessionData] = useState({ id: 0, session: 0, duration: 0 })
+	const [sessionData, setSessionData] = useState({ id: '', session: 0, duration: 0 })
 	const [openSessionModal, setOpenSessionModal] = useState(false)
 	const [editingSession, setEditingSession] = useState(false)
 
 	function clearSessionData() {
-		setSessionData({ id: 0, session: 0, duration: 0 })
+		setSessionData({ id: '', session: 0, duration: 0 })
 	}
 
 	useEffect(() => {

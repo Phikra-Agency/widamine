@@ -53,7 +53,7 @@ export default function SidebarSearch({ collapsed = false, onExpand }: SidebarSe
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const navigate = useNavigate()
 
   const doSearch = useCallback(async (q: string) => {

@@ -4,27 +4,17 @@ import { createPractitionerColumns, type PractitionerStatsRow } from '@/pages/ba
 import { TanStackDataTable, useDataTable, DataTable } from '@/components/data-table'
 import { EmptyUsersIllustration } from '@/components/illustrations'
 import { UserCircle } from '@phosphor-icons/react'
+import type { CalendarDaySlots } from '@/components/calendar/views/CalendarGridCells'
+import type { EventCardSchedule } from '@/components/calendar/EventCard'
 
 const EmptyPractitionerIllustration = EmptyUsersIllustration
 
 /* ─── Types ────────────────────────────────────────────────────── */
 
-interface ScheduleAppointment {
-  id: string
-  status: string
-  practitionerId?: string
-  practitioner?: { id: string; name: string }
-  motif?: { id: string; name: string }
-}
+type ScheduleAppointment = NonNullable<EventCardSchedule['appointment']>
 
 interface ScheduleSlot {
   appointment?: ScheduleAppointment
-}
-
-interface CalendarDaySlots {
-  morning: ScheduleSlot[]
-  afternoon: ScheduleSlot[]
-  evening: ScheduleSlot[]
 }
 
 interface PractitionerAnalyticsProps {
@@ -108,7 +98,7 @@ export default function PractitionerAnalytics({
 }: PractitionerAnalyticsProps) {
   const [error, setError] = useState<string | null>(null)
   const [hovered, setHovered] = useState<{ p: PractitionerStatsRow; style: React.CSSProperties } | null>(null)
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const onHover = useCallback((p: PractitionerStatsRow, rect: DOMRect) => {
     clearTimeout(leaveTimer.current)

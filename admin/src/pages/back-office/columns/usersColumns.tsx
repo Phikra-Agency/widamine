@@ -1,11 +1,12 @@
 import { EmptyUsersIllustration } from '@/components/illustrations'
 import type { ColumnDef } from '@tanstack/react-table'
-import { User } from '@phosphor-icons/react'
+import { User, PencilSimple as Pen, Trash as Trash2 } from '@phosphor-icons/react'
 import clsx from 'clsx'
 import type { Role } from '@/stores/authStore'
 import { DataTable, DataTableColumnHeader } from '@/components/data-table'
 import { equalsOrAllFilter } from '@/components/data-table'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui'
 
 export type UserRow = {
   id: number
@@ -42,9 +43,11 @@ function UserAvatar({ name }: { name: string }) {
 
 type UserColumnsDeps = {
   isReceptionist: boolean
+  onEdit: (item: UserRow) => void
+  onDelete: (item: UserRow) => void
 }
 
-export function createUsersColumns({ isReceptionist }: UserColumnsDeps): ColumnDef<UserRow>[] {
+export function createUsersColumns({ isReceptionist, onEdit, onDelete }: UserColumnsDeps): ColumnDef<UserRow>[] {
   return [
     {
       id: 'name',
@@ -70,6 +73,40 @@ export function createUsersColumns({ isReceptionist }: UserColumnsDeps): ColumnD
       cell: ({ row }) => <RoleBadge role={row.original.role} />,
       filterFn: (row, _columnId, value) => equalsOrAllFilter(value, row.original.role),
       meta: { width: 'narrow' },
+    },
+    {
+      id: 'actions',
+      header: () => <span className='sr-only'>Actions</span>,
+      enableSorting: false,
+      cell: ({ row }) => (
+        <DataTable.RowActions>
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation()
+              onEdit(row.original)
+            }}
+            className='text-muted-foreground hover:bg-amber-50 hover:text-amber-600'
+          >
+            <Pen size={16} />
+          </Button>
+          {!isReceptionist && (
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation()
+                onDelete(row.original)
+              }}
+              className='text-muted-foreground hover:bg-red-50 hover:text-red-600'
+            >
+              <Trash2 size={16} />
+            </Button>
+          )}
+        </DataTable.RowActions>
+      ),
+      meta: { align: 'right' as const, width: 'actions' as const },
     },
   ]
 }

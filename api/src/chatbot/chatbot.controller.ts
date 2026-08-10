@@ -8,6 +8,14 @@ export class ChatbotController {
 
   @Post('message')
   handleMessage(@Body() dto: ChatbotMessageDto) {
-    return this.chatbotService.handleMessage(dto.message, dto.history)
+    return this.chatbotService.handleMessage(dto.message, dto.history).catch((err) => {
+      console.error('[Chatbot] error:', err?.message)
+      console.error('[Chatbot] stack:', err?.stack)
+      return {
+        reply:
+          'Le centre Widamine est joignable par téléphone au **+212 (535) 624 696** ou par email à **info@widamineaestheticcenter.com**.',
+        sources: [],
+      }
+    })
   }
 }

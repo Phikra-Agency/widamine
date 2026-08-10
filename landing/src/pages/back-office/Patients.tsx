@@ -229,7 +229,7 @@ function Table({ openDrawer }: { openDrawer: (patient: any) => void }) {
       const matchesGender = !debouncedFilters.gender || i.gender === debouncedFilters.gender
       const matchesCity = debouncedFilters.city === 'null' || !debouncedFilters.city || i.city === debouncedFilters.city
       const matchesPractitioner = !isPractitioner || !debouncedFilters.practitionerOnly ||
-        i.appointments?.some(a => a.practitionerId === user?.id || a.practitioner?.id === user?.id)
+        i.appointments?.some(a => a.practitionerId === String(user?.id) || a.practitioner?.id === String(user?.id))
       return matchesTerm && matchesGender && matchesCity && matchesPractitioner
     })
   }, [items, debouncedFilters, isPractitioner, user?.id])

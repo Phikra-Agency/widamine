@@ -105,7 +105,9 @@ export const useMotifsStore = create<MotifStoreInterface>()(
     }),
     {
       name: 'motifs-storage',
-      partialize: (state) => ({ items: state.items, lastFetchedAt: state.lastFetchedAt }),
+      version: 2,
+      partialize: (state) => ({ items: state.items }),
+      migrate: (persisted: any) => ({ ...persisted, lastFetchedAt: null }),
     }
   )
 )

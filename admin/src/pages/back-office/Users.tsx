@@ -95,8 +95,10 @@ function UsersTable() {
     () =>
       createUsersColumns({
         isReceptionist,
+        onEdit: openEditModal,
+        onDelete: openDeleteModal,
       }),
-    [isReceptionist],
+    [isReceptionist, openEditModal, openDeleteModal],
   )
 
   const table = useReactTable({
@@ -180,7 +182,7 @@ function UsersTable() {
           loading={loading}
           emptyIllustration={USERS_EMPTY_ILLUSTRATION}
           emptyTitle='Aucun utilisateur trouvé'
-          stopClickOnColumns={[]}
+          stopClickOnColumns={["actions"]}
           onRowClick={(user) => openEditModal(user)}
         />
       </DataTable.Desktop>

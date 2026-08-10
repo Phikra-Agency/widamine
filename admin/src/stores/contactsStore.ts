@@ -21,6 +21,9 @@ interface ContactStoreInterface {
   setFilters: (filters: ContactStoreInterface['filters']) => void
   fetchItems: () => Promise<void>
   readItem: () => Promise<void>
+  setShowConfirm: (open: boolean) => void
+  confirmOpen: boolean
+  deleteItem: () => Promise<void>
 }
 
 export const useContactsStore = create<ContactStoreInterface>((set, get) => ({
@@ -28,10 +31,14 @@ export const useContactsStore = create<ContactStoreInterface>((set, get) => ({
   item: {} as Contact,
   filters: { read: false },
   openShowModal: false,
+  confirmOpen: false,
   lastFetchedAt: 0,
   lastFilter: '',
   setItem: (item) => {
     set({ item })
+  },
+  setShowConfirm: (open) => {
+    set({ confirmOpen: open })
   },
   toggleOpenShowModal() {
     set({ openShowModal: !get().openShowModal })
@@ -54,5 +61,13 @@ export const useContactsStore = create<ContactStoreInterface>((set, get) => ({
     await api.put('contacts/'+get().item.id+'/read')
     set({ lastFetchedAt: 0 })
     get().fetchItems()
+  },
+  deleteItem: async () => {
+    try {
+      await api.delete('contacts/'+get().item.id)
+    } finally {
+      set({ confirmOpen: false, lastFetchedAt: 0, openShowModal: false })
+      await get().fetchItems()
+    }
   }
 }))

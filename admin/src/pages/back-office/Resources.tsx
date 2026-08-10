@@ -75,7 +75,10 @@ function ResourcesTable() {
     void fetchItems().finally(() => setLoading(false))
   }, [fetchItems])
 
-  const columns = useMemo(() => createSallesColumns(), [])
+  const columns = useMemo(
+    () => createSallesColumns({ onEdit: openEditModal, onDelete: openDeleteModal }),
+    [openEditModal, openDeleteModal],
+  )
 
   const table = useDataTable({
     data: items,
@@ -124,7 +127,7 @@ function ResourcesTable() {
           loading={loading}
           emptyIllustration={SALLES_EMPTY_ILLUSTRATION}
           emptyTitle='Aucune salle trouvée'
-          stopClickOnColumns={[]}
+          stopClickOnColumns={["actions"]}
           onRowClick={openEditModal}
         />
       </DataTable.Desktop>
@@ -155,6 +158,17 @@ function ResourcesTable() {
                       <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} />
                       {p.label}
                     </span>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openDeleteModal(item)
+                      }}
+                      className='flex shrink-0 h-9 w-9 items-center justify-center rounded-control border border-border bg-secondary/[0.04] text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors'
+                      aria-label='Supprimer la salle'
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </DataTable.MobileCard>
               )

@@ -173,7 +173,7 @@ export default function Chatbot() {
                         }}
                       >
                         <div className='text-[13px]' style={{ color: C.secondary, lineHeight: 1.6, fontFamily: "'Poppins Light', sans-serif" }}>
-                          <Markdown content={msg.content} />
+                          <Markdown content={msg.content ?? ''} />
                         </div>
                       </div>
                     </motion.div>
@@ -334,8 +334,8 @@ function Header() {
   )
 }
 
-function Markdown({ content }: { content: string }) {
-  const lines = content.split('\n')
+function Markdown({ content }: { content: string | undefined }) {
+  const lines = (content ?? '').split('\n')
   const elements: React.ReactNode[] = []
 
   let i = 0

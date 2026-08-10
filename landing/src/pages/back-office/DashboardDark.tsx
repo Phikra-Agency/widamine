@@ -1,4 +1,4 @@
-// import { useAppointmentsStore } from '@/stores/appointmentsStore'
+import { useAppointmentsStore } from '@/stores/appointmentsStore'
 import { ArrowRight, CalendarBlank, CalendarDots as CalendarClock, Clock as Clock3, EnvelopeSimple as Mail, Phone, Sparkle as Sparkles } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'

@@ -20,7 +20,7 @@ interface CellCallbacks {
 
 function PractitionerCell({ p, onHover, onLeave }: { p: PractitionerStatsRow } & CellCallbacks) {
   const ref = useRef<HTMLDivElement>(null)
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const show = useCallback(() => {
     clearTimeout(leaveTimer.current)

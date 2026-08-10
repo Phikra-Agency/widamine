@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from '@phosphor-icons/react'
 import { C } from '@/lib/theme'

@@ -1,6 +1,0 @@
-2026/08/04-11:49:08.356 9a78b Reusing MANIFEST /home/alae/Documents/repos/widamine/api/_IGNORE_widamine-session/Default/Local Storage/leveldb/MANIFEST-000001
-2026/08/04-11:49:08.360 9a78b Recovering log #3
-2026/08/04-11:49:08.360 9a78b Reusing old log /home/alae/Documents/repos/widamine/api/_IGNORE_widamine-session/Default/Local Storage/leveldb/000003.log 
-2026/08/04-11:50:08.362 9a78b Level-0 table #5: started
-2026/08/04-11:50:08.374 9a78b Level-0 table #5: 18947 bytes OK
-2026/08/04-11:50:08.380 9a78b Delete type=0 #3
