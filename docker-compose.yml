@@ -17,6 +17,8 @@ services:
       WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
     ports:
       - "${API_PORT:-3000}:3000"
+    env_file:
+      - .env
 
   admin:
     build:
