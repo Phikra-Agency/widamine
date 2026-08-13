@@ -218,30 +218,32 @@ export class AppointmentNotificationService {
   // ════════════════════════════════════════════════════════════════
 
   async sendNewBookingAcknowledgment(appointmentId: string) {
-    if (!(await this.canSendAnyEmail())) return;
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { motif: true },
     });
-    if (!appt || !appt.email) return;
+    if (!appt) return;
 
-    const html = this.wrap(`
-      ${this.title('✓', 'Réservation reçue')}
-      ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
-      ${this.paragraph('Votre demande de rendez-vous a bien été enregistrée.')}
-      ${this.motifBox(appt.motif?.name || 'Consultation')}
-      ${this.note(`
-        Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
-        <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
-      `)}
-      ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:contact@widamine.com" style="color: ' + this.COLORS.primary + ';">contact@widamine.com</a>.')}
-      ${this.closing()}
-    `);
+    // Send email if enabled AND email exists
+    if ((await this.canSendAnyEmail()) && appt.email) {
+      const html = this.wrap(`
+        ${this.title('✓', 'Réservation reçue')}
+        ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
+        ${this.paragraph('Votre demande de rendez-vous a bien été enregistrée.')}
+        ${this.motifBox(appt.motif?.name || 'Consultation')}
+        ${this.note(`
+          Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
+          <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
+        `)}
+        ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:contact@widamine.com" style="color: ' + this.COLORS.primary + ';">contact@widamine.com</a>.')}
+        ${this.closing()}
+      `);
 
-    await this.mailService.sendMail(appt.email, 'Réservation reçue — Widamine', html);
+      await this.mailService.sendMail(appt.email, 'Réservation reçue — Widamine', html);
+    }
     
-    // Send WhatsApp acknowledgment (if enabled)
-    if (await this.canSendAnyWhatsApp()) {
+    // Send WhatsApp INDEPENDENTLY if enabled AND phone exists
+    if ((await this.canSendAnyWhatsApp()) && appt.phone) {
       await this.sendWhatsAppToAppointment(
         appt,
         `Bonjour ${appt.name}, votre demande de rendez-vous (${appt.motif?.name || 'Consultation'}) a bien été enregistrée. Notre équipe vous recontactera rapidement pour confirmer. — Widamine`,
