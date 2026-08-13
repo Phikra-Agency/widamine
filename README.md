@@ -13,7 +13,6 @@ Monorepo for the Widamine clinic platform: public site, staff admin, and API.
 ## Quick start
 
 ```bash
-./start-mongodb.sh
 npm run bootstrap
 npm run db:seed
 npm run dev

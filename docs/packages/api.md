@@ -1,6 +1,6 @@
 # API (`api/`)
 
-NestJS REST API with Prisma ORM + MongoDB.
+NestJS REST API with Prisma ORM + PostgreSQL (cloud hosted).
 
 ## Dev
 
@@ -20,11 +20,13 @@ JWT-based. Public endpoints carry no guard. Staff endpoints use `AuthGuard` + op
 `POST /chatbot/message` — public endpoint.
 
 - Model: `llama-3.3-70b-versatile` via Groq API
-- Lead capture: Always asks for name + email, stores in `ChatLead` collection
-- Tools: `store_lead`, `get_services`, `get_service_details`, `get_team`, `get_business_info`, `trigger_popup`
+- Lead capture: Asks for name + email, stores in `ChatLead`
+- Tools: `store_lead`, `get_services`, `get_service_details`, `get_team`, `get_business_info`, `trigger_popup`, `get_clinic_stats`, `get_practitioners_info`
 - Requires `GROQ_API_KEY` in `api/.env`
 
 ## Database
+
+PostgreSQL cloud database hosted on Coolify (`91.98.161.53:5420`).
 
 | Model | Description |
 |-------|-------------|
@@ -43,14 +45,31 @@ JWT-based. Public endpoints carry no guard. Staff endpoints use `AuthGuard` + op
 ## Environment (`api/.env`)
 
 ```env
-DATABASE_URL=mongodb://127.0.0.1:27017/widamine?replicaSet=rs0
+DATABASE_URL=postgresql://...  # Cloud PostgreSQL (already set)
 JWT_SECRET=<required>
 GROQ_API_KEY=<required for chatbot>
-BREVO_API_KEY=<optional>
+BREVO_API_KEY=<required for email>
 SMTP_FROM_NAME=Widamine
-SMTP_FROM_EMAIL=<optional>
+SMTP_FROM_EMAIL=<your sender email>
+WHATSAPP_ENABLED=false         # Set to true and scan QR to enable
 VITE_ADMIN_URL=http://localhost:5174
 ```
+
+## Prisma commands
+
+```bash
+cd api
+npx prisma studio          # Visual DB editor at :5555
+npx prisma migrate dev     # Create and apply new migration
+npx prisma migrate deploy  # Apply migrations (production)
+npx prisma generate        # Regenerate client after schema changes
+npm run seed               # Seed demo data
+```
+
+## Notifications
+
+- **Email:** Brevo TransactionalEmailsApi — set `BREVO_API_KEY`
+- **WhatsApp:** OpenWA — set `WHATSAPP_ENABLED=true` and scan QR on first run
 
 ## Docker
 

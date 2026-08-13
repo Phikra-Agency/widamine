@@ -9,11 +9,13 @@ export class ChatbotController {
   @Post('message')
   handleMessage(@Body() dto: ChatbotMessageDto) {
     return this.chatbotService.handleMessage(dto.message, dto.history).catch((err) => {
-      console.error('[Chatbot] error:', err?.message)
-      console.error('[Chatbot] stack:', err?.stack)
+      console.error('[Chatbot Controller] ❌ Error:', err?.message)
+      console.error('[Chatbot Controller] Stack:', err?.stack)
+      
+      // Return user-friendly fallback message
       return {
         reply:
-          'Le centre Widamine est joignable par téléphone au **+212 (535) 624 696** ou par email à **info@widamineaestheticcenter.com**.',
+          'Le centre Widamine est joignable par téléphone au **+212 (535) 624 696** ou par email à **info@widamineaestheticcenter.com**.\n\n*L\'assistant IA rencontre actuellement un problème technique.*',
         sources: [],
       }
     })

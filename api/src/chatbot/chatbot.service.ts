@@ -21,12 +21,15 @@ export class ChatbotService {
   async handleMessage(message: string, history?: { role: string; content: string }[]) {
     const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
+      console.error('[Chatbot] ❌ GROQ_API_KEY not found in environment variables')
       return {
         reply:
           "Le centre Widamine est joignable par téléphone au **+212 (535) 624 696** ou par email à **info@widamineaestheticcenter.com**.\n\nNos horaires : du lundi au vendredi de 9h à 18h, le samedi de 9h à 13h.\n\n*L'assistant IA sera bientôt disponible.*",
         sources: [],
       }
     }
+    
+    console.log('[Chatbot] 🤖 Processing message with GROQ API...')
 
     const systemPrompt = `Tu es l'assistant virtuel du Widamine Center, un centre médical de dermato-esthétique, bodycontouring et lasers à Fès, Maroc. Tu es professionnel, chaleureux et serviable.
 
@@ -172,7 +175,21 @@ function: {
 
     if (!res.ok) {
       const errText = await res.text()
-      throw new Error(`NVIDIA API error ${res.status}: ${errText}`)
+      console.error('[Chatbot] ❌ GROQ API Error:', res.status, errText)
+      
+      // Parse error details if available
+      let errorDetails = errText
+      try {
+        const errorJson = JSON.parse(errText)
+        errorDetails = errorJson.error?.message || errorJson.message || errText
+        if (errorJson.error?.code === 'invalid_api_key') {
+          console.error('[Chatbot] 💡 HINT: The GROQ_API_KEY in .env is invalid. Get a new key from https://console.groq.com/keys')
+        }
+      } catch {
+        // errText is not JSON, use as-is
+      }
+      
+      throw new Error(`GROQ API error ${res.status}: ${errorDetails}`)
     }
 
     const data = await res.json()
@@ -220,7 +237,8 @@ function: {
 
       if (!res2.ok) {
         const errText = await res2.text()
-        throw new Error(`NVIDIA API error ${res2.status}: ${errText}`)
+        console.error('[Chatbot] ❌ GROQ API Error (follow-up):', res2.status, errText)
+        throw new Error(`GROQ API error ${res2.status}: ${errText}`)
       }
 
       const data2 = await res2.json()

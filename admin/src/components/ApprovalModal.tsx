@@ -5,6 +5,7 @@ import { X, CheckCircle, Warning } from '@phosphor-icons/react'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useAuthStore } from '@/stores/authStore'
+import { API_BASE_URL } from '@/lib/api'
 
 type Unavailability = {
   id: string
@@ -46,7 +47,7 @@ export default function ApprovalModal({ item, onClose, onSuccess }: Props) {
     try {
       setLoadingConflicts(true)
       const token = useAuthStore.getState().token
-      const response = await fetch(`http://localhost:3000/unavailabilities/${item.id}`, {
+      const response = await fetch(`${API_BASE_URL}/unavailabilities/${item.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (!response.ok) throw new Error('Failed to load')
@@ -67,7 +68,7 @@ export default function ApprovalModal({ item, onClose, onSuccess }: Props) {
     try {
       setLoading(true)
       const token = useAuthStore.getState().token
-      const response = await fetch(`http://localhost:3000/unavailabilities/${item.id}/approve`, {
+      const response = await fetch(`${API_BASE_URL}/unavailabilities/${item.id}/approve`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -95,7 +96,7 @@ export default function ApprovalModal({ item, onClose, onSuccess }: Props) {
     try {
       setLoading(true)
       const token = useAuthStore.getState().token
-      const response = await fetch(`http://localhost:3000/unavailabilities/${item.id}/reject`, {
+      const response = await fetch(`${API_BASE_URL}/unavailabilities/${item.id}/reject`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

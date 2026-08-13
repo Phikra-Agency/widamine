@@ -28,6 +28,23 @@ export class AppointmentNotificationService {
     return settings.emailCancellation;
   }
 
+  private async canSendWhatsApp(type: "confirmation" | "reminder" | "cancellation") {
+    const settings = await this.prisma.appSettings.findUnique({
+      where: { singletonKey: "default" },
+      select: {
+        whatsappEnabled: true,
+        whatsappConfirmation: true,
+        whatsappReminder: true,
+        whatsappCancellation: true,
+      },
+    });
+    if (!settings) return false;
+    if (!settings.whatsappEnabled) return false;
+    if (type === "confirmation") return settings.whatsappConfirmation;
+    if (type === "reminder") return settings.whatsappReminder;
+    return settings.whatsappCancellation;
+  }
+
   private async canSendAnyEmail() {
     const settings = await this.prisma.appSettings.findUnique({
       where: { singletonKey: "default" },
@@ -37,8 +54,23 @@ export class AppointmentNotificationService {
     return settings.emailEnabled;
   }
 
-  private async sendWhatsAppToAppointment(appt: { phone: string | null }, message: string) {
+  private async canSendAnyWhatsApp() {
+    const settings = await this.prisma.appSettings.findUnique({
+      where: { singletonKey: "default" },
+      select: { whatsappEnabled: true },
+    });
+    if (!settings) return false;
+    return settings.whatsappEnabled;
+  }
+
+  private async sendWhatsAppToAppointment(appt: { phone: string | null }, message: string, type?: "confirmation" | "reminder" | "cancellation") {
     if (!appt.phone) return;
+    
+    // Check if WhatsApp is enabled for this type
+    if (type && !(await this.canSendWhatsApp(type))) {
+      return;
+    }
+    
     await this.smsService.sendWhatsApp(appt.phone, message).catch((e: any) => {
       console.error(`[WhatsApp] Failed to send to ${appt.phone}: ${e?.message || e}`);
     });
@@ -207,10 +239,14 @@ export class AppointmentNotificationService {
     `);
 
     await this.mailService.sendMail(appt.email, 'Réservation reçue — Widamine', html);
-    await this.sendWhatsAppToAppointment(
-      appt,
-      `Bonjour ${appt.name}, votre demande de rendez-vous (${appt.motif?.name || 'Consultation'}) a bien été enregistrée. Notre équipe vous recontactera rapidement pour confirmer. — Widamine`,
-    );
+    
+    // Send WhatsApp acknowledgment (if enabled)
+    if (await this.canSendAnyWhatsApp()) {
+      await this.sendWhatsAppToAppointment(
+        appt,
+        `Bonjour ${appt.name}, votre demande de rendez-vous (${appt.motif?.name || 'Consultation'}) a bien été enregistrée. Notre équipe vous recontactera rapidement pour confirmer. — Widamine`,
+      );
+    }
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -243,6 +279,7 @@ export class AppointmentNotificationService {
     await this.sendWhatsAppToAppointment(
       appt,
       `Bonjour ${appt.name}, votre rendez-vous pour ${appt.motif?.name || '—'} est CONFIRMÉ. ${this.dateStr(appt.schedules[0]?.datetime)}. Merci de confirmer votre présence. — Widamine`,
+      'confirmation'
     );
   }
 
@@ -273,6 +310,7 @@ export class AppointmentNotificationService {
     await this.sendWhatsAppToAppointment(
       appt,
       `Bonjour ${appt.name}, votre rendez-vous${date ? ` du ${date}` : ''}${appt.motif ? ` pour ${appt.motif.name}` : ''} a été annulé. Si vous souhaitez reprendre rendez-vous, contactez-nous. — Widamine`,
+      'cancellation'
     );
   }
 
@@ -306,6 +344,7 @@ export class AppointmentNotificationService {
     await this.sendWhatsAppToAppointment(
       appt,
       `Bonjour ${appt.name}, rappel de votre rendez-vous demain (${appt.motif?.name || '—'} — ${this.dateStr(appt.schedules[0]?.datetime)}). Merci de confirmer votre présence. — Widamine`,
+      'reminder'
     );
   }
 

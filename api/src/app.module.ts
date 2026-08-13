@@ -16,6 +16,7 @@ import { CronModule } from "./cron/cron.module";
 import { ChatbotModule } from "./chatbot/chatbot.module";
 import { SearchModule } from "./search/search.module";
 import { ClinicInfoModule } from "./clinic-info/clinic-info.module";
+import { UnavailabilityModule } from "./unavailability/unavailability.module";
 
 console.log("[AppModule] Loading modules...");
 
@@ -38,6 +39,7 @@ console.log("[AppModule] Loading modules...");
     ChatbotModule,
     SearchModule,
     ClinicInfoModule,
+    UnavailabilityModule,
   ],
 })
 export class AppModule {}

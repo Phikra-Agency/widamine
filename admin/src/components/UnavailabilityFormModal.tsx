@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { X } from '@phosphor-icons/react'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/stores/authStore'
+import { API_BASE_URL } from '@/lib/api'
 
 type Unavailability = {
   id: string
@@ -63,10 +64,10 @@ export default function UnavailabilityFormModal({ item, onClose, onSuccess }: Pr
       const token = useAuthStore.getState().token
 
       const url = item
-        ? `http://localhost:3000/unavailabilities/${item.id}`
+        ? `${API_BASE_URL}/unavailabilities/${item.id}`
         : pendingId
-        ? `http://localhost:3000/unavailabilities/${pendingId}`
-        : 'http://localhost:3000/unavailabilities'
+        ? `${API_BASE_URL}/unavailabilities/${pendingId}`
+        : `${API_BASE_URL}/unavailabilities`
 
       const response = await fetch(url, {
         method: item || pendingId ? 'PUT' : 'POST',

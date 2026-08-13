@@ -1,6 +1,6 @@
 import api from '@/lib/api'
 import axios from 'axios'
-import { EnvelopeSimple, Bell } from '@phosphor-icons/react'
+import { EnvelopeSimple, Bell, WhatsappLogo } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,8 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 
 type NotificationType = 'confirmation' | 'reminder' | 'cancellation'
-type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'inAppEnabled'
-type TypesKey = 'smsTypes' | 'emailTypes' | 'inAppTypes'
+type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'inAppEnabled' | 'whatsappEnabled'
+type TypesKey = 'smsTypes' | 'emailTypes' | 'inAppTypes' | 'whatsappTypes'
 
 interface ChannelTypes {
   confirmation: boolean
@@ -22,9 +22,11 @@ interface NotificationSettings {
   smsEnabled: boolean
   emailEnabled: boolean
   inAppEnabled: boolean
+  whatsappEnabled: boolean
   smsTypes: ChannelTypes
   emailTypes: ChannelTypes
   inAppTypes: ChannelTypes
+  whatsappTypes: ChannelTypes
 }
 
 const reveal = {
@@ -37,9 +39,11 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   smsEnabled: false,
   emailEnabled: true,
   inAppEnabled: true,
+  whatsappEnabled: false,
   smsTypes: { confirmation: true, reminder: true, cancellation: false },
   emailTypes: { confirmation: true, reminder: true, cancellation: true },
   inAppTypes: { confirmation: true, reminder: true, cancellation: false },
+  whatsappTypes: { confirmation: false, reminder: false, cancellation: false },
 }
 
 export default function Settings() {
@@ -163,6 +167,14 @@ export default function Settings() {
                         onToggleType={(type) => toggleType('emailTypes', type)}
                       />
                       <ChannelRow
+                        name='WhatsApp'
+                        enabled={settings.whatsappEnabled}
+                        disabled={saving}
+                        onToggleEnabled={(checked) => setChannelEnabled('whatsappEnabled', checked)}
+                        types={settings.whatsappTypes}
+                        onToggleType={(type) => toggleType('whatsappTypes', type)}
+                      />
+                      <ChannelRow
                         name='In-App'
                         enabled={settings.inAppEnabled}
                         disabled={saving}
@@ -207,6 +219,7 @@ function ChannelRow({
 }) {
   const channelMeta = {
     Email: { icon: EnvelopeSimple, subtitle: 'Canal email' },
+    WhatsApp: { icon: WhatsappLogo, subtitle: 'Messages WhatsApp via OpenWA' },
     'In-App': { icon: Bell, subtitle: 'Notifications dans le back-office' },
   } as const
 

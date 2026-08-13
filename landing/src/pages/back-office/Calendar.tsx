@@ -426,6 +426,18 @@ function Planner() {
               </button>
             </div>
               <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                onClick={() => {
+                  const today = new Date()
+                  const dayOfWeek = today.getDay()
+                  setMobileDayIdx(dayOfWeek === 0 ? 0 : dayOfWeek - 1)
+                  setFilters({ ...filters, date: formatLocalDate(new Date()) })
+                }}
+                className='px-2 text-[10px] font-semibold text-white/50 transition hover:text-white/80'
+              >
+                Aujourd'hui
+              </button>
               <div className='relative'>
                 <button
                   type='button'
@@ -501,18 +513,6 @@ function Planner() {
                 )}
               </div>
 
-              <button
-                type='button'
-                onClick={() => {
-                  const today = new Date()
-                  const dayOfWeek = today.getDay()
-                  setMobileDayIdx(dayOfWeek === 0 ? 0 : dayOfWeek - 1)
-                  setFilters({ ...filters, date: formatLocalDate(new Date()) })
-                }}
-                className='text-[10px] font-semibold text-white/50 transition hover:text-white/80'
-              >
-                Auj
-              </button>
               <div className='relative' ref={pickerRef}>
                   <button
                     type='button'
@@ -857,7 +857,7 @@ function Planner() {
                   <div className='mt-1.5 flex items-center justify-between gap-3'>
                     <p className='text-sm text-secondary'>{dayLabel}</p>
                     {isToday ? (
-                      <span className='rounded-full bg-primary/10 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-primary font-medium'>
+                      <span className='ml-3 rounded-full bg-primary/10 px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-primary font-medium'>
                         Aujourd'hui
                       </span>
                     ) : null}

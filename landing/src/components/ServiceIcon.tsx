@@ -28,6 +28,29 @@ export function ServiceIcon({
     )
   }
 
+  // If color is provided, use CSS mask to apply dynamic color
+  if (color) {
+    return (
+      <div
+        className={`${className}`}
+        style={{
+          width: size,
+          height: size,
+          backgroundColor: color,
+          maskImage: `url(${iconSrc})`,
+          WebkitMaskImage: `url(${iconSrc})`,
+          maskSize: 'contain',
+          WebkitMaskSize: 'contain',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+          maskPosition: 'center',
+          WebkitMaskPosition: 'center',
+        }}
+      />
+    )
+  }
+
+  // Default: use img tag
   return (
     <img 
       src={iconSrc} 
@@ -36,7 +59,6 @@ export function ServiceIcon({
       style={{ 
         width: size, 
         height: size,
-        filter: color ? 'none' : undefined
       }}
     />
   )

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type MouseEvent, type TransitionEvent } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import {
@@ -64,7 +65,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
-      // { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'] }, // DISABLED - Feature not ready
+      { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'] },
     ],
   },
   {
@@ -255,6 +256,7 @@ function SidebarContent({
 export default function BackOfficeLayout() {
   const { pathname } = useLocation()
   const { user } = useAuthStore()
+  const { startPolling, stopPolling } = useNotificationsStore()
   const isFullBleedPage = pathname.endsWith('/calendar')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -265,6 +267,20 @@ export default function BackOfficeLayout() {
     }
   })
   const [sidebarTransitioning, setSidebarTransitioning] = useState(false)
+
+  // Start notification polling when user is logged in
+  useEffect(() => {
+    if (user) {
+      console.log('[BackOfficeLayout] 🔔 Starting notification polling...')
+      // Set user role for notification store
+      useNotificationsStore.getState().setUserRole(user.role as any)
+      startPolling()
+      return () => {
+        console.log('[BackOfficeLayout] 🔕 Stopping notification polling...')
+        stopPolling()
+      }
+    }
+  }, [user, startPolling, stopPolling])
 
   const toggleSidebarCollapsed = useCallback(() => {
     setSidebarTransitioning(true)

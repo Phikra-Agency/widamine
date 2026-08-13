@@ -8,8 +8,8 @@ import { fr } from 'date-fns/locale'
 export default function NotificationToast() {
   const { items, markRead, startPolling, stopPolling } = useNotificationsStore()
   const { user } = useAuthStore()
-  const [visible, setVisible] = useState<number[]>([])
-  const [dismissed, setDismissed] = useState<number[]>([])
+  const [visible, setVisible] = useState<(string | number)[]>([])
+  const [dismissed, setDismissed] = useState<(string | number)[]>([])
   const canPoll = user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
 
   useEffect(() => {

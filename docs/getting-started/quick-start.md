@@ -3,21 +3,18 @@
 ## Prerequisites
 
 - Node.js 20+
-- MongoDB 7+ as a **replica set** (Prisma transactions)
+- Access to the PostgreSQL cloud database (already configured in `api/.env`)
 
 ## Steps
 
 ```bash
-# 1. Start MongoDB replica set
-./start-mongodb.sh
-
-# 2. Install dependencies + generate Prisma client
+# 1. Install dependencies + generate Prisma client
 npm run bootstrap
 
-# 3. Seed database
+# 2. Seed database (if starting fresh)
 npm run db:seed
 
-# 4. Start all apps (turbo)
+# 3. Start all apps (turbo)
 npm run dev
 ```
 
@@ -35,14 +32,14 @@ npm run dev
 
 ## Environment
 
-Copy `api/.env.example` to `api/.env` and set required vars:
+The `api/.env` is already configured with the cloud PostgreSQL connection.
+Only set these if missing:
 
 ```env
 JWT_SECRET=<your-secret>
 GROQ_API_KEY=<groq-api-key>   # for chatbot
+BREVO_API_KEY=<brevo-key>     # for email notifications
 ```
-
-`VITE_PUBLIC_API_URL` defaults to `/api` (proxied to API in dev and via nginx in Docker).
 
 ## Proxy env vars
 
@@ -54,7 +51,11 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 
 ## Chatbot lead capture
 
-The chatbot on the landing page collects visitor name + email and stores in `ChatLead` collection. Requires `GROQ_API_KEY` in `api/.env`.
+The chatbot on the landing page collects visitor name + email and stores in `ChatLead`. Requires `GROQ_API_KEY` in `api/.env`.
+
+## WhatsApp notifications
+
+Set `WHATSAPP_ENABLED=true` in `api/.env`, start the API, and scan the QR code that appears in the terminal with WhatsApp mobile. Session persists across restarts.
 
 ## Scripts
 
@@ -64,3 +65,4 @@ The chatbot on the landing page collects visitor name + email and stores in `Cha
 | `npm run build` | Production build |
 | `npm run lint` | Lint all workspaces |
 | `npm run db:seed` | Seed demo data |
+| `npm run db:generate` | Regenerate Prisma client |

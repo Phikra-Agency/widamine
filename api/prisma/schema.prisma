@@ -21,6 +21,7 @@ model User {
   assignedAppointments Appointment[]       @relation("AssignedPractitionerAppointments")
   availabilityBlocks   AvailabilityBlock[]
   resourceAssignments  ResourcePractitioner[]
+  unavailabilities     PractitionerUnavailability[]
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
@@ -192,6 +193,28 @@ model MotifResource {
   updatedAt   DateTime @updatedAt
 
   @@unique([motifId, resourceId])
+}
+
+model PractitionerUnavailability {
+  id              String   @id @default(uuid())
+  practitionerId  String
+  practitioner    User     @relation(fields: [practitionerId], references: [id])
+  startDate       DateTime
+  endDate         DateTime
+  startTime       String
+  endTime         String
+  excuseType      String
+  customReason    String?
+  status          String   @default("PENDING")
+  rejectionReason String?
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([practitionerId])
+  @@index([status])
+  @@index([startDate, endDate])
 }
 
 model AvailabilityBlock {

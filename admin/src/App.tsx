@@ -13,7 +13,7 @@ const Resources = lazy(() => import('@/pages/back-office/Resources'))
 const Motifs = lazy(() => import('@/pages/back-office/Motifs'))
 const Settings = lazy(() => import('@/pages/back-office/Settings'))
 const Reservations = lazy(() => import('@/pages/back-office/Reservations'))
-// const Unavailabilities = lazy(() => import('@/pages/back-office/Unavailabilities')) // DISABLED - Feature not ready
+const Unavailabilities = lazy(() => import('@/pages/back-office/Unavailabilities'))
 
 function App() {
   return (
@@ -45,8 +45,7 @@ function App() {
               </Route>
 
               <Route element={<RoleWrapper roles={['ADMIN', 'DOCTOR', 'PRACTITIONER']} />}>
-                {/* <Route path='unavailabilities' element={<Suspense fallback={null}><Unavailabilities /></Suspense>} /> */}
-                {/* DISABLED - Indisponibilités feature not ready */}
+                <Route path='unavailabilities' element={<Suspense fallback={null}><Unavailabilities /></Suspense>} />
               </Route>
 
               <Route index element={<Navigate to='/calendar' replace />} />

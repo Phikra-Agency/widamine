@@ -494,14 +494,20 @@ function TimeSection({
               type='button'
               onClick={() => isAvailable && onSelectTime(slot.label)}
               disabled={!isAvailable}
-              className='flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-none'
+              className='relative flex flex-col items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none'
               style={{ 
                 borderColor: isAvailable ? '#e5e7eb' : '#f3f4f6', 
                 color: isAvailable ? `${C.secondary}99` : `${C.secondary}40`,
                 backgroundColor: isAvailable ? '#ffffff' : '#fafafa'
               }}
+              title={!isAvailable ? 'Indisponible pour le moment' : undefined}
             >
-              {slot.label}
+              <span>{slot.label}</span>
+              {!isAvailable && (
+                <span className='text-[9px] font-medium' style={{ color: `${C.secondary}30` }}>
+                  Indisponible
+                </span>
+              )}
             </button>
           )
         })}

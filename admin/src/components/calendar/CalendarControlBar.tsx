@@ -218,8 +218,8 @@ export default function CalendarControlBar({
           <div
             className='absolute top-1/2 -translate-y-1/2'
             style={todayButtonSide === 'left'
-              ? { right: 'calc(50% + 130px)' }
-              : { left: 'calc(50% + 130px)' }
+              ? { right: 'calc(50% + 155px)' }
+              : { left: 'calc(50% + 155px)' }
             }
           >
             <Button

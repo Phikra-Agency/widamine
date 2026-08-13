@@ -6,7 +6,7 @@
 |-----|-------------|
 | [Quick start](getting-started/quick-start.md) | Local dev bootstrap |
 | [Docker](getting-started/docker.md) | Compose deployment |
-| [MongoDB](getting-started/mongodb.md) | Replica set setup and notes |
+| [Docker](getting-started/docker.md) | Container deployment |
 
 ## Packages
 

@@ -144,6 +144,7 @@ function PatientsTable({ openDrawer }: { openDrawer: (patient: any) => void }) {
   useSearchHighlight('patients')
 
   const cities = useMemo(() => {
+    if (!items || !Array.isArray(items)) return []
     const norm = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
     const map = new Map<string, string>()
     items.forEach((i) => {

@@ -28,6 +28,7 @@ import {
 import CalendarControlBar from '@/components/calendar/CalendarControlBar'
 
 import PractitionerAnalytics from '@/components/calendar/PractitionerAnalytics'
+import { useAuthStore } from '@/stores/authStore'
 import EventCard from '@/components/calendar/EventCard'
 import {
   CalendarDayGrid,
@@ -138,6 +139,8 @@ function Planner() {
   )
   const [mobileDayIdx, setMobileDayIdx] = useState(0)
   const [pageView, setPageView] = useState<'calendar' | 'analytics'>('calendar')
+  const { user } = useAuthStore()
+  const isDoctor = user?.role === 'DOCTOR' || user?.role === 'PRACTITIONER'
   const [filterPractitionerIds, setFilterPractitionerIds] = useState<string[]>(
     () => { const v = searchParams.get('practitionerIds'); return v ? v.split(',') : [] }
   )
@@ -539,7 +542,7 @@ function Planner() {
         onDateChange={handleDateChange}
         compact={false}
         isAnalytics={pageView === 'analytics'}
-        onToggleAnalytics={() => setPageView(pageView === 'calendar' ? 'analytics' : 'calendar')}
+        onToggleAnalytics={isDoctor ? undefined : () => setPageView(pageView === 'calendar' ? 'analytics' : 'calendar')}
       >
       </CalendarControlBar>
 
@@ -658,7 +661,7 @@ function Planner() {
         </>
       )}
 
-      {pageView === 'analytics' && (
+      {pageView === 'analytics' && !isDoctor && (
         <div className='flex-1 overflow-auto'>
           <div className='bo-page-inner bo-section-stack'>
             {filterPractitionerIds.length === 1 || filterPractitionerIds.length === 2 ? (
