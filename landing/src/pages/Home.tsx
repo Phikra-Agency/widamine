@@ -58,7 +58,7 @@ startxref
 const SM = {
   hero: {
     logo: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af2514716ef72443f348bc_home-logo-middle.svg',
-    topLeft: '/images/leaf-top-left.png',
+    topLeft: '/images/leaf-top-left.webp',
     topRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af35669264ecc82de0caaa_header-top-right.avif',
     midRight: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3566abad49265e1cb9a8_header-middle-right.avif',
     midLeft: 'https://cdn.prod.website-files.com/6605bb62a0c4eb429d0631b4/66af3565abee64cc381d4b75_header-middle-left-vector.svg',
@@ -309,7 +309,7 @@ function HeroSection() {
             boxShadow: '0 28px 70px -28px rgba(30,30,30,0.36)',
           }}
         >
-          <img src='/hero.jpg' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' />
+          <img src='/hero.webp' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' fetchPriority='high' decoding='async' />
         </div>
       </div>
 

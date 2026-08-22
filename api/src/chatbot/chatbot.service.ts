@@ -3,7 +3,7 @@ import { PrismaService } from '@/prisma/prisma.service'
 import { ClinicInfoService } from '@/clinic-info/clinic-info.service'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const MODEL = 'llama-3.3-70b-versatile'
+const MODEL = 'openai/gpt-oss-20b'
 
 interface ToolCall {
   id: string

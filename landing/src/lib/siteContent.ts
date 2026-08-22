@@ -87,6 +87,7 @@ export const ICON_MAP: Record<string, string> = {
   'peeling-visage': '/images/services/peeling-visage.webp',
   'suivi': '/images/services/suivi.webp',
   'bilan': '/images/services/bilan.webp',
+  'peeling': '/images/services/peeling.svg', // dedicated SVG for DB slug 'peeling'
   'sculpsure': '/images/services/sculpsure.webp',
   'sculpSure': '/images/services/sculpsure.webp', // alias
   'epilation-laser-complete': '/images/services/epilation-laser.webp',
