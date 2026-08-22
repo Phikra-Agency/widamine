@@ -63,27 +63,27 @@ async function main() {
 
   // ── Motifs ─────────────────────────────────────────────
   const motifConsultation = await prisma.motif.create({
-    data: { name: 'Consultation', slug: 'consultation', duration: 30, color: '#3b82f6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation générale' },
+    data: { name: 'Consultation', slug: 'consultation', duration: 30, color: '#3b82f6', isActive: true, isOnlineBookable: true, category: 'visage', requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation générale' },
   })
 
   const motifSuivi = await prisma.motif.create({
-    data: { name: 'Suivi', slug: 'suivi', duration: 20, color: '#f59e0b', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation de suivi' },
+    data: { name: 'Suivi', slug: 'suivi', duration: 20, color: '#f59e0b', isActive: true, isOnlineBookable: true, category: 'visage', requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Consultation de suivi' },
   })
 
   const motifBilan = await prisma.motif.create({
-    data: { name: 'Bilan', slug: 'bilan', duration: 60, color: '#8b5cf6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Bilan complet' },
+    data: { name: 'Bilan', slug: 'bilan', duration: 60, color: '#8b5cf6', isActive: true, isOnlineBookable: true, category: 'visage', requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Bilan complet' },
   })
 
   const motifLaser = await prisma.motif.create({
-    data: { name: 'Épilation laser', slug: 'epilation-laser', duration: 45, color: '#ec4899', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Séance d\'épilation laser' },
+    data: { name: 'Épilation laser', slug: 'epilation-laser', duration: 45, color: '#ec4899', isActive: true, isOnlineBookable: true, category: 'techniques', requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'Séance d\'épilation laser' },
   })
 
   const motifPeeling = await prisma.motif.create({
-    data: { name: 'Peeling', slug: 'peeling', duration: 30, color: '#14b8a6', isActive: true, requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Séance de peeling visage' },
+    data: { name: 'Peeling', slug: 'peeling', duration: 30, color: '#14b8a6', isActive: true, isOnlineBookable: true, category: 'visage', requiresPractitionerChoice: false, pendingTtlHours: 24, description: 'Séance de peeling visage' },
   })
 
   const motifSculpSure = await prisma.motif.create({
-    data: { name: 'SculpSure', slug: 'sculpSure', duration: 25, color: '#2E90C0', isActive: true, requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'SculpSure — traitement des bourrelets graisseux' },
+    data: { name: 'SculpSure', slug: 'sculpSure', duration: 25, color: '#2E90C0', isActive: true, isOnlineBookable: true, category: 'corps', requiresPractitionerChoice: true, pendingTtlHours: 24, description: 'SculpSure — traitement des bourrelets graisseux' },
   })
 
   // ── Sessions ───────────────────────────────────────────
