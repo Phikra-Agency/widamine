@@ -804,7 +804,7 @@ Réservation reçue
           embedded
             ? 'relative flex w-full max-w-full flex-col sm:max-w-[720px]'
             : 'pointer-events-auto relative flex w-full flex-col'
-        } overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl`}
+        } max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain rounded-2xl border border-gray-100 bg-white shadow-xl`}
         style={{ width: embedded ? undefined : `min(calc(100vw - 1.5rem), 680px)` }}
       >
         <div className='mb-5 flex items-center justify-between px-5 pt-5 sm:mb-6 sm:px-6 sm:pt-6'>
@@ -813,7 +813,7 @@ Réservation reçue
           </h2>
           {embedded ? null : (
             <button onClick={onClose} style={{ color: C.secondary }}>
-              <X size={20} weight='duotone' opacity={0.4} />
+              <X size={20} weight='regular' opacity={0.4} />
             </button>
           )}
         </div>
@@ -827,7 +827,7 @@ Réservation reçue
               transition={{ duration: 0.35, ease: 'easeOut' }}
               src='/images/team/dr widad slaoui.jpg'
               alt='Dr. Widad Slaoui'
-              className='h-[200px] w-full rounded-2xl object-cover object-center shadow-md sm:h-[270px]'
+              className='h-[200px] w-full rounded-2xl object-cover object-[center_20%] sm:object-center shadow-md sm:h-[270px]'
             />
             <motion.span
               initial={{ opacity: 0, y: 8 }}
