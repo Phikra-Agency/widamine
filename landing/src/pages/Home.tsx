@@ -542,12 +542,11 @@ function TeamSection() {
                       loading='lazy'
                     />
                   </div>
-                  <div className='pointer-events-none absolute inset-x-1 bottom-1 h-[55%] rounded-b-[1.75rem] bg-gradient-to-t from-black/80 via-black/30 to-transparent' />
                   <div className='absolute bottom-0 left-0 right-0 p-6 sm:p-7'>
-                    <h3 className='font-semibold leading-tight text-white' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, letterSpacing: '0.01em' }}>
+                    <h3 className='font-semibold leading-tight text-white' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h5, letterSpacing: '0.01em', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
                       {m.name}
                     </h3>
-                    <p className='mt-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/70'>
+                    <p className='mt-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white' style={{ textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
                       {m.role}
                     </p>
                   </div>
