@@ -523,7 +523,7 @@ function TeamSection() {
           <Swiper
             modules={[Autoplay, Navigation]}
             navigation={{ prevEl: '.team-prev', nextEl: '.team-next' }}
-            autoplay={{ delay: 2200, disableOnInteraction: false }}
+            autoplay={{ delay: 1400, disableOnInteraction: false }}
             slidesPerView={1}
             breakpoints={{ 640: { slidesPerView: 3, spaceBetween: 12 } }}
             spaceBetween={12}
