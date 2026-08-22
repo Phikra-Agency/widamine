@@ -83,10 +83,14 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         [/oeil|eye|paupi[eè]re/i, 'eye-aesthetics'],
         [/sourcil|eyebrow/i, 'eyebrow-aesthetics'],
       ]
-      const KNOWN = ['facial-aesthetics','lip-aesthetics','eye-aesthetics','eyebrow-aesthetics','body-aesthetics','breast-aesthetics','butt-aesthetics','arm-aesthetics','liposuction','vaser-liposuction','epilation-laser','consultation']
-      let data = res.data.map((item: any) => {
-        const slug = item.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') || ''
-        let icon = KNOWN.includes(slug) ? slug : null
+       let data = res.data.map((item: any) => {
+        // Use the real DB slug as icon source — ICON_MAP is keyed by DB slugs
+        const dbSlug = (item.slug || '').toLowerCase()
+        // Fallback: generate from name only if slug missing
+        const fallbackSlug = item.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') || ''
+        const slug = dbSlug || fallbackSlug
+        // Direct match in ICON_MAP keys, otherwise heuristic fallback
+        let icon: string | null = slug
         if (!icon) {
           const match = FALLBACK.find(([re]) => re.test(item.name))
           if (match) icon = match[1]

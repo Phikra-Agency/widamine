@@ -92,6 +92,17 @@ export const ICON_MAP: Record<string, string> = {
   'sculpSure': '/images/services/sculpsure.webp', // alias
   'epilation-laser-complete': '/images/services/epilation-laser.webp',
   'epilation-laser': '/images/services/epilation-laser.webp', // alias
+  // Sync: reservation popup fallback slugs → reuse visage/corps/techniques icons
+  'facial-aesthetics': '/images/services/peeling.svg',
+  'lip-aesthetics': '/images/services/consultation.webp',
+  'eye-aesthetics': '/images/services/bilan.webp',
+  'eyebrow-aesthetics': '/images/services/suivi.webp',
+  'body-aesthetics': '/images/services/sculpsure.webp',
+  'breast-aesthetics': '/images/services/sculpsure.webp',
+  'butt-aesthetics': '/images/services/sculpsure.webp',
+  'arm-aesthetics': '/images/services/sculpsure.webp',
+  'liposuction': '/images/services/sculpsure.webp',
+  'vaser-liposuction': '/images/services/sculpsure.webp',
 }
 
 export const MEGA_CATEGORIES = [
