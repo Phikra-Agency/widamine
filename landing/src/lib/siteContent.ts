@@ -88,19 +88,19 @@ export const ICON_MAP: Record<string, string> = {
   'suivi': '/images/services/suivi.svg',
   'bilan': '/images/services/bilan.svg',
   'peeling': '/images/services/peeling.svg', // dedicated SVG for DB slug 'peeling'
-  'sculpsure': '/images/services/sculpsure.webp',
-  'sculpSure': '/images/services/sculpsure.webp', // alias
-  'epilation-laser-complete': '/images/services/epilation-laser.webp',
-  'epilation-laser': '/images/services/epilation-laser.webp', // alias
+  'sculpsure': '/images/services/sculpSure.svg',
+  'sculpSure': '/images/services/sculpSure.svg', // alias — premium thin-stroke
+  'epilation-laser-complete': '/images/services/epilation-laser.svg',
+  'epilation-laser': '/images/services/epilation-laser.svg', // alias — premium thin-stroke
   // Sync: reservation popup fallback slugs → reuse visage/corps/techniques icons
   'facial-aesthetics': '/images/services/peeling.svg',
-  'lip-aesthetics': '/images/services/consultation.webp',
-  'eye-aesthetics': '/images/services/bilan.webp',
-  'eyebrow-aesthetics': '/images/services/suivi.webp',
-  'body-aesthetics': '/images/services/sculpsure.webp',
-  'breast-aesthetics': '/images/services/sculpsure.webp',
-  'butt-aesthetics': '/images/services/sculpsure.webp',
-  'arm-aesthetics': '/images/services/sculpsure.webp',
+  'lip-aesthetics': '/images/services/consultation-icon.svg',
+  'eye-aesthetics': '/images/services/bilan.svg',
+  'eyebrow-aesthetics': '/images/services/suivi.svg',
+  'body-aesthetics': '/images/services/sculpSure.svg',
+  'breast-aesthetics': '/images/services/sculpSure.svg',
+  'butt-aesthetics': '/images/services/sculpSure.svg',
+  'arm-aesthetics': '/images/services/sculpSure.svg',
   'liposuction': '/images/services/sculpsure.webp',
   'vaser-liposuction': '/images/services/sculpsure.webp',
 }
