@@ -83,10 +83,10 @@ export function serviceToContent(s: DynamicService): ServicePageContent {
 
 /* ── Service icon illustrations (generated with make-service-icons.py) ─────── */
 export const ICON_MAP: Record<string, string> = {
-  'consultation': '/images/services/consultation.webp',
+  'consultation': '/images/services/consultation-icon.svg',
   'peeling-visage': '/images/services/peeling-visage.webp',
-  'suivi': '/images/services/suivi.webp',
-  'bilan': '/images/services/bilan.webp',
+  'suivi': '/images/services/suivi.svg',
+  'bilan': '/images/services/bilan.svg',
   'peeling': '/images/services/peeling.svg', // dedicated SVG for DB slug 'peeling'
   'sculpsure': '/images/services/sculpsure.webp',
   'sculpSure': '/images/services/sculpsure.webp', // alias

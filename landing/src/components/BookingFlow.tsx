@@ -219,7 +219,7 @@ function ReservationSteps({
               {motifsError ? <InlineMessage tone='error'>{motifsError}</InlineMessage> : null}
               {isLoadingMotifs ? <InlineMessage>Chargement des motifs...</InlineMessage> : null}
               <div className='mb-5 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-2'>
-                {motifs.map((motif) => (
+                {motifs.filter((m: any) => (m.slug || m.icon) !== 'consultation').map((motif) => (
                   <button
                     key={motif.id}
                     data-active={selectedMotif?.id === motif.id}
