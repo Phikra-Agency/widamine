@@ -37,14 +37,14 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
   const dynamicCategories = (['visage', 'corps', 'techniques'] as const).map((cat) => ({
     slug: cat,
     label: CATEGORY_LABELS[cat],
-    items: [] as { label: string; href: string; slug: string }[],
+    items: [] as { label: string; href: string; slug: string; color: string }[],
   }))
 
   // First, add static SERVICE_PAGES items
   SERVICE_PAGES.forEach((p) => {
     const target = dynamicCategories.find((c) => c.slug === p.category)
     if (target) {
-      target.items.push({ label: p.title, href: `/services/${p.slug}`, slug: p.slug })
+      target.items.push({ label: p.title, href: `/services/${p.slug}`, slug: p.slug, color: p.color })
       knownSlugs.add(p.slug)
     }
   })
@@ -56,7 +56,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
     const apiCategory = s.category as 'visage' | 'corps' | 'techniques' | undefined
     const target = dynamicCategories.find((c) => c.slug === apiCategory)
     if (target) {
-      target.items.push({ label: s.name, href: `/services/${s.slug}`, slug: s.slug })
+      target.items.push({ label: s.name, href: `/services/${s.slug}`, slug: s.slug, color: s.color || C.primary })
       knownSlugs.add(s.slug)
     }
   })
@@ -226,8 +226,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${C.primary}10` }}>
-                                    <ServiceIcon slug={item.slug} size={20} color={C.primary} />
+                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${item.color}14` }}>
+                                    <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
                                   <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>
                                 </Link>
@@ -349,7 +349,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <ServiceIcon slug={item.slug} size={20} color={C.primary} className='opacity-70' />
+                        <ServiceIcon slug={item.slug} size={20} color={item.color} className='opacity-80' />
                         {item.label}
                       </Link>
                     ))}
