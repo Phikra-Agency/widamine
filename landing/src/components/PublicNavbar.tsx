@@ -226,7 +226,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${item.color}14` }}>
+                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
                                   <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>

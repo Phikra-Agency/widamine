@@ -234,7 +234,7 @@ function ReservationSteps({
                       boxShadow: selectedMotif?.id === motif.id ? `0 0 0 1px ${C.primary}` : '0 1px 2px rgba(0,0,0,0.04)',
                     }}
                   >
-                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg' style={{ backgroundColor: `${motif.color || C.primary}14` }}>
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border' style={{ backgroundColor: `${motif.color || C.primary}16`, borderColor: `${motif.color || C.primary}22` }}>
                       <ServiceIcon slug={motif.icon} size={22} color={motif.color || C.primary} />
                     </div>
                     <span className='min-w-0 text-sm font-medium' style={{ color: C.secondary }}>{motif.name}</span>
