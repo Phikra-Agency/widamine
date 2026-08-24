@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="400" height="400">
-  <!-- Consultation: chat bubble — matches drop/wave weight -->
-  <path d="M5 6.5A2.2 2.2 0 0 1 7.2 4.3h9.6A2.2 2.2 0 0 1 19 6.5v6.8A2.2 2.2 0 0 1 16.8 15.5H9.8L5.5 19.2V6.5Z" fill="black"/>
-  <path d="M8.5 10.5h7M8.5 13.2h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+  <!-- Consultation: elegant faces + chat — luxury consult -->
+  <path d="M7.2 5.2c-1.1 0-2 1-2 2.1v5.6c0 1.1.9 2.1 2 2.1h2.6l2.2 2.3V15h2.5c1.1 0 2-1 2-2.1V7.3c0-1.1-.9-2.1-2-2.1H7.2Z" fill="none" stroke="black" stroke-width="1.15" stroke-linejoin="round"/>
+  <circle cx="9.2" cy="9.5" r="1.6" fill="none" stroke="black" stroke-width="1.1"/>
+  <path d="M7.6 12.3c.5.7 1.1 1.2 1.6 1.2.5 0 1.1-.5 1.6-1.2" fill="none" stroke="black" stroke-width="1" stroke-linecap="round"/>
+  <path d="M13.2 9.5h3M13.2 11.8h2.2" stroke="black" stroke-width="1.15" stroke-linecap="round"/>
+  <circle cx="16.5" cy="6.2" r="1.4" fill="black"/>
+  <path d="M15.6 6.2h1.8M16.5 5.3v1.8" stroke="white" stroke-width="1" stroke-linecap="round"/>
 </svg>
