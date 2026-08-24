@@ -77,3 +77,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Updated 4 icons to bold simple language (refresh/doc/sparkle/chat) to match wave+drop

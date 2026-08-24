@@ -1,8 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="400" height="400">
-  <!-- Bilan — chart + pulse — premium thin stroke, black on transparent for CSS mask -->
-  <path d="M5 16.5h14" stroke="black" stroke-width="1.2" stroke-linecap="round"/>
-<rect x="6" y="11.5" width="3" height="5" rx="1" fill="black"/>
-<rect x="10.5" y="8.5" width="3" height="8" rx="1" fill="black"/>
-<rect x="15" y="5.5" width="3" height="11" rx="1" fill="black"/>
-<path d="M3.5 4.2h17" stroke="black" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>
+  <!-- Bilan: document with pulse — clean -->
+  <path d="M7 3.5h8l4 4v10a1.5 1.5 0 0 1-1.5 1.5h-10.5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 7 3.5Z" fill="none" stroke="black" stroke-width="1.45" stroke-linejoin="round"/>
+  <path d="M15 3.5v4h4" fill="none" stroke="black" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M8.5 13h3M8.5 16h5.5" stroke="black" stroke-width="1.3" stroke-linecap="round"/>
+  <path d="M14.5 11.5l1.2 2 1.8-3" fill="none" stroke="black" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
