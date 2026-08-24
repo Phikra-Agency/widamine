@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import PublicNavbar from '@/components/PublicNavbar'
 import { useServices } from '@/hooks/useServices'
 import { serviceToContent, ICON_MAP } from '@/lib/siteContent'
+import { ServiceIcon } from '@/components/ServiceIcon'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { C, TYPE, SPACING } from '@/lib/theme'
 
@@ -105,16 +106,10 @@ export default function ServiceCategory() {
                   className='group flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 py-8 sm:py-10 md:py-14 border-b transition-colors hover:bg-white/40 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 rounded-2xl'
                   style={{ borderColor: 'rgba(26,54,70,0.08)' }}
                 >
-                  {/* Service Icon */}
-                  {ICON_MAP[service.slug] && (
-                    <div className='shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-[rgba(26,54,70,0.08)] bg-white/50 transition-all group-hover:border-[#009FD6]/30 group-hover:shadow-lg'>
-                      <img 
-                        src={ICON_MAP[service.slug]} 
-                        alt={service.title}
-                        className='w-full h-full object-cover transition-transform group-hover:scale-105'
-                      />
-                    </div>
-                  )}
+                  {/* Service Icon — per-motif tint */}
+                  <div className='shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border bg-white/50 flex items-center justify-center transition-all group-hover:shadow-lg' style={{ borderColor: `${service.color}18`, background: `${service.color}0f` }}>
+                    <ServiceIcon slug={service.slug} size={28} color={service.color} />
+                  </div>
 
                   <div className='md:flex-1'>
                     <div className='mb-3 sm:mb-4 flex flex-wrap gap-2 sm:gap-3'>
