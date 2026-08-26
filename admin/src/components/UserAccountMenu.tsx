@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { GearSix, SignOut as LogOut, CaretUp, CaretLeft, User, EnvelopeSimple, Bell } from '@phosphor-icons/react'
+import { GearSix, SignOut as LogOut, CaretUp, CaretLeft, User, EnvelopeSimple, Bell, WhatsappLogo } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useRef } from 'react'
@@ -18,8 +18,8 @@ import api from '@/lib/api'
 import axios from 'axios'
 
 type NotificationType = 'confirmation' | 'reminder' | 'cancellation'
-type EnabledKey = 'smsEnabled' | 'emailEnabled'
-type TypesKey = 'smsTypes' | 'emailTypes'
+type EnabledKey = 'smsEnabled' | 'emailEnabled' | 'whatsappEnabled'
+type TypesKey = 'smsTypes' | 'emailTypes' | 'whatsappTypes'
 
 interface ChannelTypes {
   confirmation: boolean
@@ -31,18 +31,22 @@ interface NotificationSettings {
   smsEnabled: boolean
   emailEnabled: boolean
   inAppEnabled: boolean
+  whatsappEnabled: boolean
   smsTypes: ChannelTypes
   emailTypes: ChannelTypes
   inAppTypes: ChannelTypes
+  whatsappTypes: ChannelTypes
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
   smsEnabled: false,
   emailEnabled: true,
   inAppEnabled: true,
+  whatsappEnabled: false,
   smsTypes: { confirmation: true, reminder: true, cancellation: false },
   emailTypes: { confirmation: true, reminder: true, cancellation: true },
   inAppTypes: { confirmation: true, reminder: true, cancellation: false },
+  whatsappTypes: { confirmation: false, reminder: false, cancellation: false },
 }
 
 const TYPES: { key: NotificationType; label: string }[] = [
@@ -149,6 +153,7 @@ export default function UserAccountMenu({
   const channels = [
     { key: 'email' as const, label: 'Email', icon: EnvelopeSimple },
     { key: 'inApp' as const, label: 'In-App', icon: Bell },
+    { key: 'whatsapp' as const, label: 'WhatsApp', icon: WhatsappLogo },
   ]
 
   return (

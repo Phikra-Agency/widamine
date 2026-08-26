@@ -7,6 +7,7 @@ import { ArrowRight, CaretDown } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/api'
 import UserAccountMenu from '@/components/UserAccountMenu'
+import SidebarNotificationBell from '@/components/SidebarNotificationBell'
 
 function parseSchedule(datetime?: string): Date | null {
   if (!datetime) return null
@@ -97,6 +98,7 @@ export default function PractitionerStatusBar() {
         {/* Desktop layout */}
         <div className='hidden min-w-0 items-center md:flex md:border-r md:border-secondary/8 md:px-5 md:py-0'>
           <UserAccountMenu variant='compact' />
+          <SidebarNotificationBell />
         </div>
 
         <button
@@ -221,7 +223,8 @@ function MobileBottomBar({
             <span className='text-[10px] font-medium text-secondary/40'>{todayTotal} aujourd'hui</span>
           )}
         </div>
-        <div className='flex items-center gap-1'>
+        <div className='flex items-center gap-1.5'>
+          <SidebarNotificationBell />
           {open && (
             <Link
               to='/patients'

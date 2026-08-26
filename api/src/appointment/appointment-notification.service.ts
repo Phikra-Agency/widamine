@@ -354,100 +354,255 @@ export class AppointmentNotificationService {
   //  5. DOCTOR — new appointment
   // ════════════════════════════════════════════════════════════════
 
-  async notifyDoctorNewAppointment(appointmentId: string) {
-    if (!(await this.canSendAnyEmail())) return;
-
+  async notifyDoctorNewAppointment(appointmentId: string, changedBy?: { id: string; name: string; role: string }) {
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appt?.practitionerId) return;
+    if (!appt) return;
 
-    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
-    if (!doctor) return;
-    const to = doctor.notificationEmail ?? doctor.email;
-    if (!to) return;
+    // CREATE IN-APP NOTIFICATION for assigned practitioner
+    if (appt.practitionerId) {
+      const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'PRACTITIONER',
+          recipient: appt.practitionerId,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Nouveau rendez-vous${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    const html = this.wrap(`
-      ${this.title('📋', 'Nouvelle réservation')}
-      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
-      ${this.paragraph('Un nouveau rendez-vous vous a été assigné.')}
-      ${this.detailsTable([
-        ['Patient', this.patientName(appt)],
-        ['Téléphone', appt.phone || '—'],
-        ['Traitement', appt.motif?.name || '—'],
-        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
-        ['Note', appt.context || '—'],
-      ])}
-      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
-    `);
+    // CREATE IN-APP NOTIFICATION for all ADMINs
+    const admins = await this.prisma.user.findMany({
+      where: { role: 'ADMIN' },
+      select: { id: true, name: true },
+    });
+    
+    const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+    for (const admin of admins) {
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'ADMIN',
+          recipient: admin.id,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Nouveau rendez-vous${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    await this.mailService.sendMail(to, `Nouvelle réservation — ${appt.motif?.name || 'Widamine'}`, html);
+    // SEND EMAIL to practitioner if enabled
+    if (appt.practitionerId && (await this.canSendAnyEmail())) {
+      const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
+      if (doctor) {
+        const to = doctor.notificationEmail ?? doctor.email;
+        if (to) {
+          const html = this.wrap(`
+            ${this.title('📋', 'Nouvelle réservation')}
+            ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+            ${this.paragraph('Un nouveau rendez-vous vous a été assigné.')}
+            ${this.detailsTable([
+              ['Patient', this.patientName(appt)],
+              ['Téléphone', appt.phone || '—'],
+              ['Traitement', appt.motif?.name || '—'],
+              ['Date', this.dateStr(appt.schedules[0]?.datetime)],
+              ['Note', appt.context || '—'],
+            ])}
+            ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
+          `);
+
+          await this.mailService.sendMail(to, `Nouvelle réservation — ${appt.motif?.name || 'Widamine'}`, html);
+        }
+      }
+    }
   }
 
   // ════════════════════════════════════════════════════════════════
   //  6. DOCTOR — confirmation
   // ════════════════════════════════════════════════════════════════
 
-  async notifyDoctorConfirmation(appointmentId: string) {
-    if (!(await this.canSendAnyEmail())) return;
-
+  async notifyDoctorConfirmation(appointmentId: string, changedBy?: { id: string; name: string; role: string }) {
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appt?.practitionerId) return;
+    if (!appt) return;
 
-    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
-    if (!doctor) return;
-    const to = doctor.notificationEmail ?? doctor.email;
-    if (!to) return;
+    // CREATE IN-APP NOTIFICATION for assigned practitioner
+    if (appt.practitionerId) {
+      const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'PRACTITIONER',
+          recipient: appt.practitionerId,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Rendez-vous confirmé${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    const html = this.wrap(`
-      ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
-      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
-      ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
-      ${this.detailsTable([
-        ['Patient', this.patientName(appt)],
-        ['Traitement', appt.motif?.name || '—'],
-        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
-      ])}
-      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
-    `, this.COLORS.success);
+    // CREATE IN-APP NOTIFICATION for all ADMINs
+    const admins = await this.prisma.user.findMany({
+      where: { role: 'ADMIN' },
+      select: { id: true },
+    });
+    
+    const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+    for (const admin of admins) {
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'ADMIN',
+          recipient: admin.id,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Rendez-vous confirmé${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    await this.mailService.sendMail(to, `Confirmé — ${appt.motif?.name || 'Widamine'}`, html);
+    // SEND EMAIL to practitioner if enabled
+    if (appt.practitionerId && (await this.canSendAnyEmail())) {
+      const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
+      if (doctor) {
+        const to = doctor.notificationEmail ?? doctor.email;
+        if (to) {
+          const html = this.wrap(`
+            ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
+            ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+            ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
+            ${this.detailsTable([
+              ['Patient', this.patientName(appt)],
+              ['Traitement', appt.motif?.name || '—'],
+              ['Date', this.dateStr(appt.schedules[0]?.datetime)],
+            ])}
+            ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
+          `, this.COLORS.success);
+
+          await this.mailService.sendMail(to, `Confirmé — ${appt.motif?.name || 'Widamine'}`, html);
+        }
+      }
+    }
   }
 
   // ════════════════════════════════════════════════════════════════
   //  7. DOCTOR — cancellation
   // ════════════════════════════════════════════════════════════════
 
-  async notifyDoctorCancellation(appointmentId: string) {
-    if (!(await this.canSendAnyEmail())) return;
-
+  async notifyDoctorCancellation(appointmentId: string, changedBy?: { id: string; name: string; role: string }) {
     const appt = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
       include: { motif: true, practitioner: true, schedules: true, patient: true },
     });
-    if (!appt?.practitionerId) return;
+    if (!appt) return;
 
-    const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
-    if (!doctor) return;
-    const to = doctor.notificationEmail ?? doctor.email;
-    if (!to) return;
+    // CREATE IN-APP NOTIFICATION for assigned practitioner
+    if (appt.practitionerId) {
+      const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'PRACTITIONER',
+          recipient: appt.practitionerId,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Rendez-vous annulé${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    const html = this.wrap(`
-      ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
-      ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
-      ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
-      ${this.detailsTable([
-        ['Patient', this.patientName(appt)],
-        ['Traitement', appt.motif?.name || '—'],
-        ['Date', this.dateStr(appt.schedules[0]?.datetime)],
-      ])}
-      ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
-    `, this.COLORS.danger);
+    // CREATE IN-APP NOTIFICATION for all ADMINs
+    const admins = await this.prisma.user.findMany({
+      where: { role: 'ADMIN' },
+      select: { id: true },
+    });
+    
+    const changedByText = changedBy ? ` par ${changedBy.role === 'DOCTOR' ? 'Dr.' : changedBy.role === 'ADMIN' ? 'Admin' : ''} ${changedBy.name}` : '';
+    for (const admin of admins) {
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: appt.id,
+          channel: 'IN_APP',
+          recipientType: 'ADMIN',
+          recipient: admin.id,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Rendez-vous annulé${changedByText}: ${this.patientName(appt)} - ${appt.motif?.name || 'Consultation'}`,
+          sentAt: new Date(),
+        },
+      });
+    }
 
-    await this.mailService.sendMail(to, `Annulé — ${appt.motif?.name || 'Widamine'}`, html);
+    // SEND EMAIL to practitioner if enabled
+    if (appt.practitionerId && (await this.canSendAnyEmail())) {
+      const doctor = await this.prisma.user.findUnique({ where: { id: appt.practitionerId } });
+      if (doctor) {
+        const to = doctor.notificationEmail ?? doctor.email;
+        if (to) {
+          const html = this.wrap(`
+            ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
+            ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
+            ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
+            ${this.detailsTable([
+              ['Patient', this.patientName(appt)],
+              ['Traitement', appt.motif?.name || '—'],
+              ['Date', this.dateStr(appt.schedules[0]?.datetime)],
+            ])}
+            ${this.closing('Dr. ' + (doctor.name || 'Widamine'))}
+          `, this.COLORS.danger);
+
+          await this.mailService.sendMail(to, `Annulé — ${appt.motif?.name || 'Widamine'}`, html);
+        }
+      }
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  8. CONTACT FORM NOTIFICATION
+  // ════════════════════════════════════════════════════════════════
+
+  async notifyContactFormSubmission(contactId: string) {
+    const contact = await this.prisma.contact.findUnique({
+      where: { id: contactId },
+    });
+    if (!contact) return;
+
+    // CREATE IN-APP NOTIFICATION for all ADMINs and RECEPTIONISTs
+    const staff = await this.prisma.user.findMany({
+      where: { role: { in: ['ADMIN', 'RECEPTIONIST'] } },
+      select: { id: true, role: true },
+    });
+
+    for (const user of staff) {
+      await this.prisma.notificationLog.create({
+        data: {
+          appointmentId: contactId, // Using contactId since we don't have a separate contactId field
+          channel: 'IN_APP',
+          recipientType: user.role,
+          recipient: user.id,
+          provider: 'system',
+          status: 'DELIVERED',
+          message: `Nouveau message de contact: ${contact.name} - ${contact.phone}`,
+          sentAt: new Date(),
+        },
+      });
+    }
   }
 }

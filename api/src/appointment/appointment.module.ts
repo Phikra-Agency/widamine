@@ -10,5 +10,6 @@ import { AppointmentNotificationService } from "./appointment-notification.servi
   imports: [MailModule, SmsModule, PatientModule],
   controllers: [AppointmentController],
   providers: [AppointmentService, AppointmentNotificationService],
+  exports: [AppointmentService, AppointmentNotificationService],
 })
 export class AppointmentModule {}

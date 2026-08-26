@@ -5,7 +5,7 @@ interface NotificationItem {
   id: string | number
   type: 'new_booking' | 'new_contact' | 'cancellation' | 'reminder'
   message: string
-  appointmentId?: number
+  appointmentId?: string | number
   contactId?: string
   createdAt: string
   read: boolean
@@ -78,6 +78,31 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
       const appointmentItems: NotificationItem[] = []
       const contactItems: NotificationItem[] = []
 
+      // Doctors: only their own appointments (server-scoped), only open bookings
+      if (role === 'DOCTOR' || role === 'PRACTITIONER') {
+        try {
+          const appointmentsRes = await api.get<{ id: string; name: string; status: string; createdAt: string }[]>('appointments')
+          appointmentItems.push(
+            ...appointmentsRes.data
+              .filter(
+                (a) =>
+                  (a.status === 'PENDING' || a.status === 'CONFIRMED') &&
+                  new Date(a.createdAt).getTime() > last,
+              )
+              .map((a) => ({
+                id: `appointment-${a.id}`,
+                type: 'new_booking' as const,
+                message: `Nouvelle réservation de ${a.name}`,
+                appointmentId: a.id,
+                createdAt: a.createdAt,
+                read: false,
+              }))
+          )
+        } catch (err: any) {
+          console.error('[Notifications] ❌ Error fetching appointments:', err)
+        }
+      }
+
       // Only ADMIN and RECEPTIONIST can access appointments queue
       if (role === 'ADMIN' || role === 'RECEPTIONIST') {
         try {
@@ -102,23 +127,25 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
         }
       }
 
-      // All roles can access contacts
-      try {
-        const contactsRes = await api.get<{ id: string; name: string; email: string; createdAt: string }[]>('contacts?read=false')
-        contactItems.push(
-          ...contactsRes.data
-            .filter((c) => new Date(c.createdAt).getTime() > last)
-            .map((c) => ({
-              id: `contact-${c.id}`,
-              type: 'new_contact' as const,
-              message: `Nouveau message de ${c.name} (${c.email})`,
-              contactId: c.id,
-              createdAt: c.createdAt,
-              read: false,
-            }))
-        )
-      } catch (err: any) {
-        console.error('[Notifications] ❌ Error fetching contacts:', err)
+      // Inbox messages are handled by ADMIN/RECEPTIONIST — doctors see only their own bookings
+      if (role !== 'DOCTOR' && role !== 'PRACTITIONER') {
+        try {
+          const contactsRes = await api.get<{ id: string; name: string; email: string; createdAt: string }[]>('contacts?read=false')
+          contactItems.push(
+            ...contactsRes.data
+              .filter((c) => new Date(c.createdAt).getTime() > last)
+              .map((c) => ({
+                id: `contact-${c.id}`,
+                type: 'new_contact' as const,
+                message: `Nouveau message de ${c.name} (${c.email})`,
+                contactId: c.id,
+                createdAt: c.createdAt,
+                read: false,
+              }))
+          )
+        } catch (err: any) {
+          console.error('[Notifications] ❌ Error fetching contacts:', err)
+        }
       }
 
       const allItems = [...appointmentItems, ...contactItems]

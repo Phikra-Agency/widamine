@@ -14,14 +14,25 @@ import { ContactService } from "./contact.service";
 import { CreateContactDto } from "./dto/create-contact.dto";
 import { AuthGuard } from "@/auth/auth.guard";
 import { RoleGuard } from "@/auth/role.guard";
+import { AppointmentNotificationService } from "@/appointment/appointment-notification.service";
 
 @Controller("contacts")
 export class ContactController {
-  constructor(private readonly contactService: ContactService) {}
+  constructor(
+    private readonly contactService: ContactService,
+    private readonly notificationService: AppointmentNotificationService,
+  ) {}
 
   @Post()
-  create(@Body() createContactDto: CreateContactDto) {
-    return this.contactService.create(createContactDto);
+  async create(@Body() createContactDto: CreateContactDto) {
+    const contact = await this.contactService.create(createContactDto);
+    
+    // Notify staff about new contact form submission
+    this.notificationService.notifyContactFormSubmission(contact.id).catch((err) =>
+      console.error("Failed to notify contact submission:", err.message),
+    );
+    
+    return contact;
   }
 
   @UseGuards(AuthGuard, RoleGuard("ADMIN", "RECEPTIONIST", "DOCTOR", "PRACTITIONER"))
