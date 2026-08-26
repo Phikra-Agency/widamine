@@ -309,8 +309,8 @@ function HeroSection() {
             boxShadow: '0 28px 70px -28px rgba(30,30,30,0.36)',
           }}
         >
-          <img src='/hero.webp' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' fetchPriority='high' decoding='async' style={{ filter: 'saturate(0.85) brightness(1.05) hue-rotate(6deg)' }} />
-          <div className='absolute inset-0 bg-[#009FD6]/[0.12] pointer-events-none' aria-hidden />
+          <img src='/hero.webp' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' fetchPriority='high' decoding='async' style={{ filter: 'saturate(0.82) brightness(1.06) hue-rotate(8deg)' }} />
+          <div className='absolute inset-0 bg-[#009FD6]/[0.15] pointer-events-none' aria-hidden />
         </div>
       </div>
 
