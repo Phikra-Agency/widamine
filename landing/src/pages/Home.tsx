@@ -292,7 +292,7 @@ function HeroSection() {
           </button>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-all duration-500 active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-all duration-500 hover:brightness-[0.92] hover:bg-primary/[0.04] active:scale-[0.96]'
             style={{ borderColor: C.primary, color: C.secondary }}
           >
             Prendre rendez-vous

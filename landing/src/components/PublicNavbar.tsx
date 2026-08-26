@@ -229,7 +229,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85 group-hover:font-semibold'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85 transition-all duration-200 group-hover:font-semibold'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>
