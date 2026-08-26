@@ -209,7 +209,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                             <Link
                               to={`/category/${cat.slug}`}
                               onClick={() => setIsServicesOpen(false)}
-                              className='group mb-5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold uppercase tracking-wide transition-all duration-300 hover:bg-primary/5'
+                              className='group mb-5 flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-bold uppercase tracking-wide transition-all duration-300'
                               style={{ color: C.primary }}
                             >
                               {cat.label}
@@ -229,7 +229,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85 group-hover:font-semibold'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>

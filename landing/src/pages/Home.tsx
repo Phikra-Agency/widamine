@@ -285,14 +285,14 @@ function HeroSection() {
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
             onClick={downloadCatalogue}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors hover:brightness-[0.88] active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-all duration-500 hover:brightness-[0.88] active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Recevoir le catalogue
           </button>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-colors active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-all duration-500 active:scale-[0.96]'
             style={{ borderColor: C.primary, color: C.secondary }}
           >
             Prendre rendez-vous
@@ -336,10 +336,10 @@ const ConceptSection = () => {
     <section className="relative w-full overflow-hidden py-24 sm:py-32 lg:py-40" style={{ backgroundColor: C.bg }}>
       <div className="pointer-events-none absolute left-10 top-24 h-64 w-64 rounded-[50%] bg-white/70 blur-[120px]" />
       <div className="pointer-events-none absolute right-16 bottom-20 h-56 w-56 rounded-[50%] bg-white/60 blur-[120px]" />
-      {/* Florals moved from Notre vision */}
-      <img src={SM.intro.topLeft} alt='' className='pointer-events-none absolute left-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
-      <img src={SM.intro.topRight} alt='' className='pointer-events-none absolute right-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
-      <img src='/methode-top-right.avif' alt='' className='pointer-events-none absolute right-0 bottom-0 w-40 sm:w-52 opacity-30 widamine-tint' loading='lazy' />
+      {/* Florals moved from Notre vision — with scroll parallax */}
+      <img src={SM.intro.topLeft} alt='' data-parallax className='pointer-events-none absolute left-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
+      <img src={SM.intro.topRight} alt='' data-parallax className='pointer-events-none absolute right-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
+      <img src='/methode-top-right.avif' alt='' data-parallax className='pointer-events-none absolute right-0 bottom-0 w-40 sm:w-52 opacity-30 widamine-tint' loading='lazy' />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_0.95fr] lg:gap-20">
