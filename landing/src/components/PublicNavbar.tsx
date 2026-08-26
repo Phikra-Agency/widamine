@@ -141,7 +141,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
           </Link>
 
           {/* Desktop Nav Links - Centered */}
-          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden items-center gap-5 lg:flex'>
+          <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden items-center gap-7 lg:flex'>
             <div
               ref={megaRef}
               className='relative'
@@ -151,7 +151,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[13px] font-medium whitespace-nowrap transition-all duration-300 hover:opacity-100 hover:scale-105'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-all duration-300 hover:opacity-100 hover:scale-105'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
@@ -223,13 +223,13 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   key={item.label}
                                   to={item.href}
                                   onClick={() => setIsServicesOpen(false)}
-                                  className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-300 hover:bg-primary/6 hover:pl-4'
+                                  className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:opacity-100'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 group-hover:rotate-3' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
+                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85 transition-opacity duration-200 group-hover:opacity-100'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>
@@ -237,27 +237,6 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         ))}
                       </div>
                       
-                      {/* Bottom CTA bar */}
-                      <motion.div 
-                        className='mt-8 flex items-center justify-between rounded-2xl px-6 py-4' 
-                        style={{ background: `${C.primary}08`, border: `1px solid ${C.primary}15` }}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <div>
-                          <div className='text-sm font-semibold' style={{ color: C.secondary }}>Besoin d'aide pour choisir ?</div>
-                          <div className='text-xs opacity-70' style={{ color: C.secondary }}>Contactez-nous pour une consultation gratuite</div>
-                        </div>
-                        <Link
-                          to='/contact'
-                          onClick={() => setIsServicesOpen(false)}
-                          className='inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:scale-105 hover:shadow-lg active:scale-95'
-                          style={{ background: C.primary, boxShadow: '0 4px 16px rgba(0,159,214,0.25)' }}
-                        >
-                          Contactez-nous
-                        </Link>
-                      </motion.div>
                     </div>
                   </motion.div>
                 ) : null}
@@ -266,7 +245,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[13px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
+              className='text-[14px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
             >
               À propos
@@ -274,7 +253,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/contact'
-              className='text-[13px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
+              className='text-[14px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
             >
               Contact

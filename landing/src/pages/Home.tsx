@@ -285,14 +285,14 @@ function HeroSection() {
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
             onClick={downloadCatalogue}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white shadow-[0_18px_34px_rgba(0,159,214,0.18)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_22px_40px_rgba(0,159,214,0.22)] active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors hover:brightness-[0.88] active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Recevoir le catalogue
           </button>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-transform hover:-translate-y-0.5 hover:bg-primary/7 active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-colors active:scale-[0.96]'
             style={{ borderColor: C.primary, color: C.secondary }}
           >
             Prendre rendez-vous
@@ -309,8 +309,7 @@ function HeroSection() {
             boxShadow: '0 28px 70px -28px rgba(30,30,30,0.36)',
           }}
         >
-          <img src='/hero.webp' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' fetchPriority='high' decoding='async' style={{ filter: 'saturate(0.82) brightness(1.06) hue-rotate(8deg)' }} />
-          <div className='absolute inset-0 bg-[#009FD6]/[0.15] pointer-events-none' aria-hidden />
+          <img src='/hero.webp' alt='' className='absolute inset-0 h-full w-full object-cover' loading='eager' fetchPriority='high' decoding='async' />
         </div>
       </div>
 
@@ -327,23 +326,7 @@ function HeroSection() {
 }
 
 function IntroSection() {
-  return (
-    <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
-      <div className='mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10'>
-        <h2 data-fade-scroll className='leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
-          Notre vision
-        </h2>
-        <div className='mx-auto mt-8 max-w-[700px] text-base leading-7 text-pretty'>
-          <p>
-            Chez Widamine, nous allions expertise dermatologique et approche globale du bien-être &mdash; science, technologie et élégance &mdash; pour offrir à chaque patient une prise en charge médicale personnalisée, respectueuse de sa peau et de ses besoins.
-          </p>
-        </div>
-      </div>
-      <img src={SM.intro.topLeft} alt='' data-parallax className='absolute left-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
-      <img src={SM.intro.topRight} alt='' data-parallax className='absolute right-0 top-0 w-36 sm:w-48 opacity-40 widamine-tint' loading='lazy' />
-      <img src='/methode-top-right.avif' alt='' data-parallax className='absolute right-0 bottom-0 w-40 sm:w-52 opacity-40 widamine-tint' loading='lazy' />
-    </section>
-  )
+  return null
 }
 
 
@@ -353,6 +336,10 @@ const ConceptSection = () => {
     <section className="relative w-full overflow-hidden py-24 sm:py-32 lg:py-40" style={{ backgroundColor: C.bg }}>
       <div className="pointer-events-none absolute left-10 top-24 h-64 w-64 rounded-[50%] bg-white/70 blur-[120px]" />
       <div className="pointer-events-none absolute right-16 bottom-20 h-56 w-56 rounded-[50%] bg-white/60 blur-[120px]" />
+      {/* Florals moved from Notre vision */}
+      <img src={SM.intro.topLeft} alt='' className='pointer-events-none absolute left-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
+      <img src={SM.intro.topRight} alt='' className='pointer-events-none absolute right-0 top-0 w-36 sm:w-48 opacity-30 widamine-tint' loading='lazy' />
+      <img src='/methode-top-right.avif' alt='' className='pointer-events-none absolute right-0 bottom-0 w-40 sm:w-52 opacity-30 widamine-tint' loading='lazy' />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_0.95fr] lg:gap-20">
