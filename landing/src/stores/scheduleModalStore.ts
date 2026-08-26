@@ -40,7 +40,7 @@ interface ScheduleModalStoreInterface {
   step: number
   setStep: (step: number) => void
 
-  userData: { prenom: string; nom: string; email: string; phone: string; note: string }
+  userData: { prenom: string; nom: string; email: string; phone: string; gender: string; note: string }
   setUserData: (data: any) => void
 
   isSubmitting: boolean
@@ -133,7 +133,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
       step: 1,
       submitSuccess: false,
       submitError: null,
-      userData: { prenom: '', nom: '', email: '', phone: '', note: '' }
+      userData: { prenom: '', nom: '', email: '', phone: '', gender: '', note: '' }
     })
   },
 
@@ -216,7 +216,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
   step: 1,
   setStep: (step) => set({ step }),
 
-  userData: { prenom: '', nom: '', email: '', phone: '', note: '' },
+  userData: { prenom: '', nom: '', email: '', phone: '', gender: '', note: '' },
   setUserData: (data) => set({ userData: data }),
 
   isSubmitting: false,
@@ -234,6 +234,7 @@ export const useScheduleModalStore = create<ScheduleModalStoreInterface>((set, g
         name: `${userData.prenom} ${userData.nom}`,
         email: userData.email,
         phone: userData.phone,
+        gender: userData.gender,
         context: userData.note,
         motifId: selectedMotif.id,
         practitionerId: selectedPractitionerId || undefined,

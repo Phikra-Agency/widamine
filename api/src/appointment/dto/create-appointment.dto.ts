@@ -27,6 +27,10 @@ export class CreateAppointmentDto {
   practitionerId?: string;
 
   @IsOptional()
+  @IsString()
+  gender?: string;
+
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   sessionNumber?: number;

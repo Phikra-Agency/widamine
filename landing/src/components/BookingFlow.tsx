@@ -152,7 +152,7 @@ function ReservationSteps({
     }
   }
 
-  const inputBase = `w-full rounded-full border py-2.5 pr-4 pl-10 text-sm focus:outline-none ${C.secondary} placeholder:text-gray-400 border-gray-200 bg-white hover:border-gray-300 focus:border-[${C.primary}] focus:ring-1 focus:ring-[${C.primary}]/20`
+  const inputBase = `w-full rounded-full border py-2.5 pr-4 pl-10 text-sm focus:outline-none placeholder:text-gray-400 border-gray-200 bg-white hover:border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:ring-inset`
 
   const cardBase = 'overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 sm:p-6'
 
@@ -380,6 +380,22 @@ function ReservationSteps({
                   </div>
                   {errors.phone && <p className='mt-1 px-3 text-[11px]' style={{ color: '#dc2626' }}>{errors.phone}</p>}
                 </div>
+                <div className='sm:col-span-2'>
+                  <div className='relative'>
+                    <User size={16} weight='duotone' className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none' style={{ color: `${C.secondary}60` }} />
+                    <select
+                      required
+                      value={userData.gender || ''}
+                      onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
+                      className={`${inputBase} appearance-none`}
+                      style={{ color: userData.gender ? C.secondary : '#9ca3af', borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
+                    >
+                      <option value='' disabled>Genre *</option>
+                      <option value='FEMALE'>Femme</option>
+                      <option value='MALE'>Homme</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className='mb-6'>
@@ -418,7 +434,7 @@ function ReservationSteps({
         {step === 3 ? (
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !userData.prenom || !userData.nom || !userData.email || !userData.phone}
+            disabled={isSubmitting || !userData.prenom || !userData.nom || !userData.email || !userData.phone || !userData.gender}
             className='flex w-full items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
             style={{ backgroundColor: C.primary }}
           >
@@ -719,6 +735,7 @@ function ConsultationForm({
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [gender, setGender] = useState('')
   const [note, setNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -737,7 +754,7 @@ function ConsultationForm({
 
   const handleSubmit = async () => {
     if (!validate()) return
-    if (!prenom || !nom || !email || !phone) return
+    if (!prenom || !nom || !email || !phone || !gender) return
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -748,6 +765,7 @@ function ConsultationForm({
         name: `${prenom} ${nom}`,
         email,
         phone,
+        gender,
         context: `Consultation avec Dr. Widad Slaoui. ${note}`,
         motifId,
         datetime: date && selectedHour ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}T${selectedHour}:00` : undefined,
@@ -791,7 +809,7 @@ Réservation reçue
     )
   }
 
-  const inputBase = `w-full rounded-full border py-2.5 pr-4 pl-10 text-sm focus:outline-none ${C.secondary} placeholder:text-gray-400 border-gray-200 bg-white hover:border-gray-300 focus:border-[${C.primary}] focus:ring-1 focus:ring-[${C.primary}]/20`
+  const inputBase = `w-full rounded-full border py-2.5 pr-4 pl-10 text-sm focus:outline-none placeholder:text-gray-400 border-gray-200 bg-white hover:border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:ring-inset`
 
   if (consultStep === 1) {
     return (
@@ -957,13 +975,13 @@ Réservation reçue
           Consultation — Contact
         </h2>
         {embedded ? null : (
-          <button onClick={onClose} style={{ color: C.secondary }}>
-            <X size={20} weight='duotone' opacity={0.4} />
-          </button>
-        )}
-      </div>
+            <button onClick={onClose} style={{ color: C.secondary }}>
+              <X size={20} weight='regular' opacity={0.4} />
+            </button>
+          )}
+        </div>
 
-      <div className='relative mb-6 flex items-center gap-3 rounded-xl border p-3' style={{ borderColor: `${C.primary}20`, backgroundColor: `${C.primary}06` }}>
+        <div className='relative mb-6 flex items-center gap-3 rounded-xl border p-3' style={{ borderColor: `${C.primary}20`, backgroundColor: `${C.primary}06` }}>
         <div className='h-10 w-10 shrink-0 overflow-hidden rounded-full' style={{ backgroundColor: `${C.primary}15` }}>
           <img src='/images/team/dr widad slaoui.jpg' alt='Dr. Widad Slaoui' className='h-full w-full object-cover object-top' />
         </div>
@@ -1032,6 +1050,22 @@ Réservation reçue
           </div>
           {errors.phone && <p className='mt-1 px-3 text-[11px]' style={{ color: '#dc2626' }}>{errors.phone}</p>}
         </div>
+        <div className='sm:col-span-2'>
+          <div className='relative'>
+            <User size={16} weight='duotone' className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none' style={{ color: `${C.secondary}60` }} />
+            <select
+              required
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className={`${inputBase} appearance-none`}
+              style={{ color: gender ? C.secondary : '#9ca3af' }}
+            >
+              <option value='' disabled>Genre *</option>
+              <option value='FEMALE'>Femme</option>
+              <option value='MALE'>Homme</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className='mb-6'>
@@ -1055,7 +1089,7 @@ Réservation reçue
         </button>
         <button
           onClick={handleSubmit}
-          disabled={submitting || !prenom || !nom || !email || !phone}
+          disabled={submitting || !prenom || !nom || !email || !phone || !gender}
           className='flex w-full items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto'
           style={{ backgroundColor: C.primary }}
         >

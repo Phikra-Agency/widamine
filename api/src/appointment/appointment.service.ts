@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { PatientService } from "@/patient/patient.service";
+import { toZonedTime, fromZonedTime, format } from 'date-fns-tz';
 
 @Injectable()
 export class AppointmentService {
@@ -125,6 +126,7 @@ export class AppointmentService {
     resourceId?: string;
     datetime?: string;
     sessionNumber?: number;
+    gender?: string;
   }) {
     const motif = await this.prisma.motif.findUnique({ where: { id: data.motifId } });
     if (!motif) throw new NotFoundException("Motif not found");
@@ -155,6 +157,7 @@ export class AppointmentService {
       lastName: data.name.split(" ").slice(1).join(" ") || "",
       email: data.email,
       phone: data.phone,
+      gender: data.gender as any,
     });
 
     const session = await this.prisma.session.findFirst({
@@ -187,9 +190,12 @@ export class AppointmentService {
     });
 
     if (data.datetime && session) {
+      // TIMEZONE FIX: Ensure datetime is properly parsed as ISO string (already in correct timezone from frontend)
+      const scheduleDate = new Date(data.datetime);
+      
       await this.prisma.schedule.create({
         data: {
-          datetime: new Date(data.datetime),
+          datetime: scheduleDate,
           sessionId: session.id,
           appointmentId: appointment.id,
         },
@@ -206,10 +212,18 @@ export class AppointmentService {
   }
 
   async countByDateRange(from: string, to: string) {
-    const fromDate = new Date(from)
-    fromDate.setUTCHours(0, 0, 0, 0)
-    const toDate = new Date(to)
-    toDate.setUTCHours(23, 59, 59, 999)
+    const MOROCCO_TZ = 'Africa/Casablanca';
+    
+    // Parse dates in Morocco timezone
+    const fromDateParts = from.split('-').map(Number);
+    const toDateParts = to.split('-').map(Number);
+    
+    const fromDateMorocco = new Date(fromDateParts[0], fromDateParts[1] - 1, fromDateParts[2], 0, 0, 0, 0);
+    const toDateMorocco = new Date(toDateParts[0], toDateParts[1] - 1, toDateParts[2], 23, 59, 59, 999);
+    
+    const fromDate = fromZonedTime(fromDateMorocco, MOROCCO_TZ);
+    const toDate = fromZonedTime(toDateMorocco, MOROCCO_TZ);
+    
     return this.prisma.appointment.count({
       where: {
         status: { not: "CANCELLED" },
@@ -319,23 +333,9 @@ export class AppointmentService {
     return this.prisma.appointment.delete({ where: { id } });
   }
 
-  private getMoroccoOffsetMinutes(dateStr: string): number {
-    const d = new Date(dateStr + 'T12:00:00Z');
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Africa/Casablanca',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).formatToParts(d);
-    const get = (t: string) => parseInt(parts.find(p => p.type === t)?.value || '0', 10);
-    const localMs = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'));
-    return (localMs - d.getTime()) / 60000;
-  }
-
   async getAvailability(motifId: string, date: string, practitionerId?: string) {
+    const MOROCCO_TZ = 'Africa/Casablanca';
+    
     const motif = await this.prisma.motif.findUnique({
       where: { id: motifId },
       include: {
@@ -357,11 +357,16 @@ export class AppointmentService {
     if (!practitionerIds.length) return [];
 
     const assignedResourceIds = motif.resourceAssignments.map(ra => ra.resource.id);
+    
+    // Parse date as YYYY-MM-DD in Morocco timezone
     const [year, month, day] = date.split('-').map(Number);
-    const offsetMinutes = this.getMoroccoOffsetMinutes(date);
-
-    const startOfDay = new Date(Date.UTC(year, month - 1, day, -offsetMinutes / 60, 0, 0));
-    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23 - offsetMinutes / 60, 59, 59, 999));
+    
+    // Create start/end of day in Morocco timezone, then convert to UTC for database query
+    const startOfDayMorocco = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const endOfDayMorocco = new Date(year, month - 1, day, 23, 59, 59, 999);
+    
+    const startOfDay = fromZonedTime(startOfDayMorocco, MOROCCO_TZ);
+    const endOfDay = fromZonedTime(endOfDayMorocco, MOROCCO_TZ);
 
     const existingAppointments = await this.prisma.appointment.findMany({
       where: {
@@ -407,8 +412,10 @@ export class AppointmentService {
 
       for (let hour = 9; hour < 18; hour++) {
         for (let min = 0; min < 60; min += duration) {
-          const slotTime = new Date(Date.UTC(year, month - 1, day, hour - offsetMinutes / 60, min, 0));
-          const timeKey = slotTime.getTime();
+          // Create slot time in Morocco timezone
+          const slotTimeMorocco = new Date(year, month - 1, day, hour, min, 0, 0);
+          const slotTimeUTC = fromZonedTime(slotTimeMorocco, MOROCCO_TZ);
+          const timeKey = slotTimeUTC.getTime();
 
           const practitionerConflict = conflicts.has(`practitioner_${practitioner.id}_${timeKey}`);
           let hasFreeResource = assignedResourceIds.length === 0;
@@ -421,13 +428,13 @@ export class AppointmentService {
 
           const isAvailable = !practitionerConflict && hasFreeResource;
 
-          // CHANGED: Return ALL slots, marking unavailable ones
+          // Return time as ISO string (UTC)
           slots.push({
-            time: slotTime.toISOString(),
+            time: slotTimeUTC.toISOString(),
             practitionerId: practitioner.id,
             practitionerName: practitioner.name,
             practitionerImage: practitioner.image || initialsAvatar(practitioner.name),
-            available: isAvailable, // NEW: availability flag
+            available: isAvailable,
           });
         }
       }
