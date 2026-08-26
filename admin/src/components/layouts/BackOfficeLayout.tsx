@@ -6,6 +6,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import {
   CalendarBlank,
   CalendarDots as CalendarDays,
+  CalendarX,
   CaretDoubleLeft,
   CaretDoubleRight,
   SignIn as LogIn,
@@ -14,7 +15,6 @@ import {
   Stethoscope,
   UserCircle,
   ChatCircleDots,
-  List,
   X,
   GearSix,
 } from '@phosphor-icons/react'
@@ -67,7 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
-      { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'], comingSoon: true },
+      { to: 'unavailabilities', label: 'Indisponibilités', icon: CalendarX, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'], comingSoon: true },
     ],
   },
   {

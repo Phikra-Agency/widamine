@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { API_BASE_URL } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, CheckCircle, XCircle, Clock, CalendarBlank } from '@phosphor-icons/react'
+import { Plus, CheckCircle, XCircle, Clock, CalendarBlank, CalendarX } from '@phosphor-icons/react'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import UnavailabilityFormModal from '@/components/UnavailabilityFormModal'
@@ -80,7 +80,7 @@ export default function Unavailabilities() {
       <div className="absolute inset-0 flex items-center justify-center p-4 bg-background/40 backdrop-blur-[3px]">
         <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl text-center">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-            <Clock size={20} weight="duotone" className="text-muted-foreground" />
+            <CalendarX size={20} weight="duotone" className="text-muted-foreground" />
           </div>
           <h3 className="text-base font-semibold">Fonctionnalité en file d’attente</h3>
           <p className="mt-2 text-sm text-muted-foreground">
