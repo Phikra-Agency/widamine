@@ -124,7 +124,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
     >
       <div className='mx-auto w-full max-w-4xl px-4 relative'>
         <nav
-          className='relative flex items-center justify-between rounded-full px-6 py-3 transition-all duration-300'
+          className='relative flex items-center justify-between rounded-full pl-6 pr-3 py-3 transition-all duration-300'
           style={{
             background: '#fbf7ef',
             border: `0.5px solid ${C.primary}`,
