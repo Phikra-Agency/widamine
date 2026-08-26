@@ -107,7 +107,7 @@ export default function ServiceCategory() {
                   style={{ borderColor: 'rgba(26,54,70,0.08)' }}
                 >
                   {/* Service Icon — per-motif tint */}
-                  <div className='shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border flex items-center justify-center transition-all group-hover:shadow-lg' style={{ borderColor: `${service.color}24`, background: `${service.color}14` }}>
+                  <div className='hidden shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border flex items-center justify-center transition-all group-hover:shadow-lg' style={{ borderColor: `${service.color}24`, background: `${service.color}14` }}>
                     <ServiceIcon slug={service.slug} size={28} color={service.color} />
                   </div>
 

@@ -151,7 +151,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-all duration-300 hover:opacity-100 hover:scale-105'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
@@ -226,10 +226,10 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   className='group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:opacity-100'
                                   style={{ color: C.secondary }}
                                 >
-                                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
+                                  <div className='hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85 transition-all duration-200 group-hover:font-semibold'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85 transition-all duration-300 group-hover:font-semibold group-hover:opacity-100'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>
@@ -245,7 +245,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[14px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
+              className='text-[14px] font-medium transition-colors'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
             >
               À propos
@@ -253,7 +253,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/contact'
-              className='text-[14px] font-medium transition-all duration-300 hover:opacity-100 hover:scale-105'
+              className='text-[14px] font-medium transition-colors'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
             >
               Contact
@@ -328,7 +328,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.opacity = '0.85' }}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <ServiceIcon slug={item.slug} size={20} color={item.color} className='opacity-80' />
+                        <ServiceIcon slug={item.slug} size={20} color={item.color} className='hidden opacity-80' />
                         {item.label}
                       </Link>
                     ))}
