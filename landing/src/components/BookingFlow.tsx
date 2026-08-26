@@ -115,6 +115,7 @@ function ReservationSteps({
 
   const [bookingType, setBookingType] = useState<'traitement' | 'consultation' | null>(null)
   const [viewingDoctorsFor, setViewingDoctorsFor] = useState<string | null>(null)
+  const [traitGenderOpen, setTraitGenderOpen] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({})
 
   const validate = () => {
@@ -383,17 +384,24 @@ function ReservationSteps({
                 <div className='sm:col-span-2'>
                   <div className='relative'>
                     <User size={16} weight='duotone' className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none' style={{ color: `${C.secondary}60` }} />
-                    <select
-                      required
-                      value={userData.gender || ''}
-                      onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
-                      className={`${inputBase} appearance-none`}
-                      style={{ color: userData.gender ? C.secondary : '#9ca3af', borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
+                    <button
+                      type='button'
+                      onClick={() => setTraitGenderOpen(!traitGenderOpen)}
+                      className={`${inputBase} text-left flex items-center justify-between pr-4`}
+                      style={{ color: userData.gender ? C.secondary : '#9ca3af', borderColor: traitGenderOpen ? C.primary : '#e5e7eb', backgroundColor: '#ffffff' }}
                     >
-                      <option value='' disabled>Genre *</option>
-                      <option value='FEMALE'>Femme</option>
-                      <option value='MALE'>Homme</option>
-                    </select>
+                      <span>{userData.gender === 'FEMALE' ? 'Femme' : userData.gender === 'MALE' ? 'Homme' : 'Genre *'}</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${traitGenderOpen ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    {traitGenderOpen && (
+                      <div className='absolute left-0 right-0 top-full mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-20'>
+                        <div className='py-2'>
+                          <div className='px-4 py-2.5 text-sm text-gray-400'>Genre *</div>
+                          <button type='button' onClick={() => { setUserData({ ...userData, gender: 'FEMALE' }); setTraitGenderOpen(false); }} className='w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors' style={{ color: C.secondary }}>Femme</button>
+                          <button type='button' onClick={() => { setUserData({ ...userData, gender: 'MALE' }); setTraitGenderOpen(false); }} className='w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors' style={{ color: C.secondary }}>Homme</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -736,6 +744,7 @@ function ConsultationForm({
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [gender, setGender] = useState('')
+  const [genderOpen, setGenderOpen] = useState(false)
   const [note, setNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -967,7 +976,7 @@ Réservation reçue
         embedded
           ? 'relative flex w-full max-w-full flex-col min-h-[24rem] sm:max-w-[720px] sm:min-h-[30rem]'
           : 'pointer-events-auto relative flex w-full flex-col'
-      } overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-xl sm:p-6`}
+      } max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain rounded-2xl border border-gray-100 bg-white p-5 shadow-xl sm:p-6`}
       style={embedded ? undefined : { width: `min(calc(100vw - 1.5rem), 520px)` }}
     >
       <div className='mb-5 flex items-center justify-between sm:mb-6'>
@@ -1053,17 +1062,24 @@ Réservation reçue
         <div className='sm:col-span-2'>
           <div className='relative'>
             <User size={16} weight='duotone' className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none' style={{ color: `${C.secondary}60` }} />
-            <select
-              required
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className={`${inputBase} appearance-none`}
-              style={{ color: gender ? C.secondary : '#9ca3af' }}
+            <button
+              type='button'
+              onClick={() => setGenderOpen(!genderOpen)}
+              className={`${inputBase} text-left flex items-center justify-between pr-4`}
+              style={{ color: gender ? C.secondary : '#9ca3af', borderColor: genderOpen ? C.primary : '#e5e7eb', backgroundColor: '#ffffff' }}
             >
-              <option value='' disabled>Genre *</option>
-              <option value='FEMALE'>Femme</option>
-              <option value='MALE'>Homme</option>
-            </select>
+              <span>{gender === 'FEMALE' ? 'Femme' : gender === 'MALE' ? 'Homme' : 'Genre *'}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${genderOpen ? 'rotate-180' : ''}`}><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            {genderOpen && (
+              <div className='absolute left-0 right-0 top-full mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-20'>
+                <div className='py-2'>
+                  <div className='px-4 py-2.5 text-sm text-gray-400'>Genre *</div>
+                  <button type='button' onClick={() => { setGender('FEMALE'); setGenderOpen(false); }} className='w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors' style={{ color: C.secondary }}>Femme</button>
+                  <button type='button' onClick={() => { setGender('MALE'); setGenderOpen(false); }} className='w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors' style={{ color: C.secondary }}>Homme</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
