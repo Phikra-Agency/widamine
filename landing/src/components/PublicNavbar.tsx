@@ -127,7 +127,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
           className='relative flex items-center justify-between rounded-full pl-6 pr-3 py-3 transition-all duration-300'
           style={{
             background: '#fbf7ef',
-            border: `0.5px solid ${C.primary}`,
+            border: `0.5px solid ${C.primary}30`,
             position: 'relative',
             zIndex: 200,
           }}
@@ -178,10 +178,11 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                     }}
                   >
                     <div 
-                      className='relative overflow-hidden rounded-3xl bg-white p-8' 
+                      className='relative overflow-hidden rounded-3xl p-8' 
                       style={{ 
+                        background: '#fbf8f3',
                         boxShadow: '0 20px 70px rgba(0,0,0,0.15), 0 4px 20px rgba(0,159,214,0.08)',
-                        border: `1px solid ${C.primary}12`
+                        border: `0.5px solid ${C.primary}30`
                       }}
                     >
                       {/* Top connecting line effect */}
