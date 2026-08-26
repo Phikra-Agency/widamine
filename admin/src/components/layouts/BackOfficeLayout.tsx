@@ -28,6 +28,7 @@ import NotificationToast from '@/components/NotificationToast'
 import SidebarSearch from '@/components/layouts/SidebarSearch'
 import { useSidebarCounts } from '@/hooks/useSidebarCounts'
 import { cn } from '@/lib/utils'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const SIDEBAR_COLLAPSED_KEY = 'widamine-sidebar-collapsed'
 const SIDEBAR_EXPANDED_WIDTH = 'var(--sidebar-expanded-width)'
@@ -48,6 +49,7 @@ type NavLink = {
   label: string
   icon: Icon
   roles: LinkRole[]
+  comingSoon?: boolean
 }
 
 type NavGroup = {
@@ -65,7 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'patients', label: 'Patients', icon: UserCircle, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'contacts', label: 'Messages', icon: ChatCircleDots, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
       { to: 'reservations', label: 'Réservations', icon: CalendarBlank, roles: ['ADMIN', 'RECEPTIONIST', 'DOCTOR', 'PRACTITIONER'] },
-      { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'] },
+      { to: 'unavailabilities', label: 'Indisponibilités', icon: List, roles: ['ADMIN', 'DOCTOR', 'PRACTITIONER'], comingSoon: true },
     ],
   },
   {
@@ -75,7 +77,6 @@ const NAV_GROUPS: NavGroup[] = [
       { to: 'users', label: 'Utilisateurs', icon: Users, roles: ['ADMIN', 'RECEPTIONIST'] },
       { to: 'resources', label: 'Salles', icon: Door, roles: ['ADMIN'] },
       { to: 'motifs', label: 'Traitements', icon: Stethoscope, roles: ['ADMIN'] },
-      { to: 'settings', label: 'Paramètres', icon: GearSix, roles: ['ADMIN'] },
     ],
   },
 ]
@@ -121,6 +122,7 @@ function SidebarContent({
 }) {
   const location = useLocation()
   const { user } = useAuthStore()
+  const [comingSoonOpen, setComingSoonOpen] = useState(false)
 
   const navGroups = useMemo(() => visibleNavGroups(user?.role as LinkRole | undefined), [user?.role])
   const { patientsCount, messagesCount, calendarCount, reservationsCount, usersCount, resourcesCount, motifsCount, unavailabilitiesCount } = useSidebarCounts()
@@ -187,6 +189,28 @@ function SidebarContent({
                 {group.links.map((link) => {
             const isActive = location.pathname === link.to
             const counter = getCounter(link.to)
+            const isComingSoon = (link as any).comingSoon
+            if (isComingSoon) {
+              return (
+                <button
+                  key={link.to}
+                  type='button'
+                  onClick={() => setComingSoonOpen(true)}
+                  title={collapsed ? `${link.label} — Bientôt disponible` : undefined}
+                  className={cn(
+                    'bo-nav-link group w-full text-left opacity-60 grayscale cursor-pointer hover:opacity-80',
+                    'bg-muted/40 border border-transparent',
+                    collapsed && 'bo-nav-link-collapsed justify-center',
+                  )}
+                >
+                  <SidebarNavIcon icon={link.icon} active={false} />
+                  {!collapsed && <span>{link.label}</span>}
+                  {!collapsed && (
+                    <span className='ml-auto text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60'>Bientôt</span>
+                  )}
+                </button>
+              )
+            }
                   return (
                     <Link
                       key={link.to}
@@ -249,12 +273,24 @@ function SidebarContent({
           </div>
         )}
       </div>
+
+      <Dialog open={comingSoonOpen} onOpenChange={setComingSoonOpen}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle>Bientôt disponible</DialogTitle>
+            <DialogDescription>
+              La gestion des indisponibilités est en file d’attente. Cette fonctionnalité sera activée prochainement. Merci pour votre compréhension.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
 export default function BackOfficeLayout() {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   const { user } = useAuthStore()
   const { startPolling, stopPolling } = useNotificationsStore()
   const isFullBleedPage = pathname.endsWith('/calendar')
@@ -381,7 +417,11 @@ export default function BackOfficeLayout() {
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side='right' showCloseButton className='flex w-[280px] max-w-[85vw] flex-col gap-0 border-0 bg-card p-0 text-foreground xl:hidden'>
             <div className='flex min-h-0 flex-1 flex-col [&_.bo-nav-link]:text-foreground [&_.bo-nav-link:hover]:bg-muted/50 [&_.bo-nav-link[data-active="true"]]:bg-primary/10 [&_.bo-nav-link[data-active="true"]]:text-primary [&_.bo-nav-icon]:text-muted-foreground [&_.bo-nav-link:hover_.bo-nav-icon]:text-foreground [&_.bo-nav-link[data-active="true"]_.bo-nav-icon]:text-primary [&_.bo-sidebar-group-label]:text-muted-foreground [&_.bo-sidebar-header]:border-border-subtle [&_.bo-sidebar-brand-row]:pt-2'>
-              <SidebarContent onNavigate={() => setSidebarOpen(false)} collapsed={false} mobile />
+              <SidebarContent 
+                onNavigate={() => setSidebarOpen(false)} 
+                collapsed={false} 
+                mobile 
+              />
             </div>
           </SheetContent>
         </Sheet>

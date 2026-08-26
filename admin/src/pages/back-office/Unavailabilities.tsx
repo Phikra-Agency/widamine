@@ -65,8 +65,8 @@ function equalsOrAllFilter(filterValue: any, rowValue: any) {
 
 export default function Unavailabilities() {
   return (
-    <div className="bo-page">
-      <div className="bo-page-inner bo-section-stack">
+    <div className="bo-page relative">
+      <div className="bo-page-inner bo-section-stack blur-[2px] pointer-events-none select-none opacity-60">
         <div className='bo-page-ambient-tr' />
         <div className='bo-page-ambient-bl' />
         <Heading />
@@ -76,6 +76,18 @@ export default function Unavailabilities() {
         </Card>
       </div>
       <Modals />
+      {/* File d'attente — blur overlay + popup */}
+      <div className="absolute inset-0 flex items-center justify-center p-4 bg-background/40 backdrop-blur-[3px]">
+        <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <Clock size={20} weight="duotone" className="text-muted-foreground" />
+          </div>
+          <h3 className="text-base font-semibold">Fonctionnalité en file d’attente</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            La gestion des indisponibilités n’est pas encore disponible. Elle est actuellement en file d’attente et sera activée prochainement.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
