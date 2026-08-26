@@ -15,6 +15,7 @@ import {
   Stethoscope,
   UserCircle,
   ChatCircleDots,
+  List,
   X,
   GearSix,
 } from '@phosphor-icons/react'
