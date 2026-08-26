@@ -237,7 +237,7 @@ function ReservationSteps({
                     <div className='hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border' style={{ backgroundColor: `${motif.color || C.primary}16`, borderColor: `${motif.color || C.primary}22` }}>
                       <ServiceIcon slug={motif.icon} size={22} color={motif.color || C.primary} />
                     </div>
-                    <span className='min-w-0 text-sm font-medium transition-all duration-500 ease-out group-hover:font-bold group-hover:[text-shadow:0_0_0.3px_currentColor]' style={{ color: C.secondary }}>{motif.name}</span>
+                    <span className='min-w-0 text-sm font-medium transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-bold group-hover:[text-shadow:0_0_0.4px_currentColor] [font-variation-settings:"wght"500] group-hover:[font-variation-settings:"wght"700]' style={{ color: C.secondary }}>{motif.name}</span>
                     {selectedMotif?.id === motif.id ? <CheckIcon size={14} weight='regular' className='ml-auto shrink-0' style={{ color: C.primary }} /> : null}
                   </button>
                 ))}
