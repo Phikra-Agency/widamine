@@ -279,7 +279,7 @@ function HeroSection() {
           Une peau éclatante,{' '}
           <span style={{ color: C.primary, fontStyle: 'italic' }}>une confiance retrouvée</span>
         </h1>
-        <p className='mx-auto mt-4 max-w-[600px] text-sm font-semibold tracking-[0.08em] uppercase sm:text-base text-pretty' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily }}>
+        <p className='mx-auto mt-4 max-w-[600px] text-sm font-semibold tracking-[0.03em] normal-case sm:text-base text-pretty' style={{ color: `${C.secondary}b3`, fontFamily: TYPE.bodyFamily }}>
           Votre centre de dermato-esthétique de référence
         </p>
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
