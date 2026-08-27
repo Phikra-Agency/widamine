@@ -151,13 +151,13 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors hover:underline hover:decoration-primary/50 hover:underline-offset-4 hover:decoration-1'
+                className='group inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
               >
                 Services
-                <ChevronDown size={11} weight='bold' className={`transition-all duration-300 ease-out ${isServicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={11} weight='bold' className={`transition-all duration-300 ease-out group-hover:!text-primary ${isServicesOpen ? 'rotate-180' : ''}`} style={{ color: isServicesActive ? C.primary : undefined }} />
               </button>
 
               <AnimatePresence>
