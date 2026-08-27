@@ -210,7 +210,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                             <Link
                               to={`/category/${cat.slug}`}
                               onClick={() => setIsServicesOpen(false)}
-                              className='group mb-5 flex items-center gap-2 rounded-lg px-2 py-1.5 pb-1 text-sm font-bold normal-case tracking-wide transition-all duration-300 text-primary hover:underline hover:decoration-primary/50 hover:underline-offset-4 hover:decoration-1'
+                              className='group mb-5 flex items-center gap-2 rounded-lg px-2 py-1.5 pb-1 text-sm font-bold normal-case tracking-wide transition-colors duration-300 text-primary'
                             >
                               {cat.label}
                               <svg className='h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1 text-primary' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
