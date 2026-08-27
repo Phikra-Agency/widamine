@@ -151,7 +151,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors hover:underline hover:decoration-primary hover:underline-offset-4 hover:decoration-2'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
