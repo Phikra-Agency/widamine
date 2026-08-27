@@ -157,7 +157,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                 aria-expanded={isServicesOpen}
               >
                 Services
-                <ChevronDown size={11} weight='bold' className={`transition-all duration-300 ease-out group-hover:!text-primary ${isServicesOpen ? 'rotate-180' : ''}`} style={{ color: isServicesActive ? C.primary : undefined }} />
+                <ChevronDown size={11} weight='bold' className={`transition-all duration-300 ease-out ${isServicesActive || isServicesOpen ? 'text-primary' : 'text-secondary group-hover:!text-primary'} ${isServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
