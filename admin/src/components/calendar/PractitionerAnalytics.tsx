@@ -53,19 +53,22 @@ function MinimalCard({ p }: { p: PractitionerStatsRow }) {
   )
 
   return (
-    <div className='rounded-surface border border-border bg-card p-5 shadow-bo-card ring-1 ring-border'>
-      <p className='text-sm font-semibold tracking-tight text-foreground'>{p.name}</p>
-      <div className='mt-4 flex items-center gap-2'>
-        <span className='inline-flex h-6 min-w-[24px] items-center justify-center rounded-element border border-border-subtle bg-secondary/5 px-1.5 text-xs font-bold text-secondary/60'>
-          {p.count}
-        </span>
-        <span className='text-[10px] font-medium uppercase tracking-wider text-secondary/30'>RDV</span>
-        <span className='ml-auto min-w-[40px] text-xs font-semibold text-foreground'>
+    <div className='rounded-3xl border border-primary/10 bg-white p-6 shadow-[0_8px_32px_rgba(26,54,70,0.06)]'>
+      <div className='flex items-start justify-between'>
+        <p className='text-[15px] font-semibold tracking-tight text-secondary' style={{ fontFamily: 'Chambora, serif' }}>{p.name}</p>
+        <div className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/10'>
+          <UserCircle size={18} weight='duotone' className='text-primary/70' />
+        </div>
+      </div>
+      <div className='mt-5 flex items-baseline gap-2.5'>
+        <span className='text-3xl font-bold tracking-tight text-secondary'>{p.count}</span>
+        <span className='text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary/40'>RDV</span>
+        <span className='ml-auto text-sm font-medium tabular-nums text-secondary/70'>
           {p.percentage.toFixed(1)}%
         </span>
       </div>
-      <div className='mt-2 h-2 w-full max-w-[80px] overflow-hidden rounded-full bg-muted'>
-        <div className='h-full rounded-full bg-primary' style={{ width: `${Math.min(p.percentage, 100)}%` }} />
+      <div className='mt-3 h-1.5 w-full overflow-hidden rounded-full bg-primary/10'>
+        <div className='h-full rounded-full bg-primary transition-all duration-500' style={{ width: `${Math.min(p.percentage, 100)}%` }} />
       </div>
       {sorted.length > 0 && (
         <div className='mt-4 space-y-2'>
