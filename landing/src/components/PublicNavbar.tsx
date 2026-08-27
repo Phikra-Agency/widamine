@@ -151,7 +151,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               <button
                 type='button'
                 onClick={handleServicesClick}
-                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors'
+                className='inline-flex cursor-pointer items-center gap-1 !text-[14px] font-medium whitespace-nowrap transition-colors hover:underline hover:decoration-primary hover:underline-offset-4 hover:decoration-2'
                 style={{ color: isServicesActive ? C.primary : C.secondary, opacity: isServicesActive ? 1 : 0.85 }}
                 aria-haspopup='menu'
                 aria-expanded={isServicesOpen}
@@ -230,7 +230,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                                   <div className='hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg' style={{ background: `${item.color}18`, border: `1px solid ${item.color}20` }}>
                                     <ServiceIcon slug={item.slug} size={20} color={item.color} />
                                   </div>
-                                  <span className='truncate font-medium opacity-85 transition-colors duration-200 group-hover:text-primary group-hover:opacity-100'>{item.label}</span>
+                                  <span className='truncate font-medium opacity-85 transition-colors duration-200 group-hover:opacity-100'>{item.label}</span>
                                 </Link>
                               ))}
                             </div>
@@ -246,7 +246,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/about'
-              className='text-[14px] font-medium transition-colors'
+              className='text-[14px] font-medium transition-colors hover:underline hover:decoration-primary hover:underline-offset-4 hover:decoration-2'
               style={{ color: pathname === '/about' ? C.primary : C.secondary, opacity: pathname === '/about' ? 1 : 0.85 }}
             >
               À propos
@@ -254,7 +254,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
 
             <Link
               to='/contact'
-              className='text-[14px] font-medium transition-colors'
+              className='text-[14px] font-medium transition-colors hover:underline hover:decoration-primary hover:underline-offset-4 hover:decoration-2'
               style={{ color: isContact ? C.primary : C.secondary, opacity: isContact ? 1 : 0.85 }}
             >
               Contact
