@@ -285,7 +285,7 @@ function HeroSection() {
         <div data-fade className='mt-11 flex flex-wrap items-center justify-center gap-4'>
           <button
             onClick={open}
-            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-all duration-500 hover:brightness-[0.82] active:scale-[0.96]'
+            className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors duration-500 hover:!bg-[#007a9e] active:scale-[0.96]'
             style={{ background: C.primary }}
           >
             Prendre rendez-vous

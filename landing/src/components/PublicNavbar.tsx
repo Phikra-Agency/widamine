@@ -285,7 +285,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               type='button'
               onClick={open}
               aria-label='Prendre rendez-vous'
-              className='hidden cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold text-white transition-all duration-300 border-2 hover:!bg-transparent hover:!text-primary lg:inline-flex'
+              className='hidden cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-[13px] font-semibold text-white transition-colors duration-500 border-2 hover:!bg-[#007a9e] hover:!text-white lg:inline-flex'
               style={{ background: C.primary, borderColor: C.primary }}
             >
               Rendez-vous
