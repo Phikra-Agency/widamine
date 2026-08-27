@@ -181,7 +181,7 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
                       className='relative overflow-hidden rounded-3xl p-8' 
                       style={{ 
                         background: '#fbf7ef',
-                        boxShadow: '0 20px 70px rgba(0,0,0,0.15), 0 4px 20px rgba(0,159,214,0.08)',
+                        boxShadow: 'none',
                         border: `0.5px solid ${C.primary}30`
                       }}
                     >
