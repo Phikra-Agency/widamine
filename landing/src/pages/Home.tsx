@@ -271,7 +271,7 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className='relative z-20 mx-auto mt-32 max-w-[980px] px-5 pb-0 sm:mt-36' data-video-wrap>
+      <div className='relative z-20 mx-auto mt-32 max-w-[980px] px-5 pb-0' data-video-wrap>
         <div
           data-fade
           className='relative overflow-hidden rounded-[28px]'

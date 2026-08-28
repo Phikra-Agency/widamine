@@ -299,8 +299,8 @@ export default function PublicNavbar({ theme = 'light' }: PublicNavbarProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className='relative z-[100] mt-3 overflow-hidden rounded-3xl shadow-xl lg:hidden'
-              style={{ background: 'white', border: `1px solid ${C.primary}15` }}
+              className='relative z-[100] mt-3 overflow-hidden rounded-3xl lg:hidden'
+              style={{ background: '#fbf7ef', border: `0.5px solid ${C.primary}30`, boxShadow: 'none' }}
             >
               <div className='max-h-[78dvh] space-y-1 overflow-y-auto p-4'>
                 <Link 
