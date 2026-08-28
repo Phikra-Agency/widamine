@@ -105,7 +105,7 @@ export default function About() {
               >
                 <button
                   onClick={open}
-                  className='inline-flex items-center rounded-full px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95'
+                  className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors duration-500 hover:!bg-[#007a9e] active:scale-[0.96]'
                   style={{ background: C.primary }}
                 >
                   Prendre rendez-vous
@@ -113,11 +113,10 @@ export default function About() {
                 
                 <a
                   href='tel:+212535624696'
-                  className='inline-flex items-center rounded-full border-2 px-8 py-4 text-sm font-semibold transition-all duration-300 hover:-translate-y-1'
+                  className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-all duration-500 hover:brightness-[0.88] hover:bg-primary/[0.08] active:scale-[0.96]'
                   style={{ 
                     borderColor: C.primary, 
                     color: C.secondary,
-                    background: 'transparent',
                   }}
                 >
                   +212 535 624 696
@@ -217,7 +216,7 @@ export default function About() {
 
               <motion.button
                 onClick={open}
-                className='inline-flex items-center rounded-full px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95'
+                className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors duration-500 hover:!bg-[#007a9e] active:scale-[0.96]'
                 style={{ background: C.primary }}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -531,7 +530,7 @@ export default function About() {
           <div className='flex flex-wrap items-center justify-center gap-5'>
             <button
               onClick={open}
-              className='inline-flex items-center rounded-full px-10 py-5 text-base font-semibold text-white shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl active:scale-95'
+              className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-colors duration-500 hover:!bg-[#007a9e] active:scale-[0.96]'
               style={{ background: C.primary }}
             >
               Prendre rendez-vous
@@ -539,11 +538,10 @@ export default function About() {
             
             <a
               href='tel:+212535624696'
-              className='inline-flex items-center rounded-full border-2 px-10 py-5 text-base font-semibold transition-all duration-300 hover:-translate-y-2'
+              className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full border px-8 text-base font-semibold transition-all duration-500 hover:brightness-[0.88] hover:bg-primary/[0.08] active:scale-[0.96]'
               style={{ 
                 borderColor: C.primary, 
                 color: C.secondary,
-                background: 'transparent',
               }}
             >
               +212 535 624 696
