@@ -117,27 +117,27 @@ export class AppointmentNotificationService {
 
           <!-- Header -->
           <tr>
-            <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
-              <h1 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 24px; font-weight: 400; color: ${this.COLORS.white}; letter-spacing: 3px; text-transform: uppercase;">WIDAMINE</h1>
-              <p style="margin: 8px 0 0; font-size: 11px; color: ${this.COLORS.accent}; letter-spacing: 2px; text-transform: uppercase; font-weight: 300;">Aesthetic Center</p>
+            <td style="background: ${this.COLORS.white}; padding: 36px 40px 28px; text-align: center; border-bottom: 1px solid #f0e8d8;">
+              <div style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 30px; font-weight: 400; color: ${this.COLORS.secondary}; letter-spacing: -0.02em;">Widamine</div>
+              <p style="margin: 6px 0 0; font-size: 11px; color: ${this.COLORS.primary}; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Aesthetic Center</p>
             </td>
           </tr>
 
           <!-- Content -->
           <tr>
-            <td style="background: ${this.COLORS.white}; padding: 48px 40px;">
+            <td style="background: ${this.COLORS.white}; padding: 40px 40px 48px;">
               ${content}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">Fès, Maroc</p>
-              <p style="margin: 16px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">
-                <a href="https://new.widamineaestheticcenter.com" style="color: ${this.COLORS.accent}; text-decoration: none;">new.widamineaestheticcenter.com</a>
+            <td style="background: ${this.COLORS.white}; padding: 28px 40px 36px; text-align: center; border-top: 1px solid #f0e8d8;">
+              <p style="margin: 0; font-size: 12px; color: ${this.COLORS.textLight}; letter-spacing: 1px;">Fès, Maroc</p>
+              <p style="margin: 12px 0 0; font-size: 12px; color: ${this.COLORS.textLight};">
+                <a href="https://new.widamineaestheticcenter.com" style="color: ${this.COLORS.primary}; text-decoration: none;">new.widamineaestheticcenter.com</a>
                 &nbsp;&nbsp;·&nbsp;&nbsp;
-                <a href="mailto:admin@widamineaestheticcenter.com" style="color: ${this.COLORS.accent}; text-decoration: none;">admin@widamineaestheticcenter.com</a>
+                <a href="mailto:admin@widamineaestheticcenter.com" style="color: ${this.COLORS.primary}; text-decoration: none;">admin@widamineaestheticcenter.com</a>
               </p>
             </td>
           </tr>
@@ -150,12 +150,11 @@ export class AppointmentNotificationService {
 </html>`;
   }
 
-  private title(icon: string, text: string, color?: string): string {
-    const c = color || this.COLORS.secondary;
+  // ponytail: no emoji/symbol icons — plain theme title, type is carried by the accent line
+  private title(text: string): string {
     return `
       <div style="text-align: center; margin-bottom: 32px;">
-        <div style="width: 48px; height: 48px; background: ${c}; border-radius: 50%; margin: 0 auto 16px; line-height: 48px; font-size: 20px; color: ${this.COLORS.white};">${icon}</div>
-        <h2 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 28px; font-weight: 400; color: ${c};">${text}</h2>
+        <h2 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 28px; font-weight: 400; color: ${this.COLORS.secondary}; letter-spacing: -0.02em;">${text}</h2>
       </div>`;
   }
 
@@ -173,13 +172,6 @@ export class AppointmentNotificationService {
           </tr>
         `).join('')}
       </table>`;
-  }
-
-  private note(text: string): string {
-    return `
-      <div style="background: #f7fafc; border-left: 4px solid ${this.COLORS.accent}; padding: 16px 20px; margin: 24px 0; border-radius: 0 4px 4px 0;">
-        <p style="margin: 0; font-size: 14px; color: ${this.COLORS.text}; line-height: 1.6;">${text}</p>
-      </div>`;
   }
 
   private motifBox(name: string): string {
@@ -228,14 +220,11 @@ export class AppointmentNotificationService {
     // Send email if enabled AND email exists
     if ((await this.canSendAnyEmail()) && appt.email) {
       const html = this.wrap(`
-        ${this.title('✓', 'Réservation reçue')}
+        ${this.title('Réservation reçue')}
         ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
         ${this.paragraph('Votre demande de rendez-vous a bien été enregistrée.')}
         ${this.motifBox(appt.motif?.name || 'Consultation')}
-        ${this.note(`
-          Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
-          <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
-        `)}
+        ${this.paragraph('Notre équipe va examiner votre demande et vous recontacter rapidement. <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.')}
         ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:admin@widamineaestheticcenter.com" style="color: ' + this.COLORS.primary + ';">admin@widamineaestheticcenter.com</a>.')}
         ${this.closing()}
       `);
@@ -266,7 +255,7 @@ export class AppointmentNotificationService {
     if (!appt || !appt.email) return;
 
     const html = this.wrap(`
-      ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
+      ${this.title('Rendez-vous confirmé')}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph(`Bonne nouvelle ! Votre rendez-vous pour <strong>${appt.motif?.name || '—'}</strong> a été confirmé.`)}
       ${this.detailsTable([
@@ -274,7 +263,7 @@ export class AppointmentNotificationService {
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
-      ${this.note('Nous vous attendons. En cas d\'empêchement, merci de nous prévenir au moins <strong>24 heures</strong> à l\'avance.')}
+      ${this.paragraph('Nous vous attendons. En cas d\'empêchement, merci de nous prévenir au moins <strong>24 heures</strong> à l\'avance.')}
       ${this.closing()}
     `, this.COLORS.success);
 
@@ -302,10 +291,10 @@ export class AppointmentNotificationService {
     const date = appt.schedules[0] ? this.dateStr(appt.schedules[0].datetime) : '';
 
     const html = this.wrap(`
-      ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
+      ${this.title('Rendez-vous annulé')}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph(`Votre rendez-vous${date ? ` du <strong>${date}</strong>` : ''}${appt.motif ? ` pour <strong>${appt.motif.name}</strong>` : ''} a été annulé.`)}
-      ${this.note('Si vous souhaitez reprendre rendez-vous, contactez-nous directement. Nous restons à votre disposition.')}
+      ${this.paragraph('Si vous souhaitez reprendre rendez-vous, contactez-nous directement. Nous restons à votre disposition.')}
       ${this.closing()}
     `, this.COLORS.danger);
 
@@ -331,7 +320,7 @@ export class AppointmentNotificationService {
     if (!appt || !appt.email) return;
 
     const html = this.wrap(`
-      ${this.title('⏰', 'Rappel de rendez-vous', this.COLORS.warning)}
+      ${this.title('Rappel de rendez-vous')}
       ${this.paragraph(`Bonjour <strong>${appt.name}</strong>,`)}
       ${this.paragraph('Ceci est un rappel pour votre rendez-vous <strong>demain</strong>.')}
       ${this.detailsTable([
@@ -339,7 +328,7 @@ export class AppointmentNotificationService {
         ['Praticien', appt.practitioner?.name || '—'],
         ['Date', this.dateStr(appt.schedules[0]?.datetime)],
       ])}
-      ${this.note('Merci de confirmer votre présence. En cas d\'empêchement, contactez-nous dès que possible.')}
+      ${this.paragraph('Merci de confirmer votre présence. En cas d\'empêchement, contactez-nous dès que possible.')}
       ${this.closing()}
     `, this.COLORS.warning);
 
@@ -408,7 +397,7 @@ export class AppointmentNotificationService {
         const to = doctor.notificationEmail ?? doctor.email;
         if (to) {
           const html = this.wrap(`
-            ${this.title('📋', 'Nouvelle réservation')}
+            ${this.title('Nouvelle réservation')}
             ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
             ${this.paragraph('Un nouveau rendez-vous vous a été assigné.')}
             ${this.detailsTable([
@@ -484,7 +473,7 @@ export class AppointmentNotificationService {
         const to = doctor.notificationEmail ?? doctor.email;
         if (to) {
           const html = this.wrap(`
-            ${this.title('✓', 'Rendez-vous confirmé', this.COLORS.success)}
+            ${this.title('Rendez-vous confirmé')}
             ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
             ${this.paragraph('Le rendez-vous suivant a été confirmé.')}
             ${this.detailsTable([
@@ -558,7 +547,7 @@ export class AppointmentNotificationService {
         const to = doctor.notificationEmail ?? doctor.email;
         if (to) {
           const html = this.wrap(`
-            ${this.title('✗', 'Rendez-vous annulé', this.COLORS.danger)}
+            ${this.title('Rendez-vous annulé')}
             ${this.paragraph(`Bonjour <strong>${doctor.name || ''}</strong>,`)}
             ${this.paragraph('Un rendez-vous a été annulé. Veuillez mettre à jour votre agenda.')}
             ${this.detailsTable([
