@@ -136,8 +136,6 @@ export class AppointmentNotificationService {
               <p style="margin: 0; font-size: 12px; color: ${this.COLORS.textLight}; letter-spacing: 1px;">Fès, Maroc</p>
               <p style="margin: 12px 0 0; font-size: 12px; color: ${this.COLORS.textLight};">
                 <a href="https://new.widamineaestheticcenter.com" style="color: ${this.COLORS.primary}; text-decoration: none;">new.widamineaestheticcenter.com</a>
-                &nbsp;&nbsp;·&nbsp;&nbsp;
-                <a href="mailto:admin@widamineaestheticcenter.com" style="color: ${this.COLORS.primary}; text-decoration: none;">admin@widamineaestheticcenter.com</a>
               </p>
             </td>
           </tr>
