@@ -56,6 +56,7 @@ export class AppointmentController {
     }
     const result = await this.appointmentService.update(id, { status: "REJECTED" });
     this.notificationService.sendCancellation(id).catch(() => {});
+    this.notificationService.notifyDoctorCancellation(id).catch(() => {});
     this.patientService.deleteIfNoAppointments(result.patientId).catch(() => {});
     return result;
   }

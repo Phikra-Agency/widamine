@@ -76,11 +76,12 @@ export class AppointmentNotificationService {
     });
   }
 
+  // ponytail: single brand source for all mail templates — matches landing theme (C.primary/C.secondary/C.bg)
   private readonly COLORS = {
-    primary: '#2e90c0',
+    primary: '#009FD6',
     secondary: '#1a3646',
-    accent: '#e8c5b8',
-    bg: '#F7F1EB',
+    accent: '#F7A269',
+    bg: '#FBF7EF',
     white: '#ffffff',
     text: '#2d3748',
     textLight: '#718096',
@@ -118,7 +119,7 @@ export class AppointmentNotificationService {
           <tr>
             <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
               <h1 style="margin: 0; font-family: ${this.FONTS.serif}; font-size: 24px; font-weight: 400; color: ${this.COLORS.white}; letter-spacing: 3px; text-transform: uppercase;">WIDAMINE</h1>
-              <p style="margin: 8px 0 0; font-size: 11px; color: ${this.COLORS.accent}; letter-spacing: 2px; text-transform: uppercase; font-weight: 300;">Sobriété Esthétique</p>
+              <p style="margin: 8px 0 0; font-size: 11px; color: ${this.COLORS.accent}; letter-spacing: 2px; text-transform: uppercase; font-weight: 300;">Aesthetic Center</p>
             </td>
           </tr>
 
@@ -134,9 +135,9 @@ export class AppointmentNotificationService {
             <td style="background: ${this.COLORS.secondary}; padding: 32px 40px; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px;">Fès, Maroc</p>
               <p style="margin: 16px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">
-                <a href="https://widamine.com" style="color: ${this.COLORS.accent}; text-decoration: none;">widamine.com</a>
+                <a href="https://new.widamineaestheticcenter.com" style="color: ${this.COLORS.accent}; text-decoration: none;">new.widamineaestheticcenter.com</a>
                 &nbsp;&nbsp;·&nbsp;&nbsp;
-                <a href="mailto:contact@widamine.com" style="color: ${this.COLORS.accent}; text-decoration: none;">contact@widamine.com</a>
+                <a href="mailto:admin@widamineaestheticcenter.com" style="color: ${this.COLORS.accent}; text-decoration: none;">admin@widamineaestheticcenter.com</a>
               </p>
             </td>
           </tr>
@@ -235,7 +236,7 @@ export class AppointmentNotificationService {
           Notre équipe va examiner votre demande et vous recontacter rapidement pour vous confirmer ou refuser votre rendez-vous.<br><br>
           <strong>Vous recevrez un email de confirmation</strong> dès que votre réservation sera validée.
         `)}
-        ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:contact@widamine.com" style="color: ' + this.COLORS.primary + ';">contact@widamine.com</a>.')}
+        ${this.paragraph('Pour toute question, contactez-nous à <a href="mailto:admin@widamineaestheticcenter.com" style="color: ' + this.COLORS.primary + ';">admin@widamineaestheticcenter.com</a>.')}
         ${this.closing()}
       `);
 
