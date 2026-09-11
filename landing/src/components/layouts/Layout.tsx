@@ -11,6 +11,7 @@ import {
 import { useEffect } from 'react'
 import Scheduling from '@/components/Scheduling'
 import ContactPopup from '@/components/ContactPopup'
+import BmiPopup from '@/components/BmiPopup'
 import Chatbot from '@/components/Chatbot'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -38,6 +39,7 @@ export default function Layout() {
 			</div>
 			<Scheduling />
 			<ContactPopup />
+			<BmiPopup />
 			<Chatbot />
 		</main>
 	)

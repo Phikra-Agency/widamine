@@ -10,6 +10,7 @@ import { Autoplay, Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import PublicNavbar from '@/components/PublicNavbar'
+import { useBmiPopupStore } from '@/stores/bmiPopupStore'
 import { SERVICE_PAGES, ICON_MAP } from '@/lib/siteContent'
 import { C, TYPE } from '@/lib/theme'
 
@@ -412,8 +413,24 @@ function TreatmentsSection() {
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-16 lg:grid-cols-[0.9fr_1fr] lg:items-center'>
-          {/* Right — content (first on mobile) */}
-          <div className='max-w-xl order-1 lg:order-2'>
+          {/* Left — image (top on mobile, left on desktop) */}
+          <div className='relative flex items-center justify-center'>
+            {/* Blue offset backdrop */}
+            <div className='pointer-events-none absolute left-2 top-2 h-[500px] w-full max-w-[420px] select-none rounded-[2rem]' style={{ background: `${C.primary}15` }} />
+
+            {/* Photo card */}
+            <div ref={imgWrapperRef} className='relative h-[500px] w-full max-w-[420px] rounded-[2rem] shadow-[0_30px_70px_rgba(30,30,30,0.18)] ring-1 ring-[rgba(0,159,214,0.08)]'>
+              {/* The image */}
+              <img
+                src='/images/team/dr widad slaoui.jpg'
+                alt='Dr. Widad Slaoui'
+                className='h-full w-full object-cover object-center rounded-[2rem]'
+              />
+            </div>
+          </div>
+
+          {/* Right — content (bottom on mobile, right on desktop) */}
+          <div className='max-w-xl'>
             <p className='text-xs font-semibold uppercase tracking-[0.25em]' style={{ color: C.primary }}>
               Rencontrez la docteur
             </p>
@@ -441,22 +458,6 @@ function TreatmentsSection() {
             <div className='mt-8 leading-8' style={{ color: `${C.secondary}cc` }}>
               <p>Médecin dermatologue avec une expertise en médecine esthétique, laser et bodycontouring. Formation internationale et participation active aux congrès mondiaux, apportant les techniques les plus avancées et sécurisées de la dermatologie moderne.</p>
               <p className='mt-4'>Son approche est fondée sur un accompagnement personnalisé, recherchant toujours des résultats naturels, harmonieux et reflétant le bien-être de chaque patiente.</p>
-            </div>
-          </div>
-
-          {/* Left — image (second on mobile) */}
-          <div className='relative flex items-center justify-center order-2 lg:order-1'>
-            {/* Blue offset backdrop */}
-            <div className='pointer-events-none absolute left-2 top-2 h-[500px] w-full max-w-[420px] select-none rounded-[2rem]' style={{ background: `${C.primary}15` }} />
-
-            {/* Photo card */}
-            <div ref={imgWrapperRef} className='relative h-[500px] w-full max-w-[420px] rounded-[2rem] shadow-[0_30px_70px_rgba(30,30,30,0.18)] ring-1 ring-[rgba(0,159,214,0.08)]'>
-              {/* The image */}
-              <img
-                src='/images/team/dr widad slaoui.jpg'
-                alt='Dr. Widad Slaoui'
-                className='h-full w-full object-cover object-center rounded-[2rem]'
-              />
             </div>
           </div>
           </div>
@@ -673,6 +674,18 @@ function ConsultSection() {
     <section className='relative py-24 sm:py-32 lg:py-40' style={{ background: C.bg }}>
       <div className='mx-auto max-w-7xl px-4 sm:px-6'>
         <div className='grid gap-12 lg:grid-cols-2 lg:items-center'>
+          <div className='w-full overflow-hidden rounded-[2rem] relative' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
+            <iframe
+              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3303!2d-4.9794!3d34.0364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2zQm91bGV2YXJkIFNsYW91aSwgRsOocw!5e0!3m2!1sfr!2sma!4v1'
+              width='100%'
+              height='380'
+              style={{ border: 0 }}
+              allowFullScreen
+              loading='lazy'
+              referrerPolicy='no-referrer-when-downgrade'
+              className='w-full'
+            />
+          </div>
           <div>
               <h2 className='leading-tight sm:text-4xl md:text-5xl text-balance' style={{ fontFamily: TYPE.headingFamily, fontSize: TYPE.h2, letterSpacing: TYPE.headingSpacing, color: C.secondary }}>
                 Comment <span style={{ color: C.primary, fontStyle: 'italic' }}>prendre rendez-vous</span> au Widamine Center ?
@@ -703,18 +716,6 @@ function ConsultSection() {
             <button onClick={open} className='mt-8 inline-flex items-center rounded-full px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.96]' style={{ background: C.primary }}>
               Prendre rendez-vous
             </button>
-          </div>
-          <div className='w-full overflow-hidden rounded-[2rem] relative' style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15)' }}>
-            <iframe
-              src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3303!2d-4.9794!3d34.0364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2zQm91bGV2YXJkIFNsYW91aSwgRsOocw!5e0!3m2!1sfr!2sma!4v1'
-              width='100%'
-              height='380'
-              style={{ border: 0 }}
-              allowFullScreen
-              loading='lazy'
-              referrerPolicy='no-referrer-when-downgrade'
-              className='w-full'
-            />
           </div>
         </div>
       </div>
@@ -784,6 +785,26 @@ function useGSAPAnimations() {
 
 export default function Home() {
   useGSAPAnimations()
+
+  // ponytail: BMI popup fires once per page load after scrolling past the hero (in-memory flag resets on refresh)
+  useEffect(() => {
+    const scroller = document.getElementById('app-scroll')
+    if (!scroller) return
+    let shown = false
+    const timer = setTimeout(() => {
+      const onScroll = () => {
+        if (!shown && scroller.scrollTop > 600) {
+          shown = true
+          const s = useBmiPopupStore.getState()
+          if (!s.isOpen && !useScheduleModalStore.getState().isOpen) s.open()
+          scroller.removeEventListener('scroll', onScroll)
+        }
+      }
+      scroller.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <>

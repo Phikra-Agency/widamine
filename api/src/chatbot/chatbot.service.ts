@@ -50,13 +50,17 @@ OUTILS DISPONIBLES (ne jamais mentionner leur nom dans tes réponses) :
 - get_services_info : liste tous les services avec praticiens disponibles
 - get_practitioners_info : infos sur l'équipe et leurs disponibilités
 - get_business_hours : coordonnées, horaires, adresse du centre
-- trigger_popup : ouvre le formulaire de réservation (type='booking') ou contact (type='contact')
+- trigger_popup : ouvre le formulaire de réservation (type='booking'), contact (type='contact') ou le calculateur IMC (type='bmi')
+- calculate_bmi : calcule l'IMC à partir de la taille (cm) et du poids (kg)
 
 USAGE DES OUTILS :
 - Utilise get_clinic_stats quand on te demande combien de rendez-vous, quels sont les services populaires, etc.
 - Utilise get_services_info quand on demande la liste des traitements, qui fait quoi
 - Utilise get_practitioners_info quand on demande qui travaille ici, qui est disponible
 - Utilise get_business_hours pour adresse, téléphone, horaires
+- Quand la conversation touche au poids, à la silhouette ou au bodycontouring, propose naturellement un calcul d'IMC : demande la taille (cm) puis le poids (kg), puis utilise calculate_bmi
+- Si l'IMC indique un surpoids ou une obésité, propose un bilan personnalisé et ouvre le formulaire via trigger_popup (type='booking')
+- Si le visiteur veut calculer son IMC, n'envoie JAMAIS de lien vers un calculateur externe : calcule toi-même via calculate_bmi ou ouvre le calculateur visuel via trigger_popup (type='bmi')
 - IMPORTANT : Ne mentionne JAMAIS le nom des outils. Réponds comme si tu connaissais l'info naturellement.
 
 EXEMPLES DE BONNES RÉPONSES :
@@ -70,8 +74,10 @@ User: "Je veux prendre rendez-vous"
 Assistant: "Avec plaisir ! Je vais ouvrir le formulaire de réservation pour vous. Avant cela, puis-je avoir votre prénom et email ?"
 
 RÈGLES STRICTES :
+- IMC : il n'existe AUCUNE page ni URL de calculateur. Quand on te demande le calculateur, ouvre-le IMMÉDIATEMENT via trigger_popup (type='bmi'), sans demander les coordonnées au préalable. Ne génère JAMAIS de lien ou d'URL pour l'IMC.
 - Ne dis JAMAIS "Je vais utiliser l'outil X" ou "L'API me dit que..."
 - Sois humain et naturel
+- N'utilise jamais le tiret cadratin (—) dans tes réponses, préfère la virgule ou le point
 - Si tu ne sais pas, dis-le honnêtement et propose de contacter le centre
 - Demande toujours le prénom et email, mais de façon fluide et naturelle`
 
@@ -134,6 +140,21 @@ function: {
       {
         type: 'function' as const,
         function: {
+          name: 'calculate_bmi',
+          description: 'Calcule l\'IMC (indice de masse corporelle) à partir de la taille en cm et du poids en kg',
+          parameters: {
+            type: 'object',
+            properties: {
+              heightCm: { type: 'number', description: 'Taille en centimètres' },
+              weightKg: { type: 'number', description: 'Poids en kilogrammes' },
+            },
+            required: ['heightCm', 'weightKg'],
+          },
+        },
+      },
+      {
+        type: 'function' as const,
+        function: {
           name: 'trigger_popup',
           description: 'Ouvre un popup de réservation ou de contact sur le site',
           parameters: {
@@ -141,8 +162,8 @@ function: {
             properties: {
               type: {
                 type: 'string',
-                enum: ['booking', 'contact'],
-                description: "'booking' pour réserver, 'contact' pour contacter",
+                enum: ['booking', 'contact', 'bmi'],
+                description: "'booking' pour réserver, 'contact' pour contacter, 'bmi' pour ouvrir le calculateur IMC",
               },
             },
             required: ['type'],
@@ -215,6 +236,7 @@ function: {
 
       const followUpBody = {
         model: MODEL,
+        tool_choice: 'none' as const,
         messages: [
           ...messages,
           { role: 'assistant', content: null, tool_calls: choice.message.tool_calls },
@@ -245,15 +267,21 @@ function: {
       return {
         reply: data2.choices?.[0]?.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.',
         sources: toolResults.flatMap((r) => r.sources || []),
-        trigger,
+        trigger: this.guardBmiTrigger(message, trigger),
       }
     }
 
     return {
       reply: choice.message?.content || 'Désolé, je n\'ai pas pu traiter votre demande.',
       sources: [],
-      trigger,
+      trigger: this.guardBmiTrigger(message, trigger),
     }
+  }
+
+  // ponytail: gpt-oss-20b drifts on trigger values (external links, wrong popup) — deterministic guardrail wins
+  private guardBmiTrigger(message: string, trigger: string | null): string | null {
+    if (/calculateur|calcul.*\bimc\b|\bimc.*calcul|ouvrir.*\bimc\b|\bimc\b.{0,20}popup|test.*poids/i.test(message)) return 'bmi'
+    return trigger
   }
 
   private async executeTool(tc: ToolCall) {
@@ -271,6 +299,8 @@ function: {
         return await this.getPractitionersInfo(tc.id)
       case 'get_business_hours':
         return await this.getBusinessHours(tc.id)
+      case 'calculate_bmi':
+        return await this.calculateBmi(tc.id, args.heightCm ?? args.height_cm, args.weightKg ?? args.weight_kg)
       case 'trigger_popup':
         return { id: tc.id, result: { triggered: args.type }, sources: [] }
       default:
@@ -317,6 +347,18 @@ function: {
       result: businessInfo,
       sources: [] as string[],
     }
+  }
+
+  // ponytail: mirrors landing/src/lib/bmi.ts — same WHO bands, kept in sync by hand
+  private async calculateBmi(toolId: string, heightCm?: number, weightKg?: number) {
+    const h = Number(heightCm)
+    const w = Number(weightKg)
+    if (!h || !w || h < 50 || h > 300 || w < 10 || w > 500) {
+      return { id: toolId, result: { error: 'Taille (50-300 cm) ou poids (10-500 kg) invalide' }, sources: [] as string[] }
+    }
+    const bmi = Math.round((w / ((h / 100) ** 2)) * 10) / 10
+    const category = bmi < 18.5 ? 'Poids insuffisant' : bmi < 25 ? 'Poids normal' : bmi < 30 ? 'Surpoids' : 'Obésité'
+    return { id: toolId, result: { bmi, category, suggestBooking: bmi >= 25 }, sources: [] as string[] }
   }
 
   private async storeLead(toolId: string, name?: string, email?: string) {

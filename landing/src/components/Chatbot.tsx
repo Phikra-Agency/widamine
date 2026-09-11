@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { C, TYPE } from '@/lib/theme'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
 import { useContactPopupStore } from '@/stores/contactPopupStore'
+import { useBmiPopupStore } from '@/stores/bmiPopupStore'
 import { API_BASE_URL } from '@/lib/api'
 
 interface Message {
@@ -27,6 +28,7 @@ export default function Chatbot() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const openScheduleModal = useScheduleModalStore((s) => s.open)
   const openContactPopup = useContactPopupStore((s) => s.open)
+  const openBmiPopup = useBmiPopupStore((s) => s.open)
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 350)
@@ -92,6 +94,8 @@ export default function Chatbot() {
         openScheduleModal()
       } else if (data.trigger === 'contact') {
         openContactPopup()
+      } else if (data.trigger === 'bmi') {
+        openBmiPopup()
       }
     } catch {
       setMessages((prev) => [
