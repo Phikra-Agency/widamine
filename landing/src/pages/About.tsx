@@ -140,7 +140,7 @@ export default function About() {
               >
                 <div className='aspect-[4/5] lg:aspect-[3/4] overflow-hidden'>
                   <img 
-                    src='/images/gallery/clinic-interior.webp'
+                    src='/images/gallery/about-hero.webp'
                     alt='Centre Widamine - Cabinet médical' 
                     className='w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105'
                   />
