@@ -140,7 +140,7 @@ export default function About() {
               >
                 <div className='aspect-[4/5] lg:aspect-[3/4] overflow-hidden'>
                   <img 
-                    src='https://lh3.googleusercontent.com/gps-cs-s/AHRPTWk-C-bpX_xlt-IoVZClvZEDvooFgooE2MXE2ziwjHH1TUfWrxzanvJivhmVZkorFBaVCIUQ2w-NIGkQEWe9Cdz8seQy78ZxZlZy0Ejt5ob9Cg53uYqci7xYvDJ-funph8EUEYYXXcdGh3I=s680-w680-h510' 
+                    src='/images/gallery/clinic-interior.webp'
                     alt='Centre Widamine - Cabinet médical' 
                     className='w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105'
                   />

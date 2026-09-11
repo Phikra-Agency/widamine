@@ -845,35 +845,37 @@ Réservation reçue
           )}
         </div>
 
-        <div className='flex flex-col gap-6 px-5 pb-5 sm:flex-row sm:px-6 sm:pb-6'>
+        <div className='flex flex-col gap-6 px-5 pb-5 sm:flex-row sm:gap-6 sm:px-6 sm:pb-6'>
           {/* Left — Dr. Widad */}
-          <div className='flex shrink-0 flex-col items-center sm:w-[220px]'>
+          <div className='mx-auto flex flex-row items-center justify-center gap-4 sm:mx-0 sm:w-[220px] sm:shrink-0 sm:flex-col sm:items-center sm:gap-0'>
             <motion.img
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
               src='/images/team/dr widad slaoui.jpg'
               alt='Dr. Widad Slaoui'
-              className='h-[200px] w-full rounded-2xl object-cover object-[center_20%] sm:object-center shadow-md sm:h-[270px]'
+              className='h-[90px] w-[90px] shrink-0 rounded-2xl object-cover object-[center_20%] shadow-md sm:h-[270px] sm:w-full sm:object-center'
             />
-            <motion.span
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
-              className='mt-3 text-sm font-semibold'
-              style={{ color: C.secondary }}
-            >
-              Dr. Widad Slaoui
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25, duration: 0.3 }}
-              className='text-xs'
-              style={{ color: `${C.secondary}70` }}
-            >
-              Dermatologue esthétique
-            </motion.span>
+            <div className='flex flex-col sm:mt-3 sm:items-center'>
+              <motion.span
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.3 }}
+                className='text-sm font-semibold'
+                style={{ color: C.secondary }}
+              >
+                Dr. Widad Slaoui
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.3 }}
+                className='text-xs'
+                style={{ color: `${C.secondary}70` }}
+              >
+                Dermatologue esthétique
+              </motion.span>
+            </div>
           </div>
 
           {/* Right — Calendar + Time */}
