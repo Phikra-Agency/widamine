@@ -101,11 +101,6 @@ export default function BmiPopup() {
             </button>
 
             <div className='px-8 pb-9 pt-9'>
-              {/* logo */}
-              <div className='mb-7 flex justify-center'>
-                <img src='/logo.svg' alt='Widamine' className='h-9 w-9 object-contain' />
-              </div>
-
               <AnimatePresence mode='wait'>
                 {/* ── step 1 — gender ── */}
                 {step === 1 && (
