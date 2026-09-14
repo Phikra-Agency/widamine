@@ -47,7 +47,19 @@ export default function BmiPopup() {
     handleClose()
   }
   
-  const goBooking = () => { close(); openBooking() }
+  const goBooking = () => { 
+    // Save result before opening booking
+    if (bmi !== null && cat && gender && ageNum) {
+      setResult({
+        bmi,
+        category: cat.label,
+        gender: gender as 'FEMME' | 'HOMME',
+        age: ageNum,
+      })
+    }
+    close()
+    openBooking()
+  }
 
   return (
     <AnimatePresence>
@@ -100,16 +112,16 @@ export default function BmiPopup() {
                   <Step key='s1'>
                     <Heading>Vous êtes ?</Heading>
                     <Sub>Pour un calcul personnalisé</Sub>
-                    <div className='mt-7 grid grid-cols-2 gap-3'>
+                    <div className='mt-7 grid grid-cols-2 gap-4'>
                       {(['FEMME', 'HOMME'] as const).map((g) => (
                         <button
                           key={g}
                           onClick={() => { setGender(g); setStep(2) }}
-                          className='cursor-pointer rounded-2xl py-4 text-sm font-semibold transition-all active:scale-[0.97]'
+                          className='min-h-14 cursor-pointer rounded-full border-2 text-base font-semibold transition-all duration-300 active:scale-[0.96]'
                           style={{
-                            background: gender === g ? C.primary : 'white',
-                            color: gender === g ? '#fff' : C.secondary,
-                            border: `1px solid ${gender === g ? C.primary : 'rgba(26,54,70,0.10)'}`,
+                            borderColor: gender === g ? C.primary : `${C.secondary}15`,
+                            background: gender === g ? `${C.primary}10` : 'white',
+                            color: C.secondary,
                           }}
                         >
                           {g === 'FEMME' ? 'Femme' : 'Homme'}
@@ -133,9 +145,9 @@ export default function BmiPopup() {
                       placeholder='34'
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      className='hide-number-spinners mt-7 w-full rounded-2xl bg-white px-5 py-4 text-center text-2xl font-semibold outline-none transition-all'
+                      className='hide-number-spinners mt-7 min-h-14 w-full rounded-full border-2 bg-white px-6 text-center text-2xl font-semibold outline-none transition-all duration-300 focus:brightness-[0.97]'
                       style={{
-                        border: `1px solid ${ageOk ? C.primary : 'rgba(26,54,70,0.10)'}`,
+                        borderColor: C.primary,
                         color: C.secondary,
                         fontFamily: TYPE.headingFamily,
                       }}
@@ -254,12 +266,12 @@ function Step({ children }: { children: React.ReactNode }) {
 function Heading({ children }: { children: React.ReactNode }) {
   return (
     <h2
-      className='text-center'
+      className='text-balance text-center'
       style={{
         fontFamily: TYPE.headingFamily,
-        fontSize: 'clamp(1.6rem, 4vw, 2rem)',
-        letterSpacing: '-0.02em',
-        lineHeight: 1.05,
+        fontSize: 'clamp(1.75rem, 5vw, 2.25rem)',
+        letterSpacing: TYPE.headingSpacing,
+        lineHeight: 0.95,
         color: C.secondary,
       }}
     >
@@ -289,15 +301,15 @@ function Row({ onBack, onNext, disabled, nextLabel = 'Continuer' }: {
     <div className='mt-7 flex items-center justify-between'>
       <button
         onClick={onBack}
-        className='flex cursor-pointer items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-60'
-        style={{ color: `${C.secondary}45`, fontFamily: TYPE.bodyFamily }}
+        className='flex cursor-pointer items-center gap-1 text-sm font-semibold transition-opacity hover:opacity-60'
+        style={{ color: `${C.secondary}60`, fontFamily: TYPE.bodyFamily }}
       >
-        <ArrowLeft size={12} /> Retour
+        <ArrowLeft size={14} /> Retour
       </button>
       <button
         onClick={onNext}
         disabled={disabled}
-        className='cursor-pointer rounded-2xl px-7 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-25'
+        className='inline-flex min-h-14 cursor-pointer items-center justify-center rounded-full px-8 text-base font-semibold text-white transition-all duration-300 hover:opacity-90 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40'
         style={{ background: C.primary, fontFamily: TYPE.bodyFamily }}
       >
         {nextLabel}
@@ -316,8 +328,8 @@ function Field({ label, unit, placeholder, value, onChange }: {
   return (
     <label className='block'>
       <span
-        className='mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em]'
-        style={{ color: `${C.secondary}50`, fontFamily: TYPE.bodyFamily }}
+        className='mb-2 block text-xs font-semibold uppercase tracking-[0.15em]'
+        style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}
       >
         {label}
       </span>
@@ -328,14 +340,14 @@ function Field({ label, unit, placeholder, value, onChange }: {
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className='hide-number-spinners w-full rounded-2xl bg-white px-4 py-3.5 pr-9 text-base font-semibold outline-none transition-all'
+          className='hide-number-spinners min-h-14 w-full rounded-full border-2 bg-white px-6 pr-10 text-base font-semibold outline-none transition-all duration-300 focus:brightness-[0.97]'
           style={{
-            border: `1px solid ${value ? C.primary : 'rgba(26,54,70,0.10)'}`,
+            borderColor: value ? C.primary : `${C.secondary}15`,
             color: C.secondary,
           }}
         />
         <span
-          className='absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase'
+          className='absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold uppercase'
           style={{ color: `${C.secondary}35` }}
         >
           {unit}
