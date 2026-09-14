@@ -406,13 +406,13 @@ function ReservationSteps({
                 </div>
               </div>
 
-              <div className='mb-6'>
+              <div className='mb-6 px-0.5'>
                 <textarea
                   placeholder='Note'
                   rows={4}
                   value={userData.note}
                   onChange={(e) => setUserData({ ...userData, note: e.target.value })}
-                  className='w-full resize-none rounded-xl border px-4 py-3 text-sm'
+                  className='w-full resize-none rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-inset'
                   style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
                 />
               </div>
@@ -1086,13 +1086,13 @@ Réservation reçue
         </div>
       </div>
 
-      <div className='mb-6'>
+      <div className='mb-6 px-0.5'>
         <textarea
           placeholder='Note (optionnelle)'
           rows={3}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className='w-full resize-none rounded-xl border px-4 py-3 text-sm'
+          className='w-full resize-none rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-inset'
           style={{ color: C.secondary, borderColor: '#e5e7eb', backgroundColor: '#ffffff' }}
         />
       </div>

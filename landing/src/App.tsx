@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { MantineProvider } from '@mantine/core'
@@ -25,7 +25,7 @@ export default function App() {
               <Route path='contact' element={<Contact />} />
               <Route path='category/:category' element={<ServiceCategory />} />
               <Route path='services/:slug' element={<ServiceDetail />} />
-              <Route path='*' element={<>404</>} />
+              <Route path='*' element={<Navigate to='/' replace />} />
             </Route>
           </Routes>
         </BrowserRouter>
