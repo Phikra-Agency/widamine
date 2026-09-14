@@ -91,11 +91,11 @@ export default function Chatbot() {
     fetchReply()
   }, [scheduleSubmitted, contactSubmitted])
 
-  // Handle BMI result — send personalized feedback
+  // Handle BMI result — send personalized feedback (SHORT)
   useEffect(() => {
     if (!bmiResult) return
 
-    const msg = `Le client vient de calculer son IMC : ${bmiResult.bmi.toFixed(1)} (${bmiResult.category}), ${bmiResult.gender === 'FEMME' ? 'femme' : 'homme'}, ${bmiResult.age} ans. Donne-lui un commentaire personnalisé avec des conseils adaptés à sa situation en 2-3 phrases maximum. Ne demande PAS son prénom ou email dans cette réponse, fournis uniquement les conseils et félicitations.`
+    const msg = `Le client vient de calculer son IMC : ${bmiResult.bmi.toFixed(1)} (${bmiResult.category}), ${bmiResult.gender === 'FEMME' ? 'femme' : 'homme'}, ${bmiResult.age} ans. Donne-lui UN SEUL commentaire court et encourageant en 1 phrase maximum (15-20 mots). Ne demande PAS son prénom ou email.`
 
     setOpen(true)
     const fetchReply = async () => {
@@ -109,6 +109,13 @@ export default function Chatbot() {
         })
         const data = await res.json()
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }])
+        
+        // Play notification sound
+        try {
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ0NVKzn7K1aGA==')
+          audio.volume = 0.3
+          audio.play().catch(() => {})
+        } catch {}
       } catch {
         /* ignore */
       } finally {
@@ -231,7 +238,7 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
-            className='fixed bottom-20 right-6 z-40 flex w-[340px] flex-col overflow-hidden sm:w-[380px]'
+            className='fixed bottom-20 right-6 z-[99999] flex w-[340px] flex-col overflow-hidden sm:w-[380px]'
             style={{
               maxHeight: 'calc(100vh - 120px)',
               height: 520,
