@@ -35,30 +35,35 @@ export default function BmiPopup() {
   }
   
   const handleResultClose = () => {
-    // Save result for chatbot to access
-    if (bmi !== null && cat && gender && ageNum) {
-      setResult({
-        bmi,
-        category: cat.label,
-        gender: gender as 'FEMME' | 'HOMME',
-        age: ageNum,
-      })
-    }
-    handleClose()
+    // Close popup first, then save result after a brief delay
+    close()
+    setTimeout(() => {
+      if (bmi !== null && cat && gender && ageNum) {
+        setResult({
+          bmi,
+          category: cat.label,
+          gender: gender as 'FEMME' | 'HOMME',
+          age: ageNum,
+        })
+      }
+      reset()
+    }, 200)
   }
   
   const goBooking = () => { 
-    // Save result before opening booking
-    if (bmi !== null && cat && gender && ageNum) {
-      setResult({
-        bmi,
-        category: cat.label,
-        gender: gender as 'FEMME' | 'HOMME',
-        age: ageNum,
-      })
-    }
+    // Close popup first, then save result
     close()
-    openBooking()
+    setTimeout(() => {
+      if (bmi !== null && cat && gender && ageNum) {
+        setResult({
+          bmi,
+          category: cat.label,
+          gender: gender as 'FEMME' | 'HOMME',
+          age: ageNum,
+        })
+      }
+      openBooking()
+    }, 200)
   }
 
   return (
