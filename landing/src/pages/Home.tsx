@@ -787,23 +787,9 @@ export default function Home() {
   useGSAPAnimations()
 
   // ponytail: BMI popup fires once per page load after scrolling past the hero (in-memory flag resets on refresh)
+  // Removed auto BMI popup trigger - now handled by chatbot teaser
   useEffect(() => {
-    const scroller = document.getElementById('app-scroll')
-    if (!scroller) return
-    let shown = false
-    const timer = setTimeout(() => {
-      const onScroll = () => {
-        if (!shown && scroller.scrollTop > 600) {
-          shown = true
-          const s = useBmiPopupStore.getState()
-          if (!s.isOpen && !useScheduleModalStore.getState().isOpen) s.open()
-          scroller.removeEventListener('scroll', onScroll)
-        }
-      }
-      scroller.addEventListener('scroll', onScroll, { passive: true })
-      onScroll()
-    }, 800)
-    return () => clearTimeout(timer)
+    // No-op - BMI popup is now integrated into chatbot
   }, [])
 
   return (

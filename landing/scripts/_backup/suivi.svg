@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100">
+  <!-- Suivi: clipboard with check — black on transparent -->
+  <path d="M8 3h8v2H8V3Z M9 2h6a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" fill="black"/>
+  <rect x="6" y="5" width="12" height="15" rx="2" fill="black"/>
+  <path d="M8.5 11.5l2 2 4-4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

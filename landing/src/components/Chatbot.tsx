@@ -95,7 +95,7 @@ export default function Chatbot() {
   useEffect(() => {
     if (!bmiResult) return
 
-    const msg = `Le client vient de calculer son IMC : ${bmiResult.bmi.toFixed(1)} (${bmiResult.category}), ${bmiResult.gender === 'FEMME' ? 'femme' : 'homme'}, ${bmiResult.age} ans. Donne-lui un commentaire personnalisé avec des conseils adaptés à sa situation en 2-3 phrases maximum.`
+    const msg = `Le client vient de calculer son IMC : ${bmiResult.bmi.toFixed(1)} (${bmiResult.category}), ${bmiResult.gender === 'FEMME' ? 'femme' : 'homme'}, ${bmiResult.age} ans. Donne-lui un commentaire personnalisé avec des conseils adaptés à sa situation en 2-3 phrases maximum. Ne demande PAS son prénom ou email dans cette réponse, fournis uniquement les conseils et félicitations.`
 
     setOpen(true)
     const fetchReply = async () => {

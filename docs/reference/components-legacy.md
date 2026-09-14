@@ -1,67 +1,74 @@
-# Components
+# Components Reference
 
-> **Note**: The old monolithic frontend (`frontend/`) has been replaced by two packages:  
-> [`landing/`](../packages/landing.md) (public site) and [`admin/`](../packages/admin.md) (staff back-office).  
-> This doc has been updated to reflect the current structure.
+> The old monolithic `frontend/` has been fully replaced.  
+> Current packages: [`landing/`](../packages/landing.md) · [`admin/`](../packages/admin.md)
 
 ---
 
-## Landing (`landing/`)
+## Landing Components
 
-### Components
+### Public-facing
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| Chatbot | `src/components/Chatbot.tsx` | Floating AI chatbot with lead capture |
-| Layout | `src/components/layouts/Layout.tsx` | Site shell (header, footer, chatbot) |
+| PublicNavbar | `components/PublicNavbar.tsx` | Floating pill navbar, mega-menu, mobile drawer |
+| PublicFooter | `components/PublicFooter.tsx` | Footer with social icons, service links, legal |
+| BookingFlow | `components/BookingFlow.tsx` | Full booking modal (type → calendar → form) |
+| Chatbot | `components/Chatbot.tsx` | Floating chatbot, Groq-powered, lead capture |
+| BmiPopup | `components/BmiPopup.tsx` | BMI calculator popup |
+| ContactPopup | `components/ContactPopup.tsx` | Contact form popup |
+| ServiceIcon | `components/ServiceIcon.tsx` | Per-slug SVG icons |
+| ServiceDecorative | `components/ServiceDecorative.tsx` | Decorative service page elements |
+| Preloader | `components/Preloader.tsx` | Page preloader animation |
 
-### Sections (in `src/pages/Home.tsx`)
+### Back-office (within landing routes)
 
-| Section | Description |
-|---------|-------------|
-| HeroSection | Title, subtitle, CTAs |
-| IntroSection | "Notre vision" — single paragraph |
-| ConceptSection | "Notre Objectif" — image + text |
-| DoctorSection | Dr. Widad Slaoui bio |
-| TeamSection | Team member cards |
-| GallerySection | Photo carousel |
-| TestimonialsSection | Patient reviews |
-| ContactSection | Booking info |
-| Footer | Links, socials |
-
-### Stores
-
-| Store | File | Purpose |
-|-------|------|---------|
-| scheduleModalStore | `src/stores/scheduleModalStore.ts` | Booking modal state |
-| contactPopupStore | `src/stores/contactPopupStore.ts` | Contact form popup state |
+| Component | File | Purpose |
+|-----------|------|---------|
+| BackOfficeLayout | `components/layouts/BackOfficeLayout.tsx` | Dark sidebar layout |
+| BackOfficeLayoutDark | `components/layouts/BackOfficeLayoutDark.tsx` | Alternate dark theme |
+| PractitionerStatusBar | `components/PractitionerStatusBar.tsx` | Live status bar |
+| ScheduleShowModal | `components/ScheduleShowModal.tsx` | Appointment detail |
+| Scheduling | `components/Scheduling.tsx` | Scheduling UI |
 
 ---
 
-## Admin (`admin/`)
+## Admin Components
 
-### Pages (in `src/pages/back-office/`)
+### Layout
 
-| Page | Route | Description |
-|------|-------|-------------|
-| Dashboard | `/` | Overview stats |
-| Appointments | `/appointments` | Booking queue |
-| Calendar | `/calendar` | Weekly calendar |
-| Users | `/users` | Staff accounts (ADMIN) |
-| Patients | `/patients` | Patient records |
-| Motifs | `/motifs` | Treatment definitions (ADMIN) |
-| Resources | `/resources` | Room management (ADMIN) |
-| Contacts | `/contacts` | Contact form submissions |
-
-### UI Components
-
-shadcn/ui v4 from `@/components/ui/`. Key custom components:
-
-| Component | Path | Purpose |
+| Component | File | Purpose |
 |-----------|------|---------|
-| FormDialog | `@/components/bo/FormDialog` | CRUD overlay dialogs |
-| LoadingScreen | `@/components/bo/LoadingScreen` | Full-page loader |
+| BackOfficeLayout | `components/layouts/BackOfficeLayout.tsx` | Main sidebar + nav |
+| SidebarSearch | `components/layouts/SidebarSearch.tsx` | Global search in sidebar |
 
-### Stores
+### Modals & Overlays
 
-Zustand stores in `src/stores/`: auth, appointments, patients, users, motifs, resources, contacts, schedules, scheduleModal.
+| Component | File | Purpose |
+|-----------|------|---------|
+| ScheduleShowModal | `components/ScheduleShowModal.tsx` | View appointment details |
+| UnavailabilityFormModal | `components/UnavailabilityFormModal.tsx` | Add/edit practitioner block |
+| ApprovalModal | `components/ApprovalModal.tsx` | Confirm destructive actions |
+| SettingsModal | `components/SettingsModal.tsx` | Notification channel settings (email, WhatsApp) |
+
+### Data Display
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| DataTable | `components/data-table/DataTable.tsx` | Generic table with filters |
+| TanStackDataTable | `components/data-table/TanStackDataTable.tsx` | TanStack Table v8 wrapper |
+| PractitionerAnalytics | `components/calendar/PractitionerAnalytics.tsx` | Practitioner stats panel |
+| CalendarNotificationBell | `components/calendar/CalendarNotificationBell.tsx` | Unread notification count |
+
+### Wrappers
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| AuthWrapper | `components/wrappers/AuthWrapper.tsx` | Redirect if not authenticated |
+| UnauthWrapper | `components/wrappers/UnauthWrapper.tsx` | Redirect if authenticated |
+| RoleWrapper | `components/wrappers/RoleWrapper.tsx` | Restrict by role |
+| RefreshWrapper | `components/wrappers/RefreshWrapper.tsx` | Token refresh on mount |
+
+### UI Kit (shadcn/ui v4)
+
+All in `components/ui/`: badge, button, card, checkbox, dialog, dropdown-menu, input, label, popover, scroll-area, select, separator, sheet, switch, table, tabs, textarea.
