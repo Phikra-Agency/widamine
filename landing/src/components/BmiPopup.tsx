@@ -35,35 +35,15 @@ export default function BmiPopup() {
   }
   
   const handleResultClose = () => {
-    // Close popup first, then save result after a brief delay
+    // Just close and reset, result already saved
     close()
-    setTimeout(() => {
-      if (bmi !== null && cat && gender && ageNum) {
-        setResult({
-          bmi,
-          category: cat.label,
-          gender: gender as 'FEMME' | 'HOMME',
-          age: ageNum,
-        })
-      }
-      reset()
-    }, 200)
+    reset()
   }
   
   const goBooking = () => { 
-    // Close popup first, then save result
+    // Just close and open booking
     close()
-    setTimeout(() => {
-      if (bmi !== null && cat && gender && ageNum) {
-        setResult({
-          bmi,
-          category: cat.label,
-          gender: gender as 'FEMME' | 'HOMME',
-          age: ageNum,
-        })
-      }
-      openBooking()
-    }, 200)
+    openBooking()
   }
 
   return (
@@ -165,7 +145,25 @@ export default function BmiPopup() {
                       <Field label='Taille' unit='cm' placeholder='170' value={height} onChange={setHeight} />
                       <Field label='Poids' unit='kg' placeholder='70' value={weight} onChange={setWeight} />
                     </div>
-                    <Row onBack={() => setStep(2)} onNext={() => setStep(4)} disabled={bmi === null} nextLabel='Voir mon résultat' />
+                    <Row 
+                      onBack={() => setStep(2)} 
+                      onNext={() => {
+                        setStep(4)
+                        // Trigger chatbot with result immediately
+                        if (bmi !== null && cat && gender && ageNum) {
+                          setTimeout(() => {
+                            setResult({
+                              bmi,
+                              category: cat.label,
+                              gender: gender as 'FEMME' | 'HOMME',
+                              age: ageNum,
+                            })
+                          }, 300)
+                        }
+                      }} 
+                      disabled={bmi === null} 
+                      nextLabel='Voir mon résultat' 
+                    />
                   </Step>
                 )}
 
