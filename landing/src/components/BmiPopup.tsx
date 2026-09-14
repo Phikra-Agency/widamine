@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, X } from '@phosphor-icons/react'
 import { C, TYPE } from '@/lib/theme'
 import { calcBmi, bmiCategory } from '@/lib/bmi'
 import { useBmiPopupStore } from '@/stores/bmiPopupStore'
 import { useScheduleModalStore } from '@/stores/scheduleModalStore'
+import { API_BASE_URL } from '@/lib/api'
 
 const SEGMENTS = [
   { label: '< 18,5', color: '#62bca1' },
@@ -21,6 +22,8 @@ export default function BmiPopup() {
   const [age, setAge] = useState('')
   const [height, setHeight] = useState('')
   const [weight, setWeight] = useState('')
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [loadingFeedback, setLoadingFeedback] = useState(false)
 
   const ageNum = Number(age)
   const ageOk = age !== '' && ageNum >= 5 && ageNum <= 120
@@ -28,7 +31,15 @@ export default function BmiPopup() {
   const cat = bmi === null ? null : bmiCategory(bmi)
   const marker = bmi === null ? null : Math.min(100, Math.max(0, ((bmi - 12) / (42 - 12)) * 100))
 
-  const reset = () => { setStep(1); setGender(''); setAge(''); setHeight(''); setWeight('') }
+  const reset = () => { 
+    setStep(1)
+    setGender('')
+    setAge('')
+    setHeight('')
+    setWeight('')
+    setAiFeedback('')
+    setLoadingFeedback(false)
+  }
   const handleClose = () => {
     close()
     reset()
@@ -60,6 +71,31 @@ export default function BmiPopup() {
     close()
     openBooking()
   }
+
+  // Fetch AI feedback when reaching step 4
+  useEffect(() => {
+    if (step === 4 && bmi !== null && cat && gender && !aiFeedback && !loadingFeedback) {
+      setLoadingFeedback(true)
+      const fetchFeedback = async () => {
+        try {
+          const msg = `Le client vient de calculer son IMC : ${bmi.toFixed(1)} (${cat.label}), ${gender === 'FEMME' ? 'femme' : 'homme'}, ${ageNum} ans. Donne-lui un commentaire personnalisé avec des conseils adaptés à sa situation en 2-3 phrases maximum. Ne demande PAS son prénom ou email dans cette réponse, fournis uniquement les conseils et félicitations.`
+          
+          const res = await fetch(`${API_BASE_URL}/chatbot/message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, history: [] }),
+          })
+          const data = await res.json()
+          setAiFeedback(data.reply)
+        } catch {
+          setAiFeedback('Prenez rendez-vous pour un bilan personnalisé avec nos experts.')
+        } finally {
+          setLoadingFeedback(false)
+        }
+      }
+      fetchFeedback()
+    }
+  }, [step, bmi, cat, gender, ageNum, aiFeedback, loadingFeedback])
 
   return (
     <AnimatePresence>
@@ -201,9 +237,20 @@ export default function BmiPopup() {
                       {SEGMENTS.map((s) => <span key={s.label}>{s.label}</span>)}
                     </div>
 
-                    <p className='mt-4 text-center text-[13px] leading-relaxed' style={{ color: `${C.secondary}80`, fontFamily: TYPE.bodyFamily }}>
-                      {cat.advice}
-                    </p>
+                    {/* AI Feedback */}
+                    <div className='mt-4 rounded-xl bg-white/60 px-4 py-3' style={{ border: `1px solid rgba(26,54,70,0.08)` }}>
+                      {loadingFeedback ? (
+                        <div className='flex items-center justify-center gap-2 py-2'>
+                          <div className='h-1.5 w-1.5 animate-pulse rounded-full' style={{ background: C.primary }} />
+                          <div className='h-1.5 w-1.5 animate-pulse rounded-full delay-75' style={{ background: C.primary }} />
+                          <div className='h-1.5 w-1.5 animate-pulse rounded-full delay-150' style={{ background: C.primary }} />
+                        </div>
+                      ) : (
+                        <p className='text-center text-[13px] leading-relaxed' style={{ color: C.secondary, fontFamily: TYPE.bodyFamily }}>
+                          {aiFeedback || cat.advice}
+                        </p>
+                      )}
+                    </div>
 
                     <button
                       onClick={goBooking}
